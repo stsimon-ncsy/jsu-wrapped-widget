@@ -40,6 +40,29 @@
     return String(value);
   }
 
+  function getStatAnimationConfig(value) {
+    if (!hasValue(value)) {
+      return null;
+    }
+
+    var text = String(value).trim();
+    var suffixMatch = text.match(/([^\d\s,.-]+)$/);
+    var numericText = text.replace(/,/g, "").replace(/[^\d.-]/g, "");
+    var target = Number(numericText);
+
+    if (!isFinite(target)) {
+      return null;
+    }
+
+    var decimalIndex = numericText.indexOf(".");
+
+    return {
+      target: target,
+      suffix: suffixMatch ? suffixMatch[1] : "",
+      decimals: decimalIndex === -1 ? 0 : numericText.length - decimalIndex - 1
+    };
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -283,7 +306,7 @@
       final: ["Share", "Chapter", "Wrapped"]
     }[card.theme] || ["JSU", "NCSY", "Wrapped"];
 
-    return [
+    var html = [
       '<div class="jsuw-stickers" aria-hidden="true">',
       '<span class="jsuw-sticker jsuw-sticker--one">' + escapeHtml(words[0]) + '</span>',
       '<span class="jsuw-sticker jsuw-sticker--two">' + escapeHtml(words[1]) + '</span>',
@@ -291,9 +314,19 @@
       '<span class="jsuw-doodle jsuw-doodle--one"></span>',
       '<span class="jsuw-doodle jsuw-doodle--two"></span>',
       '<span class="jsuw-spark jsuw-spark--one"></span>',
-      '<span class="jsuw-spark jsuw-spark--two"></span>',
-      "</div>"
-    ].join("");
+      '<span class="jsuw-spark jsuw-spark--two"></span>'
+    ];
+
+    for (var index = 0; index < 18; index += 1) {
+      var x = 5 + ((index * 11) % 86) + "%";
+      var drift = ((index % 5) - 2) * 14 + "px";
+      var delay = index * -220 + "ms";
+
+      html.push('<span class="jsuw-confetti-piece" style="--i:' + index + ";--x:" + x + ";--dx:" + drift + ";--delay:" + delay + '"></span>');
+    }
+
+    html.push("</div>");
+    return html.join("");
   }
 
   function renderBrandLockup() {
@@ -310,11 +343,35 @@
     var html = '<div class="jsuw-stat-pattern jsuw-stat-pattern--' + escapeHtml(card.theme) + '" aria-hidden="true">';
 
     for (var index = 0; index < count; index += 1) {
-      html += '<span style="--i:' + index + '"></span>';
+      var x = ((index * 2.9) % 96).toFixed(2) + "%";
+      var y = (12 + ((index * 7) % 68)).toFixed(2) + "%";
+      var height = 24 + ((index * 11) % 68) + "px";
+      var size = 20 + ((index * 13) % 30) + "px";
+      var delay = index * 14 + "ms";
+      var waveDelay = index * 46 + "ms";
+      var bubbleDelay = index * 72 + "ms";
+
+      html += '<span style="--i:' + index + ";--x:" + x + ";--y:" + y + ";--h:" + height + ";--s:" + size + ";--delay:" + delay + ";--wave-delay:" + waveDelay + ";--bubble-delay:" + bubbleDelay + '"></span>';
     }
 
     html += "</div>";
     return html;
+  }
+
+  function renderStatNumber(card, statClass) {
+    var animation = getStatAnimationConfig(card.stat);
+    var attributes = "";
+
+    if (animation) {
+      attributes = [
+        ' data-jsuw-countup="true"',
+        ' data-jsuw-stat-target="' + escapeHtml(animation.target) + '"',
+        ' data-jsuw-stat-suffix="' + escapeHtml(animation.suffix) + '"',
+        ' data-jsuw-stat-decimals="' + escapeHtml(animation.decimals) + '"'
+      ].join("");
+    }
+
+    return '<div class="' + statClass + '"' + attributes + ">" + escapeHtml(card.stat) + "</div>";
   }
 
   function renderCardBody(card) {
@@ -342,7 +399,7 @@
       html.push(
         '<div class="jsuw-stat-lockup" aria-hidden="true">',
         renderStatPattern(card),
-        '<div class="' + statClass + '">' + escapeHtml(card.stat) + "</div>",
+        renderStatNumber(card, statClass),
         '<div class="jsuw-stat-label">' + escapeHtml(card.statLabel || "") + "</div>",
         "</div>"
       );
@@ -439,6 +496,65 @@
     }
   }
 
+  function prefersReducedMotion() {
+    return Boolean(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function formatAnimatedStat(value, decimals, suffix) {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    }).format(value) + suffix;
+  }
+
+  function animateCountUp(element) {
+    var target = Number(element.getAttribute("data-jsuw-stat-target"));
+    var suffix = element.getAttribute("data-jsuw-stat-suffix") || "";
+    var decimals = Number(element.getAttribute("data-jsuw-stat-decimals") || 0);
+
+    if (!isFinite(target)) {
+      return;
+    }
+
+    if (prefersReducedMotion() || typeof root.requestAnimationFrame !== "function") {
+      element.textContent = formatAnimatedStat(target, decimals, suffix);
+      return;
+    }
+
+    var start = root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    var duration = target > 999 ? 1180 : 880;
+
+    element.textContent = formatAnimatedStat(0, decimals, suffix);
+
+    root.requestAnimationFrame(function step(now) {
+      var elapsed = Math.max(0, now - start);
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = target * eased;
+
+      element.textContent = formatAnimatedStat(progress === 1 ? target : current, decimals, suffix);
+
+      if (progress < 1) {
+        root.requestAnimationFrame(step);
+      }
+    });
+  }
+
+  function activateStory(container) {
+    var story = container.querySelector(".jsuw-story");
+    var countUps = container.querySelectorAll("[data-jsuw-countup]");
+
+    if (story && typeof root.requestAnimationFrame === "function") {
+      root.requestAnimationFrame(function () {
+        story.classList.add("jsuw-story--entered");
+      });
+    } else if (story) {
+      story.classList.add("jsuw-story--entered");
+    }
+
+    Array.prototype.forEach.call(countUps, animateCountUp);
+  }
+
   function goTo(container, state, nextIndex, options) {
     var total = state.cards.length;
 
@@ -452,6 +568,7 @@
 
     state.index = nextIndex;
     renderStory(container, state);
+    activateStory(container);
 
     if (options && options.focusStory) {
       focusStory(container);
@@ -756,6 +873,7 @@
 
       target.__jsuWrappedCleanup = installInteraction(target, state);
       renderStory(target, state);
+      activateStory(target);
       return state;
     } catch (error) {
       renderError(
@@ -789,6 +907,7 @@
     createCards: createCards,
     findChapter: findChapter,
     formatNumber: formatNumber,
+    getStatAnimationConfig: getStatAnimationConfig,
     getKeyNavigationAction: getKeyNavigationAction,
     getChapterSlug: getChapterSlug,
     getDataUrl: getDataUrl,

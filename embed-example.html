@@ -14,8 +14,20 @@
       .example-page {
         align-items: center;
         display: flex;
+        justify-content: center;
+        box-sizing: border-box;
         min-height: 100vh;
+        overflow-x: hidden;
         padding: 24px;
+        width: 100%;
+      }
+
+      @media (max-width: 480px) {
+        .example-page {
+          align-items: flex-start;
+          min-height: 100svh;
+          padding: 8px;
+        }
       }
     </style>
   </head>
