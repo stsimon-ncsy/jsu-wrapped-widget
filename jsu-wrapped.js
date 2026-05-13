@@ -180,6 +180,10 @@
     return null;
   }
 
+  function getRegionParam(url) {
+    return getSearchValue(url, ["region"]);
+  }
+
   function getAutoplayPreference(container, options) {
     var settings = options || {};
     var dataset = (container && container.dataset) || {};
@@ -370,6 +374,22 @@
     }
   }
 
+  function buildRegionUrl(regionName, url) {
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("region", slugify(regionName));
+      parsed.searchParams.delete("chapter");
+      parsed.searchParams.delete("card");
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      return bare + "?region=" + encodeURIComponent(slugify(regionName));
+    }
+  }
+
   function renderChapterPickerMarkup(context) {
     var settings = context || {};
     var records = Array.isArray(settings.records) ? settings.records.filter(function (record) {
@@ -379,6 +399,7 @@
     var url = settings.url || (root && root.location && root.location.href) || "";
     var firstRecord = records[0] || {};
     var year = asText(settings.year || firstRecord.year_label || firstRecord.school_year, "this year");
+    var requestedRegion = asText(settings.region || getRegionParam(url), "");
 
     records.sort(function (a, b) {
       return chapterLabel(a).localeCompare(chapterLabel(b));
@@ -420,19 +441,43 @@
       regionMap[regionName].push(record);
     });
 
-    var chapterHtml = Object.keys(regionMap).sort().map(function (regionName) {
-      var chapters = regionMap[regionName];
-      var countLabel = chapters.length === 1 ? "1 chapter" : chapters.length + " chapters";
+    var regions = Object.keys(regionMap).sort().map(function (regionName) {
+      return {
+        name: regionName,
+        slug: slugify(regionName),
+        chapters: regionMap[regionName]
+      };
+    });
+    var requestedSlug = slugify(requestedRegion);
+    var activeRegion = regions.filter(function (region) {
+      return region.slug === requestedSlug || region.name.toLowerCase() === requestedRegion.toLowerCase();
+    })[0] || regions[0] || null;
+    var regionSelector = regions.map(function (region) {
+      var isActive = activeRegion && region.slug === activeRegion.slug;
+      var countLabel = region.chapters.length === 1 ? "1" : String(region.chapters.length);
 
       return [
+        '<a class="jsuw-region-pill' + (isActive ? " jsuw-region-pill--active" : "") + '" href="' + escapeHtml(buildRegionUrl(region.name, url)) + '"' + (isActive ? ' aria-current="true"' : "") + ">",
+        '<span>' + escapeHtml(region.name) + "</span>",
+        '<em>' + escapeHtml(countLabel) + "</em>",
+        "</a>"
+      ].join("");
+    }).join("");
+    var chapterHtml = "";
+
+    if (activeRegion) {
+      var chapters = activeRegion.chapters;
+      var countLabel = chapters.length === 1 ? "1 chapter" : chapters.length + " chapters";
+
+      chapterHtml = [
         '<section class="jsuw-picker-region">',
-        '<h2><span>' + escapeHtml(regionName) + '</span><em>' + escapeHtml(countLabel) + "</em></h2>",
+        '<h2><span>' + escapeHtml(activeRegion.name) + '</span><em>' + escapeHtml(countLabel) + "</em></h2>",
         '<div class="jsuw-picker-region-list">',
         chapters.map(renderPickerItem).join(""),
         "</div>",
         "</section>"
       ].join("");
-    }).join("");
+    }
 
     if (!chapterHtml) {
       chapterHtml = '<div class="jsuw-picker-empty">No chapter records are available yet.</div>';
@@ -443,7 +488,8 @@
       '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
       '<div class="jsuw-picker-topline">JSU Wrapped · ' + escapeHtml(year) + "</div>",
       '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
-      '<p class="jsuw-picker-subtext">Pick a chapter to open its Wrapped story.</p>',
+      '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
+      regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
       '<div class="jsuw-picker-list">',
       chapterHtml,
       "</div>",
@@ -846,15 +892,25 @@
   }
 
   function renderReachBody(card) {
-    var newCount = Math.max(0, Math.min(card.newCount || 0, card.rawValue || 0));
-    var repeatCutoff = Math.max(0, (card.rawValue || 0) - newCount);
+    var rawCount = Math.max(0, card.rawValue || numberValue(card.stat));
+    var newCount = Math.max(0, Math.min(card.newCount || 0, rawCount));
+    var repeatCutoff = Math.max(0, rawCount - newCount);
+    var visibleTotal = Math.max(0, Math.min(rawCount, 210));
+    var visibleNewCount = rawCount > 0 ? Math.round(newCount / rawCount * visibleTotal) : 0;
+
+    if (newCount > 0 && visibleNewCount === 0) {
+      visibleNewCount = 1;
+    }
+
+    visibleNewCount = Math.max(0, Math.min(visibleNewCount, visibleTotal));
+    var visibleRepeatCutoff = Math.max(0, visibleTotal - visibleNewCount);
 
     return renderReferenceShell(card, [
       '<div class="jsuw-reference-top">',
       renderTopMatter(card),
       "</div>",
-      renderIndexedSpans("jsuw-dot-field", card.rawValue || card.stat, 210, function (index) {
-        return index >= repeatCutoff ? "jsuw-dot--new" : "jsuw-dot--returning";
+      renderIndexedSpans("jsuw-dot-field", visibleTotal, visibleTotal, function (index) {
+        return index >= visibleRepeatCutoff ? "jsuw-dot--new" : "jsuw-dot--returning";
       }),
       '<div class="jsuw-dot-legend">',
       '<span><i class="jsuw-dot-key jsuw-dot-key--returning"></i>' + escapeHtml(formatNumber(repeatCutoff)) + " returning connections</span>",
@@ -1230,9 +1286,91 @@
     oscillator.stop(start + duration + 0.02);
   }
 
+  function getSoundProfileForCard(card) {
+    var theme = card && card.theme || "default";
+    var profiles = {
+      cover: [
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.03, delay: 0 },
+        { frequency: 494, duration: 0.11, type: "sine", volume: 0.026, delay: 0.07 },
+        { frequency: 659.25, duration: 0.16, type: "sine", volume: 0.024, delay: 0.16 }
+      ],
+      events: [
+        { frequency: 196, duration: 0.07, type: "square", volume: 0.018, delay: 0 },
+        { frequency: 247, duration: 0.08, type: "triangle", volume: 0.025, delay: 0.06 },
+        { frequency: 330, duration: 0.12, type: "sine", volume: 0.026, delay: 0.13 }
+      ],
+      reach: [
+        { frequency: 294, duration: 0.06, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 370, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.06 },
+        { frequency: 494, duration: 0.12, type: "sine", volume: 0.025, delay: 0.14 }
+      ],
+      moments: [
+        { frequency: 220, duration: 0.05, type: "square", volume: 0.016, delay: 0 },
+        { frequency: 330, duration: 0.05, type: "square", volume: 0.016, delay: 0.05 },
+        { frequency: 440, duration: 0.08, type: "triangle", volume: 0.022, delay: 0.1 },
+        { frequency: 660, duration: 0.13, type: "sine", volume: 0.021, delay: 0.17 }
+      ],
+      new: [
+        { frequency: 392, duration: 0.08, type: "triangle", volume: 0.026, delay: 0 },
+        { frequency: 523.25, duration: 0.1, type: "sine", volume: 0.024, delay: 0.08 },
+        { frequency: 784, duration: 0.14, type: "sine", volume: 0.022, delay: 0.17 }
+      ],
+      repeat: [
+        { frequency: 262, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 392, duration: 0.1, type: "triangle", volume: 0.023, delay: 0.08 },
+        { frequency: 524, duration: 0.16, type: "sine", volume: 0.021, delay: 0.16 }
+      ],
+      biggest: [
+        { frequency: 196, duration: 0.08, type: "square", volume: 0.017, delay: 0 },
+        { frequency: 392, duration: 0.09, type: "triangle", volume: 0.026, delay: 0.08 },
+        { frequency: 784, duration: 0.18, type: "sine", volume: 0.024, delay: 0.17 }
+      ],
+      persona: [
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 415, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.08 },
+        { frequency: 554, duration: 0.1, type: "sine", volume: 0.022, delay: 0.16 },
+        { frequency: 660, duration: 0.16, type: "sine", volume: 0.02, delay: 0.26 }
+      ],
+      movement: [
+        { frequency: 247, duration: 0.08, type: "triangle", volume: 0.023, delay: 0 },
+        { frequency: 370, duration: 0.08, type: "triangle", volume: 0.023, delay: 0.08 },
+        { frequency: 494, duration: 0.1, type: "sine", volume: 0.022, delay: 0.16 },
+        { frequency: 740, duration: 0.17, type: "sine", volume: 0.02, delay: 0.27 }
+      ],
+      final: [
+        { frequency: 262, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.08 },
+        { frequency: 392, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.16 },
+        { frequency: 523.25, duration: 0.14, type: "sine", volume: 0.024, delay: 0.25 },
+        { frequency: 659.25, duration: 0.2, type: "sine", volume: 0.021, delay: 0.38 }
+      ],
+      default: [
+        { frequency: 392, duration: 0.13, type: "triangle", volume: 0.035, delay: 0 },
+        { frequency: 523.25, duration: 0.16, type: "sine", volume: 0.03, delay: 0.08 }
+      ]
+    };
+
+    return (profiles[theme] || profiles.default).map(function (note) {
+      return {
+        frequency: note.frequency,
+        duration: note.duration,
+        type: note.type,
+        volume: note.volume,
+        delay: note.delay
+      };
+    });
+  }
+
+  function playSoundProfile(state, profile) {
+    profile.forEach(function (note) {
+      playTone(state, note.frequency, note.duration, note.type, note.volume, note.delay);
+    });
+  }
+
   function playCardSound(state) {
-    playTone(state, 392, 0.13, "triangle", 0.035, 0);
-    playTone(state, 523.25, 0.16, "sine", 0.03, 0.08);
+    var card = state && state.cards ? state.cards[state.index] : null;
+
+    playSoundProfile(state, getSoundProfileForCard(card));
   }
 
   function playCountSound(state, progress, target) {
@@ -1823,6 +1961,7 @@
         renderChapterPicker(target, {
           records: records,
           year: target.dataset && target.dataset.year,
+          region: settings.region || getRegionParam(settings.url),
           url: settings.url,
           assetBase: assetBase
         });
@@ -1893,12 +2032,15 @@
     getStatAnimationConfig: getStatAnimationConfig,
     getKeyNavigationAction: getKeyNavigationAction,
     getChapterSlug: getChapterSlug,
+    getRegionParam: getRegionParam,
     getDataUrl: getDataUrl,
     getBrandChoice: getBrandChoice,
+    getSoundProfileForCard: getSoundProfileForCard,
     getAutoplayPreference: getAutoplayPreference,
     getAutoplayDelay: getAutoplayDelay,
     getInitialCardIndex: getInitialCardIndex,
     buildChapterUrl: buildChapterUrl,
+    buildRegionUrl: buildRegionUrl,
     createFallbackSvg: createFallbackSvg,
     init: init,
     renderCardBody: renderCardBody,
