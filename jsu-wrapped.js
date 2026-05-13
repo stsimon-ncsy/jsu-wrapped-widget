@@ -296,6 +296,27 @@
     ].join("");
   }
 
+  function renderBrandLockup() {
+    return [
+      '<div class="jsuw-brand-lockup" aria-label="NCSY JSU Wrapped">',
+      '<span class="jsuw-brand-mark" aria-hidden="true">JSU</span>',
+      '<span class="jsuw-brand-copy"><strong>NCSY / JSU</strong><em>Wrapped</em></span>',
+      "</div>"
+    ].join("");
+  }
+
+  function renderStatPattern(card) {
+    var count = card.theme === "events" ? 38 : card.theme === "moments" ? 36 : 42;
+    var html = '<div class="jsuw-stat-pattern jsuw-stat-pattern--' + escapeHtml(card.theme) + '" aria-hidden="true">';
+
+    for (var index = 0; index < count; index += 1) {
+      html += '<span style="--i:' + index + '"></span>';
+    }
+
+    html += "</div>";
+    return html;
+  }
+
   function renderCardBody(card) {
     var headlineClass = "jsuw-headline";
     var statClass = "jsuw-stat-number";
@@ -312,6 +333,7 @@
 
     var html = [
       '<div class="jsuw-card-main">',
+      renderBrandLockup(),
       '<div class="jsuw-eyebrow">' + escapeHtml(card.eyebrow || "JSU Wrapped") + "</div>",
       '<h2 class="' + headlineClass + '">' + escapeHtml(card.headline) + "</h2>"
     ];
@@ -319,6 +341,7 @@
     if (card.type === "stat") {
       html.push(
         '<div class="jsuw-stat-lockup" aria-hidden="true">',
+        renderStatPattern(card),
         '<div class="' + statClass + '">' + escapeHtml(card.stat) + "</div>",
         '<div class="jsuw-stat-label">' + escapeHtml(card.statLabel || "") + "</div>",
         "</div>"
@@ -389,7 +412,7 @@
       '<section class="jsuw-story" tabindex="0" role="group" aria-roledescription="story" aria-label="JSU Wrapped card ' + cardNumber + " of " + total + '">',
       '<div class="jsuw-progress" aria-hidden="true">' + renderProgress(state.index, total) + "</div>",
       '<p class="jsuw-sr-only">Card ' + cardNumber + " of " + total + "</p>",
-      '<article class="jsuw-card jsuw-theme-' + escapeHtml(card.theme) + '" data-jsuw-card>',
+      '<article class="jsuw-card jsuw-type-' + escapeHtml(card.type) + " jsuw-theme-" + escapeHtml(card.theme) + '" data-jsuw-card>',
       renderStickerCloud(card),
       renderCardBody(card),
       "</article>",

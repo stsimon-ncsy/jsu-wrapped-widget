@@ -4,12 +4,12 @@
   --jsuw-ink-muted: rgba(255, 255, 255, 0.62);
   --jsuw-card-shadow: 0 28px 80px rgba(17, 24, 39, 0.28);
   --jsuw-deep: #111827;
-  --jsuw-blue: #2864ff;
-  --jsuw-cyan: #00c2ff;
-  --jsuw-pink: #ff3b91;
-  --jsuw-orange: #ff9f1c;
-  --jsuw-lime: #a7f33b;
-  --jsuw-violet: #6728ff;
+  --jsuw-blue: #00c2ff;
+  --jsuw-pink: #ff2e93;
+  --jsuw-orange: #ff6b4a;
+  --jsuw-sun: #ffb627;
+  --jsuw-lime: #29d69a;
+  --jsuw-violet: #6a2bff;
   --jsuw-radius: 34px;
   box-sizing: border-box;
   color: var(--jsuw-ink);
@@ -100,7 +100,7 @@
   height: 100%;
   isolation: isolate;
   overflow: hidden;
-  padding: 44px 24px 96px;
+  padding: 42px 24px 90px;
   position: relative;
   width: 100%;
 }
@@ -115,79 +115,77 @@
 }
 
 #jsu-wrapped .jsuw-card::before {
-  background: rgba(255, 255, 255, 0.16);
-  height: 230px;
-  right: -92px;
-  top: 88px;
-  width: 230px;
+  background: repeating-linear-gradient(
+    -17deg,
+    rgba(255, 255, 255, 0.105) 0 22px,
+    rgba(255, 255, 255, 0) 22px 52px
+  );
+  border-radius: 0;
+  inset: 0;
 }
 
 #jsu-wrapped .jsuw-card::after {
-  background: rgba(255, 255, 255, 0.12);
-  bottom: -90px;
-  height: 270px;
-  left: -110px;
-  width: 270px;
+  background: rgba(21, 4, 40, 0.14);
+  border-radius: 0;
+  bottom: -16%;
+  height: 42%;
+  left: -18%;
+  right: -18%;
+  transform: rotate(-11deg);
 }
 
 #jsu-wrapped .jsuw-theme-cover {
   background:
-    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.24), transparent 28%),
-    linear-gradient(135deg, #1d4ed8 0%, #7c3aed 45%, #ff3b91 100%);
+    linear-gradient(160deg, #150428 0%, #6a2bff 52%, #ff2e93 100%);
 }
 
 #jsu-wrapped .jsuw-theme-events {
   background:
-    radial-gradient(circle at 76% 20%, rgba(255, 255, 255, 0.22), transparent 26%),
-    linear-gradient(150deg, #051937 0%, #2864ff 42%, #00c2ff 100%);
+    linear-gradient(180deg, #fff4e5 0%, #ffcfa0 100%);
+  color: #150428;
 }
 
 #jsu-wrapped .jsuw-theme-reach {
   background:
-    radial-gradient(circle at 20% 76%, rgba(255, 255, 255, 0.2), transparent 28%),
-    linear-gradient(135deg, #2a124f 0%, #ff3b91 52%, #ff9f1c 100%);
+    linear-gradient(165deg, #29d69a 0%, #00c2ff 100%);
+  color: #150428;
 }
 
 #jsu-wrapped .jsuw-theme-moments {
   background:
-    radial-gradient(circle at 72% 76%, rgba(255, 255, 255, 0.2), transparent 28%),
-    linear-gradient(135deg, #0f5132 0%, #00a676 42%, #a7f33b 100%);
+    linear-gradient(165deg, #6a2bff 0%, #ff2e93 60%, #ffb627 100%);
 }
 
 #jsu-wrapped .jsuw-theme-new {
   background:
-    radial-gradient(circle at 25% 18%, rgba(255, 255, 255, 0.22), transparent 28%),
-    linear-gradient(135deg, #3a0ca3 0%, #4361ee 50%, #4cc9f0 100%);
+    linear-gradient(180deg, #fff4e5 0%, #ffb627 100%);
+  color: #150428;
 }
 
 #jsu-wrapped .jsuw-theme-repeat {
   background:
-    radial-gradient(circle at 74% 24%, rgba(255, 255, 255, 0.24), transparent 26%),
-    linear-gradient(135deg, #822faf 0%, #ef476f 48%, #ffd166 100%);
+    linear-gradient(180deg, #150428 0%, #2a0f4a 100%);
 }
 
 #jsu-wrapped .jsuw-theme-biggest {
   background:
-    radial-gradient(circle at 22% 78%, rgba(255, 255, 255, 0.22), transparent 28%),
-    linear-gradient(135deg, #111827 0%, #f97316 50%, #facc15 100%);
+    linear-gradient(160deg, #ff2e93 0%, #b721ff 100%);
 }
 
 #jsu-wrapped .jsuw-theme-persona {
   background:
-    radial-gradient(circle at 72% 74%, rgba(255, 255, 255, 0.22), transparent 26%),
-    linear-gradient(135deg, #005f73 0%, #0a9396 46%, #ee9b00 100%);
+    linear-gradient(165deg, #ffb627 0%, #ff6b4a 50%, #ff2e93 100%);
+  color: #150428;
 }
 
 #jsu-wrapped .jsuw-theme-movement {
   background:
-    radial-gradient(circle at 72% 24%, rgba(255, 255, 255, 0.18), transparent 28%),
-    linear-gradient(135deg, #111827 0%, #3b82f6 45%, #22c55e 100%);
+    linear-gradient(180deg, #150428 0%, #321560 100%);
 }
 
 #jsu-wrapped .jsuw-theme-final {
   background:
-    radial-gradient(circle at 20% 22%, rgba(255, 255, 255, 0.22), transparent 30%),
-    linear-gradient(135deg, #6025ff 0%, #ff3b91 48%, #ffb000 100%);
+    linear-gradient(165deg, #6a2bff 0%, #ff2e93 60%, #ffb627 100%);
 }
 
 #jsu-wrapped .jsuw-card-main {
@@ -198,6 +196,54 @@
   position: relative;
   width: 100%;
   z-index: 2;
+}
+
+#jsu-wrapped .jsuw-type-stat .jsuw-card-main {
+  display: grid;
+  gap: 10px;
+  grid-template-rows: auto auto auto minmax(188px, 1fr) auto;
+}
+
+#jsu-wrapped .jsuw-brand-lockup {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-width: 100%;
+}
+
+#jsu-wrapped .jsuw-brand-mark {
+  align-items: center;
+  background: #b7ff31;
+  border: 2px solid rgba(21, 4, 40, 0.9);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 rgba(21, 4, 40, 0.26);
+  color: #150428;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  height: 28px;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 1;
+  transform: rotate(-3deg);
+  width: 32px;
+}
+
+#jsu-wrapped .jsuw-brand-copy {
+  color: currentColor;
+  display: grid;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.04;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-brand-copy em {
+  color: #b7ff31;
+  font-style: normal;
 }
 
 #jsu-wrapped .jsuw-eyebrow {
@@ -216,10 +262,26 @@
   text-transform: uppercase;
 }
 
+#jsu-wrapped .jsuw-theme-events .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-reach .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-new .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-persona .jsuw-brand-copy em {
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-reach .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-new .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-persona .jsuw-eyebrow {
+  background: rgba(21, 4, 40, 0.1);
+  border-color: rgba(21, 4, 40, 0.22);
+  color: #150428;
+}
+
 #jsu-wrapped .jsuw-headline {
-  color: var(--jsuw-ink);
+  color: currentColor;
   font-family: inherit;
-  font-size: 2.42rem;
+  font-size: 2.34rem;
   font-weight: 950;
   letter-spacing: 0;
   line-height: 0.95;
@@ -240,7 +302,7 @@
 }
 
 #jsu-wrapped .jsuw-subtext {
-  color: var(--jsuw-ink-soft);
+  color: currentColor;
   font-family: inherit;
   font-size: 1.02rem;
   font-weight: 750;
@@ -248,38 +310,146 @@
   line-height: 1.35;
   margin: 16px 0 0;
   max-width: 29ch;
+  opacity: 0.78;
   overflow-wrap: anywhere;
 }
 
 #jsu-wrapped .jsuw-stat-lockup {
-  margin-top: auto;
-  padding-bottom: 14px;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 2px 0 8px;
+  min-height: 188px;
+  padding: 0;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-type-stat .jsuw-subtext {
+  font-size: 0.96rem;
+  line-height: 1.24;
+  margin-top: 0;
+  max-width: 100%;
 }
 
 #jsu-wrapped .jsuw-stat-number {
-  color: var(--jsuw-ink);
+  color: currentColor;
   font-family: inherit;
-  font-size: 5.35rem;
+  font-size: clamp(5.8rem, 30vw, 8.9rem);
   font-weight: 1000;
   letter-spacing: 0;
-  line-height: 0.82;
+  line-height: 0.78;
   overflow-wrap: anywhere;
-  text-shadow: 0 10px 28px rgba(17, 24, 39, 0.18);
+  position: relative;
+  text-align: center;
+  text-shadow: 5px 5px 0 rgba(21, 4, 40, 0.18);
+  z-index: 2;
 }
 
 #jsu-wrapped .jsuw-stat-number--compact {
-  font-size: 4.34rem;
+  font-size: clamp(4.8rem, 22vw, 7.1rem);
   line-height: 0.88;
 }
 
 #jsu-wrapped .jsuw-stat-label {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 1.1rem;
-  font-weight: 900;
+  align-self: center;
+  background: #ffb627;
+  border: 3px solid #150428;
+  border-radius: 14px;
+  color: #150428;
+  font-size: 1.28rem;
+  font-weight: 1000;
   letter-spacing: 0;
   line-height: 1.1;
-  margin-top: 8px;
+  margin-top: -2px;
+  padding: 5px 14px;
+  position: relative;
   text-transform: uppercase;
+  transform: rotate(-2deg);
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-stat-pattern {
+  inset: 8px 0 2px;
+  opacity: 0.84;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-stat-pattern span {
+  display: block;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(10, 1fr);
+  inset: auto 2px 0;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span {
+  aspect-ratio: 1;
+  background: var(--jsuw-pink);
+  border-radius: 4px;
+  opacity: 0.52;
+  position: static;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(3n) {
+  background: var(--jsuw-violet);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(4n) {
+  background: var(--jsuw-sun);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(5n) {
+  background: var(--jsuw-lime);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach,
+#jsu-wrapped .jsuw-stat-pattern--new {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(14, 1fr);
+  inset: 14px 2px 0;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach span,
+#jsu-wrapped .jsuw-stat-pattern--new span {
+  aspect-ratio: 1;
+  background: rgba(21, 4, 40, 0.72);
+  border: 1px solid rgba(21, 4, 40, 0.82);
+  border-radius: 999px;
+  position: static;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach span:nth-child(3n),
+#jsu-wrapped .jsuw-stat-pattern--new span:nth-child(4n) {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--moments span {
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  bottom: 44%;
+  height: calc(20px + (var(--i) % 7) * 9px);
+  left: calc(var(--i) * 2.9%);
+  width: 3px;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--repeat span,
+#jsu-wrapped .jsuw-stat-pattern--biggest span {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  height: calc(18px + (var(--i) % 5) * 10px);
+  left: calc((var(--i) * 37) % 94 * 1%);
+  top: calc((var(--i) * 23) % 84 * 1%);
+  width: calc(18px + (var(--i) % 5) * 10px);
 }
 
 #jsu-wrapped .jsuw-badge {
@@ -567,6 +737,11 @@
     padding: 42px 20px 88px;
   }
 
+  #jsu-wrapped .jsuw-type-stat .jsuw-card-main {
+    gap: 8px;
+    grid-template-rows: auto auto auto minmax(172px, 1fr) auto;
+  }
+
   #jsu-wrapped .jsuw-headline {
     font-size: 2.08rem;
     line-height: 0.98;
@@ -592,6 +767,15 @@
 
   #jsu-wrapped .jsuw-subtext {
     font-size: 0.96rem;
+  }
+
+  #jsu-wrapped .jsuw-type-stat .jsuw-subtext {
+    font-size: 0.88rem;
+    line-height: 1.22;
+  }
+
+  #jsu-wrapped .jsuw-type-stat .jsuw-stat-lockup {
+    min-height: 172px;
   }
 
   #jsu-wrapped .jsuw-sticker {
