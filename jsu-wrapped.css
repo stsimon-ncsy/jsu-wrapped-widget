@@ -1037,6 +1037,178 @@
   max-width: 42ch;
 }
 
+#jsu-wrapped .jsuw-shell--picker {
+  max-width: min(680px, calc(100vw - 32px));
+}
+
+#jsu-wrapped .jsuw-picker {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.24), transparent 28%),
+    radial-gradient(circle at 88% 20%, rgba(255, 182, 39, 0.28), transparent 22%),
+    linear-gradient(145deg, #150428 0%, #5b21b6 38%, #ff2e93 72%, #ffb627 100%);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 30px;
+  box-shadow: var(--jsuw-card-shadow);
+  color: #ffffff;
+  overflow: hidden;
+  padding: 30px;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-picker::before {
+  border: 2px dashed rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  content: "";
+  height: 180px;
+  position: absolute;
+  right: -62px;
+  top: -44px;
+  width: 180px;
+}
+
+#jsu-wrapped .jsuw-picker-topline {
+  color: #b7ff31;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  margin-bottom: 10px;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-title {
+  color: #ffffff;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(2.35rem, 9vw, 4.1rem);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.88;
+  margin: 0;
+  max-width: 9ch;
+  position: relative;
+  text-shadow: 5px 5px 0 rgba(21, 4, 40, 0.28);
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-subtext {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.32;
+  margin: 16px 0 22px;
+  position: relative;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-list {
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-item {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid rgba(21, 4, 40, 0.88);
+  border-radius: 18px;
+  box-shadow: 5px 5px 0 rgba(21, 4, 40, 0.38);
+  color: #150428;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 78px;
+  padding: 12px 14px;
+  text-decoration: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+#jsu-wrapped .jsuw-picker-item:hover,
+#jsu-wrapped .jsuw-picker-item:focus-visible {
+  box-shadow: 7px 7px 0 rgba(21, 4, 40, 0.42);
+  transform: translate(-2px, -2px) rotate(-0.6deg);
+}
+
+#jsu-wrapped .jsuw-picker-item:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.78);
+  outline-offset: 3px;
+}
+
+#jsu-wrapped .jsuw-picker-logo {
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid rgba(21, 4, 40, 0.24);
+  border-radius: 12px;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  overflow: hidden;
+  width: 42px;
+}
+
+#jsu-wrapped .jsuw-picker-brand--ncsy .jsuw-picker-logo {
+  background: #150428;
+  padding: 6px 7px;
+  width: 58px;
+}
+
+#jsu-wrapped .jsuw-picker-logo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-picker-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+#jsu-wrapped .jsuw-picker-copy strong {
+  color: #150428;
+  display: block;
+  font-size: 1.08rem;
+  font-weight: 1000;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-copy em,
+#jsu-wrapped .jsuw-picker-copy span {
+  color: rgba(21, 4, 40, 0.7);
+  display: block;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.18;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-arrow {
+  background: #150428;
+  border-radius: 999px;
+  color: #ffb627;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  padding: 9px 12px;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-empty {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 850;
+  padding: 16px;
+}
+
 #jsu-wrapped .jsuw-sr-only {
   height: 1px;
   margin: -1px;
@@ -2039,6 +2211,23 @@
 @media (max-width: 430px) {
   #jsu-wrapped {
     padding: 10px;
+  }
+
+  #jsu-wrapped .jsuw-picker {
+    border-radius: 26px;
+    padding: 24px 18px;
+  }
+
+  #jsu-wrapped .jsuw-picker-item {
+    gap: 10px;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  #jsu-wrapped .jsuw-picker-arrow {
+    grid-column: 2;
+    justify-self: start;
+    padding: 8px 11px;
   }
 
   #jsu-wrapped .jsuw-card {

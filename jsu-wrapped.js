@@ -241,6 +241,90 @@
     return null;
   }
 
+  function chapterLabel(record) {
+    return asText(record && record.chapter_name, asText(record && record.chapter_slug, "JSU chapter"));
+  }
+
+  function buildChapterUrl(record, url) {
+    var slug = record && record.chapter_slug;
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+
+    if (!hasValue(slug)) {
+      return href || "#";
+    }
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("chapter", String(slug).trim());
+      parsed.searchParams.delete("card");
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      return bare + "?chapter=" + encodeURIComponent(String(slug).trim());
+    }
+  }
+
+  function renderChapterPickerMarkup(context) {
+    var settings = context || {};
+    var records = Array.isArray(settings.records) ? settings.records.filter(function (record) {
+      return record && hasValue(record.chapter_slug);
+    }).slice() : [];
+    var assetBase = settings.assetBase || "";
+    var url = settings.url || (root && root.location && root.location.href) || "";
+    var firstRecord = records[0] || {};
+    var year = asText(settings.year || firstRecord.year_label || firstRecord.school_year, "this year");
+
+    records.sort(function (a, b) {
+      return chapterLabel(a).localeCompare(chapterLabel(b));
+    });
+
+    var chapterHtml = records.map(function (record) {
+      var brand = getBrandChoice(record);
+      var logoUrl = getLogoAsset(brand, assetBase);
+      var region = asText(record.region_name, "JSU");
+      var school = asText(record.school_name, "");
+      var stats = [
+        hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+        hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+        hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : ""
+      ].filter(Boolean).join(" · ");
+
+      return [
+        '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url)) + '">',
+        '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
+        '<span class="jsuw-picker-copy">',
+        '<strong>' + escapeHtml(chapterLabel(record)) + "</strong>",
+        '<em>' + escapeHtml([school, region].filter(Boolean).join(" · ")) + "</em>",
+        stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
+        "</span>",
+        '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
+        "</a>"
+      ].join("");
+    }).join("");
+
+    if (!chapterHtml) {
+      chapterHtml = '<div class="jsuw-picker-empty">No chapter records are available yet.</div>';
+    }
+
+    return [
+      '<div class="jsuw-shell jsuw-shell--picker">',
+      '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
+      '<div class="jsuw-picker-topline">JSU Wrapped · ' + escapeHtml(year) + "</div>",
+      '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
+      '<p class="jsuw-picker-subtext">Pick a chapter to open its Wrapped story.</p>',
+      '<div class="jsuw-picker-list">',
+      chapterHtml,
+      "</div>",
+      "</section>",
+      "</div>"
+    ].join("");
+  }
+
+  function renderChapterPicker(container, context) {
+    container.innerHTML = renderChapterPickerMarkup(context);
+  }
+
   function createCards(record, options) {
     var chapterName = asText(record.chapter_name, "Your JSU chapter");
     var yearLabel = asText(record.year_label || record.school_year, "This year");
@@ -1382,22 +1466,27 @@
       target.__jsuWrappedCleanup = null;
     }
 
-    var chapterSlug = settings.chapter || getChapterSlug(settings.url);
-
-    if (!hasValue(chapterSlug)) {
-      renderError(
-        target,
-        "This Wrapped link needs a chapter code.",
-        "Ask your JSU or NCSY team for a link that includes ?chapter=your-chapter."
-      );
-      return null;
-    }
-
     target.innerHTML = '<div class="jsuw-shell"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
 
     try {
       var dataUrl = settings.dataUrl || getDataUrl(target);
       var records = settings.records || await fetchRecords(dataUrl);
+      var chapterSlug = settings.chapter || getChapterSlug(settings.url);
+      var assetBase = getAssetBase(target, settings);
+
+      if (!hasValue(chapterSlug)) {
+        renderChapterPicker(target, {
+          records: records,
+          year: target.dataset && target.dataset.year,
+          url: settings.url,
+          assetBase: assetBase
+        });
+        return {
+          picker: true,
+          records: records
+        };
+      }
+
       var chapter = findChapter(records, chapterSlug);
 
       if (!chapter) {
@@ -1410,7 +1499,7 @@
       }
 
       var state = {
-        cards: createCards(chapter, { assetBase: getAssetBase(target, settings) }),
+        cards: createCards(chapter, { assetBase: assetBase }),
         record: chapter,
         soundEnabled: false,
         soundEngine: null
@@ -1459,8 +1548,10 @@
     getDataUrl: getDataUrl,
     getBrandChoice: getBrandChoice,
     getInitialCardIndex: getInitialCardIndex,
+    buildChapterUrl: buildChapterUrl,
     init: init,
     renderCardBody: renderCardBody,
+    renderChapterPickerMarkup: renderChapterPickerMarkup,
     renderStoryMarkup: renderStoryMarkup
   };
 });
