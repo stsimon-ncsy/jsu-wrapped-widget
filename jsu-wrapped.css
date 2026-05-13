@@ -1654,6 +1654,16 @@
   background-clip: text;
 }
 
+#jsu-wrapped .jsuw-reference-stat--events-compact {
+  font-size: 9.8rem;
+  letter-spacing: 0;
+}
+
+#jsu-wrapped .jsuw-reference-stat--events-dense {
+  font-size: 7.4rem;
+  letter-spacing: 0;
+}
+
 #jsu-wrapped .jsuw-event-grid {
   bottom: 126px;
   display: grid;
@@ -3570,6 +3580,14 @@
 
   #jsu-wrapped .jsuw-reference-stat--events {
     font-size: clamp(9.2rem, 48vw, 12rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--events-compact {
+    font-size: 8.6rem;
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--events-dense {
+    font-size: 6.6rem;
   }
 
   #jsu-wrapped .jsuw-event-grid,

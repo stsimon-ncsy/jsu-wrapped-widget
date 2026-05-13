@@ -343,6 +343,254 @@
     return Math.floor(requested) - 1;
   }
 
+  function compactPayload(payload) {
+    var output = {};
+
+    Object.keys(payload || {}).forEach(function (key) {
+      var value = payload[key];
+
+      if (value === null || value === undefined || value === "") {
+        return;
+      }
+
+      output[key] = value;
+    });
+
+    return output;
+  }
+
+  function nowMs() {
+    if (root.performance && typeof root.performance.now === "function") {
+      return root.performance.now();
+    }
+
+    return Date.now();
+  }
+
+  function getAnalyticsPreference(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    if (settings.analytics !== undefined) {
+      return parseBooleanFlag(settings.analytics) !== false;
+    }
+
+    var urlFlag = parseBooleanFlag(getSearchValue(settings.url, ["analytics", "tracking"]));
+
+    if (urlFlag !== null) {
+      return urlFlag;
+    }
+
+    var dataFlag = parseBooleanFlag(dataset.analytics);
+
+    if (dataFlag !== null) {
+      return dataFlag;
+    }
+
+    return true;
+  }
+
+  function getAnalyticsYear(container, options, record) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    return asText(settings.analyticsYear || dataset.year || record && (record.year_label || record.school_year), "");
+  }
+
+  function createAnalyticsPayload(state, eventName, extra) {
+    var record = state && state.record || {};
+    var cards = state && state.cards || [];
+    var index = state && isFinite(Number(state.index)) ? Number(state.index) : 0;
+    var card = cards[index] || {};
+    var mode = asText(state && state.experienceMode, "chapter");
+    var base = {
+      event: eventName,
+      wrapped_mode: mode,
+      wrapped_year: asText(state && state.analyticsYear || record.year_label || record.school_year, ""),
+      school_year: asText(record.school_year, ""),
+      year_label: asText(record.year_label, ""),
+      chapter_slug: asText(record.chapter_slug, ""),
+      chapter_id: hasValue(record.chapter_id) ? record.chapter_id : "",
+      chapter_name: asText(record.chapter_name, ""),
+      region_name: asText(record.region_name, ""),
+      brand_logo: getBrandChoice(record),
+      card_index: index + 1,
+      card_total: cards.length,
+      card_theme: asText(card.theme, ""),
+      card_type: asText(card.type, ""),
+      is_final_card: cards.length && index === cards.length - 1 ? "true" : "false",
+      autoplay_enabled: state && state.autoplayEnabled ? "true" : "false"
+    };
+
+    return compactPayload(Object.assign(base, extra || {}));
+  }
+
+  function pushAnalyticsPayload(payload) {
+    if (!payload || !payload.event) {
+      return payload || null;
+    }
+
+    try {
+      root.dataLayer = root.dataLayer || [];
+
+      if (typeof root.dataLayer.push === "function") {
+        root.dataLayer.push(payload);
+      }
+
+      if (typeof root.dispatchEvent === "function" && typeof root.CustomEvent === "function") {
+        root.dispatchEvent(new root.CustomEvent("jsuw:analytics", { detail: payload }));
+      }
+    } catch (error) {
+      return payload;
+    }
+
+    return payload;
+  }
+
+  function trackAnalyticsEvent(state, eventName, extra) {
+    if (!state || state.analyticsEnabled === false) {
+      return null;
+    }
+
+    return pushAnalyticsPayload(createAnalyticsPayload(state, eventName, extra));
+  }
+
+  function trackCardEngagement(state, navigationMethod, timestamp) {
+    if (!state || state.cardStartedAt === null || state.cardStartedAt === undefined) {
+      return null;
+    }
+
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+    var cardStartedAt = Number(state.cardStartedAt);
+    var storyStartedAt = state.storyStartedAt === null || state.storyStartedAt === undefined ? cardStartedAt : Number(state.storyStartedAt);
+    var payload = trackAnalyticsEvent(state, "jsu_wrapped_card_engagement", {
+      navigation_method: asText(navigationMethod, "unknown"),
+      card_duration_ms: Math.max(0, Math.round(now - cardStartedAt)),
+      story_elapsed_ms: Math.max(0, Math.round(now - storyStartedAt))
+    });
+
+    state.cardStartedAt = null;
+    return payload;
+  }
+
+  function trackStoryComplete(state, navigationMethod, timestamp) {
+    if (!state || state.storyCompletedAt !== null && state.storyCompletedAt !== undefined) {
+      return null;
+    }
+
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+    var storyStartedAt = state.storyStartedAt === null || state.storyStartedAt === undefined ? now : Number(state.storyStartedAt);
+
+    state.storyCompletedAt = now;
+    return trackAnalyticsEvent(state, "jsu_wrapped_story_complete", {
+      navigation_method: asText(navigationMethod, "unknown"),
+      completion_duration_ms: Math.max(0, Math.round(now - storyStartedAt))
+    });
+  }
+
+  function trackCardView(state, navigationMethod, timestamp) {
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+
+    if (!state) {
+      return null;
+    }
+
+    if (state.storyStartedAt === null || state.storyStartedAt === undefined) {
+      state.storyStartedAt = now;
+    }
+
+    state.cardStartedAt = now;
+    var payload = trackAnalyticsEvent(state, "jsu_wrapped_card_view", {
+      navigation_method: asText(navigationMethod, "unknown")
+    });
+
+    if (state.cards && state.index === state.cards.length - 1) {
+      trackStoryComplete(state, navigationMethod, now);
+    }
+
+    return payload;
+  }
+
+  function trackStoryView(state, navigationMethod) {
+    var now = nowMs();
+
+    if (!state) {
+      return null;
+    }
+
+    state.storyStartedAt = now;
+    state.storyCompletedAt = null;
+    trackAnalyticsEvent(state, "jsu_wrapped_story_view", {
+      navigation_method: asText(navigationMethod, "initial"),
+      initial_card_index: (Number(state.index) || 0) + 1
+    });
+    return trackCardView(state, navigationMethod || "initial", now);
+  }
+
+  function createPageMetadata(state) {
+    var record = state && state.record || {};
+    var brandLabel = getBrandChoice(record) === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
+    var chapterName = asText(record.chapter_name, brandLabel);
+    var yearLabel = asText(record.year_label || record.school_year, "");
+    var regionName = asText(record.region_name, "");
+    var descriptionParts = [
+      chapterName + " Wrapped",
+      yearLabel ? "for " + yearLabel : "",
+      regionName ? "- " + regionName : ""
+    ].filter(Boolean);
+
+    return {
+      title: brandLabel + " - " + chapterName,
+      description: descriptionParts.join(" ")
+    };
+  }
+
+  function setDocumentMeta(doc, attributeName, attributeValue, content) {
+    if (!doc || !doc.head || !hasValue(content)) {
+      return;
+    }
+
+    var selector = 'meta[' + attributeName + '="' + attributeValue + '"]';
+    var element = doc.querySelector(selector);
+
+    if (!element) {
+      element = doc.createElement("meta");
+      element.setAttribute(attributeName, attributeValue);
+      doc.head.appendChild(element);
+    }
+
+    element.setAttribute("content", content);
+  }
+
+  function applyPageMetadata(state) {
+    var metadata = createPageMetadata(state);
+    var doc = root.document;
+
+    if (!doc) {
+      return metadata;
+    }
+
+    if (hasValue(metadata.title)) {
+      doc.title = metadata.title;
+      setDocumentMeta(doc, "property", "og:title", metadata.title);
+      setDocumentMeta(doc, "name", "twitter:title", metadata.title);
+    }
+
+    if (hasValue(metadata.description)) {
+      setDocumentMeta(doc, "name", "description", metadata.description);
+      setDocumentMeta(doc, "property", "og:description", metadata.description);
+      setDocumentMeta(doc, "name", "twitter:description", metadata.description);
+    }
+
+    setDocumentMeta(doc, "property", "og:type", "website");
+
+    if (root.location && hasValue(root.location.href)) {
+      setDocumentMeta(doc, "property", "og:url", root.location.href);
+    }
+
+    return metadata;
+  }
+
   function findChapter(records, chapterSlug) {
     if (!Array.isArray(records) || !hasValue(chapterSlug)) {
       return null;
@@ -1097,12 +1345,21 @@
   }
 
   function renderEventsBody(card) {
+    var statClass = "jsuw-reference-stat jsuw-reference-stat--events";
+    var statLength = String(card.stat || "").replace(/[^\d]/g, "").length;
+
+    if (statLength > 3) {
+      statClass += " jsuw-reference-stat--events-dense";
+    } else if (statLength > 2) {
+      statClass += " jsuw-reference-stat--events-compact";
+    }
+
     return renderReferenceShell(card, [
       '<div class="jsuw-reference-top">',
       renderTopMatter(card),
       "</div>",
       '<div class="jsuw-big-number-wrap jsuw-big-number-wrap--events">',
-      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--events"),
+      renderStatNumber(card, statClass),
       "</div>",
       renderIndexedSpans("jsuw-event-grid", card.rawValue || card.stat, 80),
       '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
@@ -1896,6 +2153,7 @@
 
   function goTo(container, state, nextIndex, options) {
     var total = state.cards.length;
+    var method = options && options.autoplay ? "autoplay" : options && options.method || "manual";
 
     clearAutoplayTimer(state);
 
@@ -1907,9 +2165,16 @@
       nextIndex = 0;
     }
 
+    if (nextIndex === state.index) {
+      scheduleAutoplay(container, state);
+      return;
+    }
+
+    trackCardEngagement(state, method);
     state.index = nextIndex;
     renderStory(container, state);
     activateStory(container, state);
+    trackCardView(state, method);
 
     if (options && options.focusStory) {
       focusStory(container);
@@ -1917,10 +2182,14 @@
   }
 
   function previous(container, state, options) {
+    options = options || {};
+    options.method = options.method || "previous";
     goTo(container, state, state.index - 1, options);
   }
 
   function next(container, state, options) {
+    options = options || {};
+    options.method = options.method || (options.autoplay ? "autoplay" : "next");
     goTo(container, state, state.index + 1, options);
   }
 
@@ -1970,6 +2239,10 @@
       button.textContent = state.soundEnabled ? "Sound on" : "Sound off";
       button.setAttribute("aria-pressed", state.soundEnabled ? "true" : "false");
     }
+
+    trackAnalyticsEvent(state, "jsu_wrapped_sound_toggle", {
+      sound_enabled: state.soundEnabled ? "true" : "false"
+    });
   }
 
   function toggleAutoplay(container, state, options) {
@@ -1981,6 +2254,10 @@
     if (options && options.focusStory) {
       focusStory(container);
     }
+
+    trackAnalyticsEvent(state, "jsu_wrapped_autoplay_toggle", {
+      autoplay_enabled: state.autoplayEnabled ? "true" : "false"
+    });
   }
 
   function installInteraction(container, state) {
@@ -2053,10 +2330,23 @@
     container.addEventListener("click", handleClick);
     container.addEventListener("keydown", handleKeydown);
 
+    function handlePageHide() {
+      trackCardEngagement(state, "pagehide");
+    }
+
+    if (root.addEventListener) {
+      root.addEventListener("pagehide", handlePageHide);
+    }
+
     return function cleanupInteraction() {
+      trackCardEngagement(state, "cleanup");
       clearAutoplayTimer(state);
       container.removeEventListener("click", handleClick);
       container.removeEventListener("keydown", handleKeydown);
+
+      if (root.removeEventListener) {
+        root.removeEventListener("pagehide", handlePageHide);
+      }
     };
   }
 
@@ -2087,11 +2377,16 @@
   }
 
   async function shareRecap(container, state) {
+    var metadata = createPageMetadata(state);
     var data = {
-      title: state && state.experienceMode === "teen" ? asText(state.record.teen_name || state.record.student_name, "Teen JSU Wrapped") + " Wrapped" : asText(state.record.chapter_name, "JSU Wrapped"),
+      title: metadata.title,
       text: shareText(state),
       url: root.location ? root.location.href : ""
     };
+
+    trackAnalyticsEvent(state, "jsu_wrapped_share_click", {
+      share_method: root.navigator && typeof root.navigator.share === "function" ? "native" : "fallback"
+    });
 
     try {
       if (root.navigator && typeof root.navigator.share === "function") {
@@ -2322,6 +2617,10 @@
     var card = container.querySelector("[data-jsuw-card]");
     var finalCard = getFinalCard(state);
 
+    trackAnalyticsEvent(state, "jsu_wrapped_download_click", {
+      download_format: root.html2canvas && card ? "png" : "svg"
+    });
+
     async function downloadSvgFallback() {
       var logoDataUrl = await fetchImageDataUrl(finalCard.logoUrl);
       var svg = createFallbackSvg(state, logoDataUrl);
@@ -2413,17 +2712,24 @@
           cards: createTeenCards(teen, { assetBase: assetBase }),
           record: teen,
           experienceMode: "teen",
+          analyticsEnabled: getAnalyticsPreference(target, settings),
+          analyticsYear: getAnalyticsYear(target, settings, teen),
           autoplayEnabled: getAutoplayPreference(target, settings),
           autoplayDelay: getAutoplayDelay(target, settings),
           autoplayTimer: null,
+          storyStartedAt: null,
+          cardStartedAt: null,
+          storyCompletedAt: null,
           soundEnabled: false,
           soundEngine: null
         };
         teenState.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, teenState.cards.length);
 
         target.__jsuWrappedCleanup = installInteraction(target, teenState);
+        applyPageMetadata(teenState);
         renderStory(target, teenState);
         activateStory(target, teenState);
+        trackStoryView(teenState, "initial");
         return teenState;
       }
 
@@ -2460,17 +2766,24 @@
         cards: createCards(chapter, { assetBase: assetBase }),
         record: chapter,
         experienceMode: "chapter",
+        analyticsEnabled: getAnalyticsPreference(target, settings),
+        analyticsYear: getAnalyticsYear(target, settings, chapter),
         autoplayEnabled: getAutoplayPreference(target, settings),
         autoplayDelay: getAutoplayDelay(target, settings),
         autoplayTimer: null,
+        storyStartedAt: null,
+        cardStartedAt: null,
+        storyCompletedAt: null,
         soundEnabled: false,
         soundEngine: null
       };
       state.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, state.cards.length);
 
       target.__jsuWrappedCleanup = installInteraction(target, state);
+      applyPageMetadata(state);
       renderStory(target, state);
       activateStory(target, state);
+      trackStoryView(state, "initial");
       return state;
     } catch (error) {
       renderError(
@@ -2517,6 +2830,14 @@
     getAutoplayPreference: getAutoplayPreference,
     getAutoplayDelay: getAutoplayDelay,
     getInitialCardIndex: getInitialCardIndex,
+    getAnalyticsPreference: getAnalyticsPreference,
+    createAnalyticsPayload: createAnalyticsPayload,
+    createPageMetadata: createPageMetadata,
+    applyPageMetadata: applyPageMetadata,
+    trackAnalyticsEvent: trackAnalyticsEvent,
+    trackCardEngagement: trackCardEngagement,
+    trackCardView: trackCardView,
+    trackStoryView: trackStoryView,
     buildChapterUrl: buildChapterUrl,
     buildRegionUrl: buildRegionUrl,
     buildTeenUrl: buildTeenUrl,
