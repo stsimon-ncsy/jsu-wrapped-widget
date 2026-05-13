@@ -40,6 +40,26 @@
     return String(value);
   }
 
+  function numberValue(value, fallback) {
+    if (!hasValue(value)) {
+      return fallback || 0;
+    }
+
+    var numeric = Number(String(value).replace(/,/g, "").replace(/%$/, ""));
+
+    return isFinite(numeric) ? numeric : fallback || 0;
+  }
+
+  function chapterStoryTitle(value) {
+    var name = asText(value, "Your JSU chapter").trim();
+
+    if (/\s+JSU$/i.test(name)) {
+      return name.replace(/\s+JSU$/i, "\nJSU");
+    }
+
+    return name;
+  }
+
   function getStatAnimationConfig(value) {
     if (!hasValue(value)) {
       return null;
@@ -114,6 +134,28 @@
     return DEFAULT_DATA_PATH.replace("{year}", encodeURIComponent(year));
   }
 
+  function getInitialCardIndex(url, total) {
+    var href = url || (root && root.location && root.location.href) || "";
+    var count = Number(total) || 0;
+    var value = null;
+
+    try {
+      value = new URL(href).searchParams.get("card");
+    } catch (error) {
+      if (href.charAt(0) === "?") {
+        value = new URLSearchParams(href).get("card");
+      }
+    }
+
+    var requested = Number(value);
+
+    if (!isFinite(requested) || requested < 1 || requested > count) {
+      return 0;
+    }
+
+    return Math.floor(requested) - 1;
+  }
+
   function findChapter(records, chapterSlug) {
     if (!Array.isArray(records) || !hasValue(chapterSlug)) {
       return null;
@@ -141,6 +183,11 @@
         type: "cover",
         eyebrow: "JSU Wrapped",
         headline: chapterName + ", your year is wrapped",
+        displayHeadline: "we are\n" + chapterStoryTitle(chapterName) + ".",
+        displayEyebrow: "Our year - " + yearLabel,
+        markerText: "and this is our year.",
+        regionName: regionName,
+        yearLabel: yearLabel,
         subtext: yearLabel + " - " + regionName,
         badge: asText(record.school_name, "Chapter recap"),
         theme: "cover"
@@ -152,7 +199,10 @@
         type: "stat",
         eyebrow: "Events hosted",
         headline: "You hosted " + formatNumber(record.events_hosted) + " events this year",
+        displayHeadline: "We pulled off\nthis many\nprograms.",
+        displayEyebrow: "Chapter 01 - We Did The Thing",
         stat: formatNumber(record.events_hosted),
+        rawValue: numberValue(record.events_hosted),
         statLabel: "events",
         subtext: "From lunch clubs to BBQs, " + chapterName + " kept showing up.",
         theme: "events"
@@ -164,7 +214,11 @@
         type: "stat",
         eyebrow: "Teen reach",
         headline: formatNumber(record.unique_teens) + " teens were part of the story",
+        displayHeadline: "That's\n" + formatNumber(record.unique_teens) + " of us.",
+        displayEyebrow: "Chapter 02 - Us",
         stat: formatNumber(record.unique_teens),
+        rawValue: numberValue(record.unique_teens),
+        newCount: numberValue(record.new_teens),
         statLabel: "teens",
         subtext: "That's " + formatNumber(record.unique_teens) + " students who had a JSU touchpoint this year.",
         theme: "reach"
@@ -176,7 +230,10 @@
         type: "stat",
         eyebrow: "Engagement moments",
         headline: formatNumber(record.engagement_moments) + " moments of connection",
+        displayHeadline: "Together we\nmade...",
+        displayEyebrow: "Chapter 03 - Together",
         stat: formatNumber(record.engagement_moments),
+        rawValue: numberValue(record.engagement_moments),
         statLabel: "moments",
         subtext: "Every sign-in, every lunch table, every conversation - it added up.",
         theme: "moments"
@@ -188,7 +245,11 @@
         type: "stat",
         eyebrow: "New faces",
         headline: formatNumber(record.new_teens) + " new teens joined this year",
+        displayHeadline: formatNumber(record.new_teens) + " new\npeople\nfound us.",
+        displayEyebrow: "Chapter 04 - The New Crew",
         stat: formatNumber(record.new_teens),
+        rawValue: numberValue(record.new_teens),
+        schoolName: asText(record.school_name, "Northwood JSU"),
         statLabel: "new teens",
         subtext: chapterName + " kept opening the door.",
         theme: "new"
@@ -200,7 +261,11 @@
         type: "stat",
         eyebrow: "Repeat engagement",
         headline: asText(record.repeat_attendee_rate_label) + " came back again",
+        displayHeadline: "We kept\ncoming\nback.",
+        displayEyebrow: "Chapter 05 - Once Is Never Enough",
         stat: asText(record.repeat_attendee_rate_label),
+        rawValue: numberValue(record.repeat_attendee_rate_label),
+        repeatCount: Math.round(numberValue(record.unique_teens) * numberValue(record.repeat_attendee_rate_label) / 100),
         statLabel: "returned",
         subtext: "The best clubs do more than attract teens. They bring them back.",
         theme: "repeat"
@@ -212,7 +277,13 @@
         type: "stat",
         eyebrow: "Biggest event",
         headline: "Biggest moment: " + asText(record.largest_event_name),
+        displayHeadline: "Our biggest\nnight was...",
+        displayEyebrow: "Chapter 06 - The One We'll Remember",
+        eventName: asText(record.largest_event_name),
         stat: formatNumber(record.largest_event_attendance),
+        rawValue: numberValue(record.largest_event_attendance),
+        month: asText(record.most_active_month, "This year"),
+        schoolsRepresented: numberValue(record.schools_represented),
         statLabel: "teens",
         subtext: formatNumber(record.largest_event_attendance) + " teens in the room. Big energy.",
         theme: "biggest"
@@ -224,6 +295,16 @@
         type: "persona",
         eyebrow: "Chapter type",
         headline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
+        displayHeadline: "We're the\nkind of\nchapter that...",
+        displayEyebrow: "Chapter 07 - Who We Are",
+        persona: asText(record.chapter_persona, "The Momentum Maker"),
+        chapterName: chapterName,
+        tags: [
+          hasValue(record.top_program_type) ? asText(record.top_program_type) : "",
+          hasValue(record.most_active_month) ? asText(record.most_active_month) + " energy" : "",
+          hasValue(record.learning_sessions) ? formatNumber(record.learning_sessions) + " learning sessions" : "",
+          hasValue(record.shabbatons) ? formatNumber(record.shabbatons) + " shabbatons" : ""
+        ].filter(Boolean),
         subtext: asText(record.chapter_line, chapterName + " made the year feel personal."),
         badge: asText(record.top_program_type || record.most_active_month, "Signature energy"),
         theme: "persona"
@@ -258,6 +339,9 @@
         type: "movement",
         eyebrow: "Bigger movement",
         headline: "You were part of something bigger",
+        displayHeadline: "And we're\nnot alone.",
+        displayEyebrow: "Chapter 08 - The Bigger Crew",
+        chapterName: chapterName,
         stats: movementStats,
         subtext: "One chapter. One region. One national movement.",
         theme: "movement"
@@ -268,6 +352,18 @@
       type: "final",
       eyebrow: "Ready to share",
       headline: chapterName + " Wrapped",
+      displayHeadline: chapterStoryTitle(chapterName) + "\nWrapped",
+      chapterName: chapterName,
+      schoolName: asText(record.school_name, "JSU"),
+      yearLabel: yearLabel,
+      summaryStats: [
+        hasValue(record.events_hosted) ? { value: formatNumber(record.events_hosted), label: "programs together" } : null,
+        hasValue(record.unique_teens) ? { value: formatNumber(record.unique_teens), label: "of us, one chapter" } : null,
+        hasValue(record.engagement_moments) ? { value: formatNumber(record.engagement_moments), label: "moments stacked up" } : null,
+        hasValue(record.new_teens) ? { value: formatNumber(record.new_teens), label: "new faces joined us" } : null,
+        hasValue(record.repeat_attendee_rate_label) ? { value: asText(record.repeat_attendee_rate_label), label: "kept coming back" } : null
+      ].filter(Boolean),
+      persona: asText(record.chapter_persona, "JSU energy"),
       subtext: [
         hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
         hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
@@ -293,31 +389,22 @@
   }
 
   function renderStickerCloud(card) {
-    var words = {
-      cover: ["JSU", "2026", "Wrapped"],
-      events: ["Lunch", "Club", "Showed up"],
-      reach: ["New faces", "Belonging", "JSU"],
-      moments: ["Stories", "Tables", "Talks"],
-      new: ["Open door", "Welcome", "First time"],
-      repeat: ["Again", "Back", "Real club"],
-      biggest: ["Big energy", "Packed", "Moment"],
-      persona: ["Type", "Vibe", "Identity"],
-      movement: ["Region", "National", "Together"],
-      final: ["Share", "Chapter", "Wrapped"]
-    }[card.theme] || ["JSU", "NCSY", "Wrapped"];
+    var confettiThemes = {
+      cover: 30,
+      moments: 20,
+      biggest: 24,
+      final: 22
+    };
 
     var html = [
       '<div class="jsuw-stickers" aria-hidden="true">',
-      '<span class="jsuw-sticker jsuw-sticker--one">' + escapeHtml(words[0]) + '</span>',
-      '<span class="jsuw-sticker jsuw-sticker--two">' + escapeHtml(words[1]) + '</span>',
-      '<span class="jsuw-sticker jsuw-sticker--three">' + escapeHtml(words[2]) + '</span>',
       '<span class="jsuw-doodle jsuw-doodle--one"></span>',
       '<span class="jsuw-doodle jsuw-doodle--two"></span>',
       '<span class="jsuw-spark jsuw-spark--one"></span>',
       '<span class="jsuw-spark jsuw-spark--two"></span>'
     ];
 
-    for (var index = 0; index < 18; index += 1) {
+    for (var index = 0; index < (confettiThemes[card.theme] || 0); index += 1) {
       var x = 5 + ((index * 11) % 86) + "%";
       var drift = ((index % 5) - 2) * 14 + "px";
       var delay = index * -220 + "ms";
@@ -361,6 +448,11 @@
   function renderStatNumber(card, statClass) {
     var animation = getStatAnimationConfig(card.stat);
     var attributes = "";
+    var classes = statClass;
+
+    if (classes.indexOf("jsuw-stat-number--nowrap") === -1) {
+      classes += " jsuw-stat-number--nowrap";
+    }
 
     if (animation) {
       attributes = [
@@ -371,10 +463,277 @@
       ].join("");
     }
 
-    return '<div class="' + statClass + '"' + attributes + ">" + escapeHtml(card.stat) + "</div>";
+    return '<div class="' + classes + '" aria-label="' + escapeHtml(card.stat) + '"' + attributes + ">" + escapeHtml(card.stat) + "</div>";
+  }
+
+  function htmlWithBreaks(value) {
+    return escapeHtml(value).replace(/\n/g, "<br>");
+  }
+
+  function getHeadlineClass(card) {
+    var text = String(card.displayHeadline || card.headline || "");
+    var headlineClass = "jsuw-headline";
+
+    if (text.length > 52) {
+      headlineClass += " jsuw-headline--dense";
+    } else if (text.length > 36) {
+      headlineClass += " jsuw-headline--compact";
+    }
+
+    return headlineClass;
+  }
+
+  function renderTopMatter(card) {
+    return [
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.displayEyebrow || card.eyebrow || "JSU Wrapped") + "</div>",
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>"
+    ].join("");
+  }
+
+  function renderIndexedSpans(className, count, maxCount, extraClassFn) {
+    var total = Math.max(0, Math.min(numberValue(count), maxCount || numberValue(count)));
+    var html = '<div class="' + className + '" aria-hidden="true">';
+
+    for (var index = 0; index < total; index += 1) {
+      var extra = typeof extraClassFn === "function" ? extraClassFn(index, total) : "";
+      var height = 10 + ((index * 7) % 36) + "px";
+      html += '<span class="' + extra + '" style="--i:' + index + ';--delay:' + (index * 12) + 'ms;--h:' + height + '"></span>';
+    }
+
+    html += "</div>";
+    return html;
+  }
+
+  function renderReferenceShell(card, body) {
+    return [
+      '<div class="jsuw-card-main jsuw-reference-main jsuw-reference-' + escapeHtml(card.theme) + '">',
+      body,
+      "</div>"
+    ].join("");
+  }
+
+  function renderCoverBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-pennant">' + escapeHtml(card.badge || "JSU chapter") + "</div>",
+      '<div class="jsuw-cover-title">',
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.displayEyebrow || card.eyebrow) + "</div>",
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      "</div>",
+      '<div class="jsuw-cover-footer">',
+      '<div class="jsuw-marker-line">' + escapeHtml(card.markerText || "and this is our year.") + "</div>",
+      '<p class="jsuw-subtext">' + escapeHtml((card.regionName || "JSU") + " - " + (card.yearLabel || "This year")) + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderEventsBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-big-number-wrap jsuw-big-number-wrap--events">',
+      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--events"),
+      "</div>",
+      renderIndexedSpans("jsuw-event-grid", card.rawValue || card.stat, 80),
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderReachBody(card) {
+    var newCount = Math.max(0, Math.min(card.newCount || 0, card.rawValue || 0));
+    var repeatCutoff = Math.max(0, (card.rawValue || 0) - newCount);
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      renderIndexedSpans("jsuw-dot-field", card.rawValue || card.stat, 210, function (index) {
+        return index >= repeatCutoff ? "jsuw-dot--new" : "jsuw-dot--returning";
+      }),
+      '<div class="jsuw-dot-legend">',
+      '<span><i class="jsuw-dot-key jsuw-dot-key--returning"></i>' + escapeHtml(formatNumber(repeatCutoff)) + " returning connections</span>",
+      '<span><i class="jsuw-dot-key jsuw-dot-key--new"></i>' + escapeHtml(formatNumber(newCount)) + " first-timers</span>",
+      "</div>",
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderMomentsBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-moment-center">',
+      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--moments"),
+      '<div class="jsuw-marker-chip">moments together</div>',
+      "</div>",
+      renderIndexedSpans("jsuw-waveform", 64, 64),
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderNewBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-new-pass">',
+      '<div class="jsuw-pass-kicker">New to ' + escapeHtml(card.schoolName || "JSU") + "</div>",
+      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--new"),
+      '<div class="jsuw-marker-line">walked in for the first time</div>',
+      "</div>",
+      renderIndexedSpans("jsuw-new-grid", card.rawValue || card.stat, 100),
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderRepeatBody(card) {
+    var percent = Math.max(0, Math.min(numberValue(card.stat), 100));
+    var circumference = 565.49;
+    var dash = (circumference * percent / 100).toFixed(2);
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-donut">',
+      '<svg viewBox="0 0 240 240" aria-hidden="true">',
+      '<circle class="jsuw-donut-track" cx="120" cy="120" r="90"></circle>',
+      '<circle class="jsuw-donut-fill" cx="120" cy="120" r="90" style="--dash:' + dash + ';--gap:' + (circumference - dash).toFixed(2) + '"></circle>',
+      "</svg>",
+      '<div class="jsuw-donut-center">',
+      renderStatNumber(card, "jsuw-donut-number"),
+      '<span>came back for more</span>',
+      "</div>",
+      "</div>",
+      '<div class="jsuw-mini-stat-row">',
+      '<div><strong>' + escapeHtml(formatNumber(card.repeatCount || 0)) + "</strong><span>came twice or more</span></div>",
+      '<div><strong>' + escapeHtml(card.stat) + "</strong><span>return rate</span></div>",
+      "</div>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderBiggestBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-ticket">',
+      '<div class="jsuw-ticket-row"><span>The big one</span><strong>' + escapeHtml(card.month || "JSU") + "</strong></div>",
+      '<div class="jsuw-ticket-title">' + htmlWithBreaks(String(card.eventName || "Biggest event").replace(/\s+/, "\n")) + "</div>",
+      '<div class="jsuw-ticket-divider"></div>',
+      '<div class="jsuw-ticket-stats">',
+      '<div><span>Showed up</span>' + renderStatNumber(card, "jsuw-ticket-number") + "</div>",
+      '<div><span>Schools</span><strong>' + escapeHtml(formatNumber(card.schoolsRepresented || 0)) + "</strong></div>",
+      "</div>",
+      "</div>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderPersonaBody(card) {
+    var tags = card.tags && card.tags.length ? card.tags.slice(0, 4) : [card.badge || "JSU energy"];
+    var tagHtml = tags.map(function (tag, index) {
+      return '<span style="--i:' + index + '">' + escapeHtml(tag) + "</span>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-persona-card">',
+      '<div class="jsuw-smile-face" aria-hidden="true"><span></span></div>',
+      '<div class="jsuw-pass-kicker">Builds community</div>',
+      '<div class="jsuw-persona-title">' + escapeHtml(card.persona || "The Momentum Maker") + "</div>",
+      '<p>' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>",
+      '<div class="jsuw-tag-cloud">' + tagHtml + "</div>"
+    ].join(""));
+  }
+
+  function renderMovementBody(card) {
+    var statHtml = (card.stats || []).map(function (stat, index) {
+      return '<li style="--i:' + index + '"><strong>' + escapeHtml(stat.value) + "</strong><span>" + escapeHtml(stat.label) + "</span></li>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-orbit" aria-hidden="true">',
+      '<span class="jsuw-orbit-ring jsuw-orbit-ring--outer"></span>',
+      '<span class="jsuw-orbit-ring jsuw-orbit-ring--inner"></span>',
+      '<span class="jsuw-orbit-core">' + escapeHtml(card.chapterName || "JSU") + "</span>",
+      "</div>",
+      '<ul class="jsuw-movement-list jsuw-movement-list--reference">' + statHtml + "</ul>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderFinalBody(card) {
+    var stats = (card.summaryStats || []).map(function (stat, index) {
+      return '<div style="--i:' + index + '"><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-share-poster">',
+      renderBrandLockup(),
+      '<div class="jsuw-marker-line">we are</div>',
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-share-stats">' + stats + "</div>",
+      '<div class="jsuw-share-energy">' + escapeHtml(card.persona || "JSU energy") + "</div>",
+      '<div class="jsuw-share-school">' + escapeHtml((card.schoolName || "JSU") + " - " + (card.yearLabel || "This year")) + "</div>",
+      "</div>",
+      '<div class="jsuw-final-actions">',
+      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share this recap</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>',
+      '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
+      "</div>"
+    ].join(""));
   }
 
   function renderCardBody(card) {
+    if (card.theme === "cover") {
+      return renderCoverBody(card);
+    }
+
+    if (card.theme === "events") {
+      return renderEventsBody(card);
+    }
+
+    if (card.theme === "reach") {
+      return renderReachBody(card);
+    }
+
+    if (card.theme === "moments") {
+      return renderMomentsBody(card);
+    }
+
+    if (card.theme === "new") {
+      return renderNewBody(card);
+    }
+
+    if (card.theme === "repeat") {
+      return renderRepeatBody(card);
+    }
+
+    if (card.theme === "biggest") {
+      return renderBiggestBody(card);
+    }
+
+    if (card.theme === "persona") {
+      return renderPersonaBody(card);
+    }
+
+    if (card.theme === "movement") {
+      return renderMovementBody(card);
+    }
+
+    if (card.theme === "final") {
+      return renderFinalBody(card);
+    }
+
     var headlineClass = "jsuw-headline";
     var statClass = "jsuw-stat-number";
 
@@ -468,11 +827,13 @@
       '<div class="jsuw-shell">',
       '<section class="jsuw-story" tabindex="0" role="group" aria-roledescription="story" aria-label="JSU Wrapped card ' + cardNumber + " of " + total + '">',
       '<div class="jsuw-progress" aria-hidden="true">' + renderProgress(state.index, total) + "</div>",
+      '<div class="jsuw-story-header" aria-hidden="true">' + renderBrandLockup() + '<span>' + String(cardNumber).padStart(2, "0") + " / " + String(total).padStart(2, "0") + "</span></div>",
       '<p class="jsuw-sr-only">Card ' + cardNumber + " of " + total + "</p>",
       '<article class="jsuw-card jsuw-type-' + escapeHtml(card.type) + " jsuw-theme-" + escapeHtml(card.theme) + '" data-jsuw-card>',
       renderStickerCloud(card),
       renderCardBody(card),
       "</article>",
+      '<div class="jsuw-tap-zones" aria-hidden="true"><span></span><span></span><span></span></div>',
       '<div class="jsuw-controls">',
       '<button class="jsuw-nav-button" type="button" data-jsuw-action="prev" ' + (state.index === 0 ? "disabled" : "") + '>Back</button>',
       '<button class="jsuw-nav-button jsuw-nav-button--next" type="button" data-jsuw-action="next">' + nextLabel + "</button>",
@@ -866,10 +1227,10 @@
       }
 
       var state = {
-        index: 0,
         cards: createCards(chapter),
         record: chapter
       };
+      state.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, state.cards.length);
 
       target.__jsuWrappedCleanup = installInteraction(target, state);
       renderStory(target, state);
@@ -911,6 +1272,7 @@
     getKeyNavigationAction: getKeyNavigationAction,
     getChapterSlug: getChapterSlug,
     getDataUrl: getDataUrl,
+    getInitialCardIndex: getInitialCardIndex,
     init: init,
     renderCardBody: renderCardBody
   };
