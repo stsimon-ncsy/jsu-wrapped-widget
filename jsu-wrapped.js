@@ -14,6 +14,7 @@
   var DEFAULT_DATA_PATH = "/wp-content/uploads/wrapped/wrapped-{year}.json";
   var WIDGET_ID = "jsu-wrapped";
   var SCRIPT_SRC = root && root.document && root.document.currentScript ? root.document.currentScript.src : "";
+  var DEFAULT_AUTOPLAY_DELAY = 5200;
 
   function hasValue(value) {
     return value !== null && value !== undefined && String(value).trim() !== "";
@@ -135,6 +136,90 @@
     return DEFAULT_DATA_PATH.replace("{year}", encodeURIComponent(year));
   }
 
+  function parseBooleanFlag(value) {
+    if (!hasValue(value)) {
+      return null;
+    }
+
+    var normalized = String(value).trim().toLowerCase();
+
+    if (["1", "true", "yes", "on"].indexOf(normalized) !== -1) {
+      return true;
+    }
+
+    if (["0", "false", "no", "off"].indexOf(normalized) !== -1) {
+      return false;
+    }
+
+    return null;
+  }
+
+  function getSearchValue(url, names) {
+    var href = url || (root && root.location && root.location.href) || "";
+
+    try {
+      var params = new URL(href).searchParams;
+
+      for (var index = 0; index < names.length; index += 1) {
+        if (params.has(names[index])) {
+          return params.get(names[index]);
+        }
+      }
+    } catch (error) {
+      if (href.charAt(0) === "?") {
+        var searchParams = new URLSearchParams(href);
+
+        for (var offset = 0; offset < names.length; offset += 1) {
+          if (searchParams.has(names[offset])) {
+            return searchParams.get(names[offset]);
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function getAutoplayPreference(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    if (settings.autoplay !== undefined) {
+      return parseBooleanFlag(settings.autoplay) === true;
+    }
+
+    var urlFlag = parseBooleanFlag(getSearchValue(settings.url, ["autoplay", "autoadvance", "auto"]));
+
+    if (urlFlag !== null) {
+      return urlFlag;
+    }
+
+    var dataFlag = parseBooleanFlag(dataset.autoadvance || dataset.autoplay);
+
+    return dataFlag === true;
+  }
+
+  function getAutoplayDelay(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+    var requested = settings.autoplayDelay || getSearchValue(settings.url, ["duration", "autoplayDelay", "autoadvanceDelay"]) || dataset.autoplayDelay || dataset.autoadvanceDelay;
+    var delay = Number(requested);
+
+    if (!isFinite(delay) || delay <= 0) {
+      return DEFAULT_AUTOPLAY_DELAY;
+    }
+
+    if (delay < 1500) {
+      return 1500;
+    }
+
+    if (delay > 30000) {
+      return 30000;
+    }
+
+    return Math.round(delay);
+  }
+
   function getScriptBaseUrl() {
     if (!hasValue(SCRIPT_SRC)) {
       return "";
@@ -245,6 +330,26 @@
     return asText(record && record.chapter_name, asText(record && record.chapter_slug, "JSU chapter"));
   }
 
+  function chapterFootprintLabel(record, chapterName) {
+    var schoolName = asText(record && record.school_name, "");
+    var schoolCount = numberValue(record && record.schools_represented, 0);
+    var representedMatch = schoolName.match(/(\d[\d,]*)\s+schools?\s+represented/i);
+
+    if (schoolCount > 1) {
+      return "Across " + formatNumber(schoolCount) + " schools";
+    }
+
+    if (representedMatch) {
+      return "Across " + formatNumber(representedMatch[1]) + " schools";
+    }
+
+    if (hasValue(schoolName)) {
+      return "New to " + schoolName;
+    }
+
+    return "New to " + asText(chapterName, "JSU");
+  }
+
   function buildChapterUrl(record, url) {
     var slug = record && record.chapter_slug;
     var href = url || (root && root.location && root.location.href) || "";
@@ -279,7 +384,7 @@
       return chapterLabel(a).localeCompare(chapterLabel(b));
     });
 
-    var chapterHtml = records.map(function (record) {
+    function renderPickerItem(record) {
       var brand = getBrandChoice(record);
       var logoUrl = getLogoAsset(brand, assetBase);
       var region = asText(record.region_name, "JSU");
@@ -300,6 +405,32 @@
         "</span>",
         '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
         "</a>"
+      ].join("");
+    }
+
+    var regionMap = {};
+
+    records.forEach(function (record) {
+      var regionName = asText(record.region_name, "Other chapters");
+
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
+      }
+
+      regionMap[regionName].push(record);
+    });
+
+    var chapterHtml = Object.keys(regionMap).sort().map(function (regionName) {
+      var chapters = regionMap[regionName];
+      var countLabel = chapters.length === 1 ? "1 chapter" : chapters.length + " chapters";
+
+      return [
+        '<section class="jsuw-picker-region">',
+        '<h2><span>' + escapeHtml(regionName) + '</span><em>' + escapeHtml(countLabel) + "</em></h2>",
+        '<div class="jsuw-picker-region-list">',
+        chapters.map(renderPickerItem).join(""),
+        "</div>",
+        "</section>"
       ].join("");
     }).join("");
 
@@ -405,6 +536,7 @@
         stat: formatNumber(record.new_teens),
         rawValue: numberValue(record.new_teens),
         schoolName: asText(record.school_name, "Northwood JSU"),
+        newTeenContext: chapterFootprintLabel(record, chapterName),
         statLabel: "new teens",
         subtext: chapterName + " kept opening the door.",
         theme: "new"
@@ -752,7 +884,7 @@
       renderTopMatter(card),
       "</div>",
       '<div class="jsuw-new-pass">',
-      '<div class="jsuw-pass-kicker">New to ' + escapeHtml(card.schoolName || "JSU") + "</div>",
+      '<div class="jsuw-pass-kicker">' + escapeHtml(card.newTeenContext || ("New to " + (card.schoolName || "JSU"))) + "</div>",
       renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--new"),
       '<div class="jsuw-marker-line">walked in for the first time</div>',
       "</div>",
@@ -997,17 +1129,27 @@
     return '<button class="jsuw-sound-toggle" type="button" data-jsuw-action="sound" aria-pressed="' + (state && state.soundEnabled ? "true" : "false") + '">' + label + "</button>";
   }
 
+  function renderAutoplayToggle(state) {
+    var enabled = Boolean(state && state.autoplayEnabled);
+    var label = enabled ? "Auto on" : "Auto off";
+
+    return '<button class="jsuw-autoplay-toggle" type="button" data-jsuw-action="autoplay" aria-pressed="' + (enabled ? "true" : "false") + '">' + label + "</button>";
+  }
+
   function renderStoryMarkup(state) {
     var card = state.cards[state.index];
     var total = state.cards.length;
     var cardNumber = state.index + 1;
     var nextLabel = state.index === total - 1 ? "Replay" : "Next";
+    var autoplayActive = Boolean(state.autoplayEnabled && state.index < total - 1);
+    var storyClass = "jsuw-story jsuw-story-theme-" + escapeHtml(card.theme) + (autoplayActive ? " jsuw-story--autoplay" : "");
+    var storyStyle = '--jsuw-progress-duration:' + escapeHtml(state.autoplayDelay || DEFAULT_AUTOPLAY_DELAY) + "ms";
 
     return [
       '<div class="jsuw-shell">',
-      '<section class="jsuw-story jsuw-story-theme-' + escapeHtml(card.theme) + '" tabindex="0" role="group" aria-roledescription="story" aria-label="JSU Wrapped card ' + cardNumber + " of " + total + '">',
+      '<section class="' + storyClass + '" style="' + storyStyle + '" tabindex="0" role="group" aria-roledescription="story" aria-label="JSU Wrapped card ' + cardNumber + " of " + total + '">',
       '<div class="jsuw-progress" aria-hidden="true">' + renderProgress(state.index, total) + "</div>",
-      '<div class="jsuw-story-header">' + renderBrandLockup(card) + '<span class="jsuw-card-count" aria-hidden="true">' + String(cardNumber).padStart(2, "0") + " / " + String(total).padStart(2, "0") + "</span>" + renderSoundToggle(state) + "</div>",
+      '<div class="jsuw-story-header">' + renderBrandLockup(card) + '<span class="jsuw-card-count" aria-hidden="true">' + String(cardNumber).padStart(2, "0") + " / " + String(total).padStart(2, "0") + '</span><span class="jsuw-story-tools">' + renderAutoplayToggle(state) + renderSoundToggle(state) + "</span></div>",
       '<p class="jsuw-sr-only">Card ' + cardNumber + " of " + total + "</p>",
       '<article class="jsuw-card jsuw-type-' + escapeHtml(card.type) + " jsuw-theme-" + escapeHtml(card.theme) + '" data-jsuw-card>',
       renderStickerCloud(card),
@@ -1162,10 +1304,38 @@
     Array.prototype.forEach.call(countUps, function (element) {
       animateCountUp(element, state);
     });
+
+    scheduleAutoplay(container, state);
+  }
+
+  function clearAutoplayTimer(state) {
+    if (state && state.autoplayTimer) {
+      root.clearTimeout(state.autoplayTimer);
+      state.autoplayTimer = null;
+    }
+  }
+
+  function scheduleAutoplay(container, state) {
+    clearAutoplayTimer(state);
+
+    if (!state || !state.autoplayEnabled || prefersReducedMotion()) {
+      return;
+    }
+
+    if (state.index >= state.cards.length - 1) {
+      return;
+    }
+
+    state.autoplayTimer = root.setTimeout(function () {
+      state.autoplayTimer = null;
+      next(container, state, { autoplay: true });
+    }, state.autoplayDelay || DEFAULT_AUTOPLAY_DELAY);
   }
 
   function goTo(container, state, nextIndex, options) {
     var total = state.cards.length;
+
+    clearAutoplayTimer(state);
 
     if (nextIndex < 0) {
       nextIndex = 0;
@@ -1240,6 +1410,17 @@
     }
   }
 
+  function toggleAutoplay(container, state, options) {
+    clearAutoplayTimer(state);
+    state.autoplayEnabled = !state.autoplayEnabled;
+    renderStory(container, state);
+    activateStory(container, state);
+
+    if (options && options.focusStory) {
+      focusStory(container);
+    }
+  }
+
   function installInteraction(container, state) {
     function runAction(action, options) {
       if (action === "prev") {
@@ -1252,6 +1433,8 @@
         downloadRecap(container, state);
       } else if (action === "sound") {
         toggleSound(container, state);
+      } else if (action === "autoplay") {
+        toggleAutoplay(container, state, options);
       }
     }
 
@@ -1309,6 +1492,7 @@
     container.addEventListener("keydown", handleKeydown);
 
     return function cleanupInteraction() {
+      clearAutoplayTimer(state);
       container.removeEventListener("click", handleClick);
       container.removeEventListener("keydown", handleKeydown);
     };
@@ -1372,29 +1556,186 @@
     return '<text x="' + x + '" y="' + y + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(text) + "</text>";
   }
 
-  function createFallbackSvg(state) {
-    var record = state.record;
+  function splitSvgLines(value, maxChars, maxLines) {
+    var words = String(value || "").replace(/\s+/g, " ").trim().split(" ");
+    var lines = [];
+    var current = "";
+
+    words.forEach(function (word) {
+      var next = current ? current + " " + word : word;
+
+      if (current && next.length > maxChars) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = next;
+      }
+    });
+
+    if (current) {
+      lines.push(current);
+    }
+
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/\s+$/, "") + "...";
+    }
+
+    return lines.length ? lines : [""];
+  }
+
+  function svgTextLines(lines, x, y, size, weight, fill, lineHeight, className) {
+    return lines.map(function (line, index) {
+      return '<text class="' + escapeXml(className || "") + '" x="' + x + '" y="' + (y + index * lineHeight) + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(line) + "</text>";
+    }).join("");
+  }
+
+  function getFinalCard(state) {
+    var cards = state && state.cards || [];
+
+    for (var index = 0; index < cards.length; index += 1) {
+      if (cards[index] && cards[index].theme === "final") {
+        return cards[index];
+      }
+    }
+
+    return cards[cards.length - 1] || {};
+  }
+
+  function createFallbackConfetti() {
+    var colors = ["#fff7a9", "#00d9ff", "#ff4f9a", "#7cff6b", "#ffb000", "#ffffff"];
+    var pieces = [];
+
+    for (var index = 0; index < 54; index += 1) {
+      var x = 34 + ((index * 89) % 1012);
+      var y = 56 + ((index * 137) % 1700);
+      var rotate = (index * 29) % 180;
+      var fill = colors[index % colors.length];
+
+      if (index % 5 === 0) {
+        pieces.push('<circle cx="' + x + '" cy="' + y + '" r="' + (7 + index % 9) + '" fill="' + fill + '" opacity="0.88"/>');
+      } else {
+        pieces.push('<rect x="' + x + '" y="' + y + '" width="' + (16 + index % 13) + '" height="' + (7 + index % 8) + '" rx="4" fill="' + fill + '" opacity="0.9" transform="rotate(' + rotate + " " + x + " " + y + ')"/>');
+      }
+    }
+
+    return '<g class="confetti" aria-hidden="true">' + pieces.join("") + "</g>";
+  }
+
+  function fallbackLogoMarkup(brand, logoDataUrl) {
+    var brandText = brand === "ncsy" ? "NCSY" : "JSU";
+
+    if (hasValue(logoDataUrl)) {
+      return [
+        '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+        '<image href="' + escapeXml(logoDataUrl) + '" x="100" y="114" width="124" height="124" preserveAspectRatio="xMidYMid meet"/>'
+      ].join("");
+    }
+
+    return [
+      '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+      svgLine(brandText, 112, 192, brand === "ncsy" ? 40 : 56, 900, "#ffffff")
+    ].join("");
+  }
+
+  function fallbackStatRows(stats) {
+    return (stats || []).slice(0, 5).map(function (stat, index) {
+      var y = 1010 + index * 128;
+
+      return [
+        '<g transform="translate(92 ' + y + ')">',
+        '<rect width="896" height="96" rx="28" fill="#ffffff" opacity="' + (index % 2 ? "0.16" : "0.22") + '"/>',
+        '<text x="34" y="64" font-size="54" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.value) + "</text>",
+        '<text x="310" y="60" font-size="32" font-weight="800" fill="#fff4b7" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.label) + "</text>",
+        "</g>"
+      ].join("");
+    }).join("");
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (resolve) {
+      if (!root.FileReader) {
+        resolve("");
+        return;
+      }
+
+      var reader = new root.FileReader();
+
+      reader.onloadend = function () {
+        resolve(String(reader.result || ""));
+      };
+      reader.onerror = function () {
+        resolve("");
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function fetchImageDataUrl(url) {
+    if (!hasValue(url) || !root.fetch) {
+      return "";
+    }
+
+    try {
+      var response = await root.fetch(url, { credentials: "same-origin" });
+
+      if (!response.ok) {
+        return "";
+      }
+
+      return await blobToDataUrl(await response.blob());
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function createFallbackSvg(state, logoDataUrl) {
+    var record = state.record || {};
+    var card = getFinalCard(state);
     var chapterName = asText(record.chapter_name, "JSU Wrapped");
-    var persona = asText(record.chapter_persona, "JSU energy");
-    var year = asText(record.year_label || record.school_year, "This year");
+    var persona = asText(card.persona || record.chapter_persona, "JSU energy");
+    var year = asText(card.yearLabel || record.year_label || record.school_year, "This year");
+    var brand = card.brandChoice === "ncsy" || getBrandChoice(record) === "ncsy" ? "ncsy" : "jsu";
+    var headlineLines = splitSvgLines(chapterName, 16, 3).concat(["Wrapped"]);
+    var summaryLines = splitSvgLines(card.subtext || [
+      hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+      hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+      hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : "",
+      persona + " energy"
+    ].filter(Boolean).join(". ") + ".", 28, 3);
+    var stats = card.summaryStats || [
+      hasValue(record.events_hosted) ? { value: formatNumber(record.events_hosted), label: "programs together" } : null,
+      hasValue(record.unique_teens) ? { value: formatNumber(record.unique_teens), label: "of us, one chapter" } : null,
+      hasValue(record.engagement_moments) ? { value: formatNumber(record.engagement_moments), label: "moments stacked up" } : null
+    ].filter(Boolean);
 
     return [
       '<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">',
+      "<title>" + escapeXml(chapterName + " Wrapped - " + persona) + "</title>",
       "<defs>",
-      '<linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#6025ff"/><stop offset="0.48" stop-color="#ff3b91"/><stop offset="1" stop-color="#ffb000"/></linearGradient>',
+      '<linearGradient id="posterBg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#1019aa"/><stop offset="0.38" stop-color="#6928ff"/><stop offset="0.7" stop-color="#ff3b91"/><stop offset="1" stop-color="#ffc400"/></linearGradient>',
+      '<radialGradient id="posterGlow" cx="50%" cy="34%" r="65%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/><stop offset="0.52" stop-color="#ffffff" stop-opacity="0.05"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>',
+      '<filter id="posterShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#18002e" flood-opacity="0.35"/></filter>',
+      '<style>.poster-headline{letter-spacing:-1px}.confetti{mix-blend-mode:screen}</style>',
       "</defs>",
-      '<rect width="1080" height="1920" rx="92" fill="url(#bg)"/>',
-      '<circle cx="880" cy="220" r="170" fill="#ffffff" opacity="0.18"/>',
-      '<circle cx="160" cy="1550" r="230" fill="#00d4ff" opacity="0.2"/>',
-      svgLine("JSU Wrapped", 92, 190, 58, 800, "#ffffff"),
-      svgLine(year, 92, 275, 40, 700, "#fff2b8"),
-      svgLine(chapterName, 92, 470, 92, 900, "#ffffff"),
-      svgLine("Wrapped", 92, 585, 92, 900, "#ffffff"),
-      svgLine(hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "Events", 92, 890, 70, 900, "#ffffff"),
-      svgLine(hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "Teens reached", 92, 1010, 70, 900, "#ffffff"),
-      svgLine(hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : "Engagement moments", 92, 1130, 70, 900, "#ffffff"),
-      svgLine(persona + " energy", 92, 1370, 58, 800, "#fff2b8"),
-      svgLine("One chapter. One movement.", 92, 1620, 48, 800, "#ffffff"),
+      '<rect width="1080" height="1920" rx="92" fill="url(#posterBg)"/>',
+      '<rect width="1080" height="1920" rx="92" fill="url(#posterGlow)"/>',
+      '<path d="M-120 420 C180 210 320 680 650 390 C850 216 1020 254 1200 90" fill="none" stroke="#ffffff" stroke-width="26" opacity="0.15"/>',
+      '<path d="M-80 1510 C270 1330 438 1745 778 1430 C936 1284 1020 1302 1188 1190" fill="none" stroke="#00d9ff" stroke-width="30" opacity="0.18"/>',
+      createFallbackConfetti(),
+      '<rect x="52" y="60" width="976" height="1800" rx="76" fill="#16032f" opacity="0.74" stroke="#ffffff" stroke-width="8" filter="url(#posterShadow)"/>',
+      '<circle cx="914" cy="220" r="122" fill="#fff4b7" opacity="0.22"/>',
+      '<circle cx="166" cy="1574" r="164" fill="#00d9ff" opacity="0.19"/>',
+      fallbackLogoMarkup(brand, logoDataUrl),
+      svgLine(brand === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped", 274, 160, 48, 900, "#ffffff"),
+      svgLine(year, 276, 220, 34, 800, "#fff4b7"),
+      svgTextLines(headlineLines, 92, 430, 96, 900, "#ffffff", 104, "poster-headline"),
+      '<rect x="92" y="770" width="640" height="82" rx="41" fill="#fff4b7" opacity="0.96"/>',
+      svgLine(persona + " energy", 126, 826, 40, 900, "#16032f"),
+      svgTextLines(summaryLines, 92, 930, 43, 800, "#ffffff", 58, "poster-copy"),
+      fallbackStatRows(stats),
+      '<rect x="92" y="1718" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
+      svgLine(asText(record.region_name, "One movement") + " - One chapter. One movement.", 126, 1766, 31, 800, "#ffffff"),
       "</svg>"
     ].join("");
   }
@@ -1402,9 +1743,11 @@
   async function downloadRecap(container, state) {
     var filename = slugify(state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
     var card = container.querySelector("[data-jsuw-card]");
+    var finalCard = getFinalCard(state);
 
-    function downloadSvgFallback() {
-      var svg = createFallbackSvg(state);
+    async function downloadSvgFallback() {
+      var logoDataUrl = await fetchImageDataUrl(finalCard.logoUrl);
+      var svg = createFallbackSvg(state, logoDataUrl);
       downloadBlob(container, new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), filename);
       setStatus(container, "Image downloaded.");
     }
@@ -1418,7 +1761,7 @@
         });
 
         if (typeof canvas.toBlob !== "function") {
-          downloadSvgFallback();
+          await downloadSvgFallback();
           return;
         }
 
@@ -1427,16 +1770,18 @@
             downloadBlob(container, blob, filename.replace(/\.svg$/, ".png"));
             setStatus(container, "Image downloaded.");
           } else {
-            setStatus(container, "Take a screenshot to save this recap.");
+            downloadSvgFallback().catch(function () {
+              setStatus(container, "Take a screenshot to save this recap.");
+            });
           }
         }, "image/png");
         return;
       }
 
-      downloadSvgFallback();
+      await downloadSvgFallback();
     } catch (error) {
       try {
-        downloadSvgFallback();
+        await downloadSvgFallback();
       } catch (fallbackError) {
         setStatus(container, "Take a screenshot to save this recap.");
       }
@@ -1501,6 +1846,9 @@
       var state = {
         cards: createCards(chapter, { assetBase: assetBase }),
         record: chapter,
+        autoplayEnabled: getAutoplayPreference(target, settings),
+        autoplayDelay: getAutoplayDelay(target, settings),
+        autoplayTimer: null,
         soundEnabled: false,
         soundEngine: null
       };
@@ -1547,8 +1895,11 @@
     getChapterSlug: getChapterSlug,
     getDataUrl: getDataUrl,
     getBrandChoice: getBrandChoice,
+    getAutoplayPreference: getAutoplayPreference,
+    getAutoplayDelay: getAutoplayDelay,
     getInitialCardIndex: getInitialCardIndex,
     buildChapterUrl: buildChapterUrl,
+    createFallbackSvg: createFallbackSvg,
     init: init,
     renderCardBody: renderCardBody,
     renderChapterPickerMarkup: renderChapterPickerMarkup,

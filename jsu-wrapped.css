@@ -265,8 +265,8 @@
   transform: scaleX(1);
 }
 
-#jsu-wrapped .jsuw-progress-segment--active span {
-  animation: jsuw-progress-live 5.2s linear both;
+#jsu-wrapped .jsuw-story--autoplay .jsuw-progress-segment--active span {
+  animation: jsuw-progress-live var(--jsuw-progress-duration, 5.2s) linear both;
 }
 
 #jsu-wrapped .jsuw-card {
@@ -1103,9 +1103,42 @@
 
 #jsu-wrapped .jsuw-picker-list {
   display: grid;
-  gap: 10px;
+  gap: 16px;
   position: relative;
   z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-region {
+  display: grid;
+  gap: 8px;
+}
+
+#jsu-wrapped .jsuw-picker-region h2 {
+  align-items: baseline;
+  color: #ffffff;
+  display: flex;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 1000;
+  justify-content: space-between;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+  text-shadow: 2px 2px 0 rgba(21, 4, 40, 0.24);
+}
+
+#jsu-wrapped .jsuw-picker-region h2 em {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-picker-region-list {
+  display: grid;
+  gap: 10px;
 }
 
 #jsu-wrapped .jsuw-picker-item {
@@ -1245,7 +1278,15 @@
   white-space: nowrap;
 }
 
-#jsu-wrapped .jsuw-sound-toggle {
+#jsu-wrapped .jsuw-story-tools {
+  align-items: center;
+  display: inline-flex;
+  gap: 5px;
+  justify-self: end;
+}
+
+#jsu-wrapped .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-autoplay-toggle {
   appearance: none;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -1263,7 +1304,8 @@
   white-space: nowrap;
 }
 
-#jsu-wrapped .jsuw-sound-toggle[aria-pressed="true"] {
+#jsu-wrapped .jsuw-sound-toggle[aria-pressed="true"],
+#jsu-wrapped .jsuw-autoplay-toggle[aria-pressed="true"] {
   background: #ffb627;
   border-color: #150428;
   color: #150428;
@@ -1277,7 +1319,10 @@
 
 #jsu-wrapped .jsuw-story-theme-events .jsuw-sound-toggle,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-sound-toggle,
-#jsu-wrapped .jsuw-story-theme-persona .jsuw-sound-toggle {
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-events .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-autoplay-toggle {
   background: rgba(21, 4, 40, 0.09);
   border-color: rgba(21, 4, 40, 0.22);
   color: #150428;
@@ -2213,6 +2258,13 @@
     padding: 10px;
   }
 
+  #jsu-wrapped .jsuw-sound-toggle,
+  #jsu-wrapped .jsuw-autoplay-toggle {
+    font-size: 0.6rem;
+    min-height: 28px;
+    padding: 7px 8px;
+  }
+
   #jsu-wrapped .jsuw-picker {
     border-radius: 26px;
     padding: 24px 18px;
@@ -2311,6 +2363,12 @@
 
   #jsu-wrapped .jsuw-theme-movement .jsuw-movement-list span {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 380px) {
+  #jsu-wrapped .jsuw-card-count {
+    display: none;
   }
 }
 
