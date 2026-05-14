@@ -735,14 +735,14 @@
         hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
         hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
         hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : ""
-      ].filter(Boolean).join(" · ");
+      ].filter(Boolean).join(" | ");
 
       return [
         '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url)) + '">',
         '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
         '<span class="jsuw-picker-copy">',
         '<strong>' + escapeHtml(chapterLabel(record)) + "</strong>",
-        '<em>' + escapeHtml([school, region].filter(Boolean).join(" · ")) + "</em>",
+        '<em>' + escapeHtml([school, region].filter(Boolean).join(" | ")) + "</em>",
         stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
         "</span>",
         '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
@@ -809,7 +809,7 @@
     return [
       '<div class="jsuw-shell jsuw-shell--picker">',
       '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
-      '<div class="jsuw-picker-topline">JSU Wrapped · ' + escapeHtml(year) + "</div>",
+      '<div class="jsuw-picker-topline">JSU Wrapped | ' + escapeHtml(year) + "</div>",
       '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
       '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
       regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
@@ -1588,7 +1588,7 @@
       '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
       '<div class="jsuw-teen-flame" aria-hidden="true"><span></span></div>',
       '<div class="jsuw-teen-streak-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + "</div>",
-      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>✓</span>"; }).join("") + "</div>",
+      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>OK</span>"; }).join("") + "</div>",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));

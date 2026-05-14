@@ -1,36 +1,113 @@
-﻿<!-- JSU/NCSY Wrapped inline WordPress embed.
-     Paste into a WordPress template or Custom HTML area that allows <style> and <script>.
-     This version inlines the widget CSS/JS and reads JSON/logo assets from GitHub Pages for quick testing.
-     For production, replace data-source/data-teen-source/data-assets-base with /wp-content/uploads/wrapped/... URLs. -->
+<!-- JSU/NCSY Wrapped inline WordPress embed.
+     Paste into the no-header/no-footer WordPress template.
+     CSS and JS are inline; JSON and logo assets load from GitHub Pages. -->
 <div id="jsu-wrapped-wordpress-shell">
-  <div
-    id="jsu-wrapped"
-    data-year="2026"
-    data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json"
-    data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json"
-    data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
-    data-analytics="true"
-  ></div>
+  <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">
+    <div
+      id="jsu-wrapped"
+      data-year="2026"
+      data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json"
+      data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json"
+      data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
+      data-analytics="true"
+    ></div>
+    <nav class="jsuw-legal" aria-label="Wrapped policies">
+      <a href="/privacy-policy/">Privacy Policy</a>
+      <span>|</span>
+      <a href="/standards/">Behavioral Standards</a>
+      <span>|</span>
+      <a href="/cookie-policy/">Cookie Policy</a>
+    </nav>
+  </main>
 </div>
 
 <style>
 #jsu-wrapped-wordpress-shell {
   align-items: center;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 184, 27, 0.36), transparent 24rem),
+    radial-gradient(circle at 88% 18%, rgba(236, 37, 143, 0.38), transparent 26rem),
+    radial-gradient(circle at 50% 95%, rgba(38, 218, 172, 0.18), transparent 24rem),
+    #150322;
   box-sizing: border-box;
+  color: #ffffff;
   display: flex;
   justify-content: center;
   min-height: 100svh;
   overflow-x: hidden;
-  padding: 8px;
+  padding: clamp(8px, 3vw, 28px);
   width: 100%;
 }
 
-@media (min-width: 700px) {
+#jsu-wrapped-wordpress-shell *,
+#jsu-wrapped-wordpress-shell *::before,
+#jsu-wrapped-wordpress-shell *::after {
+  box-sizing: border-box;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-page-stage {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  margin: 0 auto;
+  min-height: calc(100svh - clamp(16px, 6vw, 56px));
+  width: min(100%, 980px);
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 7px;
+  justify-content: center;
+  line-height: 1.35;
+  max-width: min(92vw, 430px);
+  padding: 0 10px 2px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal a {
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal a:hover,
+#jsu-wrapped-wordpress-shell .jsuw-legal a:focus-visible {
+  color: #ffb81b;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
   #jsu-wrapped-wordpress-shell {
-    min-height: 100vh;
-    padding: 24px;
+    align-items: stretch;
+    background: #150322;
+    padding: 0;
+  }
+
+  #jsu-wrapped-wordpress-shell .jsuw-page-stage {
+    gap: 0;
+    justify-content: flex-start;
+    min-height: 100svh;
+    width: 100%;
+  }
+
+  #jsu-wrapped-wordpress-shell .jsuw-legal {
+    background: #050109;
+    font-size: 10px;
+    margin-top: 0;
+    max-width: none;
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+    width: 100%;
   }
 }
+
 #jsu-wrapped {
   --jsuw-ink: #ffffff;
   --jsuw-ink-soft: rgba(255, 255, 255, 0.78);
@@ -3799,9 +3876,11 @@
     bottom: 112px;
   }
 }
+
 </style>
 
-<script>(function (root, factory) {
+<script>
+(function (root, factory) {
   var api = factory(root);
 
   if (typeof module === "object" && module.exports) {
@@ -4538,14 +4617,14 @@
         hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
         hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
         hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : ""
-      ].filter(Boolean).join(" Â· ");
+      ].filter(Boolean).join(" | ");
 
       return [
         '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url)) + '">',
         '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
         '<span class="jsuw-picker-copy">',
         '<strong>' + escapeHtml(chapterLabel(record)) + "</strong>",
-        '<em>' + escapeHtml([school, region].filter(Boolean).join(" Â· ")) + "</em>",
+        '<em>' + escapeHtml([school, region].filter(Boolean).join(" | ")) + "</em>",
         stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
         "</span>",
         '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
@@ -4612,7 +4691,7 @@
     return [
       '<div class="jsuw-shell jsuw-shell--picker">',
       '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
-      '<div class="jsuw-picker-topline">JSU Wrapped Â· ' + escapeHtml(year) + "</div>",
+      '<div class="jsuw-picker-topline">JSU Wrapped | ' + escapeHtml(year) + "</div>",
       '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
       '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
       regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
@@ -5391,7 +5470,7 @@
       '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
       '<div class="jsuw-teen-flame" aria-hidden="true"><span></span></div>',
       '<div class="jsuw-teen-streak-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + "</div>",
-      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>âœ“</span>"; }).join("") + "</div>",
+      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>OK</span>"; }).join("") + "</div>",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));
@@ -6653,4 +6732,5 @@
     renderStoryMarkup: renderStoryMarkup
   };
 });
+
 </script>
