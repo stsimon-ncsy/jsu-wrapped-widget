@@ -1,0 +1,6656 @@
+﻿<!-- JSU/NCSY Wrapped inline WordPress embed.
+     Paste into a WordPress template or Custom HTML area that allows <style> and <script>.
+     This version inlines the widget CSS/JS and reads JSON/logo assets from GitHub Pages for quick testing.
+     For production, replace data-source/data-teen-source/data-assets-base with /wp-content/uploads/wrapped/... URLs. -->
+<div id="jsu-wrapped-wordpress-shell">
+  <div
+    id="jsu-wrapped"
+    data-year="2026"
+    data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json"
+    data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json"
+    data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
+    data-analytics="true"
+  ></div>
+</div>
+
+<style>
+#jsu-wrapped-wordpress-shell {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  min-height: 100svh;
+  overflow-x: hidden;
+  padding: 8px;
+  width: 100%;
+}
+
+@media (min-width: 700px) {
+  #jsu-wrapped-wordpress-shell {
+    min-height: 100vh;
+    padding: 24px;
+  }
+}
+#jsu-wrapped {
+  --jsuw-ink: #ffffff;
+  --jsuw-ink-soft: rgba(255, 255, 255, 0.78);
+  --jsuw-ink-muted: rgba(255, 255, 255, 0.62);
+  --jsuw-card-shadow: 0 28px 80px rgba(17, 24, 39, 0.28);
+  --jsuw-deep: #150428;
+  --jsuw-blue: #00c2ff;
+  --jsuw-pink: #ff2e93;
+  --jsuw-orange: #ff6b4a;
+  --jsuw-sun: #ffb627;
+  --jsuw-lime: #29d69a;
+  --jsuw-violet: #6a2bff;
+  --jsuw-font-display: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --jsuw-font-body: "DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --jsuw-font-marker: "Caveat", "Comic Sans MS", "Segoe Print", cursive;
+  --jsuw-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+  --jsuw-radius: 34px;
+  box-sizing: border-box;
+  color: var(--jsuw-ink);
+  font-family: var(--jsuw-font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 100%;
+  min-width: 0;
+  padding: 16px;
+  width: 100%;
+}
+
+@keyframes jsuw-story-rise {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 14px, 0) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes jsuw-pop-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes jsuw-progress-live {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes jsuw-stripe-shift {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 120px 0;
+  }
+}
+
+@keyframes jsuw-pattern-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-8deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes jsuw-wave {
+  0%,
+  100% {
+    transform: scaleY(0.46);
+  }
+
+  50% {
+    transform: scaleY(1.14);
+  }
+}
+
+@keyframes jsuw-bubble-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.92);
+  }
+
+  50% {
+    transform: translate3d(0, -14px, 0) scale(1.08);
+  }
+}
+
+@keyframes jsuw-sticker-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--jsuw-rotate));
+  }
+
+  50% {
+    transform: translate3d(0, -8px, 0) rotate(calc(var(--jsuw-rotate) + 2deg));
+  }
+}
+
+@keyframes jsuw-spin-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: rotate(0deg) scale(0.86);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: rotate(32deg) scale(1.08);
+  }
+}
+
+@keyframes jsuw-confetti-drift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -28px, 0) rotate(0deg) scale(var(--scale));
+  }
+
+  12%,
+  82% {
+    opacity: 0.78;
+  }
+
+  52% {
+    transform: translate3d(calc(var(--dx) * 0.45), calc(var(--dy) * 0.52), 0) rotate(calc(var(--rot) * 0.52)) scale(var(--scale));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)) scale(var(--scale));
+  }
+}
+
+@keyframes jsuw-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.35);
+  }
+
+  18% {
+    opacity: 0.96;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)) scale(var(--scale));
+  }
+}
+
+@keyframes jsuw-donut-draw {
+  from {
+    stroke-dashoffset: var(--dash);
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+#jsu-wrapped *,
+#jsu-wrapped *::before,
+#jsu-wrapped *::after {
+  box-sizing: border-box;
+}
+
+#jsu-wrapped .jsuw-shell {
+  margin: 0 auto;
+  max-width: min(420px, calc(100vw - 32px), calc(56.25vh - 18px));
+  width: 100%;
+}
+
+@supports (height: 100svh) {
+  #jsu-wrapped .jsuw-shell {
+    max-width: min(420px, calc(100vw - 32px), calc(56.25svh - 18px));
+  }
+}
+
+#jsu-wrapped .jsuw-shell--error {
+  max-width: 560px;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-story {
+  aspect-ratio: 9 / 16;
+  background: #111827;
+  border-radius: var(--jsuw-radius);
+  box-shadow: var(--jsuw-card-shadow);
+  min-height: 0;
+  outline: none;
+  overflow: hidden;
+  position: relative;
+  touch-action: manipulation;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card {
+  animation: jsuw-story-rise 460ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+}
+
+#jsu-wrapped .jsuw-story:focus-visible {
+  box-shadow: 0 0 0 4px rgba(40, 100, 255, 0.26), var(--jsuw-card-shadow);
+}
+
+#jsu-wrapped .jsuw-progress {
+  display: grid;
+  gap: 5px;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-progress-segment {
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 999px;
+  display: block;
+  height: 4px;
+  overflow: hidden;
+}
+
+#jsu-wrapped .jsuw-story-theme-events .jsuw-progress-segment,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-progress-segment,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment {
+  background: rgba(21, 4, 40, 0.18);
+}
+
+#jsu-wrapped .jsuw-story-theme-events .jsuw-progress-segment span,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-progress-segment span,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment span {
+  background: #150428;
+}
+
+#jsu-wrapped .jsuw-progress-segment span {
+  background: #ffffff;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+#jsu-wrapped .jsuw-progress-segment--complete span,
+#jsu-wrapped .jsuw-progress-segment--active span {
+  transform: scaleX(1);
+}
+
+#jsu-wrapped .jsuw-story--autoplay .jsuw-progress-segment--active span {
+  animation: jsuw-progress-live var(--jsuw-progress-duration, 5.2s) linear both;
+}
+
+#jsu-wrapped .jsuw-card {
+  align-items: stretch;
+  display: flex;
+  height: 100%;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 42px 24px 90px;
+  position: relative;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-card::before,
+#jsu-wrapped .jsuw-card::after {
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+#jsu-wrapped .jsuw-card::before {
+  background: repeating-linear-gradient(
+    -17deg,
+    rgba(255, 255, 255, 0.105) 0 22px,
+    rgba(255, 255, 255, 0) 22px 52px
+  );
+  animation: jsuw-stripe-shift 14s linear infinite;
+  background-size: 120px 120px;
+  border-radius: 0;
+  inset: 0;
+}
+
+#jsu-wrapped .jsuw-card::after {
+  background: rgba(21, 4, 40, 0.14);
+  border-radius: 0;
+  bottom: -16%;
+  height: 42%;
+  left: -18%;
+  right: -18%;
+  transform: rotate(-11deg);
+}
+
+#jsu-wrapped .jsuw-theme-cover {
+  background:
+    linear-gradient(160deg, #150428 0%, #6a2bff 52%, #ff2e93 100%);
+}
+
+#jsu-wrapped .jsuw-theme-events {
+  background:
+    linear-gradient(180deg, #fff4e5 0%, #ffcfa0 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-reach {
+  background:
+    linear-gradient(165deg, #29d69a 0%, #00c2ff 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-moments {
+  background:
+    linear-gradient(165deg, #6a2bff 0%, #ff2e93 60%, #ffb627 100%);
+}
+
+#jsu-wrapped .jsuw-theme-new {
+  background:
+    linear-gradient(180deg, #fff4e5 0%, #ffb627 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-repeat {
+  background:
+    linear-gradient(180deg, #150428 0%, #2a0f4a 100%);
+}
+
+#jsu-wrapped .jsuw-theme-biggest {
+  background:
+    linear-gradient(160deg, #ff2e93 0%, #b721ff 100%);
+}
+
+#jsu-wrapped .jsuw-theme-persona {
+  background:
+    linear-gradient(165deg, #ffb627 0%, #ff6b4a 50%, #ff2e93 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-movement {
+  background:
+    linear-gradient(180deg, #150428 0%, #321560 100%);
+}
+
+#jsu-wrapped .jsuw-theme-final {
+  background:
+    linear-gradient(165deg, #6a2bff 0%, #ff2e93 60%, #ffb627 100%);
+}
+
+#jsu-wrapped .jsuw-card-main {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  width: 100%;
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card-main > * {
+  animation: jsuw-pop-in 520ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card-main > *:nth-child(2) {
+  animation-delay: 55ms;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card-main > *:nth-child(3) {
+  animation-delay: 110ms;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card-main > *:nth-child(4) {
+  animation-delay: 165ms;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-card-main > *:nth-child(5) {
+  animation-delay: 220ms;
+}
+
+#jsu-wrapped .jsuw-story--entered .jsuw-reference-main > * {
+  animation: none;
+  opacity: 1;
+}
+
+#jsu-wrapped .jsuw-type-stat .jsuw-card-main {
+  display: grid;
+  gap: 8px;
+  grid-template-rows: auto auto auto minmax(222px, 1fr) auto;
+}
+
+#jsu-wrapped .jsuw-brand-lockup {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-width: 100%;
+}
+
+#jsu-wrapped .jsuw-brand-logo {
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.34);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 rgba(21, 4, 40, 0.26);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 34px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  transform: rotate(-3deg);
+  width: 34px;
+}
+
+#jsu-wrapped .jsuw-brand-logo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-brand-logo--ncsy {
+  background: #150428;
+  border-color: rgba(255, 255, 255, 0.5);
+  border-radius: 11px;
+  padding: 5px 6px;
+  width: 54px;
+}
+
+#jsu-wrapped .jsuw-brand-copy {
+  color: currentColor;
+  display: grid;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.04;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-brand-copy em {
+  color: #b7ff31;
+  font-style: normal;
+}
+
+#jsu-wrapped .jsuw-eyebrow {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: var(--jsuw-ink);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-reach .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-new .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-persona .jsuw-brand-copy em {
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-reach .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-new .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-persona .jsuw-eyebrow {
+  background: rgba(21, 4, 40, 0.1);
+  border-color: rgba(21, 4, 40, 0.22);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-reach .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-new .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-persona .jsuw-stat-number {
+  color: #150428;
+  text-shadow:
+    5px 5px 0 rgba(255, 255, 255, 0.72),
+    9px 9px 0 rgba(255, 46, 147, 0.18);
+}
+
+#jsu-wrapped .jsuw-theme-cover .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-moments .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-repeat .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-biggest .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-movement .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-final .jsuw-stat-number {
+  color: #fff7b8;
+  text-shadow: 5px 5px 0 rgba(21, 4, 40, 0.32);
+}
+
+#jsu-wrapped .jsuw-headline {
+  color: currentColor;
+  font-family: inherit;
+  font-size: 2.34rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 0.95;
+  margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+#jsu-wrapped .jsuw-headline--compact {
+  font-size: 2.12rem;
+  line-height: 0.98;
+}
+
+#jsu-wrapped .jsuw-headline--dense {
+  font-size: 1.82rem;
+  line-height: 1.02;
+}
+
+#jsu-wrapped .jsuw-subtext {
+  color: currentColor;
+  font-family: inherit;
+  font-size: 1.02rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.35;
+  margin: 16px 0 0;
+  max-width: 29ch;
+  opacity: 0.78;
+  overflow-wrap: anywhere;
+}
+
+#jsu-wrapped .jsuw-stat-lockup {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 0 6px;
+  min-height: 222px;
+  padding: 0;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-type-stat .jsuw-subtext {
+  font-size: 0.96rem;
+  line-height: 1.24;
+  margin-top: 0;
+  max-width: 100%;
+}
+
+#jsu-wrapped .jsuw-stat-number {
+  color: currentColor;
+  font-family: inherit;
+  font-size: clamp(6.4rem, 33vw, 10.25rem);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.74;
+  overflow-wrap: anywhere;
+  position: relative;
+  text-align: center;
+  text-shadow: 5px 5px 0 rgba(21, 4, 40, 0.18);
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-stat-number--compact {
+  font-size: clamp(5.1rem, 24vw, 8rem);
+  line-height: 0.82;
+}
+
+#jsu-wrapped .jsuw-stat-label {
+  align-self: center;
+  background: #ffb627;
+  border: 3px solid #150428;
+  border-radius: 14px;
+  color: #150428;
+  font-size: 1.28rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin-top: -2px;
+  padding: 5px 14px;
+  position: relative;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-stat-pattern {
+  inset: 8px 0 2px;
+  opacity: 0.84;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-stat-pattern span {
+  animation: jsuw-pattern-pop 520ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: var(--delay);
+  display: block;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(10, 1fr);
+  inset: auto 2px 0;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span {
+  aspect-ratio: 1;
+  background: var(--jsuw-pink);
+  border-radius: 4px;
+  opacity: 0.52;
+  position: static;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(3n) {
+  background: var(--jsuw-violet);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(4n) {
+  background: var(--jsuw-sun);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--events span:nth-child(5n) {
+  background: var(--jsuw-lime);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach,
+#jsu-wrapped .jsuw-stat-pattern--new {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(14, 1fr);
+  inset: 14px 2px 0;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach span,
+#jsu-wrapped .jsuw-stat-pattern--new span {
+  aspect-ratio: 1;
+  background: rgba(21, 4, 40, 0.72);
+  border: 1px solid rgba(21, 4, 40, 0.82);
+  border-radius: 999px;
+  position: static;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--reach span:nth-child(3n),
+#jsu-wrapped .jsuw-stat-pattern--new span:nth-child(4n) {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--moments span {
+  animation: jsuw-wave 1.18s ease-in-out infinite;
+  animation-delay: var(--wave-delay);
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  bottom: 44%;
+  height: var(--h);
+  left: var(--x);
+  width: 3px;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--repeat span,
+#jsu-wrapped .jsuw-stat-pattern--biggest span {
+  animation: jsuw-bubble-float 2.8s ease-in-out infinite;
+  animation-delay: var(--bubble-delay);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  height: var(--s);
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+}
+
+#jsu-wrapped .jsuw-stat-pattern--repeat span:nth-child(3n),
+#jsu-wrapped .jsuw-stat-pattern--biggest span:nth-child(3n) {
+  height: 44px;
+  width: 44px;
+}
+
+#jsu-wrapped .jsuw-stat-pattern--repeat span:nth-child(5n),
+#jsu-wrapped .jsuw-stat-pattern--biggest span:nth-child(5n) {
+  height: 20px;
+  width: 20px;
+}
+
+#jsu-wrapped .jsuw-badge {
+  align-self: flex-start;
+  background: #ffffff;
+  border-radius: 16px;
+  color: #111827;
+  font-size: 0.92rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1.18;
+  margin-top: auto;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 11px 13px;
+  transform: rotate(-2deg);
+}
+
+#jsu-wrapped .jsuw-movement-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: auto 0 18px;
+  padding: 0;
+}
+
+#jsu-wrapped .jsuw-movement-list li {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 18px;
+  display: grid;
+  gap: 2px;
+  padding: 13px 14px;
+}
+
+#jsu-wrapped .jsuw-theme-movement .jsuw-movement-list {
+  margin: 16px 0 0;
+}
+
+#jsu-wrapped .jsuw-theme-movement .jsuw-subtext {
+  margin-top: 12px;
+}
+
+#jsu-wrapped .jsuw-movement-list strong {
+  color: var(--jsuw-ink);
+  display: block;
+  font-size: 1.74rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.96;
+}
+
+#jsu-wrapped .jsuw-movement-list span {
+  color: var(--jsuw-ink-soft);
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 1.18;
+}
+
+#jsu-wrapped .jsuw-final-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+}
+
+#jsu-wrapped .jsuw-action-button,
+#jsu-wrapped .jsuw-nav-button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  min-height: 44px;
+  padding: 13px 17px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: none;
+}
+
+#jsu-wrapped .jsuw-action-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--jsuw-ink);
+}
+
+#jsu-wrapped .jsuw-action-button--primary {
+  background: #ffffff;
+  color: #111827;
+}
+
+#jsu-wrapped .jsuw-action-button:focus-visible,
+#jsu-wrapped .jsuw-nav-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.72);
+  outline-offset: 3px;
+}
+
+#jsu-wrapped .jsuw-action-status {
+  color: var(--jsuw-ink-soft);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0;
+  min-height: 1.1em;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-controls {
+  align-items: center;
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  left: 18px;
+  position: absolute;
+  right: 18px;
+  z-index: 5;
+}
+
+#jsu-wrapped .jsuw-nav-button {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--jsuw-ink);
+  flex: 0 0 auto;
+  min-width: 86px;
+}
+
+#jsu-wrapped .jsuw-nav-button--next {
+  background: #ffffff;
+  color: #111827;
+  min-width: 104px;
+}
+
+#jsu-wrapped .jsuw-nav-button:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+#jsu-wrapped .jsuw-stickers {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-sticker {
+  --jsuw-rotate: 0deg;
+  animation: jsuw-sticker-float 3.4s ease-in-out infinite;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.86);
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 1;
+  max-width: 128px;
+  overflow: hidden;
+  padding: 9px 11px;
+  position: absolute;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-sticker--one {
+  right: 20px;
+  top: 76px;
+  --jsuw-rotate: 8deg;
+}
+
+#jsu-wrapped .jsuw-sticker--two {
+  bottom: 132px;
+  right: 24px;
+  --jsuw-rotate: -7deg;
+  animation-delay: -1.1s;
+}
+
+#jsu-wrapped .jsuw-sticker--three {
+  bottom: 222px;
+  left: 20px;
+  --jsuw-rotate: 7deg;
+  animation-delay: -2s;
+}
+
+#jsu-wrapped .jsuw-theme-final .jsuw-sticker--two,
+#jsu-wrapped .jsuw-theme-final .jsuw-sticker--three {
+  display: none;
+}
+
+#jsu-wrapped .jsuw-theme-movement .jsuw-sticker {
+  display: none;
+}
+
+#jsu-wrapped .jsuw-doodle {
+  animation: jsuw-bubble-float 4s ease-in-out infinite;
+  border: 3px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  height: 44px;
+  position: absolute;
+  width: 44px;
+}
+
+#jsu-wrapped .jsuw-doodle--one {
+  right: 38px;
+  top: 188px;
+}
+
+#jsu-wrapped .jsuw-doodle--two {
+  border-left-color: transparent;
+  border-top-color: transparent;
+  bottom: 196px;
+  height: 58px;
+  left: 36px;
+  transform: rotate(-24deg);
+  width: 58px;
+  animation-delay: -1.6s;
+}
+
+#jsu-wrapped .jsuw-spark {
+  animation: jsuw-spin-pulse 2.4s ease-in-out infinite;
+  background: #ffffff;
+  clip-path: polygon(50% 0, 61% 36%, 100% 50%, 61% 64%, 50% 100%, 39% 64%, 0 50%, 39% 36%);
+  height: 28px;
+  opacity: 0.72;
+  position: absolute;
+  width: 28px;
+}
+
+#jsu-wrapped .jsuw-spark--one {
+  left: 38px;
+  top: 44%;
+}
+
+#jsu-wrapped .jsuw-spark--two {
+  bottom: 286px;
+  right: 50px;
+  transform: rotate(18deg);
+  animation-delay: -1.2s;
+}
+
+#jsu-wrapped .jsuw-confetti-piece {
+  animation: jsuw-confetti-drift var(--dur) cubic-bezier(0.22, 0.74, 0.28, 1) infinite;
+  animation-delay: var(--delay);
+  background: #ffb627;
+  border-radius: 2px;
+  height: 13px;
+  left: var(--x);
+  opacity: 0;
+  position: absolute;
+  top: var(--start-y);
+  width: 7px;
+}
+
+#jsu-wrapped .jsuw-confetti-piece--burst {
+  animation-name: jsuw-confetti-burst;
+  animation-iteration-count: 1;
+  animation-timing-function: cubic-bezier(0.18, 0.9, 0.22, 1);
+  border-radius: 999px;
+}
+
+#jsu-wrapped .jsuw-confetti-piece--drift {
+  animation-timing-function: cubic-bezier(0.38, 0, 0.24, 1);
+}
+
+#jsu-wrapped .jsuw-confetti-piece:nth-child(4n) {
+  background: #00c2ff;
+}
+
+#jsu-wrapped .jsuw-confetti-piece:nth-child(4n + 1) {
+  background: #ff2e93;
+}
+
+#jsu-wrapped .jsuw-confetti-piece:nth-child(4n + 2) {
+  background: #29d69a;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-sticker,
+#jsu-wrapped .jsuw-theme-reach .jsuw-sticker,
+#jsu-wrapped .jsuw-theme-new .jsuw-sticker,
+#jsu-wrapped .jsuw-theme-persona .jsuw-sticker {
+  background: rgba(21, 4, 40, 0.12);
+  border-color: rgba(21, 4, 40, 0.22);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-doodle,
+#jsu-wrapped .jsuw-theme-reach .jsuw-doodle,
+#jsu-wrapped .jsuw-theme-new .jsuw-doodle,
+#jsu-wrapped .jsuw-theme-persona .jsuw-doodle {
+  border-color: rgba(21, 4, 40, 0.24);
+}
+
+#jsu-wrapped .jsuw-theme-events .jsuw-spark,
+#jsu-wrapped .jsuw-theme-reach .jsuw-spark,
+#jsu-wrapped .jsuw-theme-new .jsuw-spark,
+#jsu-wrapped .jsuw-theme-persona .jsuw-spark {
+  background: #150428;
+  opacity: 0.42;
+}
+
+#jsu-wrapped .jsuw-loading,
+#jsu-wrapped .jsuw-error {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.2), transparent 28%),
+    linear-gradient(135deg, #1d4ed8 0%, #7c3aed 45%, #ff3b91 100%);
+  border-radius: var(--jsuw-radius);
+  box-shadow: var(--jsuw-card-shadow);
+  color: var(--jsuw-ink);
+  min-height: 300px;
+  padding: 30px;
+}
+
+#jsu-wrapped .jsuw-loading {
+  align-items: center;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 900;
+  justify-content: center;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-error .jsuw-headline {
+  font-size: 2rem;
+}
+
+#jsu-wrapped .jsuw-error .jsuw-subtext {
+  max-width: 42ch;
+}
+
+#jsu-wrapped .jsuw-shell--picker {
+  max-width: min(680px, calc(100vw - 32px));
+}
+
+#jsu-wrapped .jsuw-picker {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.24), transparent 28%),
+    radial-gradient(circle at 88% 20%, rgba(255, 182, 39, 0.28), transparent 22%),
+    linear-gradient(145deg, #150428 0%, #5b21b6 38%, #ff2e93 72%, #ffb627 100%);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 30px;
+  box-shadow: var(--jsuw-card-shadow);
+  color: #ffffff;
+  overflow: hidden;
+  padding: 30px;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-picker::before {
+  border: 2px dashed rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  content: "";
+  height: 180px;
+  position: absolute;
+  right: -62px;
+  top: -44px;
+  width: 180px;
+}
+
+#jsu-wrapped .jsuw-picker-topline {
+  color: #b7ff31;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  margin-bottom: 10px;
+  position: relative;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-title {
+  color: #ffffff;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(2.35rem, 9vw, 4.1rem);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.88;
+  margin: 0;
+  max-width: 9ch;
+  position: relative;
+  text-shadow: 5px 5px 0 rgba(21, 4, 40, 0.28);
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-subtext {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.32;
+  margin: 16px 0 22px;
+  position: relative;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-region-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -6px 0 20px;
+  max-height: 138px;
+  overflow: auto;
+  padding: 2px 2px 6px;
+  position: relative;
+  scrollbar-width: thin;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-region-pill {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  gap: 8px;
+  line-height: 1;
+  min-height: 38px;
+  padding: 8px 10px 8px 12px;
+  text-decoration: none;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+#jsu-wrapped .jsuw-region-pill span {
+  overflow-wrap: anywhere;
+}
+
+#jsu-wrapped .jsuw-region-pill em {
+  align-items: center;
+  background: rgba(21, 4, 40, 0.34);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.66rem;
+  font-style: normal;
+  justify-content: center;
+  min-width: 1.7em;
+  padding: 4px 6px;
+}
+
+#jsu-wrapped .jsuw-region-pill:hover,
+#jsu-wrapped .jsuw-region-pill:focus-visible {
+  background: rgba(255, 255, 255, 0.23);
+  border-color: rgba(255, 255, 255, 0.64);
+  transform: translateY(-1px);
+}
+
+#jsu-wrapped .jsuw-region-pill:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.78);
+  outline-offset: 2px;
+}
+
+#jsu-wrapped .jsuw-region-pill--active {
+  background: #ffb627;
+  border-color: #150428;
+  box-shadow: 3px 3px 0 rgba(21, 4, 40, 0.34);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-region-pill--active em {
+  background: #150428;
+  color: #ffb627;
+}
+
+#jsu-wrapped .jsuw-picker-list {
+  display: grid;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+#jsu-wrapped .jsuw-picker-region {
+  display: grid;
+  gap: 8px;
+}
+
+#jsu-wrapped .jsuw-picker-region h2 {
+  align-items: baseline;
+  color: #ffffff;
+  display: flex;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: 0.98rem;
+  font-weight: 1000;
+  justify-content: space-between;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+  text-shadow: 2px 2px 0 rgba(21, 4, 40, 0.24);
+}
+
+#jsu-wrapped .jsuw-picker-region h2 em {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-picker-region-list {
+  display: grid;
+  gap: 10px;
+}
+
+#jsu-wrapped .jsuw-picker-item {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid rgba(21, 4, 40, 0.88);
+  border-radius: 18px;
+  box-shadow: 5px 5px 0 rgba(21, 4, 40, 0.38);
+  color: #150428;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 78px;
+  padding: 12px 14px;
+  text-decoration: none;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+#jsu-wrapped .jsuw-picker-item:hover,
+#jsu-wrapped .jsuw-picker-item:focus-visible {
+  box-shadow: 7px 7px 0 rgba(21, 4, 40, 0.42);
+  transform: translate(-2px, -2px) rotate(-0.6deg);
+}
+
+#jsu-wrapped .jsuw-picker-item:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.78);
+  outline-offset: 3px;
+}
+
+#jsu-wrapped .jsuw-picker-logo {
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid rgba(21, 4, 40, 0.24);
+  border-radius: 12px;
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  overflow: hidden;
+  width: 42px;
+}
+
+#jsu-wrapped .jsuw-picker-brand--ncsy .jsuw-picker-logo {
+  background: #150428;
+  padding: 6px 7px;
+  width: 58px;
+}
+
+#jsu-wrapped .jsuw-picker-logo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-picker-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+#jsu-wrapped .jsuw-picker-copy strong {
+  color: #150428;
+  display: block;
+  font-size: 1.08rem;
+  font-weight: 1000;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-copy em,
+#jsu-wrapped .jsuw-picker-copy span {
+  color: rgba(21, 4, 40, 0.7);
+  display: block;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 850;
+  line-height: 1.18;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-arrow {
+  background: #150428;
+  border-radius: 999px;
+  color: #ffb627;
+  font-size: 0.74rem;
+  font-weight: 1000;
+  padding: 9px 12px;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-teen-test-link {
+  align-items: center;
+  background:
+    radial-gradient(circle at 12% 22%, rgba(255, 255, 255, 0.42) 0 9px, transparent 10px),
+    radial-gradient(circle at 88% 76%, rgba(183, 255, 49, 0.42) 0 14px, transparent 15px),
+    linear-gradient(135deg, #150428 0%, #6a2bff 46%, #ff2e93 100%);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 rgba(21, 4, 40, 0.28);
+  color: #ffffff;
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+  padding: 15px 18px;
+  position: relative;
+  text-decoration: none;
+}
+
+#jsu-wrapped .jsuw-teen-test-link::after {
+  background: #ffb627;
+  border: 2px solid #150428;
+  border-radius: 999px;
+  color: #150428;
+  content: "Test";
+  font-size: 0.67rem;
+  font-weight: 1000;
+  padding: 5px 9px;
+  position: absolute;
+  right: 12px;
+  text-transform: uppercase;
+  top: 12px;
+}
+
+#jsu-wrapped .jsuw-teen-test-link strong {
+  color: #ffffff;
+  font-family: var(--jsuw-font-display);
+  font-size: 1.24rem;
+  font-weight: 1000;
+  line-height: 1;
+  max-width: calc(100% - 58px);
+}
+
+#jsu-wrapped .jsuw-teen-test-link span {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.25;
+  max-width: calc(100% - 26px);
+}
+
+#jsu-wrapped .jsuw-picker-empty {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 850;
+  padding: 16px;
+}
+
+#jsu-wrapped .jsuw-sr-only {
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-story-header {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto 1fr auto;
+  left: 22px;
+  position: absolute;
+  right: 22px;
+  top: 30px;
+  z-index: 10;
+}
+
+#jsu-wrapped .jsuw-story-header .jsuw-brand-lockup {
+  margin: 0;
+}
+
+#jsu-wrapped .jsuw-card-count {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-story-tools {
+  align-items: center;
+  display: inline-flex;
+  gap: 5px;
+  justify-self: end;
+}
+
+#jsu-wrapped .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-autoplay-toggle {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 1;
+  min-height: 30px;
+  padding: 8px 10px;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-sound-toggle[aria-pressed="true"],
+#jsu-wrapped .jsuw-autoplay-toggle[aria-pressed="true"] {
+  background: #ffb627;
+  border-color: #150428;
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-story-theme-events .jsuw-card-count,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-card-count,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-card-count {
+  color: rgba(21, 4, 40, 0.74);
+}
+
+#jsu-wrapped .jsuw-story-theme-events .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-events .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-new .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-autoplay-toggle {
+  background: rgba(21, 4, 40, 0.09);
+  border-color: rgba(21, 4, 40, 0.22);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-tap-zones {
+  display: grid;
+  grid-template-columns: 35% 30% 35%;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 3;
+}
+
+#jsu-wrapped .jsuw-reference-main {
+  display: block;
+  font-family: var(--jsuw-font-body, ui-rounded, "Segoe UI", system-ui, sans-serif);
+  height: 100%;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-brand-lockup {
+  position: relative;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-top {
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  top: 88px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-eyebrow {
+  background: transparent;
+  border: 0;
+  color: currentColor;
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  margin: 0 0 10px;
+  opacity: 0.82;
+  padding: 0;
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-headline {
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(2.1rem, 9.8vw, 2.55rem);
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.92;
+  max-width: 10.5ch;
+  overflow-wrap: normal;
+  text-wrap: balance;
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-headline--compact {
+  font-size: clamp(1.88rem, 8.7vw, 2.25rem);
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-headline--dense {
+  font-size: clamp(1.5rem, 7.3vw, 1.92rem);
+  line-height: 0.98;
+}
+
+#jsu-wrapped .jsuw-reference-main .jsuw-subtext {
+  bottom: 66px;
+  color: currentColor;
+  font-size: 0.92rem;
+  font-weight: 800;
+  left: 28px;
+  line-height: 1.32;
+  margin: 0;
+  max-width: none;
+  opacity: 0.9;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-subtext--center {
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-stat-number--nowrap,
+#jsu-wrapped .jsuw-reference-stat,
+#jsu-wrapped .jsuw-donut-number,
+#jsu-wrapped .jsuw-ticket-number {
+  overflow-wrap: normal;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+#jsu-wrapped .jsuw-card {
+  padding: 0;
+}
+
+#jsu-wrapped .jsuw-card::before {
+  animation: none;
+  background: transparent;
+}
+
+#jsu-wrapped .jsuw-card::after {
+  display: none;
+}
+
+#jsu-wrapped .jsuw-reference-cover .jsuw-brand-lockup {
+  left: 26px;
+  position: absolute;
+  top: 58px;
+}
+
+#jsu-wrapped .jsuw-pennant {
+  background: #ffb627;
+  border: 2px solid #150428;
+  clip-path: polygon(0 0, 100% 0, 90% 50%, 100% 100%, 0 100%);
+  color: #150428;
+  font-size: 0.66rem;
+  font-weight: 1000;
+  left: 26px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  max-width: calc(100% - 52px);
+  overflow: hidden;
+  padding: 7px 20px 7px 10px;
+  position: absolute;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  top: 112px;
+  transform: rotate(-5deg);
+  white-space: nowrap;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-cover-title {
+  left: 26px;
+  position: absolute;
+  right: 26px;
+  top: 45%;
+  transform: translateY(-50%);
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-cover .jsuw-headline {
+  color: #fff;
+  font-size: clamp(2.45rem, 12vw, 4rem);
+  line-height: 0.88;
+  max-width: 100%;
+  overflow-wrap: normal;
+  text-shadow: 4px 4px 0 rgba(21, 4, 40, 0.24);
+  word-break: normal;
+}
+
+#jsu-wrapped .jsuw-reference-cover .jsuw-headline--compact,
+#jsu-wrapped .jsuw-reference-cover .jsuw-headline--dense {
+  font-size: clamp(1.56rem, 6.2vw, 2rem);
+  line-height: 0.94;
+  max-width: 100%;
+}
+
+#jsu-wrapped .jsuw-marker-line {
+  color: #ffb627;
+  font-family: "Comic Sans MS", "Segoe Print", cursive;
+  font-size: clamp(1.5rem, 8vw, 2rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+#jsu-wrapped .jsuw-cover-footer {
+  bottom: 96px;
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-cover-footer .jsuw-subtext {
+  bottom: auto;
+  left: auto;
+  margin-top: 6px;
+  position: static;
+  right: auto;
+}
+
+#jsu-wrapped .jsuw-big-number-wrap {
+  left: 0;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: 47%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+#jsu-wrapped .jsuw-reference-stat {
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-weight: 1000;
+  letter-spacing: -0.06em;
+  line-height: 0.78;
+}
+
+#jsu-wrapped .jsuw-reference-stat--events {
+  background: linear-gradient(180deg, #ff2e93 0%, #6a2bff 100%);
+  color: transparent;
+  font-size: clamp(10rem, 48vw, 16rem);
+  text-shadow: none;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+#jsu-wrapped .jsuw-reference-stat--events-compact {
+  font-size: 9.8rem;
+  letter-spacing: 0;
+}
+
+#jsu-wrapped .jsuw-reference-stat--events-dense {
+  font-size: 7.4rem;
+  letter-spacing: 0;
+}
+
+#jsu-wrapped .jsuw-event-grid {
+  bottom: 126px;
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(19, 1fr);
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-event-grid span {
+  animation: jsuw-pattern-pop 420ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: var(--delay);
+  aspect-ratio: 1;
+  background: #ff2e93;
+  border-radius: 3px;
+  opacity: 0.9;
+}
+
+#jsu-wrapped .jsuw-event-grid span:nth-child(5n + 2) {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-event-grid span:nth-child(5n + 3) {
+  background: #6a2bff;
+}
+
+#jsu-wrapped .jsuw-event-grid span:nth-child(5n + 4) {
+  background: #29d69a;
+}
+
+#jsu-wrapped .jsuw-event-grid span:nth-child(5n) {
+  background: #ff6b4a;
+}
+
+#jsu-wrapped .jsuw-reference-reach .jsuw-headline {
+  color: #fff;
+}
+
+#jsu-wrapped .jsuw-reference-reach .jsuw-headline br + * {
+  background: #150428;
+  border-radius: 10px;
+  color: #ffb627;
+}
+
+#jsu-wrapped .jsuw-dot-field {
+  align-content: start;
+  bottom: 182px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(14, 1fr);
+  left: 28px;
+  overflow: hidden;
+  position: absolute;
+  right: 28px;
+  top: 250px;
+  z-index: 3;
+}
+
+#jsu-wrapped .jsuw-dot-field span {
+  animation: jsuw-pattern-pop 340ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: var(--delay);
+  aspect-ratio: 1;
+  background: #150428;
+  border: 1.5px solid #150428;
+  border-radius: 999px;
+  min-width: 0;
+}
+
+#jsu-wrapped .jsuw-dot-field .jsuw-dot--new {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-dot-legend {
+  bottom: 132px;
+  color: #150428;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-dot-legend span {
+  align-items: center;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 900;
+  gap: 6px;
+}
+
+#jsu-wrapped .jsuw-dot-key {
+  border-radius: 999px;
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+}
+
+#jsu-wrapped .jsuw-dot-key--returning {
+  background: #150428;
+}
+
+#jsu-wrapped .jsuw-dot-key--new {
+  background: #ffb627;
+  border: 1.5px solid #150428;
+}
+
+#jsu-wrapped .jsuw-moment-center {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 47%;
+  transform: translateY(-50%);
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-stat--moments {
+  color: #fff;
+  font-size: clamp(5.4rem, 27vw, 8.2rem);
+  font-style: italic;
+  text-shadow: 0 6px 0 rgba(21, 4, 40, 0.25);
+}
+
+#jsu-wrapped .jsuw-marker-chip {
+  background: #ffb627;
+  border: 3px solid #150428;
+  border-radius: 12px;
+  color: #150428;
+  font-family: "Comic Sans MS", "Segoe Print", cursive;
+  font-size: clamp(1.25rem, 6vw, 2rem);
+  font-weight: 900;
+  margin-top: -4px;
+  padding: 4px 18px;
+  transform: rotate(-2deg);
+}
+
+#jsu-wrapped .jsuw-waveform {
+  align-items: center;
+  bottom: 150px;
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(64, minmax(0, 1fr));
+  height: 60px;
+  left: 28px;
+  overflow: hidden;
+  position: absolute;
+  right: 28px;
+}
+
+#jsu-wrapped .jsuw-waveform span {
+  animation: jsuw-wave 1.18s ease-in-out infinite;
+  animation-delay: calc(var(--delay) * 2);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 99px;
+  height: var(--h);
+  justify-self: center;
+  width: 2px;
+}
+
+#jsu-wrapped .jsuw-new-pass,
+#jsu-wrapped .jsuw-persona-card,
+#jsu-wrapped .jsuw-ticket,
+#jsu-wrapped .jsuw-share-poster {
+  box-shadow: 7px 7px 0 #150428;
+}
+
+#jsu-wrapped .jsuw-new-pass {
+  background: #fff;
+  border: 3px solid #150428;
+  border-radius: 24px;
+  left: 50%;
+  padding: 18px 22px;
+  position: absolute;
+  text-align: center;
+  top: 49%;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  width: min(310px, calc(100% - 48px));
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-new .jsuw-headline,
+#jsu-wrapped .jsuw-reference-biggest .jsuw-headline {
+  font-size: clamp(1.64rem, 7.2vw, 2rem);
+  line-height: 0.98;
+  max-width: 10ch;
+}
+
+#jsu-wrapped .jsuw-pass-kicker {
+  color: #6a2bff;
+  font-size: 0.64rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-reference-stat--new {
+  background: linear-gradient(180deg, #ff2e93, #6a2bff);
+  color: transparent;
+  font-size: clamp(4.9rem, 27vw, 8rem);
+  text-shadow: none;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+#jsu-wrapped .jsuw-new-grid {
+  bottom: 128px;
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(20, 1fr);
+  left: 28px;
+  position: absolute;
+  right: 28px;
+}
+
+#jsu-wrapped .jsuw-new-grid span {
+  animation: jsuw-pattern-pop 360ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: var(--delay);
+  aspect-ratio: 0.8;
+  background: #ff2e93;
+  border: 1px solid #150428;
+  border-radius: 50% 50% 30% 30%;
+}
+
+#jsu-wrapped .jsuw-new-grid span:nth-child(4n + 2) {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-new-grid span:nth-child(4n + 3) {
+  background: #6a2bff;
+}
+
+#jsu-wrapped .jsuw-new-grid span:nth-child(4n) {
+  background: #29d69a;
+}
+
+#jsu-wrapped .jsuw-donut {
+  height: 240px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-donut svg {
+  height: 100%;
+  overflow: visible;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-donut-track,
+#jsu-wrapped .jsuw-donut-fill {
+  fill: none;
+  stroke-width: 22;
+}
+
+#jsu-wrapped .jsuw-donut-track {
+  stroke: rgba(255, 255, 255, 0.13);
+}
+
+#jsu-wrapped .jsuw-donut-fill {
+  animation: jsuw-donut-draw 1.4s ease-out both;
+  stroke: #ffb627;
+  stroke-dasharray: var(--dash) var(--gap);
+  stroke-dashoffset: var(--dash);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 120px 120px;
+}
+
+#jsu-wrapped .jsuw-donut-center {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-donut-number {
+  color: #fff;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: 4.5rem;
+  font-weight: 1000;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+}
+
+#jsu-wrapped .jsuw-donut-center span {
+  color: #ffb627;
+  font-size: 0.62rem;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-mini-stat-row {
+  bottom: 126px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-mini-stat-row div {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+#jsu-wrapped .jsuw-mini-stat-row strong {
+  color: #29d69a;
+  display: block;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+#jsu-wrapped .jsuw-mini-stat-row span {
+  color: rgba(255, 255, 255, 0.78);
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-top: 3px;
+}
+
+#jsu-wrapped .jsuw-ticket {
+  background: linear-gradient(180deg, #ffb627 0%, #ff6b4a 100%);
+  border: 3px solid #150428;
+  border-radius: 20px;
+  color: #150428;
+  left: 50%;
+  padding: 18px 22px 22px;
+  position: absolute;
+  top: 52%;
+  transform: translate(-50%, -50%) rotate(-4deg);
+  width: min(320px, calc(100% - 48px));
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-ticket::before,
+#jsu-wrapped .jsuw-ticket::after {
+  background: #b721ff;
+  border-radius: 999px;
+  content: "";
+  height: 20px;
+  position: absolute;
+  top: 60%;
+  width: 20px;
+}
+
+#jsu-wrapped .jsuw-ticket::before {
+  left: -10px;
+}
+
+#jsu-wrapped .jsuw-ticket::after {
+  right: -10px;
+}
+
+#jsu-wrapped .jsuw-ticket-row,
+#jsu-wrapped .jsuw-ticket-stats {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+#jsu-wrapped .jsuw-ticket-row span,
+#jsu-wrapped .jsuw-ticket-stats span {
+  font-size: 0.62rem;
+  font-weight: 1000;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-ticket-row strong {
+  background: #150428;
+  border-radius: 5px;
+  color: #ffb627;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+}
+
+#jsu-wrapped .jsuw-ticket-title {
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: clamp(2rem, 10vw, 2.5rem);
+  font-style: italic;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
+  margin-top: 16px;
+}
+
+#jsu-wrapped .jsuw-ticket-divider {
+  border-top: 2px dashed #150428;
+  margin: 18px 0 10px;
+  opacity: 0.7;
+}
+
+#jsu-wrapped .jsuw-ticket-number,
+#jsu-wrapped .jsuw-ticket-stats strong {
+  color: #150428;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: 2.8rem;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+#jsu-wrapped .jsuw-ticket-stats > div:last-child {
+  text-align: right;
+}
+
+#jsu-wrapped .jsuw-persona-card {
+  background: #150428;
+  border: 4px solid #150428;
+  border-radius: 28px;
+  color: #ffb627;
+  left: 50%;
+  padding: 20px 24px 22px;
+  position: absolute;
+  text-align: center;
+  top: 56%;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  width: min(320px, calc(100% - 48px));
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-reference-persona .jsuw-reference-top {
+  top: 86px;
+}
+
+#jsu-wrapped .jsuw-reference-persona .jsuw-headline {
+  font-size: clamp(1.52rem, 7.2vw, 1.92rem);
+  line-height: 0.96;
+  max-width: 9.6ch;
+}
+
+#jsu-wrapped .jsuw-smile-face {
+  background: #ffb627;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  height: 78px;
+  margin: 0 auto 8px;
+  position: relative;
+  width: 78px;
+}
+
+#jsu-wrapped .jsuw-smile-face::before,
+#jsu-wrapped .jsuw-smile-face::after {
+  background: #150428;
+  border-radius: 999px;
+  content: "";
+  height: 7px;
+  position: absolute;
+  top: 32px;
+  width: 7px;
+}
+
+#jsu-wrapped .jsuw-smile-face::before {
+  left: 25px;
+}
+
+#jsu-wrapped .jsuw-smile-face::after {
+  right: 25px;
+}
+
+#jsu-wrapped .jsuw-smile-face span {
+  border-bottom: 4px solid #150428;
+  border-radius: 0 0 999px 999px;
+  bottom: 23px;
+  height: 18px;
+  left: 22px;
+  position: absolute;
+  width: 34px;
+}
+
+#jsu-wrapped .jsuw-persona-title {
+  color: #fff;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: clamp(2rem, 9vw, 2.4rem);
+  font-style: italic;
+  font-weight: 1000;
+  line-height: 0.95;
+  margin-top: 4px;
+}
+
+#jsu-wrapped .jsuw-persona-card p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.28;
+  margin: 10px 0 0;
+}
+
+#jsu-wrapped .jsuw-tag-cloud {
+  bottom: 118px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  left: 28px;
+  position: absolute;
+  right: 28px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-tag-cloud span {
+  background: #fff;
+  border: 2px solid #150428;
+  border-radius: 999px;
+  color: #150428;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 5px 10px;
+}
+
+#jsu-wrapped .jsuw-orbit {
+  height: 280px;
+  left: 50%;
+  position: absolute;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  z-index: 3;
+}
+
+#jsu-wrapped .jsuw-orbit-ring {
+  border: 2px dashed rgba(255, 182, 39, 0.48);
+  border-radius: 999px;
+  inset: 12px;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-orbit-ring--outer {
+  border-color: rgba(255, 46, 147, 0.45);
+  inset: 0;
+}
+
+#jsu-wrapped .jsuw-orbit-core {
+  align-items: center;
+  background: #29d69a;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  color: #150428;
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  inset: 96px;
+  justify-content: center;
+  line-height: 1;
+  padding: 8px;
+  position: absolute;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-movement-list--reference {
+  bottom: 124px;
+  margin: 0;
+  position: absolute;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-movement-list--reference li {
+  background: rgba(255, 182, 39, 0.16);
+  border-color: rgba(255, 182, 39, 0.45);
+  padding: 10px 12px;
+}
+
+#jsu-wrapped .jsuw-movement-list--reference li:nth-child(2n) {
+  background: rgba(255, 46, 147, 0.16);
+  border-color: rgba(255, 46, 147, 0.45);
+}
+
+#jsu-wrapped .jsuw-share-poster {
+  background: #150428;
+  border: 3px solid #fff;
+  border-radius: 28px;
+  bottom: 150px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  left: 26px;
+  padding: 20px 22px;
+  position: absolute;
+  right: 26px;
+  top: 76px;
+  z-index: 4;
+}
+
+#jsu-wrapped .jsuw-share-poster .jsuw-brand-lockup {
+  margin-bottom: 14px;
+}
+
+#jsu-wrapped .jsuw-share-poster .jsuw-headline {
+  font-size: clamp(2.5rem, 11vw, 3.25rem);
+  line-height: 0.9;
+  max-width: 8ch;
+}
+
+#jsu-wrapped .jsuw-share-copy {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.24;
+  margin: 10px 0 0;
+}
+
+#jsu-wrapped .jsuw-share-stats {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+#jsu-wrapped .jsuw-share-stats div {
+  align-items: baseline;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 5px;
+}
+
+#jsu-wrapped .jsuw-share-stats span {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-share-stats strong {
+  color: #ffb627;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-share-stats div:nth-child(2n) strong {
+  color: #29d69a;
+}
+
+#jsu-wrapped .jsuw-share-energy {
+  background: linear-gradient(90deg, #ffb627, #ff2e93);
+  border-radius: 12px;
+  color: #150428;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 1000;
+  margin-top: auto;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-share-school {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-reference-final .jsuw-final-actions {
+  bottom: 74px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  left: 24px;
+  position: absolute;
+  right: 24px;
+  z-index: 8;
+}
+
+#jsu-wrapped .jsuw-reference-final .jsuw-action-button {
+  font-size: 0.82rem;
+  min-height: 48px;
+  padding: 12px 10px;
+}
+
+#jsu-wrapped .jsuw-reference-final .jsuw-action-button:not(.jsuw-action-button--primary),
+#jsu-wrapped .jsuw-story-theme-final .jsuw-nav-button:not(.jsuw-nav-button--next) {
+  background: rgba(255, 255, 255, 0.42);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-reference-final .jsuw-action-status {
+  font-size: 0.72rem;
+  grid-column: 1 / -1;
+  min-height: 0.8em;
+}
+
+#jsu-wrapped .jsuw-theme-teen-cover {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(183, 255, 49, 0.42) 0 44px, transparent 45px),
+    radial-gradient(circle at 85% 8%, rgba(255, 182, 39, 0.5) 0 58px, transparent 59px),
+    linear-gradient(150deg, #071b7a 0%, #0c48c7 42%, #00c2ff 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-attendance {
+  background:
+    radial-gradient(circle at 80% 22%, rgba(255, 255, 255, 0.46) 0 48px, transparent 49px),
+    linear-gradient(160deg, #ffb627 0%, #ff6b4a 54%, #ff2e93 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-teen-ticket {
+  background:
+    linear-gradient(90deg, rgba(21, 4, 40, 0.14) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(21, 4, 40, 0.14) 1px, transparent 1px),
+    linear-gradient(160deg, #b7ff31 0%, #29d69a 48%, #00c2ff 100%);
+  background-size: auto, 22px 22px, auto;
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-teen-streak {
+  background:
+    radial-gradient(circle at 76% 27%, rgba(255, 182, 39, 0.56) 0 58px, transparent 59px),
+    linear-gradient(180deg, #150428 0%, #4b1272 52%, #ff2e93 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-vibe {
+  background:
+    radial-gradient(circle at 16% 80%, rgba(255, 255, 255, 0.34) 0 72px, transparent 73px),
+    linear-gradient(145deg, #6a2bff 0%, #ff2e93 56%, #ffb627 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-connector {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0, 194, 255, 0.26) 0 120px, transparent 121px),
+    linear-gradient(180deg, #071b7a 0%, #150428 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-depth {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 46, 147, 0.36) 0 72px, transparent 73px),
+    linear-gradient(155deg, #fff4b7 0%, #ffb627 50%, #ff6b4a 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-theme-teen-chapter {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 182, 39, 0.5) 0 46px, transparent 47px),
+    linear-gradient(155deg, #00c2ff 0%, #6a2bff 52%, #150428 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-movement {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(183, 255, 49, 0.18) 0 128px, transparent 129px),
+    linear-gradient(180deg, #150428 0%, #27105a 60%, #071b7a 100%);
+}
+
+#jsu-wrapped .jsuw-theme-teen-share {
+  background:
+    linear-gradient(155deg, #6a2bff 0%, #ff2e93 54%, #ffb627 100%);
+}
+
+#jsu-wrapped .jsuw-story-theme-teen-attendance .jsuw-progress-segment,
+#jsu-wrapped .jsuw-story-theme-teen-ticket .jsuw-progress-segment,
+#jsu-wrapped .jsuw-story-theme-teen-depth .jsuw-progress-segment {
+  background: rgba(21, 4, 40, 0.2);
+}
+
+#jsu-wrapped .jsuw-story-theme-teen-attendance .jsuw-progress-segment span,
+#jsu-wrapped .jsuw-story-theme-teen-ticket .jsuw-progress-segment span,
+#jsu-wrapped .jsuw-story-theme-teen-depth .jsuw-progress-segment span {
+  background: #150428;
+}
+
+#jsu-wrapped .jsuw-story-theme-teen-attendance .jsuw-card-count,
+#jsu-wrapped .jsuw-story-theme-teen-ticket .jsuw-card-count,
+#jsu-wrapped .jsuw-story-theme-teen-depth .jsuw-card-count {
+  color: rgba(21, 4, 40, 0.72);
+}
+
+#jsu-wrapped .jsuw-story-theme-teen-attendance .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-teen-attendance .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-teen-ticket .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-teen-ticket .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-teen-depth .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-teen-depth .jsuw-autoplay-toggle {
+  background: rgba(21, 4, 40, 0.16);
+  border-color: rgba(21, 4, 40, 0.22);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-reference-teen-cover,
+#jsu-wrapped .jsuw-reference-teen-attendance,
+#jsu-wrapped .jsuw-reference-teen-ticket,
+#jsu-wrapped .jsuw-reference-teen-streak,
+#jsu-wrapped .jsuw-reference-teen-vibe,
+#jsu-wrapped .jsuw-reference-teen-connector,
+#jsu-wrapped .jsuw-reference-teen-depth,
+#jsu-wrapped .jsuw-reference-teen-chapter,
+#jsu-wrapped .jsuw-reference-teen-movement,
+#jsu-wrapped .jsuw-reference-teen-share {
+  overflow: hidden;
+}
+
+#jsu-wrapped .jsuw-teen-scene {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  inset: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 82px 26px 86px;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-teen-scene::before,
+#jsu-wrapped .jsuw-teen-scene::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+#jsu-wrapped .jsuw-teen-scene::before {
+  background:
+    radial-gradient(circle, currentColor 0 4px, transparent 5px),
+    radial-gradient(circle, currentColor 0 3px, transparent 4px);
+  background-position: 0 0, 18px 28px;
+  background-size: 48px 48px, 54px 54px;
+  inset: 0;
+  opacity: 0.12;
+}
+
+#jsu-wrapped .jsuw-teen-scene::after {
+  border: 3px dashed rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  height: 220px;
+  right: -86px;
+  top: 118px;
+  transform: rotate(18deg);
+  width: 220px;
+}
+
+#jsu-wrapped .jsuw-teen-scene > * {
+  position: relative;
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-teen-scene .jsuw-brand-lockup {
+  margin-bottom: 0;
+}
+
+#jsu-wrapped .jsuw-teen-scene .jsuw-eyebrow {
+  background: transparent;
+  border: 0;
+  color: currentColor;
+  font-size: 0.66rem;
+  font-weight: 1000;
+  letter-spacing: 0.13em;
+  margin: 0;
+  opacity: 0.78;
+  padding: 0;
+}
+
+#jsu-wrapped .jsuw-teen-proof {
+  align-self: flex-start;
+  background: #ffb627;
+  border: 2px solid #150428;
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 rgba(21, 4, 40, 0.28);
+  color: #150428;
+  font-size: 0.62rem;
+  font-weight: 1000;
+  line-height: 1;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-title {
+  color: currentColor;
+  font-family: var(--jsuw-font-display);
+  font-size: 2.42rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.94;
+  margin: 4px 0 0;
+  max-width: 10ch;
+  overflow-wrap: anywhere;
+  text-shadow: 3px 3px 0 rgba(21, 4, 40, 0.22);
+}
+
+#jsu-wrapped .jsuw-theme-teen-attendance .jsuw-teen-title,
+#jsu-wrapped .jsuw-theme-teen-ticket .jsuw-teen-title,
+#jsu-wrapped .jsuw-theme-teen-depth .jsuw-teen-title {
+  text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.44);
+}
+
+#jsu-wrapped .jsuw-teen-title span {
+  color: #ffb627;
+  display: inline;
+  text-shadow: 3px 3px 0 rgba(21, 4, 40, 0.32);
+}
+
+#jsu-wrapped .jsuw-theme-teen-depth .jsuw-teen-title span {
+  color: #6a2bff;
+}
+
+#jsu-wrapped .jsuw-teen-title--cover {
+  font-size: 3.12rem;
+  line-height: 0.9;
+  max-width: 8.5ch;
+}
+
+#jsu-wrapped .jsuw-teen-cover-scene p,
+#jsu-wrapped .jsuw-teen-copy {
+  color: currentColor;
+  font-size: 0.95rem;
+  font-weight: 850;
+  line-height: 1.28;
+  margin: auto 0 0;
+  max-width: 31ch;
+  opacity: 0.9;
+}
+
+#jsu-wrapped .jsuw-teen-marker {
+  align-self: flex-start;
+  background: #ffffff;
+  border: 3px solid #150428;
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 rgba(21, 4, 40, 0.38);
+  color: #150428;
+  font-family: var(--jsuw-font-marker);
+  font-size: 1.72rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-top: 8px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 8px 13px 10px;
+  transform: rotate(-4deg);
+}
+
+#jsu-wrapped .jsuw-teen-big-number {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: auto 0 2px;
+  min-height: 150px;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-reference-stat--teen {
+  color: currentColor;
+  display: inline-block;
+  font-size: 8.8rem;
+  letter-spacing: 0;
+  line-height: 0.78;
+  text-shadow: 6px 6px 0 rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-theme-teen-streak .jsuw-reference-stat--teen,
+#jsu-wrapped .jsuw-theme-teen-connector .jsuw-reference-stat--teen,
+#jsu-wrapped .jsuw-theme-teen-movement .jsuw-reference-stat--teen {
+  text-shadow: 6px 6px 0 rgba(21, 4, 40, 0.34);
+}
+
+#jsu-wrapped .jsuw-teen-bars {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(9, 1fr);
+  margin: 0 0 8px;
+}
+
+#jsu-wrapped .jsuw-teen-bars span {
+  animation: jsuw-pattern-pop 360ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: calc(var(--i) * 26ms);
+  aspect-ratio: 1;
+  background: #150428;
+  border-radius: 5px;
+  box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+#jsu-wrapped .jsuw-teen-bars span:nth-child(3n + 2) {
+  background: #ffffff;
+}
+
+#jsu-wrapped .jsuw-teen-bars span:nth-child(3n) {
+  background: #b7ff31;
+}
+
+#jsu-wrapped .jsuw-teen-ticket {
+  background: #fff4b7;
+  border: 3px solid #150428;
+  border-radius: 20px;
+  box-shadow: 7px 7px 0 rgba(21, 4, 40, 0.28);
+  color: #150428;
+  margin: auto 0 8px;
+  padding: 18px 18px 16px;
+  position: relative;
+  transform: rotate(-2deg);
+}
+
+#jsu-wrapped .jsuw-teen-ticket::before,
+#jsu-wrapped .jsuw-teen-ticket::after {
+  background: #29d69a;
+  border: 3px solid #150428;
+  border-radius: 50%;
+  content: "";
+  height: 24px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+}
+
+#jsu-wrapped .jsuw-teen-ticket::before {
+  left: -15px;
+}
+
+#jsu-wrapped .jsuw-teen-ticket::after {
+  right: -15px;
+}
+
+#jsu-wrapped .jsuw-teen-ticket span,
+#jsu-wrapped .jsuw-teen-ticket dt {
+  color: rgba(21, 4, 40, 0.68);
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-ticket strong {
+  display: block;
+  font-family: var(--jsuw-font-display);
+  font-size: 2.05rem;
+  font-weight: 1000;
+  line-height: 0.95;
+  margin: 8px 0 14px;
+  overflow-wrap: anywhere;
+}
+
+#jsu-wrapped .jsuw-teen-ticket dl {
+  border-top: 2px dashed rgba(21, 4, 40, 0.32);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+  padding-top: 12px;
+}
+
+#jsu-wrapped .jsuw-teen-ticket dd {
+  font-size: 0.84rem;
+  font-weight: 950;
+  line-height: 1.12;
+  margin: 2px 0 0;
+}
+
+#jsu-wrapped .jsuw-teen-stamp {
+  align-self: flex-end;
+  background: #ff2e93;
+  border: 3px solid #150428;
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 rgba(21, 4, 40, 0.28);
+  color: #ffffff;
+  font-family: var(--jsuw-font-marker);
+  font-size: 1.42rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 9px 12px;
+  transform: rotate(8deg);
+}
+
+#jsu-wrapped .jsuw-teen-flame {
+  height: 118px;
+  margin: 4px auto 0;
+  position: relative;
+  width: 94px;
+}
+
+#jsu-wrapped .jsuw-teen-flame::before,
+#jsu-wrapped .jsuw-teen-flame::after,
+#jsu-wrapped .jsuw-teen-flame span {
+  border-radius: 70% 30% 62% 38%;
+  bottom: 0;
+  content: "";
+  position: absolute;
+  transform: rotate(45deg);
+}
+
+#jsu-wrapped .jsuw-teen-flame::before {
+  background: linear-gradient(180deg, #ffb627, #ff2e93);
+  height: 112px;
+  left: 18px;
+  width: 68px;
+}
+
+#jsu-wrapped .jsuw-teen-flame::after {
+  background: linear-gradient(180deg, #fff4b7, #ffb627);
+  height: 68px;
+  left: 30px;
+  width: 42px;
+}
+
+#jsu-wrapped .jsuw-teen-flame span {
+  background: #ffffff;
+  height: 38px;
+  left: 42px;
+  opacity: 0.45;
+  width: 24px;
+}
+
+#jsu-wrapped .jsuw-teen-streak-number {
+  margin: -18px 0 4px;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-teen-check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+#jsu-wrapped .jsuw-teen-check-row span {
+  align-items: center;
+  animation: jsuw-pop-in 360ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  background: #b7ff31;
+  border: 2px solid #150428;
+  border-radius: 999px;
+  color: #150428;
+  display: inline-flex;
+  font-size: 0;
+  font-weight: 1000;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+#jsu-wrapped .jsuw-teen-check-row span::before {
+  border-bottom: 3px solid #150428;
+  border-right: 3px solid #150428;
+  content: "";
+  display: block;
+  height: 13px;
+  margin-top: -2px;
+  transform: rotate(42deg);
+  width: 7px;
+}
+
+#jsu-wrapped .jsuw-teen-sticker-card {
+  background: #ffffff;
+  border: 3px solid #150428;
+  border-radius: 22px;
+  box-shadow: 8px 8px 0 rgba(21, 4, 40, 0.34);
+  color: #150428;
+  margin: auto 0 6px;
+  padding: 18px;
+  transform: rotate(2deg);
+}
+
+#jsu-wrapped .jsuw-teen-sticker-card em {
+  color: #6a2bff;
+  display: block;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-sticker-card strong {
+  display: block;
+  font-family: var(--jsuw-font-display);
+  font-size: 2.05rem;
+  font-weight: 1000;
+  line-height: 0.95;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+#jsu-wrapped .jsuw-teen-icon-row {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#jsu-wrapped .jsuw-teen-icon-row span {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #150428;
+  border-radius: 999px;
+  color: #150428;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  line-height: 1;
+  overflow: hidden;
+  padding: 9px 6px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-teen-network {
+  height: 178px;
+  margin: auto 0 4px;
+  position: relative;
+}
+
+#jsu-wrapped .jsuw-teen-network::before,
+#jsu-wrapped .jsuw-teen-network::after {
+  border: 3px solid rgba(255, 255, 255, 0.24);
+  border-radius: 50%;
+  content: "";
+  inset: 18px 46px;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-teen-network::after {
+  inset: 44px 76px;
+}
+
+#jsu-wrapped .jsuw-teen-node,
+#jsu-wrapped .jsuw-teen-network > span:not(.jsuw-teen-node) {
+  align-items: center;
+  background: #ffb627;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  color: #150428;
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 1000;
+  height: 46px;
+  justify-content: center;
+  position: absolute;
+  width: 46px;
+  z-index: 2;
+}
+
+#jsu-wrapped .jsuw-teen-node--center {
+  background: #ffffff;
+  border-color: #b7ff31;
+  height: 70px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+}
+
+#jsu-wrapped .jsuw-teen-network > span:nth-child(2) {
+  left: 8%;
+  top: 14%;
+}
+
+#jsu-wrapped .jsuw-teen-network > span:nth-child(3) {
+  right: 10%;
+  top: 8%;
+}
+
+#jsu-wrapped .jsuw-teen-network > span:nth-child(4) {
+  left: 16%;
+  bottom: 10%;
+}
+
+#jsu-wrapped .jsuw-teen-network > span:nth-child(5) {
+  right: 14%;
+  bottom: 14%;
+}
+
+#jsu-wrapped .jsuw-teen-network > span:nth-child(6) {
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+}
+
+#jsu-wrapped .jsuw-teen-mini-stats,
+#jsu-wrapped .jsuw-teen-split-stats,
+#jsu-wrapped .jsuw-teen-stat-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+}
+
+#jsu-wrapped .jsuw-teen-mini-stats div,
+#jsu-wrapped .jsuw-teen-split-stats div,
+#jsu-wrapped .jsuw-teen-stat-grid div {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(21, 4, 40, 0.84);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 rgba(21, 4, 40, 0.22);
+  color: #150428;
+  min-width: 0;
+  padding: 12px;
+}
+
+#jsu-wrapped .jsuw-teen-mini-stats strong,
+#jsu-wrapped .jsuw-teen-split-stats strong,
+#jsu-wrapped .jsuw-teen-stat-grid strong {
+  color: #6a2bff;
+  display: block;
+  font-family: var(--jsuw-font-display);
+  font-size: 2rem;
+  font-weight: 1000;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-teen-mini-stats span,
+#jsu-wrapped .jsuw-teen-split-stats span,
+#jsu-wrapped .jsuw-teen-stat-grid span,
+#jsu-wrapped .jsuw-teen-split-stats em {
+  color: rgba(21, 4, 40, 0.72);
+  display: block;
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-split-stats {
+  margin: auto 0 6px;
+}
+
+#jsu-wrapped .jsuw-teen-chapter-scene .jsuw-teen-title {
+  max-width: 9.5ch;
+}
+
+#jsu-wrapped .jsuw-teen-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: auto 0 4px;
+}
+
+#jsu-wrapped .jsuw-teen-stat-grid div:nth-child(2n) strong {
+  color: #ff2e93;
+}
+
+#jsu-wrapped .jsuw-teen-orbit {
+  align-items: center;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  height: 160px;
+  justify-content: center;
+  margin: auto auto 4px;
+  position: relative;
+  width: 160px;
+}
+
+#jsu-wrapped .jsuw-teen-orbit::before,
+#jsu-wrapped .jsuw-teen-orbit::after {
+  border: 2px dashed rgba(183, 255, 49, 0.36);
+  border-radius: 50%;
+  content: "";
+  inset: -24px;
+  position: absolute;
+}
+
+#jsu-wrapped .jsuw-teen-orbit::after {
+  inset: -48px;
+}
+
+#jsu-wrapped .jsuw-teen-orbit span {
+  align-items: center;
+  background: #ffffff;
+  border: 3px solid #b7ff31;
+  border-radius: 50%;
+  color: #150428;
+  display: inline-flex;
+  font-weight: 1000;
+  height: 72px;
+  justify-content: center;
+  text-transform: uppercase;
+  width: 72px;
+}
+
+#jsu-wrapped .jsuw-teen-movement-stats {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+#jsu-wrapped .jsuw-teen-movement-stats li {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto 1fr;
+  min-width: 0;
+  padding: 9px 11px;
+}
+
+#jsu-wrapped .jsuw-teen-movement-stats strong {
+  color: #ffb627;
+  font-family: var(--jsuw-font-display);
+  font-size: 1.55rem;
+  font-weight: 1000;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-teen-movement-stats span {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene {
+  padding-bottom: 136px;
+}
+
+#jsu-wrapped .jsuw-teen-share-poster {
+  background: rgba(21, 4, 40, 0.84);
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  border-radius: 24px;
+  box-shadow: 8px 8px 0 rgba(21, 4, 40, 0.28);
+  color: #ffffff;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px;
+}
+
+#jsu-wrapped .jsuw-teen-share-poster h2 {
+  color: #ffffff;
+  font-family: var(--jsuw-font-display);
+  font-size: 2.82rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 0.88;
+  margin: 8px 0 0;
+  max-width: 8ch;
+  overflow-wrap: anywhere;
+  text-shadow: 3px 3px 0 rgba(255, 46, 147, 0.38);
+}
+
+#jsu-wrapped .jsuw-teen-share-poster p {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.24;
+  margin: 10px 0 0;
+}
+
+#jsu-wrapped .jsuw-teen-share-stats {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+#jsu-wrapped .jsuw-teen-share-stats div {
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.22);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-width: 0;
+  padding-bottom: 6px;
+}
+
+#jsu-wrapped .jsuw-teen-share-stats span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-share-stats strong {
+  color: #ffb627;
+  font-family: var(--jsuw-font-display);
+  font-size: 1.52rem;
+  font-weight: 1000;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-teen-share-persona {
+  background: linear-gradient(90deg, #b7ff31, #ffb627);
+  border-radius: 13px;
+  color: #150428;
+  font-family: var(--jsuw-font-display);
+  font-size: 1rem;
+  font-weight: 1000;
+  line-height: 1;
+  margin-top: auto;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-teen-share-poster footer {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  margin-top: 8px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene .jsuw-final-actions {
+  bottom: 72px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
+  left: 24px;
+  position: absolute;
+  right: 24px;
+  z-index: 8;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene .jsuw-action-button {
+  font-size: 0.82rem;
+  min-height: 48px;
+  padding: 12px 10px;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene .jsuw-action-button:not(.jsuw-action-button--primary) {
+  background: rgba(255, 255, 255, 0.42);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene .jsuw-action-status {
+  font-size: 0.72rem;
+  grid-column: 1 / -1;
+  min-height: 0.8em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #jsu-wrapped *,
+  #jsu-wrapped *::before,
+  #jsu-wrapped *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@media (max-width: 430px) {
+  #jsu-wrapped {
+    padding: 10px;
+  }
+
+  #jsu-wrapped .jsuw-sound-toggle,
+  #jsu-wrapped .jsuw-autoplay-toggle {
+    font-size: 0.6rem;
+    min-height: 28px;
+    padding: 7px 8px;
+  }
+
+  #jsu-wrapped .jsuw-picker {
+    border-radius: 26px;
+    padding: 24px 18px;
+  }
+
+  #jsu-wrapped .jsuw-region-selector {
+    gap: 7px;
+    margin-bottom: 16px;
+    max-height: 116px;
+  }
+
+  #jsu-wrapped .jsuw-region-pill {
+    font-size: 0.68rem;
+    min-height: 34px;
+    padding: 7px 9px 7px 10px;
+  }
+
+  #jsu-wrapped .jsuw-picker-item {
+    gap: 10px;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  #jsu-wrapped .jsuw-picker-arrow {
+    grid-column: 2;
+    justify-self: start;
+    padding: 8px 11px;
+  }
+
+  #jsu-wrapped .jsuw-teen-test-link {
+    margin-top: 14px;
+    padding: 14px 15px;
+  }
+
+  #jsu-wrapped .jsuw-teen-test-link strong {
+    font-size: 1.08rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-test-link span {
+    font-size: 0.72rem;
+  }
+
+  #jsu-wrapped .jsuw-card {
+    padding: 42px 20px 88px;
+  }
+
+  #jsu-wrapped .jsuw-type-stat .jsuw-card-main {
+    gap: 8px;
+    grid-template-rows: auto auto auto minmax(206px, 1fr) auto;
+  }
+
+  #jsu-wrapped .jsuw-headline {
+    font-size: 2.08rem;
+    line-height: 0.98;
+  }
+
+  #jsu-wrapped .jsuw-headline--compact {
+    font-size: 1.82rem;
+    line-height: 1.02;
+  }
+
+  #jsu-wrapped .jsuw-headline--dense {
+    font-size: 1.56rem;
+    line-height: 1.05;
+  }
+
+  #jsu-wrapped .jsuw-stat-number {
+    font-size: 5.25rem;
+  }
+
+  #jsu-wrapped .jsuw-stat-number--compact {
+    font-size: 4.15rem;
+  }
+
+  #jsu-wrapped .jsuw-subtext {
+    font-size: 0.96rem;
+  }
+
+  #jsu-wrapped .jsuw-type-stat .jsuw-subtext {
+    font-size: 0.88rem;
+    line-height: 1.22;
+  }
+
+  #jsu-wrapped .jsuw-type-stat .jsuw-stat-lockup {
+    min-height: 206px;
+  }
+
+  #jsu-wrapped .jsuw-sticker {
+    font-size: 0.68rem;
+    max-width: 112px;
+  }
+
+  #jsu-wrapped .jsuw-controls {
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+  }
+
+  #jsu-wrapped .jsuw-nav-button {
+    min-width: 78px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  #jsu-wrapped .jsuw-theme-movement .jsuw-headline {
+    font-size: 1.88rem;
+  }
+
+  #jsu-wrapped .jsuw-theme-movement .jsuw-movement-list {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  #jsu-wrapped .jsuw-theme-movement .jsuw-movement-list li {
+    padding: 10px 12px;
+  }
+
+  #jsu-wrapped .jsuw-theme-movement .jsuw-movement-list strong {
+    font-size: 1.48rem;
+  }
+
+  #jsu-wrapped .jsuw-theme-movement .jsuw-movement-list span {
+    font-size: 0.82rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-scene {
+    padding: 78px 22px 82px;
+  }
+
+  #jsu-wrapped .jsuw-teen-proof {
+    font-size: 0.58rem;
+    padding: 6px 9px;
+  }
+
+  #jsu-wrapped .jsuw-teen-title {
+    font-size: 2.14rem;
+    max-width: 10.5ch;
+  }
+
+  #jsu-wrapped .jsuw-teen-title--cover {
+    font-size: 2.76rem;
+    max-width: 8.5ch;
+  }
+
+  #jsu-wrapped .jsuw-teen-cover-scene p,
+  #jsu-wrapped .jsuw-teen-copy {
+    font-size: 0.86rem;
+    line-height: 1.22;
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--teen {
+    font-size: 7.1rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-big-number {
+    min-height: 126px;
+  }
+
+  #jsu-wrapped .jsuw-teen-ticket {
+    padding: 16px;
+  }
+
+  #jsu-wrapped .jsuw-teen-ticket strong,
+  #jsu-wrapped .jsuw-teen-sticker-card strong {
+    font-size: 1.72rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-stamp {
+    font-size: 1.22rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-flame {
+    height: 96px;
+    width: 80px;
+  }
+
+  #jsu-wrapped .jsuw-teen-flame::before {
+    height: 94px;
+    left: 16px;
+    width: 58px;
+  }
+
+  #jsu-wrapped .jsuw-teen-flame::after {
+    height: 58px;
+    left: 26px;
+    width: 36px;
+  }
+
+  #jsu-wrapped .jsuw-teen-network {
+    height: 148px;
+  }
+
+  #jsu-wrapped .jsuw-teen-node,
+  #jsu-wrapped .jsuw-teen-network > span:not(.jsuw-teen-node) {
+    height: 40px;
+    width: 40px;
+  }
+
+  #jsu-wrapped .jsuw-teen-node--center {
+    height: 62px;
+    width: 62px;
+  }
+
+  #jsu-wrapped .jsuw-teen-mini-stats strong,
+  #jsu-wrapped .jsuw-teen-split-stats strong,
+  #jsu-wrapped .jsuw-teen-stat-grid strong {
+    font-size: 1.66rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-orbit {
+    height: 138px;
+    width: 138px;
+  }
+
+  #jsu-wrapped .jsuw-teen-orbit span {
+    height: 62px;
+    width: 62px;
+  }
+
+  #jsu-wrapped .jsuw-teen-movement-stats strong {
+    font-size: 1.34rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-poster {
+    border-radius: 22px;
+    padding: 16px;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-poster h2 {
+    font-size: 2.34rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-stats strong {
+    font-size: 1.3rem;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-scene .jsuw-final-actions {
+    bottom: 70px;
+    left: 22px;
+    right: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  #jsu-wrapped .jsuw-card-count {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  #jsu-wrapped {
+    align-items: center;
+    display: grid;
+    min-height: 100svh;
+    padding: 8px;
+  }
+
+  #jsu-wrapped .jsuw-shell {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-story {
+    aspect-ratio: auto;
+    border-radius: 28px;
+    height: calc(100svh - 16px);
+    min-height: min(640px, calc(100svh - 16px));
+    width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-card {
+    padding: 0;
+  }
+
+  #jsu-wrapped .jsuw-progress {
+    left: 16px;
+    right: 16px;
+    top: 14px;
+  }
+
+  #jsu-wrapped .jsuw-story-header {
+    left: 20px;
+    right: 20px;
+    top: 28px;
+  }
+
+  #jsu-wrapped .jsuw-reference-top {
+    left: 24px;
+    right: 24px;
+    top: 84px;
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline {
+    font-size: clamp(2rem, 10.4vw, 2.45rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline--compact {
+    font-size: clamp(1.78rem, 9vw, 2.1rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline--dense {
+    font-size: clamp(1.42rem, 7.2vw, 1.78rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-subtext {
+    bottom: 74px;
+    font-size: 0.88rem;
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-reference-cover .jsuw-brand-lockup {
+    left: 24px;
+    top: 58px;
+  }
+
+  #jsu-wrapped .jsuw-pennant {
+    left: 24px;
+    top: 114px;
+  }
+
+  #jsu-wrapped .jsuw-cover-title {
+    left: 24px;
+    right: 24px;
+    top: 45%;
+  }
+
+  #jsu-wrapped .jsuw-reference-cover .jsuw-headline {
+    font-size: clamp(2.3rem, 11vw, 3.45rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-cover .jsuw-headline--compact,
+  #jsu-wrapped .jsuw-reference-cover .jsuw-headline--dense {
+    font-size: clamp(1.52rem, 6vw, 1.94rem);
+    max-width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-cover-footer {
+    bottom: 96px;
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--events {
+    font-size: clamp(9.2rem, 48vw, 12rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--events-compact {
+    font-size: 8.6rem;
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--events-dense {
+    font-size: 6.6rem;
+  }
+
+  #jsu-wrapped .jsuw-event-grid,
+  #jsu-wrapped .jsuw-new-grid {
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-dot-field {
+    bottom: 194px;
+    left: 24px;
+    right: 24px;
+    top: 252px;
+  }
+
+  #jsu-wrapped .jsuw-dot-legend {
+    bottom: 144px;
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-reference-stat--moments {
+    font-size: clamp(4.4rem, 24vw, 6rem);
+    letter-spacing: -0.08em;
+  }
+
+  #jsu-wrapped .jsuw-waveform {
+    bottom: 160px;
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-new-pass,
+  #jsu-wrapped .jsuw-ticket,
+  #jsu-wrapped .jsuw-persona-card {
+    width: calc(100% - 48px);
+  }
+
+  #jsu-wrapped .jsuw-mini-stat-row,
+  #jsu-wrapped .jsuw-tag-cloud,
+  #jsu-wrapped .jsuw-movement-list--reference {
+    left: 24px;
+    right: 24px;
+  }
+
+  #jsu-wrapped .jsuw-orbit {
+    height: 250px;
+    width: 250px;
+  }
+
+  #jsu-wrapped .jsuw-orbit-core {
+    inset: 84px;
+  }
+
+  #jsu-wrapped .jsuw-share-poster {
+    bottom: 146px;
+    left: 20px;
+    padding: 18px 18px;
+    right: 20px;
+    top: 76px;
+  }
+
+  #jsu-wrapped .jsuw-share-poster .jsuw-headline {
+    font-size: clamp(2.1rem, 10vw, 2.85rem);
+  }
+
+  #jsu-wrapped .jsuw-share-stats strong {
+    font-size: 1.28rem;
+  }
+
+  #jsu-wrapped .jsuw-reference-final .jsuw-final-actions {
+    bottom: 74px;
+  }
+
+  #jsu-wrapped .jsuw-controls {
+    bottom: 14px;
+    left: 14px;
+    right: 14px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 760px) {
+  #jsu-wrapped {
+    align-items: center;
+    display: grid;
+    min-height: 100svh;
+    padding: 10px;
+  }
+
+  #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-story {
+    aspect-ratio: auto;
+    height: calc(100svh - 20px);
+    min-height: min(720px, calc(100svh - 20px));
+    width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-card {
+    padding: 0;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 760px) {
+  #jsu-wrapped .jsuw-reference-top {
+    top: 76px;
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline {
+    font-size: clamp(1.72rem, 9.2vw, 2.08rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline--compact {
+    font-size: clamp(1.58rem, 8.4vw, 1.9rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-main .jsuw-headline--dense {
+    font-size: clamp(1.32rem, 7vw, 1.62rem);
+  }
+
+  #jsu-wrapped .jsuw-new-pass {
+    padding: 15px 18px;
+    top: 50%;
+  }
+
+  #jsu-wrapped .jsuw-ticket {
+    top: 53%;
+  }
+
+  #jsu-wrapped .jsuw-persona-card {
+    padding: 14px 18px 16px;
+    top: 54%;
+  }
+
+  #jsu-wrapped .jsuw-smile-face {
+    height: 58px;
+    width: 58px;
+  }
+
+  #jsu-wrapped .jsuw-smile-face::before {
+    left: 18px;
+  }
+
+  #jsu-wrapped .jsuw-smile-face::after {
+    right: 18px;
+  }
+
+  #jsu-wrapped .jsuw-smile-face span {
+    bottom: 17px;
+    left: 16px;
+    width: 26px;
+  }
+
+  #jsu-wrapped .jsuw-persona-title {
+    font-size: clamp(1.48rem, 7.2vw, 1.86rem);
+  }
+
+  #jsu-wrapped .jsuw-persona-card p {
+    font-size: 0.78rem;
+  }
+
+  #jsu-wrapped .jsuw-orbit {
+    height: 210px;
+    top: 39%;
+    width: 210px;
+  }
+
+  #jsu-wrapped .jsuw-orbit-core {
+    inset: 70px;
+  }
+
+  #jsu-wrapped .jsuw-movement-list--reference {
+    bottom: 112px;
+  }
+}
+</style>
+
+<script>(function (root, factory) {
+  var api = factory(root);
+
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  }
+
+  if (root && root.document) {
+    root.JSUWrapped = api;
+  }
+})(typeof globalThis !== "undefined" ? globalThis : this, function (root) {
+  "use strict";
+
+  var DEFAULT_DATA_PATH = "/wp-content/uploads/wrapped/wrapped-{year}.json";
+  var DEFAULT_TEEN_DATA_PATH = "/wp-content/uploads/wrapped/teen-wrapped-{year}.json";
+  var WIDGET_ID = "jsu-wrapped";
+  var SCRIPT_SRC = root && root.document && root.document.currentScript ? root.document.currentScript.src : "";
+  var DEFAULT_AUTOPLAY_DELAY = 5200;
+
+  function hasValue(value) {
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  }
+
+  function asText(value, fallback) {
+    if (hasValue(value)) {
+      return String(value);
+    }
+
+    return fallback || "";
+  }
+
+  function formatNumber(value) {
+    if (!hasValue(value)) {
+      return "";
+    }
+
+    var numeric = Number(value);
+
+    if (isFinite(numeric)) {
+      return new Intl.NumberFormat("en-US").format(numeric);
+    }
+
+    return String(value);
+  }
+
+  function numberValue(value, fallback) {
+    if (!hasValue(value)) {
+      return fallback || 0;
+    }
+
+    var numeric = Number(String(value).replace(/,/g, "").replace(/%$/, ""));
+
+    return isFinite(numeric) ? numeric : fallback || 0;
+  }
+
+  function chapterStoryTitle(value) {
+    var name = asText(value, "Your JSU chapter").trim();
+
+    if (/\s+JSU$/i.test(name)) {
+      return name.replace(/\s+JSU$/i, "\nJSU");
+    }
+
+    return name;
+  }
+
+  function getStatAnimationConfig(value) {
+    if (!hasValue(value)) {
+      return null;
+    }
+
+    var text = String(value).trim();
+    var suffixMatch = text.match(/([^\d\s,.-]+)$/);
+    var numericText = text.replace(/,/g, "").replace(/[^\d.-]/g, "");
+    var target = Number(numericText);
+
+    if (!isFinite(target)) {
+      return null;
+    }
+
+    var decimalIndex = numericText.indexOf(".");
+
+    return {
+      target: target,
+      suffix: suffixMatch ? suffixMatch[1] : "",
+      decimals: decimalIndex === -1 ? 0 : numericText.length - decimalIndex - 1
+    };
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function escapeXml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  function slugify(value) {
+    return String(value || "jsu-wrapped")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "jsu-wrapped";
+  }
+
+  function getChapterSlug(url) {
+    var href = url || (root && root.location && root.location.href) || "";
+
+    try {
+      return new URL(href).searchParams.get("chapter");
+    } catch (error) {
+      if (href.charAt(0) === "?") {
+        return new URLSearchParams(href).get("chapter");
+      }
+
+      return null;
+    }
+  }
+
+  function getDataUrl(container) {
+    var dataset = (container && container.dataset) || {};
+    var year = asText(dataset.year, String(new Date().getFullYear()));
+
+    if (hasValue(dataset.source)) {
+      return dataset.source;
+    }
+
+    return DEFAULT_DATA_PATH.replace("{year}", encodeURIComponent(year));
+  }
+
+  function getTeenDataUrl(container) {
+    var dataset = (container && container.dataset) || {};
+    var year = asText(dataset.year, String(new Date().getFullYear()));
+
+    if (hasValue(dataset.teenSource)) {
+      return dataset.teenSource;
+    }
+
+    return DEFAULT_TEEN_DATA_PATH.replace("{year}", encodeURIComponent(year));
+  }
+
+  function parseBooleanFlag(value) {
+    if (!hasValue(value)) {
+      return null;
+    }
+
+    var normalized = String(value).trim().toLowerCase();
+
+    if (["1", "true", "yes", "on"].indexOf(normalized) !== -1) {
+      return true;
+    }
+
+    if (["0", "false", "no", "off"].indexOf(normalized) !== -1) {
+      return false;
+    }
+
+    return null;
+  }
+
+  function getSearchValue(url, names) {
+    var href = url || (root && root.location && root.location.href) || "";
+
+    try {
+      var params = new URL(href).searchParams;
+
+      for (var index = 0; index < names.length; index += 1) {
+        if (params.has(names[index])) {
+          return params.get(names[index]);
+        }
+      }
+    } catch (error) {
+      if (href.charAt(0) === "?") {
+        var searchParams = new URLSearchParams(href);
+
+        for (var offset = 0; offset < names.length; offset += 1) {
+          if (searchParams.has(names[offset])) {
+            return searchParams.get(names[offset]);
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function getRegionParam(url) {
+    return getSearchValue(url, ["region"]);
+  }
+
+  function getTeenSlug(url) {
+    return getSearchValue(url, ["teen", "student"]);
+  }
+
+  function getExperienceMode(url, options) {
+    var settings = options || {};
+    var requested = asText(settings.mode || getSearchValue(url || settings.url, ["mode", "view"]), "").toLowerCase();
+
+    if (requested === "teen" || requested === "student") {
+      return "teen";
+    }
+
+    if (hasValue(settings.teen) || hasValue(getTeenSlug(url || settings.url))) {
+      return "teen";
+    }
+
+    return "chapter";
+  }
+
+  function getAutoplayPreference(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    if (settings.autoplay !== undefined) {
+      return parseBooleanFlag(settings.autoplay) === true;
+    }
+
+    var urlFlag = parseBooleanFlag(getSearchValue(settings.url, ["autoplay", "autoadvance", "auto"]));
+
+    if (urlFlag !== null) {
+      return urlFlag;
+    }
+
+    var dataFlag = parseBooleanFlag(dataset.autoadvance || dataset.autoplay);
+
+    return dataFlag === true;
+  }
+
+  function getAutoplayDelay(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+    var requested = settings.autoplayDelay || getSearchValue(settings.url, ["duration", "autoplayDelay", "autoadvanceDelay"]) || dataset.autoplayDelay || dataset.autoadvanceDelay;
+    var delay = Number(requested);
+
+    if (!isFinite(delay) || delay <= 0) {
+      return DEFAULT_AUTOPLAY_DELAY;
+    }
+
+    if (delay < 1500) {
+      return 1500;
+    }
+
+    if (delay > 30000) {
+      return 30000;
+    }
+
+    return Math.round(delay);
+  }
+
+  function getScriptBaseUrl() {
+    if (!hasValue(SCRIPT_SRC)) {
+      return "";
+    }
+
+    return SCRIPT_SRC.slice(0, SCRIPT_SRC.lastIndexOf("/") + 1);
+  }
+
+  function getAssetBase(container, options) {
+    var dataset = (container && container.dataset) || {};
+    var explicit = options && options.assetBase || dataset.assetsBase;
+
+    if (hasValue(explicit)) {
+      return asText(explicit);
+    }
+
+    return getScriptBaseUrl() + "assets/";
+  }
+
+  function getBrandChoice(record) {
+    var fields = [
+      "brand_logo",
+      "logo",
+      "logo_type",
+      "logo_key",
+      "logo_flag",
+      "org_logo",
+      "organization"
+    ];
+    var value = "";
+
+    for (var index = 0; index < fields.length; index += 1) {
+      if (record && hasValue(record[fields[index]])) {
+        value = String(record[fields[index]]).trim().toLowerCase();
+        break;
+      }
+    }
+
+    if (
+      record && (
+        record.use_ncsy_logo === true ||
+        String(record.use_ncsy_logo).toLowerCase() === "true" ||
+        record.show_ncsy_logo === true ||
+        String(record.show_ncsy_logo).toLowerCase() === "true"
+      )
+    ) {
+      return "ncsy";
+    }
+
+    if (value.indexOf("ncsy") !== -1) {
+      return "ncsy";
+    }
+
+    return "jsu";
+  }
+
+  function getLogoAsset(brand, assetBase) {
+    var base = hasValue(assetBase) ? asText(assetBase) : "";
+
+    if (base && base.charAt(base.length - 1) !== "/") {
+      base += "/";
+    }
+
+    return base + (brand === "ncsy" ? "ncsy-logo.png" : "jsu-logo.png");
+  }
+
+  function getInitialCardIndex(url, total) {
+    var href = url || (root && root.location && root.location.href) || "";
+    var count = Number(total) || 0;
+    var value = null;
+
+    try {
+      value = new URL(href).searchParams.get("card");
+    } catch (error) {
+      if (href.charAt(0) === "?") {
+        value = new URLSearchParams(href).get("card");
+      }
+    }
+
+    var requested = Number(value);
+
+    if (!isFinite(requested) || requested < 1 || requested > count) {
+      return 0;
+    }
+
+    return Math.floor(requested) - 1;
+  }
+
+  function compactPayload(payload) {
+    var output = {};
+
+    Object.keys(payload || {}).forEach(function (key) {
+      var value = payload[key];
+
+      if (value === null || value === undefined || value === "") {
+        return;
+      }
+
+      output[key] = value;
+    });
+
+    return output;
+  }
+
+  function nowMs() {
+    if (root.performance && typeof root.performance.now === "function") {
+      return root.performance.now();
+    }
+
+    return Date.now();
+  }
+
+  function getAnalyticsPreference(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    if (settings.analytics !== undefined) {
+      return parseBooleanFlag(settings.analytics) !== false;
+    }
+
+    var urlFlag = parseBooleanFlag(getSearchValue(settings.url, ["analytics", "tracking"]));
+
+    if (urlFlag !== null) {
+      return urlFlag;
+    }
+
+    var dataFlag = parseBooleanFlag(dataset.analytics);
+
+    if (dataFlag !== null) {
+      return dataFlag;
+    }
+
+    return true;
+  }
+
+  function getAnalyticsYear(container, options, record) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    return asText(settings.analyticsYear || dataset.year || record && (record.year_label || record.school_year), "");
+  }
+
+  function createAnalyticsPayload(state, eventName, extra) {
+    var record = state && state.record || {};
+    var cards = state && state.cards || [];
+    var index = state && isFinite(Number(state.index)) ? Number(state.index) : 0;
+    var card = cards[index] || {};
+    var mode = asText(state && state.experienceMode, "chapter");
+    var base = {
+      event: eventName,
+      wrapped_mode: mode,
+      wrapped_year: asText(state && state.analyticsYear || record.year_label || record.school_year, ""),
+      school_year: asText(record.school_year, ""),
+      year_label: asText(record.year_label, ""),
+      chapter_slug: asText(record.chapter_slug, ""),
+      chapter_id: hasValue(record.chapter_id) ? record.chapter_id : "",
+      chapter_name: asText(record.chapter_name, ""),
+      region_name: asText(record.region_name, ""),
+      brand_logo: getBrandChoice(record),
+      card_index: index + 1,
+      card_total: cards.length,
+      card_theme: asText(card.theme, ""),
+      card_type: asText(card.type, ""),
+      is_final_card: cards.length && index === cards.length - 1 ? "true" : "false",
+      autoplay_enabled: state && state.autoplayEnabled ? "true" : "false"
+    };
+
+    return compactPayload(Object.assign(base, extra || {}));
+  }
+
+  function pushAnalyticsPayload(payload) {
+    if (!payload || !payload.event) {
+      return payload || null;
+    }
+
+    try {
+      root.dataLayer = root.dataLayer || [];
+
+      if (typeof root.dataLayer.push === "function") {
+        root.dataLayer.push(payload);
+      }
+
+      if (typeof root.dispatchEvent === "function" && typeof root.CustomEvent === "function") {
+        root.dispatchEvent(new root.CustomEvent("jsuw:analytics", { detail: payload }));
+      }
+    } catch (error) {
+      return payload;
+    }
+
+    return payload;
+  }
+
+  function trackAnalyticsEvent(state, eventName, extra) {
+    if (!state || state.analyticsEnabled === false) {
+      return null;
+    }
+
+    return pushAnalyticsPayload(createAnalyticsPayload(state, eventName, extra));
+  }
+
+  function trackCardEngagement(state, navigationMethod, timestamp) {
+    if (!state || state.cardStartedAt === null || state.cardStartedAt === undefined) {
+      return null;
+    }
+
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+    var cardStartedAt = Number(state.cardStartedAt);
+    var storyStartedAt = state.storyStartedAt === null || state.storyStartedAt === undefined ? cardStartedAt : Number(state.storyStartedAt);
+    var payload = trackAnalyticsEvent(state, "jsu_wrapped_card_engagement", {
+      navigation_method: asText(navigationMethod, "unknown"),
+      card_duration_ms: Math.max(0, Math.round(now - cardStartedAt)),
+      story_elapsed_ms: Math.max(0, Math.round(now - storyStartedAt))
+    });
+
+    state.cardStartedAt = null;
+    return payload;
+  }
+
+  function trackStoryComplete(state, navigationMethod, timestamp) {
+    if (!state || state.storyCompletedAt !== null && state.storyCompletedAt !== undefined) {
+      return null;
+    }
+
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+    var storyStartedAt = state.storyStartedAt === null || state.storyStartedAt === undefined ? now : Number(state.storyStartedAt);
+
+    state.storyCompletedAt = now;
+    return trackAnalyticsEvent(state, "jsu_wrapped_story_complete", {
+      navigation_method: asText(navigationMethod, "unknown"),
+      completion_duration_ms: Math.max(0, Math.round(now - storyStartedAt))
+    });
+  }
+
+  function trackCardView(state, navigationMethod, timestamp) {
+    var now = timestamp !== undefined ? Number(timestamp) : nowMs();
+
+    if (!state) {
+      return null;
+    }
+
+    if (state.storyStartedAt === null || state.storyStartedAt === undefined) {
+      state.storyStartedAt = now;
+    }
+
+    state.cardStartedAt = now;
+    var payload = trackAnalyticsEvent(state, "jsu_wrapped_card_view", {
+      navigation_method: asText(navigationMethod, "unknown")
+    });
+
+    if (state.cards && state.index === state.cards.length - 1) {
+      trackStoryComplete(state, navigationMethod, now);
+    }
+
+    return payload;
+  }
+
+  function trackStoryView(state, navigationMethod) {
+    var now = nowMs();
+
+    if (!state) {
+      return null;
+    }
+
+    state.storyStartedAt = now;
+    state.storyCompletedAt = null;
+    trackAnalyticsEvent(state, "jsu_wrapped_story_view", {
+      navigation_method: asText(navigationMethod, "initial"),
+      initial_card_index: (Number(state.index) || 0) + 1
+    });
+    return trackCardView(state, navigationMethod || "initial", now);
+  }
+
+  function createPageMetadata(state) {
+    var record = state && state.record || {};
+    var brandLabel = getBrandChoice(record) === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
+    var chapterName = asText(record.chapter_name, brandLabel);
+    var yearLabel = asText(record.year_label || record.school_year, "");
+    var regionName = asText(record.region_name, "");
+    var descriptionParts = [
+      chapterName + " Wrapped",
+      yearLabel ? "for " + yearLabel : "",
+      regionName ? "- " + regionName : ""
+    ].filter(Boolean);
+
+    return {
+      title: brandLabel + " - " + chapterName,
+      description: descriptionParts.join(" ")
+    };
+  }
+
+  function setDocumentMeta(doc, attributeName, attributeValue, content) {
+    if (!doc || !doc.head || !hasValue(content)) {
+      return;
+    }
+
+    var selector = 'meta[' + attributeName + '="' + attributeValue + '"]';
+    var element = doc.querySelector(selector);
+
+    if (!element) {
+      element = doc.createElement("meta");
+      element.setAttribute(attributeName, attributeValue);
+      doc.head.appendChild(element);
+    }
+
+    element.setAttribute("content", content);
+  }
+
+  function applyPageMetadata(state) {
+    var metadata = createPageMetadata(state);
+    var doc = root.document;
+
+    if (!doc) {
+      return metadata;
+    }
+
+    if (hasValue(metadata.title)) {
+      doc.title = metadata.title;
+      setDocumentMeta(doc, "property", "og:title", metadata.title);
+      setDocumentMeta(doc, "name", "twitter:title", metadata.title);
+    }
+
+    if (hasValue(metadata.description)) {
+      setDocumentMeta(doc, "name", "description", metadata.description);
+      setDocumentMeta(doc, "property", "og:description", metadata.description);
+      setDocumentMeta(doc, "name", "twitter:description", metadata.description);
+    }
+
+    setDocumentMeta(doc, "property", "og:type", "website");
+
+    if (root.location && hasValue(root.location.href)) {
+      setDocumentMeta(doc, "property", "og:url", root.location.href);
+    }
+
+    return metadata;
+  }
+
+  function findChapter(records, chapterSlug) {
+    if (!Array.isArray(records) || !hasValue(chapterSlug)) {
+      return null;
+    }
+
+    var requested = String(chapterSlug).trim().toLowerCase();
+
+    for (var index = 0; index < records.length; index += 1) {
+      var record = records[index];
+
+      if (String(record && record.chapter_slug || "").trim().toLowerCase() === requested) {
+        return record;
+      }
+    }
+
+    return null;
+  }
+
+  function findTeen(records, teenSlug) {
+    if (!Array.isArray(records)) {
+      return null;
+    }
+
+    if (!hasValue(teenSlug)) {
+      return records[0] || null;
+    }
+
+    var requested = String(teenSlug).trim().toLowerCase();
+
+    for (var index = 0; index < records.length; index += 1) {
+      var record = records[index];
+      var slug = String(record && (record.teen_slug || record.student_slug || record.slug) || "").trim().toLowerCase();
+
+      if (slug === requested) {
+        return record;
+      }
+    }
+
+    return null;
+  }
+
+  function chapterLabel(record) {
+    return asText(record && record.chapter_name, asText(record && record.chapter_slug, "JSU chapter"));
+  }
+
+  function chapterFootprintLabel(record, chapterName) {
+    var schoolName = asText(record && record.school_name, "");
+    var schoolCount = numberValue(record && record.schools_represented, 0);
+    var representedMatch = schoolName.match(/(\d[\d,]*)\s+schools?\s+represented/i);
+
+    if (schoolCount > 1) {
+      return "Across " + formatNumber(schoolCount) + " schools";
+    }
+
+    if (representedMatch) {
+      return "Across " + formatNumber(representedMatch[1]) + " schools";
+    }
+
+    if (hasValue(schoolName)) {
+      return "New to " + schoolName;
+    }
+
+    return "New to " + asText(chapterName, "JSU");
+  }
+
+  function buildChapterUrl(record, url) {
+    var slug = record && record.chapter_slug;
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+
+    if (!hasValue(slug)) {
+      return href || "#";
+    }
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("chapter", String(slug).trim());
+      parsed.searchParams.delete("card");
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      return bare + "?chapter=" + encodeURIComponent(String(slug).trim());
+    }
+  }
+
+  function buildRegionUrl(regionName, url) {
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("region", slugify(regionName));
+      parsed.searchParams.delete("chapter");
+      parsed.searchParams.delete("card");
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      return bare + "?region=" + encodeURIComponent(slugify(regionName));
+    }
+  }
+
+  function buildTeenUrl(record, url) {
+    var slug = record && (record.teen_slug || record.student_slug || record.slug) || "maya-test";
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("mode", "teen");
+      parsed.searchParams.set("teen", String(slug).trim());
+      parsed.searchParams.delete("chapter");
+      parsed.searchParams.delete("region");
+      parsed.searchParams.delete("card");
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      return bare + "?mode=teen&teen=" + encodeURIComponent(String(slug).trim());
+    }
+  }
+
+  function renderChapterPickerMarkup(context) {
+    var settings = context || {};
+    var records = Array.isArray(settings.records) ? settings.records.filter(function (record) {
+      return record && hasValue(record.chapter_slug);
+    }).slice() : [];
+    var assetBase = settings.assetBase || "";
+    var url = settings.url || (root && root.location && root.location.href) || "";
+    var firstRecord = records[0] || {};
+    var year = asText(settings.year || firstRecord.year_label || firstRecord.school_year, "this year");
+    var requestedRegion = asText(settings.region || getRegionParam(url), "");
+
+    records.sort(function (a, b) {
+      return chapterLabel(a).localeCompare(chapterLabel(b));
+    });
+
+    function renderPickerItem(record) {
+      var brand = getBrandChoice(record);
+      var logoUrl = getLogoAsset(brand, assetBase);
+      var region = asText(record.region_name, "JSU");
+      var school = asText(record.school_name, "");
+      var stats = [
+        hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+        hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+        hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : ""
+      ].filter(Boolean).join(" Â· ");
+
+      return [
+        '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url)) + '">',
+        '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
+        '<span class="jsuw-picker-copy">',
+        '<strong>' + escapeHtml(chapterLabel(record)) + "</strong>",
+        '<em>' + escapeHtml([school, region].filter(Boolean).join(" Â· ")) + "</em>",
+        stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
+        "</span>",
+        '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
+        "</a>"
+      ].join("");
+    }
+
+    var regionMap = {};
+
+    records.forEach(function (record) {
+      var regionName = asText(record.region_name, "Other chapters");
+
+      if (!regionMap[regionName]) {
+        regionMap[regionName] = [];
+      }
+
+      regionMap[regionName].push(record);
+    });
+
+    var regions = Object.keys(regionMap).sort().map(function (regionName) {
+      return {
+        name: regionName,
+        slug: slugify(regionName),
+        chapters: regionMap[regionName]
+      };
+    });
+    var requestedSlug = slugify(requestedRegion);
+    var activeRegion = regions.filter(function (region) {
+      return region.slug === requestedSlug || region.name.toLowerCase() === requestedRegion.toLowerCase();
+    })[0] || regions[0] || null;
+    var regionSelector = regions.map(function (region) {
+      var isActive = activeRegion && region.slug === activeRegion.slug;
+      var countLabel = region.chapters.length === 1 ? "1" : String(region.chapters.length);
+
+      return [
+        '<a class="jsuw-region-pill' + (isActive ? " jsuw-region-pill--active" : "") + '" href="' + escapeHtml(buildRegionUrl(region.name, url)) + '"' + (isActive ? ' aria-current="true"' : "") + ">",
+        '<span>' + escapeHtml(region.name) + "</span>",
+        '<em>' + escapeHtml(countLabel) + "</em>",
+        "</a>"
+      ].join("");
+    }).join("");
+    var chapterHtml = "";
+
+    if (activeRegion) {
+      var chapters = activeRegion.chapters;
+      var countLabel = chapters.length === 1 ? "1 chapter" : chapters.length + " chapters";
+
+      chapterHtml = [
+        '<section class="jsuw-picker-region">',
+        '<h2><span>' + escapeHtml(activeRegion.name) + '</span><em>' + escapeHtml(countLabel) + "</em></h2>",
+        '<div class="jsuw-picker-region-list">',
+        chapters.map(renderPickerItem).join(""),
+        "</div>",
+        "</section>"
+      ].join("");
+    }
+
+    if (!chapterHtml) {
+      chapterHtml = '<div class="jsuw-picker-empty">No chapter records are available yet.</div>';
+    }
+
+    var teenTestLink = buildTeenUrl({ teen_slug: "maya-test" }, url);
+
+    return [
+      '<div class="jsuw-shell jsuw-shell--picker">',
+      '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
+      '<div class="jsuw-picker-topline">JSU Wrapped Â· ' + escapeHtml(year) + "</div>",
+      '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
+      '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
+      regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
+      '<div class="jsuw-picker-list">',
+      chapterHtml,
+      "</div>",
+      '<a class="jsuw-teen-test-link" href="' + escapeHtml(teenTestLink) + '"><strong>Teen test version</strong><span>Proof of concept using sample Maya data</span></a>',
+      "</section>",
+      "</div>"
+    ].join("");
+  }
+
+  function renderChapterPicker(container, context) {
+    container.innerHTML = renderChapterPickerMarkup(context);
+  }
+
+  function createCards(record, options) {
+    var chapterName = asText(record.chapter_name, "Your JSU chapter");
+    var yearLabel = asText(record.year_label || record.school_year, "This year");
+    var regionName = asText(record.region_name, "JSU");
+    var brandChoice = getBrandChoice(record);
+    var brandLabel = brandChoice === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
+    var assetBase = options && options.assetBase || "";
+    var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var cards = [
+      {
+        type: "cover",
+        eyebrow: brandLabel,
+        headline: chapterName + ", your year is wrapped",
+        displayHeadline: chapterName + ", your year is wrapped",
+        displayEyebrow: brandLabel,
+        markerText: "and this is our year.",
+        regionName: regionName,
+        yearLabel: yearLabel,
+        subtext: yearLabel + " - " + regionName,
+        badge: asText(record.school_name, "Chapter recap"),
+        theme: "cover"
+      }
+    ];
+
+    if (hasValue(record.events_hosted)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "Events hosted",
+        headline: "You hosted " + formatNumber(record.events_hosted) + " events this year",
+        displayHeadline: "You hosted " + formatNumber(record.events_hosted) + " events this year",
+        displayEyebrow: "Events hosted",
+        stat: formatNumber(record.events_hosted),
+        rawValue: numberValue(record.events_hosted),
+        statLabel: "events",
+        subtext: "From lunch clubs to BBQs, " + chapterName + " kept showing up.",
+        theme: "events"
+      });
+    }
+
+    if (hasValue(record.unique_teens)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "Teen reach",
+        headline: formatNumber(record.unique_teens) + " teens were part of the story",
+        displayHeadline: formatNumber(record.unique_teens) + " teens were part of the story",
+        displayEyebrow: "Teen reach",
+        stat: formatNumber(record.unique_teens),
+        rawValue: numberValue(record.unique_teens),
+        newCount: numberValue(record.new_teens),
+        statLabel: "teens",
+        subtext: "That's " + formatNumber(record.unique_teens) + " students who had a JSU touchpoint this year.",
+        theme: "reach"
+      });
+    }
+
+    if (hasValue(record.engagement_moments)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "Engagement moments",
+        headline: formatNumber(record.engagement_moments) + " moments of connection",
+        displayHeadline: formatNumber(record.engagement_moments) + " moments of connection",
+        displayEyebrow: "Engagement moments",
+        stat: formatNumber(record.engagement_moments),
+        rawValue: numberValue(record.engagement_moments),
+        statLabel: "moments",
+        subtext: "Every sign-in, every lunch table, every conversation - it added up.",
+        theme: "moments"
+      });
+    }
+
+    if (hasValue(record.new_teens)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "New faces",
+        headline: formatNumber(record.new_teens) + " new teens joined this year",
+        displayHeadline: formatNumber(record.new_teens) + " new teens joined this year",
+        displayEyebrow: "New teens",
+        stat: formatNumber(record.new_teens),
+        rawValue: numberValue(record.new_teens),
+        schoolName: asText(record.school_name, "Northwood JSU"),
+        newTeenContext: chapterFootprintLabel(record, chapterName),
+        statLabel: "new teens",
+        subtext: chapterName + " kept opening the door.",
+        theme: "new"
+      });
+    }
+
+    if (hasValue(record.repeat_attendee_rate_label)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "Repeat engagement",
+        headline: asText(record.repeat_attendee_rate_label) + " came back again",
+        displayHeadline: asText(record.repeat_attendee_rate_label) + " came back again",
+        displayEyebrow: "Repeat engagement",
+        stat: asText(record.repeat_attendee_rate_label),
+        rawValue: numberValue(record.repeat_attendee_rate_label),
+        repeatCount: Math.round(numberValue(record.unique_teens) * numberValue(record.repeat_attendee_rate_label) / 100),
+        statLabel: "returned",
+        subtext: "The best clubs do more than attract teens. They bring them back.",
+        theme: "repeat"
+      });
+    }
+
+    if (hasValue(record.largest_event_name) && hasValue(record.largest_event_attendance)) {
+      cards.push({
+        type: "stat",
+        eyebrow: "Biggest event",
+        headline: "Biggest moment: " + asText(record.largest_event_name),
+        displayHeadline: "Biggest moment: " + asText(record.largest_event_name),
+        displayEyebrow: "Biggest event",
+        eventName: asText(record.largest_event_name),
+        stat: formatNumber(record.largest_event_attendance),
+        rawValue: numberValue(record.largest_event_attendance),
+        month: asText(record.most_active_month, "This year"),
+        schoolsRepresented: numberValue(record.schools_represented),
+        statLabel: "teens",
+        subtext: formatNumber(record.largest_event_attendance) + " teens in the room. Big energy.",
+        theme: "biggest"
+      });
+    }
+
+    if (hasValue(record.chapter_persona) || hasValue(record.chapter_line)) {
+      cards.push({
+        type: "persona",
+        eyebrow: "Chapter type",
+        headline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
+        displayHeadline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
+        displayEyebrow: "Chapter persona",
+        persona: asText(record.chapter_persona, "The Momentum Maker"),
+        chapterName: chapterName,
+        tags: [
+          hasValue(record.top_program_type) ? asText(record.top_program_type) : "",
+          hasValue(record.most_active_month) ? asText(record.most_active_month) + " energy" : "",
+          hasValue(record.learning_sessions) ? formatNumber(record.learning_sessions) + " learning sessions" : "",
+          hasValue(record.shabbatons) ? formatNumber(record.shabbatons) + " shabbatons" : ""
+        ].filter(Boolean),
+        subtext: asText(record.chapter_line, chapterName + " made the year feel personal."),
+        badge: asText(record.top_program_type || record.most_active_month, "Signature energy"),
+        theme: "persona"
+      });
+    }
+
+    var movementStats = [];
+
+    if (hasValue(record.region_unique_teens)) {
+      movementStats.push({
+        value: formatNumber(record.region_unique_teens),
+        label: "teens reached in the region"
+      });
+    }
+
+    if (hasValue(record.region_schools_represented)) {
+      movementStats.push({
+        value: formatNumber(record.region_schools_represented),
+        label: "schools represented"
+      });
+    }
+
+    if (hasValue(record.national_engagement_moments)) {
+      movementStats.push({
+        value: formatNumber(record.national_engagement_moments) + "+",
+        label: "national engagement moments"
+      });
+    }
+
+    if (movementStats.length > 0) {
+      cards.push({
+        type: "movement",
+        eyebrow: "Bigger movement",
+        headline: "You were part of something bigger",
+        displayHeadline: "You were part of something bigger",
+        displayEyebrow: "Bigger movement",
+        chapterName: chapterName,
+        stats: movementStats,
+        subtext: "One chapter. One region. One national movement.",
+        theme: "movement"
+      });
+    }
+
+    cards.push({
+      type: "final",
+      eyebrow: "Ready to share",
+      headline: chapterName + " Wrapped",
+      displayHeadline: chapterStoryTitle(chapterName) + "\nWrapped",
+      chapterName: chapterName,
+      schoolName: asText(record.school_name, "JSU"),
+      yearLabel: yearLabel,
+      summaryStats: [
+        hasValue(record.events_hosted) ? { value: formatNumber(record.events_hosted), label: "programs together" } : null,
+        hasValue(record.unique_teens) ? { value: formatNumber(record.unique_teens), label: "of us, one chapter" } : null,
+        hasValue(record.engagement_moments) ? { value: formatNumber(record.engagement_moments), label: "moments stacked up" } : null,
+        hasValue(record.new_teens) ? { value: formatNumber(record.new_teens), label: "new faces joined us" } : null,
+        hasValue(record.repeat_attendee_rate_label) ? { value: asText(record.repeat_attendee_rate_label), label: "kept coming back" } : null
+      ].filter(Boolean),
+      persona: asText(record.chapter_persona, "JSU energy"),
+      subtext: [
+        hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+        hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+        hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " engagement moments" : "",
+        hasValue(record.chapter_persona) ? asText(record.chapter_persona) + " energy" : "JSU energy"
+      ].filter(Boolean).join(". ") + ".",
+      badge: yearLabel,
+      theme: "final"
+    });
+
+    cards.forEach(function (card) {
+      card.brandChoice = brandChoice;
+      card.logoUrl = logoUrl;
+    });
+
+    return cards;
+  }
+
+  function createTeenCards(record, options) {
+    var teenName = asText(record.teen_name || record.student_name || record.first_name, "Maya");
+    var chapterName = asText(record.chapter_name, "Northwood JSU");
+    var yearLabel = asText(record.year_label || record.school_year, "2025-2026");
+    var regionName = asText(record.region_name, "Atlantic Seaboard");
+    var schoolName = asText(record.school_name, "Northwood High School");
+    var brandChoice = getBrandChoice(record);
+    var assetBase = options && options.assetBase || "";
+    var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var cards = [
+      {
+        type: "teen",
+        theme: "teen-cover",
+        eyebrow: "Proof of concept",
+        headline: teenName + ", your JSU year is wrapped",
+        displayHeadline: teenName + ",\nyour JSU\nyear is\nwrapped.",
+        teenName: teenName,
+        chapterName: chapterName,
+        schoolName: schoolName,
+        regionName: regionName,
+        yearLabel: yearLabel,
+        subtext: chapterName + " - " + regionName
+      },
+      {
+        type: "teen",
+        theme: "teen-attendance",
+        eyebrow: "Chapter 01 - Attendance",
+        headline: "You showed up " + formatNumber(record.events_attended) + " times",
+        displayHeadline: "You showed\nup this many\ntimes.",
+        stat: formatNumber(record.events_attended),
+        rawValue: numberValue(record.events_attended),
+        statLabel: "events",
+        subtext: asText(record.attendance_line, "From lunch clubs to BBQs, you made JSU part of your year.")
+      },
+      {
+        type: "teen",
+        theme: "teen-ticket",
+        eyebrow: "Chapter 02 - Origin",
+        headline: "It started with " + asText(record.first_event_name, "Fall Kickoff Lunch"),
+        eventName: asText(record.first_event_name, "Fall Kickoff Lunch"),
+        eventDate: asText(record.first_event_date_label, "Sep 18, 2025"),
+        eventLocation: asText(record.first_event_location || record.school_name, schoolName),
+        subtext: asText(record.first_event_line, "Your first JSU moment of the year. Then the momentum kept going.")
+      },
+      {
+        type: "teen",
+        theme: "teen-streak",
+        eyebrow: "Chapter 03 - Streak",
+        headline: "Your longest streak hit " + formatNumber(record.longest_streak),
+        displayHeadline: "Your longest\nstreak hit",
+        stat: formatNumber(record.longest_streak),
+        rawValue: numberValue(record.longest_streak),
+        statLabel: "events in a row",
+        subtext: asText(record.streak_line, "That's not just attendance. That's momentum.")
+      },
+      {
+        type: "teen",
+        theme: "teen-vibe",
+        eyebrow: "Chapter 04 - Vibe",
+        headline: "Your top vibe was " + asText(record.top_vibe, "Social + Jewish Culture"),
+        vibe: asText(record.top_vibe, "Social + Jewish Culture"),
+        subtext: asText(record.vibe_line, "You kept showing up where friends, food, and Jewish life came together.")
+      },
+      {
+        type: "teen",
+        theme: "teen-connector",
+        eyebrow: "Chapter 05 - Persona",
+        headline: "You're " + asText(record.persona, "The Connector"),
+        persona: asText(record.persona, "The Connector"),
+        friendsBrought: formatNumber(record.friends_brought),
+        schoolsInRoom: formatNumber(record.schools_in_room),
+        subtext: asText(record.persona_line, "You helped turn events into community.")
+      },
+      {
+        type: "teen",
+        theme: "teen-depth",
+        eyebrow: "Chapter 06 - Depth",
+        headline: "You made room for deeper moments too",
+        shabbatons: formatNumber(record.shabbatons),
+        learningSessions: formatNumber(record.learning_sessions),
+        leadershipMoments: formatNumber(record.leadership_moments),
+        subtext: asText(record.depth_line, "Shabbatons, learning, and leadership moments gave the year more depth.")
+      },
+      {
+        type: "teen",
+        theme: "teen-chapter",
+        eyebrow: "Chapter 07 - Your club",
+        headline: chapterName + " had a big year",
+        chapterName: chapterName,
+        summaryStats: [
+          hasValue(record.chapter_events_hosted) ? { value: formatNumber(record.chapter_events_hosted), label: "events hosted" } : null,
+          hasValue(record.chapter_unique_teens) ? { value: formatNumber(record.chapter_unique_teens), label: "unique teens" } : null,
+          hasValue(record.chapter_engagement_moments) ? { value: formatNumber(record.chapter_engagement_moments), label: "engagement moments" } : null,
+          hasValue(record.chapter_new_teens) ? { value: formatNumber(record.chapter_new_teens), label: "new this year" } : null
+        ].filter(Boolean),
+        subtext: asText(record.chapter_line, chapterName + " turned events into belonging.")
+      },
+      {
+        type: "teen",
+        theme: "teen-movement",
+        eyebrow: "Chapter 08 - Zoom out",
+        headline: "You were part of something much bigger",
+        stats: [
+          hasValue(record.region_unique_teens) ? { value: formatNumber(record.region_unique_teens), label: "teens in the region" } : null,
+          hasValue(record.region_schools_represented) ? { value: formatNumber(record.region_schools_represented), label: "schools represented" } : null,
+          hasValue(record.national_engagement_moments) ? { value: formatNumber(record.national_engagement_moments) + "+", label: "national moments" } : null
+        ].filter(Boolean),
+        subtext: asText(record.movement_line, "One club. One region. One national movement.")
+      },
+      {
+        type: "teen",
+        theme: "teen-share",
+        eyebrow: "Share card",
+        headline: teenName + "'s JSU Wrapped",
+        displayHeadline: teenName + "'s\nJSU\nWrapped",
+        teenName: teenName,
+        chapterName: chapterName,
+        yearLabel: yearLabel,
+        persona: asText(record.persona, "The Connector"),
+        subtext: [
+          hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
+          hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
+          hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
+          asText(record.persona, "The Connector") + " energy"
+        ].filter(Boolean).join(". ") + ".",
+        summaryStats: [
+          hasValue(record.events_attended) ? { value: formatNumber(record.events_attended), label: "events showed up to" } : null,
+          hasValue(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
+          hasValue(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : null,
+          hasValue(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in your room" } : null
+        ].filter(Boolean)
+      }
+    ];
+
+    cards.forEach(function (card) {
+      card.brandChoice = brandChoice;
+      card.logoUrl = logoUrl;
+    });
+
+    return cards;
+  }
+
+  function renderProgress(currentIndex, total) {
+    var html = "";
+
+    for (var index = 0; index < total; index += 1) {
+      var state = index < currentIndex ? "complete" : index === currentIndex ? "active" : "idle";
+      html += '<span class="jsuw-progress-segment jsuw-progress-segment--' + state + '"><span></span></span>';
+    }
+
+    return html;
+  }
+
+  function renderStickerCloud(card) {
+    var confettiThemes = {
+      cover: 30,
+      moments: 20,
+      biggest: 24,
+      final: 22
+    };
+
+    var html = [
+      '<div class="jsuw-stickers" aria-hidden="true">',
+      '<span class="jsuw-doodle jsuw-doodle--one"></span>',
+      '<span class="jsuw-doodle jsuw-doodle--two"></span>',
+      '<span class="jsuw-spark jsuw-spark--one"></span>',
+      '<span class="jsuw-spark jsuw-spark--two"></span>'
+    ];
+
+    for (var index = 0; index < (confettiThemes[card.theme] || 0); index += 1) {
+      var burst = index < 10;
+      var x = burst ? "50%" : 5 + ((index * 11) % 86) + "%";
+      var dx = burst ? ((index * 47) % 260) - 130 + "px" : ((index % 7) - 3) * 22 + "px";
+      var dy = burst ? ((index * 31) % 210) - 118 + "px" : 620 + ((index * 19) % 160) + "px";
+      var rotate = (index * 73) % 420 + "deg";
+      var delay = burst ? 90 + index * 32 + "ms" : index * -310 + "ms";
+      var duration = burst ? 980 + (index % 4) * 120 + "ms" : 4200 + (index % 6) * 420 + "ms";
+      var scale = (0.66 + (index % 5) * 0.14).toFixed(2);
+      var startY = burst ? "48%" : "-28px";
+
+      html.push(
+        '<span class="jsuw-confetti-piece jsuw-confetti-piece--' + (burst ? "burst" : "drift") +
+        '" style="--i:' + index + ";--x:" + x + ";--start-y:" + startY + ";--dx:" + dx + ";--dy:" + dy +
+        ";--rot:" + rotate + ";--delay:" + delay + ";--dur:" + duration + ";--scale:" + scale + '"></span>'
+      );
+    }
+
+    html.push("</div>");
+    return html.join("");
+  }
+
+  function renderBrandLockup(card) {
+    var brand = card && card.brandChoice === "ncsy" ? "ncsy" : "jsu";
+    var logoUrl = card && card.logoUrl ? card.logoUrl : getLogoAsset(brand, "");
+    var label = brand === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
+
+    return [
+      '<div class="jsuw-brand-lockup jsuw-brand-lockup--' + escapeHtml(brand) + '" aria-label="' + escapeHtml(label) + '">',
+      '<span class="jsuw-brand-logo jsuw-brand-logo--' + escapeHtml(brand) + '"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
+      '<span class="jsuw-brand-copy"><strong>' + escapeHtml(brand === "ncsy" ? "NCSY" : "JSU") + '</strong><em>Wrapped</em></span>',
+      "</div>"
+    ].join("");
+  }
+
+  function renderStatPattern(card) {
+    var count = card.theme === "events" ? 38 : card.theme === "moments" ? 36 : 42;
+    var html = '<div class="jsuw-stat-pattern jsuw-stat-pattern--' + escapeHtml(card.theme) + '" aria-hidden="true">';
+
+    for (var index = 0; index < count; index += 1) {
+      var x = ((index * 2.9) % 96).toFixed(2) + "%";
+      var y = (12 + ((index * 7) % 68)).toFixed(2) + "%";
+      var height = 24 + ((index * 11) % 68) + "px";
+      var size = 20 + ((index * 13) % 30) + "px";
+      var delay = index * 14 + "ms";
+      var waveDelay = index * 46 + "ms";
+      var bubbleDelay = index * 72 + "ms";
+
+      html += '<span style="--i:' + index + ";--x:" + x + ";--y:" + y + ";--h:" + height + ";--s:" + size + ";--delay:" + delay + ";--wave-delay:" + waveDelay + ";--bubble-delay:" + bubbleDelay + '"></span>';
+    }
+
+    html += "</div>";
+    return html;
+  }
+
+  function renderStatNumber(card, statClass) {
+    var animation = getStatAnimationConfig(card.stat);
+    var attributes = "";
+    var classes = statClass;
+
+    if (classes.indexOf("jsuw-stat-number--nowrap") === -1) {
+      classes += " jsuw-stat-number--nowrap";
+    }
+
+    if (animation) {
+      attributes = [
+        ' data-jsuw-countup="true"',
+        ' data-jsuw-stat-target="' + escapeHtml(animation.target) + '"',
+        ' data-jsuw-stat-suffix="' + escapeHtml(animation.suffix) + '"',
+        ' data-jsuw-stat-decimals="' + escapeHtml(animation.decimals) + '"'
+      ].join("");
+    }
+
+    return '<div class="' + classes + '" aria-label="' + escapeHtml(card.stat) + '"' + attributes + ">" + escapeHtml(card.stat) + "</div>";
+  }
+
+  function htmlWithBreaks(value) {
+    return escapeHtml(value).replace(/\n/g, "<br>");
+  }
+
+  function getHeadlineClass(card) {
+    var text = String(card.displayHeadline || card.headline || "");
+    var headlineClass = "jsuw-headline";
+
+    if (text.length > 52) {
+      headlineClass += " jsuw-headline--dense";
+    } else if (text.length > 36) {
+      headlineClass += " jsuw-headline--compact";
+    }
+
+    return headlineClass;
+  }
+
+  function renderTopMatter(card) {
+    return [
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.displayEyebrow || card.eyebrow || "JSU Wrapped") + "</div>",
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>"
+    ].join("");
+  }
+
+  function renderIndexedSpans(className, count, maxCount, extraClassFn) {
+    var total = Math.max(0, Math.min(numberValue(count), maxCount || numberValue(count)));
+    var html = '<div class="' + className + '" aria-hidden="true">';
+
+    for (var index = 0; index < total; index += 1) {
+      var extra = typeof extraClassFn === "function" ? extraClassFn(index, total) : "";
+      var height = 10 + ((index * 7) % 36) + "px";
+      html += '<span class="' + extra + '" style="--i:' + index + ';--delay:' + (index * 12) + 'ms;--h:' + height + '"></span>';
+    }
+
+    html += "</div>";
+    return html;
+  }
+
+  function renderReferenceShell(card, body) {
+    return [
+      '<div class="jsuw-card-main jsuw-reference-main jsuw-reference-' + escapeHtml(card.theme) + '">',
+      body,
+      "</div>"
+    ].join("");
+  }
+
+  function renderCoverBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-pennant">' + escapeHtml(card.badge || "JSU chapter") + "</div>",
+      '<div class="jsuw-cover-title">',
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.displayEyebrow || card.eyebrow) + "</div>",
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      "</div>",
+      '<div class="jsuw-cover-footer">',
+      '<div class="jsuw-marker-line">' + escapeHtml(card.markerText || "and this is our year.") + "</div>",
+      '<p class="jsuw-subtext">' + escapeHtml((card.regionName || "JSU") + " - " + (card.yearLabel || "This year")) + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderEventsBody(card) {
+    var statClass = "jsuw-reference-stat jsuw-reference-stat--events";
+    var statLength = String(card.stat || "").replace(/[^\d]/g, "").length;
+
+    if (statLength > 3) {
+      statClass += " jsuw-reference-stat--events-dense";
+    } else if (statLength > 2) {
+      statClass += " jsuw-reference-stat--events-compact";
+    }
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-big-number-wrap jsuw-big-number-wrap--events">',
+      renderStatNumber(card, statClass),
+      "</div>",
+      renderIndexedSpans("jsuw-event-grid", card.rawValue || card.stat, 80),
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderReachBody(card) {
+    var rawCount = Math.max(0, card.rawValue || numberValue(card.stat));
+    var newCount = Math.max(0, Math.min(card.newCount || 0, rawCount));
+    var repeatCutoff = Math.max(0, rawCount - newCount);
+    var visibleTotal = Math.max(0, Math.min(rawCount, 210));
+    var visibleNewCount = rawCount > 0 ? Math.round(newCount / rawCount * visibleTotal) : 0;
+
+    if (newCount > 0 && visibleNewCount === 0) {
+      visibleNewCount = 1;
+    }
+
+    visibleNewCount = Math.max(0, Math.min(visibleNewCount, visibleTotal));
+    var visibleRepeatCutoff = Math.max(0, visibleTotal - visibleNewCount);
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      renderIndexedSpans("jsuw-dot-field", visibleTotal, visibleTotal, function (index) {
+        return index >= visibleRepeatCutoff ? "jsuw-dot--new" : "jsuw-dot--returning";
+      }),
+      '<div class="jsuw-dot-legend">',
+      '<span><i class="jsuw-dot-key jsuw-dot-key--returning"></i>' + escapeHtml(formatNumber(repeatCutoff)) + " returning connections</span>",
+      '<span><i class="jsuw-dot-key jsuw-dot-key--new"></i>' + escapeHtml(formatNumber(newCount)) + " first-timers</span>",
+      "</div>",
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderMomentsBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-moment-center">',
+      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--moments"),
+      '<div class="jsuw-marker-chip">moments together</div>',
+      "</div>",
+      renderIndexedSpans("jsuw-waveform", 64, 64),
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderNewBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-new-pass">',
+      '<div class="jsuw-pass-kicker">' + escapeHtml(card.newTeenContext || ("New to " + (card.schoolName || "JSU"))) + "</div>",
+      renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--new"),
+      '<div class="jsuw-marker-line">walked in for the first time</div>',
+      "</div>",
+      renderIndexedSpans("jsuw-new-grid", card.rawValue || card.stat, 100),
+      '<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderRepeatBody(card) {
+    var percent = Math.max(0, Math.min(numberValue(card.stat), 100));
+    var circumference = 565.49;
+    var dash = (circumference * percent / 100).toFixed(2);
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-donut">',
+      '<svg viewBox="0 0 240 240" aria-hidden="true">',
+      '<circle class="jsuw-donut-track" cx="120" cy="120" r="90"></circle>',
+      '<circle class="jsuw-donut-fill" cx="120" cy="120" r="90" style="--dash:' + dash + ';--gap:' + (circumference - dash).toFixed(2) + '"></circle>',
+      "</svg>",
+      '<div class="jsuw-donut-center">',
+      renderStatNumber(card, "jsuw-donut-number"),
+      '<span>came back for more</span>',
+      "</div>",
+      "</div>",
+      '<div class="jsuw-mini-stat-row">',
+      '<div><strong>' + escapeHtml(formatNumber(card.repeatCount || 0)) + "</strong><span>came twice or more</span></div>",
+      '<div><strong>' + escapeHtml(card.stat) + "</strong><span>return rate</span></div>",
+      "</div>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderBiggestBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-ticket">',
+      '<div class="jsuw-ticket-row"><span>The big one</span><strong>' + escapeHtml(card.month || "JSU") + "</strong></div>",
+      '<div class="jsuw-ticket-title">' + htmlWithBreaks(String(card.eventName || "Biggest event").replace(/\s+/, "\n")) + "</div>",
+      '<div class="jsuw-ticket-divider"></div>',
+      '<div class="jsuw-ticket-stats">',
+      '<div><span>Showed up</span>' + renderStatNumber(card, "jsuw-ticket-number") + "</div>",
+      '<div><span>Schools</span><strong>' + escapeHtml(formatNumber(card.schoolsRepresented || 0)) + "</strong></div>",
+      "</div>",
+      "</div>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderPersonaBody(card) {
+    var tags = card.tags && card.tags.length ? card.tags.slice(0, 4) : [card.badge || "JSU energy"];
+    var tagHtml = tags.map(function (tag, index) {
+      return '<span style="--i:' + index + '">' + escapeHtml(tag) + "</span>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-persona-card">',
+      '<div class="jsuw-smile-face" aria-hidden="true"><span></span></div>',
+      '<div class="jsuw-pass-kicker">Builds community</div>',
+      '<div class="jsuw-persona-title">' + escapeHtml(card.persona || "The Momentum Maker") + "</div>",
+      '<p>' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>",
+      '<div class="jsuw-tag-cloud">' + tagHtml + "</div>"
+    ].join(""));
+  }
+
+  function renderMovementBody(card) {
+    var statHtml = (card.stats || []).map(function (stat, index) {
+      return '<li style="--i:' + index + '"><strong>' + escapeHtml(stat.value) + "</strong><span>" + escapeHtml(stat.label) + "</span></li>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-orbit" aria-hidden="true">',
+      '<span class="jsuw-orbit-ring jsuw-orbit-ring--outer"></span>',
+      '<span class="jsuw-orbit-ring jsuw-orbit-ring--inner"></span>',
+      '<span class="jsuw-orbit-core">' + escapeHtml(card.chapterName || "JSU") + "</span>",
+      "</div>",
+      '<ul class="jsuw-movement-list jsuw-movement-list--reference">' + statHtml + "</ul>",
+      '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>"
+    ].join(""));
+  }
+
+  function renderFinalBody(card) {
+    var stats = (card.summaryStats || []).map(function (stat, index) {
+      return '<div style="--i:' + index + '"><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-share-poster">',
+      renderBrandLockup(card),
+      '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<p class="jsuw-share-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      '<div class="jsuw-share-stats">' + stats + "</div>",
+      '<div class="jsuw-share-energy">' + escapeHtml(card.persona || "JSU energy") + "</div>",
+      '<div class="jsuw-share-school">' + escapeHtml((card.schoolName || "JSU") + " - " + (card.yearLabel || "This year")) + "</div>",
+      "</div>",
+      '<div class="jsuw-final-actions">',
+      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share this recap</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>',
+      '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenTop(card) {
+    return [
+      '<div class="jsuw-teen-proof">Teen test version</div>',
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.eyebrow || "Teen Wrapped") + "</div>"
+    ].join("");
+  }
+
+  function renderTeenCoverBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-cover-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title jsuw-teen-title--cover">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-teen-marker">' + escapeHtml(card.chapterName || "JSU") + "</div>",
+      '<p>' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenAttendanceBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-attendance-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-teen-big-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + "</div>",
+      '<div class="jsuw-teen-bars" aria-hidden="true">' + Array.from({ length: Math.max(0, Math.min(card.rawValue || 0, 18)) }).map(function (_, index) {
+        return '<span style="--i:' + index + '"></span>';
+      }).join("") + "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenTicketBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-ticket-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">It started<br>with...</h2>',
+      '<div class="jsuw-teen-ticket">',
+      '<span>Admit one</span>',
+      '<strong>' + escapeHtml(card.eventName || "JSU Kickoff") + "</strong>",
+      '<dl><div><dt>Date</dt><dd>' + escapeHtml(card.eventDate || "This year") + "</dd></div>",
+      '<div><dt>Place</dt><dd>' + escapeHtml(card.eventLocation || "JSU") + "</dd></div></dl>",
+      "</div>",
+      '<div class="jsuw-teen-stamp">First moment</div>',
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenStreakBody(card) {
+    var count = Math.max(0, Math.min(numberValue(card.stat), 8));
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-streak-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-teen-flame" aria-hidden="true"><span></span></div>',
+      '<div class="jsuw-teen-streak-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + "</div>",
+      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>âœ“</span>"; }).join("") + "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenVibeBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-vibe-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">Your top<br>vibe was...</h2>',
+      '<div class="jsuw-teen-sticker-card"><em>#1 program type</em><strong>' + escapeHtml(card.vibe || "Social + Jewish Culture") + "</strong></div>",
+      '<div class="jsuw-teen-icon-row"><span>Bagels</span><span>Friends</span><span>Culture</span></div>',
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenConnectorBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-connector-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">You\'re<br><span>' + escapeHtml(card.persona || "The Connector") + ".</span></h2>",
+      '<div class="jsuw-teen-network" aria-hidden="true"><span class="jsuw-teen-node jsuw-teen-node--center">you</span><span></span><span></span><span></span><span></span><span></span></div>',
+      '<div class="jsuw-teen-mini-stats"><div><strong>' + escapeHtml(card.friendsBrought || "0") + "</strong><span>friends brought</span></div><div><strong>" + escapeHtml(card.schoolsInRoom || "0") + "</strong><span>schools in your room</span></div></div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenDepthBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-depth-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">You made room<br>for deeper<br>moments too.</h2>',
+      '<div class="jsuw-teen-split-stats">',
+      '<div><span>Shabbatons</span><strong>' + escapeHtml(card.shabbatons || "0") + "</strong><em>weekends away</em></div>",
+      '<div><span>Learning</span><strong>' + escapeHtml(card.learningSessions || "0") + "</strong><em>sessions deep</em></div>",
+      "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.leadershipMoments || "0") + " leadership moments too. " + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenChapterBody(card) {
+    var stats = (card.summaryStats || []).map(function (stat, index) {
+      return '<div style="--i:' + index + '"><strong>' + escapeHtml(stat.value) + "</strong><span>" + escapeHtml(stat.label) + "</span></div>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-chapter-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">' + escapeHtml(card.chapterName || "Your chapter") + '<br>had a <span>big</span><br>year.</h2>',
+      '<div class="jsuw-teen-stat-grid">' + stats + "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenMovementBody(card) {
+    var stats = (card.stats || []).map(function (stat) {
+      return '<li><strong>' + escapeHtml(stat.value) + "</strong><span>" + escapeHtml(stat.label) + "</span></li>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-movement-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">You were part of<br>something <span>much bigger.</span></h2>',
+      '<div class="jsuw-teen-orbit" aria-hidden="true"><span>you</span></div>',
+      '<ul class="jsuw-teen-movement-stats">' + stats + "</ul>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenShareBody(card) {
+    var stats = (card.summaryStats || []).map(function (stat) {
+      return '<div><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-share-scene">',
+      '<div class="jsuw-teen-share-poster">',
+      renderBrandLockup(card),
+      '<div class="jsuw-teen-proof">Teen test version</div>',
+      '<h2>' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<p>' + escapeHtml(card.subtext || "") + "</p>",
+      '<div class="jsuw-teen-share-stats">' + stats + "</div>",
+      '<div class="jsuw-teen-share-persona">' + escapeHtml(card.persona || "The Connector") + "</div>",
+      '<footer>' + escapeHtml((card.teenName || "Maya") + " - " + (card.chapterName || "JSU") + " - " + (card.yearLabel || "This year")) + "</footer>",
+      "</div>",
+      '<div class="jsuw-final-actions">',
+      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download</button>',
+      '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
+      "</div>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderTeenBody(card) {
+    if (card.theme === "teen-cover") {
+      return renderTeenCoverBody(card);
+    }
+
+    if (card.theme === "teen-attendance") {
+      return renderTeenAttendanceBody(card);
+    }
+
+    if (card.theme === "teen-ticket") {
+      return renderTeenTicketBody(card);
+    }
+
+    if (card.theme === "teen-streak") {
+      return renderTeenStreakBody(card);
+    }
+
+    if (card.theme === "teen-vibe") {
+      return renderTeenVibeBody(card);
+    }
+
+    if (card.theme === "teen-connector") {
+      return renderTeenConnectorBody(card);
+    }
+
+    if (card.theme === "teen-depth") {
+      return renderTeenDepthBody(card);
+    }
+
+    if (card.theme === "teen-chapter") {
+      return renderTeenChapterBody(card);
+    }
+
+    if (card.theme === "teen-movement") {
+      return renderTeenMovementBody(card);
+    }
+
+    if (card.theme === "teen-share") {
+      return renderTeenShareBody(card);
+    }
+
+    return "";
+  }
+
+  function renderCardBody(card) {
+    if (String(card.theme || "").indexOf("teen-") === 0) {
+      return renderTeenBody(card);
+    }
+
+    if (card.theme === "cover") {
+      return renderCoverBody(card);
+    }
+
+    if (card.theme === "events") {
+      return renderEventsBody(card);
+    }
+
+    if (card.theme === "reach") {
+      return renderReachBody(card);
+    }
+
+    if (card.theme === "moments") {
+      return renderMomentsBody(card);
+    }
+
+    if (card.theme === "new") {
+      return renderNewBody(card);
+    }
+
+    if (card.theme === "repeat") {
+      return renderRepeatBody(card);
+    }
+
+    if (card.theme === "biggest") {
+      return renderBiggestBody(card);
+    }
+
+    if (card.theme === "persona") {
+      return renderPersonaBody(card);
+    }
+
+    if (card.theme === "movement") {
+      return renderMovementBody(card);
+    }
+
+    if (card.theme === "final") {
+      return renderFinalBody(card);
+    }
+
+    var headlineClass = "jsuw-headline";
+    var statClass = "jsuw-stat-number";
+
+    if (card.headline.length > 58) {
+      headlineClass += " jsuw-headline--dense";
+    } else if (card.headline.length > 40) {
+      headlineClass += " jsuw-headline--compact";
+    }
+
+    if (hasValue(card.stat) && String(card.stat).length > 6) {
+      statClass += " jsuw-stat-number--compact";
+    }
+
+    var html = [
+      '<div class="jsuw-card-main">',
+      renderBrandLockup(card),
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.eyebrow || "JSU Wrapped") + "</div>",
+      '<h2 class="' + headlineClass + '">' + escapeHtml(card.headline) + "</h2>"
+    ];
+
+    if (card.type === "stat") {
+      html.push(
+        '<div class="jsuw-stat-lockup" aria-hidden="true">',
+        renderStatPattern(card),
+        renderStatNumber(card, statClass),
+        '<div class="jsuw-stat-label">' + escapeHtml(card.statLabel || "") + "</div>",
+        "</div>"
+      );
+    }
+
+    if (card.type === "movement") {
+      html.push('<ul class="jsuw-movement-list">');
+      card.stats.forEach(function (stat) {
+        html.push(
+          '<li><strong>' + escapeHtml(stat.value) + "</strong><span>" + escapeHtml(stat.label) + "</span></li>"
+        );
+      });
+      html.push("</ul>");
+    }
+
+    if (hasValue(card.subtext)) {
+      html.push('<p class="jsuw-subtext">' + escapeHtml(card.subtext) + "</p>");
+    }
+
+    if (hasValue(card.badge)) {
+      html.push('<div class="jsuw-badge">' + escapeHtml(card.badge) + "</div>");
+    }
+
+    if (card.type === "final") {
+      html.push(
+        '<div class="jsuw-final-actions">',
+        '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share this recap</button>',
+        '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>',
+        '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
+        "</div>"
+      );
+    }
+
+    html.push("</div>");
+
+    return html.join("");
+  }
+
+  function renderError(container, headline, message) {
+    container.innerHTML = [
+      '<div class="jsuw-shell jsuw-shell--error">',
+      '<section class="jsuw-error" role="status">',
+      '<div class="jsuw-eyebrow">JSU Wrapped</div>',
+      '<h2 class="jsuw-headline">' + escapeHtml(headline) + "</h2>",
+      '<p class="jsuw-subtext">' + escapeHtml(message) + "</p>",
+      "</section>",
+      "</div>"
+    ].join("");
+  }
+
+  function setStatus(container, message) {
+    var status = container.querySelector("[data-jsuw-status]");
+
+    if (status) {
+      status.textContent = message;
+    }
+  }
+
+  function renderSoundToggle(state) {
+    var label = state && state.soundEnabled ? "Sound on" : "Sound off";
+
+    return '<button class="jsuw-sound-toggle" type="button" data-jsuw-action="sound" aria-pressed="' + (state && state.soundEnabled ? "true" : "false") + '">' + label + "</button>";
+  }
+
+  function renderAutoplayToggle(state) {
+    var enabled = Boolean(state && state.autoplayEnabled);
+    var label = enabled ? "Auto on" : "Auto off";
+
+    return '<button class="jsuw-autoplay-toggle" type="button" data-jsuw-action="autoplay" aria-pressed="' + (enabled ? "true" : "false") + '">' + label + "</button>";
+  }
+
+  function renderStoryMarkup(state) {
+    var card = state.cards[state.index];
+    var total = state.cards.length;
+    var cardNumber = state.index + 1;
+    var nextLabel = state.index === total - 1 ? "Replay" : "Next";
+    var autoplayActive = Boolean(state.autoplayEnabled && state.index < total - 1);
+    var storyClass = "jsuw-story jsuw-story-theme-" + escapeHtml(card.theme) + (autoplayActive ? " jsuw-story--autoplay" : "");
+    var storyStyle = '--jsuw-progress-duration:' + escapeHtml(state.autoplayDelay || DEFAULT_AUTOPLAY_DELAY) + "ms";
+
+    return [
+      '<div class="jsuw-shell">',
+      '<section class="' + storyClass + '" style="' + storyStyle + '" tabindex="0" role="group" aria-roledescription="story" aria-label="JSU Wrapped card ' + cardNumber + " of " + total + '">',
+      '<div class="jsuw-progress" aria-hidden="true">' + renderProgress(state.index, total) + "</div>",
+      '<div class="jsuw-story-header">' + renderBrandLockup(card) + '<span class="jsuw-card-count" aria-hidden="true">' + String(cardNumber).padStart(2, "0") + " / " + String(total).padStart(2, "0") + '</span><span class="jsuw-story-tools">' + renderAutoplayToggle(state) + renderSoundToggle(state) + "</span></div>",
+      '<p class="jsuw-sr-only">Card ' + cardNumber + " of " + total + "</p>",
+      '<article class="jsuw-card jsuw-type-' + escapeHtml(card.type) + " jsuw-theme-" + escapeHtml(card.theme) + '" data-jsuw-card>',
+      renderStickerCloud(card),
+      renderCardBody(card),
+      "</article>",
+      '<div class="jsuw-tap-zones" aria-hidden="true"><span></span><span></span><span></span></div>',
+      '<div class="jsuw-controls">',
+      '<button class="jsuw-nav-button" type="button" data-jsuw-action="prev" ' + (state.index === 0 ? "disabled" : "") + '>Back</button>',
+      '<button class="jsuw-nav-button jsuw-nav-button--next" type="button" data-jsuw-action="next">' + nextLabel + "</button>",
+      "</div>",
+      "</section>",
+      "</div>"
+    ].join("");
+  }
+
+  function renderStory(container, state) {
+    container.innerHTML = renderStoryMarkup(state);
+  }
+
+  function focusStory(container) {
+    var story = container.querySelector(".jsuw-story");
+
+    if (!story) {
+      return;
+    }
+
+    try {
+      story.focus({ preventScroll: true });
+    } catch (error) {
+      story.focus();
+    }
+  }
+
+  function prefersReducedMotion() {
+    return Boolean(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function ensureSoundEngine(state) {
+    var AudioContext = root.AudioContext || root.webkitAudioContext;
+
+    if (!AudioContext) {
+      return null;
+    }
+
+    if (!state.soundEngine) {
+      state.soundEngine = new AudioContext();
+    }
+
+    if (state.soundEngine.state === "suspended" && typeof state.soundEngine.resume === "function") {
+      state.soundEngine.resume();
+    }
+
+    return state.soundEngine;
+  }
+
+  function playTone(state, frequency, duration, type, volume, delay) {
+    if (!state || !state.soundEnabled || prefersReducedMotion()) {
+      return;
+    }
+
+    var context = ensureSoundEngine(state);
+
+    if (!context) {
+      return;
+    }
+
+    var start = context.currentTime + (delay || 0);
+    var oscillator = context.createOscillator();
+    var gain = context.createGain();
+
+    oscillator.type = type || "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.05, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.02);
+  }
+
+  function getSoundProfileForCard(card) {
+    var theme = card && card.theme || "default";
+    var profiles = {
+      cover: [
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.03, delay: 0 },
+        { frequency: 494, duration: 0.11, type: "sine", volume: 0.026, delay: 0.07 },
+        { frequency: 659.25, duration: 0.16, type: "sine", volume: 0.024, delay: 0.16 }
+      ],
+      events: [
+        { frequency: 196, duration: 0.07, type: "square", volume: 0.018, delay: 0 },
+        { frequency: 247, duration: 0.08, type: "triangle", volume: 0.025, delay: 0.06 },
+        { frequency: 330, duration: 0.12, type: "sine", volume: 0.026, delay: 0.13 }
+      ],
+      reach: [
+        { frequency: 294, duration: 0.06, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 370, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.06 },
+        { frequency: 494, duration: 0.12, type: "sine", volume: 0.025, delay: 0.14 }
+      ],
+      moments: [
+        { frequency: 220, duration: 0.05, type: "square", volume: 0.016, delay: 0 },
+        { frequency: 330, duration: 0.05, type: "square", volume: 0.016, delay: 0.05 },
+        { frequency: 440, duration: 0.08, type: "triangle", volume: 0.022, delay: 0.1 },
+        { frequency: 660, duration: 0.13, type: "sine", volume: 0.021, delay: 0.17 }
+      ],
+      new: [
+        { frequency: 392, duration: 0.08, type: "triangle", volume: 0.026, delay: 0 },
+        { frequency: 523.25, duration: 0.1, type: "sine", volume: 0.024, delay: 0.08 },
+        { frequency: 784, duration: 0.14, type: "sine", volume: 0.022, delay: 0.17 }
+      ],
+      repeat: [
+        { frequency: 262, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 392, duration: 0.1, type: "triangle", volume: 0.023, delay: 0.08 },
+        { frequency: 524, duration: 0.16, type: "sine", volume: 0.021, delay: 0.16 }
+      ],
+      biggest: [
+        { frequency: 196, duration: 0.08, type: "square", volume: 0.017, delay: 0 },
+        { frequency: 392, duration: 0.09, type: "triangle", volume: 0.026, delay: 0.08 },
+        { frequency: 784, duration: 0.18, type: "sine", volume: 0.024, delay: 0.17 }
+      ],
+      persona: [
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 415, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.08 },
+        { frequency: 554, duration: 0.1, type: "sine", volume: 0.022, delay: 0.16 },
+        { frequency: 660, duration: 0.16, type: "sine", volume: 0.02, delay: 0.26 }
+      ],
+      movement: [
+        { frequency: 247, duration: 0.08, type: "triangle", volume: 0.023, delay: 0 },
+        { frequency: 370, duration: 0.08, type: "triangle", volume: 0.023, delay: 0.08 },
+        { frequency: 494, duration: 0.1, type: "sine", volume: 0.022, delay: 0.16 },
+        { frequency: 740, duration: 0.17, type: "sine", volume: 0.02, delay: 0.27 }
+      ],
+      final: [
+        { frequency: 262, duration: 0.08, type: "triangle", volume: 0.024, delay: 0 },
+        { frequency: 330, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.08 },
+        { frequency: 392, duration: 0.08, type: "triangle", volume: 0.024, delay: 0.16 },
+        { frequency: 523.25, duration: 0.14, type: "sine", volume: 0.024, delay: 0.25 },
+        { frequency: 659.25, duration: 0.2, type: "sine", volume: 0.021, delay: 0.38 }
+      ],
+      default: [
+        { frequency: 392, duration: 0.13, type: "triangle", volume: 0.035, delay: 0 },
+        { frequency: 523.25, duration: 0.16, type: "sine", volume: 0.03, delay: 0.08 }
+      ]
+    };
+
+    return (profiles[theme] || profiles.default).map(function (note) {
+      return {
+        frequency: note.frequency,
+        duration: note.duration,
+        type: note.type,
+        volume: note.volume,
+        delay: note.delay
+      };
+    });
+  }
+
+  function playSoundProfile(state, profile) {
+    profile.forEach(function (note) {
+      playTone(state, note.frequency, note.duration, note.type, note.volume, note.delay);
+    });
+  }
+
+  function playCardSound(state) {
+    var card = state && state.cards ? state.cards[state.index] : null;
+
+    playSoundProfile(state, getSoundProfileForCard(card));
+  }
+
+  function playCountSound(state, progress, target) {
+    var base = target > 999 ? 220 : 330;
+    var frequency = base + Math.round(progress * 520);
+
+    playTone(state, frequency, 0.045, "square", 0.018, 0);
+  }
+
+  function formatAnimatedStat(value, decimals, suffix) {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    }).format(value) + suffix;
+  }
+
+  function animateCountUp(element, state) {
+    var target = Number(element.getAttribute("data-jsuw-stat-target"));
+    var suffix = element.getAttribute("data-jsuw-stat-suffix") || "";
+    var decimals = Number(element.getAttribute("data-jsuw-stat-decimals") || 0);
+
+    if (!isFinite(target)) {
+      return;
+    }
+
+    if (prefersReducedMotion() || typeof root.requestAnimationFrame !== "function") {
+      element.textContent = formatAnimatedStat(target, decimals, suffix);
+      return;
+    }
+
+    var start = root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    var duration = target > 999 ? 1180 : 880;
+    var nextSoundAt = 0.08;
+
+    element.textContent = formatAnimatedStat(0, decimals, suffix);
+
+    root.requestAnimationFrame(function step(now) {
+      var elapsed = Math.max(0, now - start);
+      var progress = Math.min(elapsed / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = target * eased;
+
+      element.textContent = formatAnimatedStat(progress === 1 ? target : current, decimals, suffix);
+
+      if (state && state.soundEnabled && progress >= nextSoundAt) {
+        playCountSound(state, progress, target);
+        nextSoundAt += 0.12;
+      }
+
+      if (progress < 1) {
+        root.requestAnimationFrame(step);
+      }
+    });
+  }
+
+  function activateStory(container, state) {
+    var story = container.querySelector(".jsuw-story");
+    var countUps = container.querySelectorAll("[data-jsuw-countup]");
+
+    if (story && typeof root.requestAnimationFrame === "function") {
+      root.requestAnimationFrame(function () {
+        story.classList.add("jsuw-story--entered");
+      });
+    } else if (story) {
+      story.classList.add("jsuw-story--entered");
+    }
+
+    playCardSound(state);
+    Array.prototype.forEach.call(countUps, function (element) {
+      animateCountUp(element, state);
+    });
+
+    scheduleAutoplay(container, state);
+  }
+
+  function clearAutoplayTimer(state) {
+    if (state && state.autoplayTimer) {
+      root.clearTimeout(state.autoplayTimer);
+      state.autoplayTimer = null;
+    }
+  }
+
+  function scheduleAutoplay(container, state) {
+    clearAutoplayTimer(state);
+
+    if (!state || !state.autoplayEnabled || prefersReducedMotion()) {
+      return;
+    }
+
+    if (state.index >= state.cards.length - 1) {
+      return;
+    }
+
+    state.autoplayTimer = root.setTimeout(function () {
+      state.autoplayTimer = null;
+      next(container, state, { autoplay: true });
+    }, state.autoplayDelay || DEFAULT_AUTOPLAY_DELAY);
+  }
+
+  function goTo(container, state, nextIndex, options) {
+    var total = state.cards.length;
+    var method = options && options.autoplay ? "autoplay" : options && options.method || "manual";
+
+    clearAutoplayTimer(state);
+
+    if (nextIndex < 0) {
+      nextIndex = 0;
+    }
+
+    if (nextIndex >= total) {
+      nextIndex = 0;
+    }
+
+    if (nextIndex === state.index) {
+      scheduleAutoplay(container, state);
+      return;
+    }
+
+    trackCardEngagement(state, method);
+    state.index = nextIndex;
+    renderStory(container, state);
+    activateStory(container, state);
+    trackCardView(state, method);
+
+    if (options && options.focusStory) {
+      focusStory(container);
+    }
+  }
+
+  function previous(container, state, options) {
+    options = options || {};
+    options.method = options.method || "previous";
+    goTo(container, state, state.index - 1, options);
+  }
+
+  function next(container, state, options) {
+    options = options || {};
+    options.method = options.method || (options.autoplay ? "autoplay" : "next");
+    goTo(container, state, state.index + 1, options);
+  }
+
+  function getPointerSide(event, element) {
+    var rect = element.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+
+    return x < rect.width / 2 ? "left" : "right";
+  }
+
+  function isInteractiveTarget(target) {
+    return Boolean(target && typeof target.closest === "function" && target.closest("button, a, input, textarea, select, [role='button']"));
+  }
+
+  function getKeyNavigationAction(event) {
+    if (!event) {
+      return null;
+    }
+
+    if (event.key === " " && isInteractiveTarget(event.target)) {
+      return null;
+    }
+
+    if (event.key === "ArrowRight" || event.key === " ") {
+      return "next";
+    }
+
+    if (event.key === "ArrowLeft") {
+      return "prev";
+    }
+
+    return null;
+  }
+
+  function toggleSound(container, state) {
+    state.soundEnabled = !state.soundEnabled;
+
+    if (state.soundEnabled) {
+      ensureSoundEngine(state);
+      playTone(state, 523.25, 0.14, "triangle", 0.045, 0);
+      playTone(state, 659.25, 0.16, "sine", 0.035, 0.08);
+    }
+
+    var button = container.querySelector('[data-jsuw-action="sound"]');
+
+    if (button) {
+      button.textContent = state.soundEnabled ? "Sound on" : "Sound off";
+      button.setAttribute("aria-pressed", state.soundEnabled ? "true" : "false");
+    }
+
+    trackAnalyticsEvent(state, "jsu_wrapped_sound_toggle", {
+      sound_enabled: state.soundEnabled ? "true" : "false"
+    });
+  }
+
+  function toggleAutoplay(container, state, options) {
+    clearAutoplayTimer(state);
+    state.autoplayEnabled = !state.autoplayEnabled;
+    renderStory(container, state);
+    activateStory(container, state);
+
+    if (options && options.focusStory) {
+      focusStory(container);
+    }
+
+    trackAnalyticsEvent(state, "jsu_wrapped_autoplay_toggle", {
+      autoplay_enabled: state.autoplayEnabled ? "true" : "false"
+    });
+  }
+
+  function installInteraction(container, state) {
+    function runAction(action, options) {
+      if (action === "prev") {
+        previous(container, state, options);
+      } else if (action === "next") {
+        next(container, state, options);
+      } else if (action === "share") {
+        shareRecap(container, state);
+      } else if (action === "download") {
+        downloadRecap(container, state);
+      } else if (action === "sound") {
+        toggleSound(container, state);
+      } else if (action === "autoplay") {
+        toggleAutoplay(container, state, options);
+      }
+    }
+
+    function handleClick(event) {
+      if (!event.target || typeof event.target.closest !== "function") {
+        return;
+      }
+
+      var actionTarget = event.target.closest("[data-jsuw-action]");
+
+      if (actionTarget) {
+        var action = actionTarget.getAttribute("data-jsuw-action");
+        runAction(action);
+
+        return;
+      }
+
+      var story = event.target.closest(".jsuw-story");
+
+      if (!story || isInteractiveTarget(event.target)) {
+        return;
+      }
+
+      if (getPointerSide(event, story) === "left") {
+        previous(container, state);
+      } else {
+        next(container, state);
+      }
+    }
+
+    function handleKeydown(event) {
+      if (event.key === " " && isInteractiveTarget(event.target)) {
+        var actionTarget = event.target.closest("[data-jsuw-action]");
+
+        if (actionTarget && !actionTarget.disabled) {
+          event.preventDefault();
+          runAction(actionTarget.getAttribute("data-jsuw-action"), { focusStory: true });
+        }
+
+        return;
+      }
+
+      var action = getKeyNavigationAction(event);
+
+      if (action === "next") {
+        event.preventDefault();
+        next(container, state, { focusStory: true });
+      } else if (action === "prev") {
+        event.preventDefault();
+        previous(container, state, { focusStory: true });
+      }
+    }
+
+    container.addEventListener("click", handleClick);
+    container.addEventListener("keydown", handleKeydown);
+
+    function handlePageHide() {
+      trackCardEngagement(state, "pagehide");
+    }
+
+    if (root.addEventListener) {
+      root.addEventListener("pagehide", handlePageHide);
+    }
+
+    return function cleanupInteraction() {
+      trackCardEngagement(state, "cleanup");
+      clearAutoplayTimer(state);
+      container.removeEventListener("click", handleClick);
+      container.removeEventListener("keydown", handleKeydown);
+
+      if (root.removeEventListener) {
+        root.removeEventListener("pagehide", handlePageHide);
+      }
+    };
+  }
+
+  function shareText(state) {
+    var record = state.record;
+
+    if (state && state.experienceMode === "teen") {
+      var teenName = asText(record.teen_name || record.student_name, "Maya");
+
+      return [
+        teenName + "'s JSU Wrapped:",
+        hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
+        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
+        hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
+        hasValue(record.persona) ? asText(record.persona) + " energy" : ""
+      ].filter(Boolean).join(" - ");
+    }
+
+    var chapterName = asText(record.chapter_name, "Our JSU chapter");
+
+    return [
+      chapterName + " Wrapped:",
+      hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+      hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+      hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " engagement moments" : "",
+      hasValue(record.chapter_persona) ? asText(record.chapter_persona) + " energy" : ""
+    ].filter(Boolean).join(" - ");
+  }
+
+  async function shareRecap(container, state) {
+    var metadata = createPageMetadata(state);
+    var data = {
+      title: metadata.title,
+      text: shareText(state),
+      url: root.location ? root.location.href : ""
+    };
+
+    trackAnalyticsEvent(state, "jsu_wrapped_share_click", {
+      share_method: root.navigator && typeof root.navigator.share === "function" ? "native" : "fallback"
+    });
+
+    try {
+      if (root.navigator && typeof root.navigator.share === "function") {
+        await root.navigator.share(data);
+        setStatus(container, "Shared.");
+        return;
+      }
+
+      if (root.navigator && root.navigator.clipboard && typeof root.navigator.clipboard.writeText === "function") {
+        await root.navigator.clipboard.writeText([data.text, data.url].filter(Boolean).join("\n"));
+        setStatus(container, "Recap copied.");
+        return;
+      }
+
+      setStatus(container, "Copy this page link to share your recap.");
+    } catch (error) {
+      setStatus(container, "Share was canceled.");
+    }
+  }
+
+  function downloadBlob(container, blob, filename) {
+    var url = root.URL.createObjectURL(blob);
+    var link = root.document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    link.rel = "noopener";
+    container.appendChild(link);
+    link.click();
+    link.remove();
+    root.setTimeout(function () {
+      root.URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
+  function svgLine(text, x, y, size, weight, fill) {
+    return '<text x="' + x + '" y="' + y + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(text) + "</text>";
+  }
+
+  function splitSvgLines(value, maxChars, maxLines) {
+    var words = String(value || "").replace(/\s+/g, " ").trim().split(" ");
+    var lines = [];
+    var current = "";
+
+    words.forEach(function (word) {
+      var next = current ? current + " " + word : word;
+
+      if (current && next.length > maxChars) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = next;
+      }
+    });
+
+    if (current) {
+      lines.push(current);
+    }
+
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/\s+$/, "") + "...";
+    }
+
+    return lines.length ? lines : [""];
+  }
+
+  function svgTextLines(lines, x, y, size, weight, fill, lineHeight, className) {
+    return lines.map(function (line, index) {
+      return '<text class="' + escapeXml(className || "") + '" x="' + x + '" y="' + (y + index * lineHeight) + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(line) + "</text>";
+    }).join("");
+  }
+
+  function getFinalCard(state) {
+    var cards = state && state.cards || [];
+
+    for (var index = 0; index < cards.length; index += 1) {
+      if (cards[index] && cards[index].theme === "final") {
+        return cards[index];
+      }
+    }
+
+    return cards[cards.length - 1] || {};
+  }
+
+  function createFallbackConfetti() {
+    var colors = ["#fff7a9", "#00d9ff", "#ff4f9a", "#7cff6b", "#ffb000", "#ffffff"];
+    var pieces = [];
+
+    for (var index = 0; index < 54; index += 1) {
+      var x = 34 + ((index * 89) % 1012);
+      var y = 56 + ((index * 137) % 1700);
+      var rotate = (index * 29) % 180;
+      var fill = colors[index % colors.length];
+
+      if (index % 5 === 0) {
+        pieces.push('<circle cx="' + x + '" cy="' + y + '" r="' + (7 + index % 9) + '" fill="' + fill + '" opacity="0.88"/>');
+      } else {
+        pieces.push('<rect x="' + x + '" y="' + y + '" width="' + (16 + index % 13) + '" height="' + (7 + index % 8) + '" rx="4" fill="' + fill + '" opacity="0.9" transform="rotate(' + rotate + " " + x + " " + y + ')"/>');
+      }
+    }
+
+    return '<g class="confetti" aria-hidden="true">' + pieces.join("") + "</g>";
+  }
+
+  function fallbackLogoMarkup(brand, logoDataUrl) {
+    var brandText = brand === "ncsy" ? "NCSY" : "JSU";
+
+    if (hasValue(logoDataUrl)) {
+      return [
+        '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+        '<image href="' + escapeXml(logoDataUrl) + '" x="100" y="114" width="124" height="124" preserveAspectRatio="xMidYMid meet"/>'
+      ].join("");
+    }
+
+    return [
+      '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+      svgLine(brandText, 112, 192, brand === "ncsy" ? 40 : 56, 900, "#ffffff")
+    ].join("");
+  }
+
+  function fallbackStatRows(stats) {
+    return (stats || []).slice(0, 5).map(function (stat, index) {
+      var y = 1010 + index * 128;
+
+      return [
+        '<g transform="translate(92 ' + y + ')">',
+        '<rect width="896" height="96" rx="28" fill="#ffffff" opacity="' + (index % 2 ? "0.16" : "0.22") + '"/>',
+        '<text x="34" y="64" font-size="54" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.value) + "</text>",
+        '<text x="310" y="60" font-size="32" font-weight="800" fill="#fff4b7" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.label) + "</text>",
+        "</g>"
+      ].join("");
+    }).join("");
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (resolve) {
+      if (!root.FileReader) {
+        resolve("");
+        return;
+      }
+
+      var reader = new root.FileReader();
+
+      reader.onloadend = function () {
+        resolve(String(reader.result || ""));
+      };
+      reader.onerror = function () {
+        resolve("");
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function fetchImageDataUrl(url) {
+    if (!hasValue(url) || !root.fetch) {
+      return "";
+    }
+
+    try {
+      var response = await root.fetch(url, { credentials: "same-origin" });
+
+      if (!response.ok) {
+        return "";
+      }
+
+      return await blobToDataUrl(await response.blob());
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function createFallbackSvg(state, logoDataUrl) {
+    var record = state.record || {};
+    var card = getFinalCard(state);
+    var isTeen = state && state.experienceMode === "teen";
+    var teenName = asText(record.teen_name || record.student_name || record.first_name, "Maya");
+    var chapterName = isTeen ? teenName + "'s JSU" : asText(record.chapter_name, "JSU Wrapped");
+    var persona = isTeen ? asText(card.persona || record.persona, "JSU energy") : asText(card.persona || record.chapter_persona, "JSU energy");
+    var year = asText(card.yearLabel || record.year_label || record.school_year, "This year");
+    var brand = card.brandChoice === "ncsy" || getBrandChoice(record) === "ncsy" ? "ncsy" : "jsu";
+    var headlineLines = splitSvgLines(chapterName, 16, 3).concat(["Wrapped"]);
+    var summaryLines = splitSvgLines(card.subtext || [
+      hasValue(record.events_hosted || record.events_attended) ? formatNumber(record.events_hosted || record.events_attended) + " events" : "",
+      hasValue(record.unique_teens || record.longest_streak) ? formatNumber(record.unique_teens || record.longest_streak) + (isTeen ? " event streak" : " teens") : "",
+      hasValue(record.engagement_moments || record.friends_brought) ? formatNumber(record.engagement_moments || record.friends_brought) + (isTeen ? " friends brought" : " moments") : "",
+      persona + " energy"
+    ].filter(Boolean).join(". ") + ".", 28, 3);
+    var stats = card.summaryStats || [
+      hasValue(record.events_hosted || record.events_attended) ? { value: formatNumber(record.events_hosted || record.events_attended), label: isTeen ? "events showed up to" : "programs together" } : null,
+      hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one chapter" } : null,
+      hasValue(record.engagement_moments || record.friends_brought) ? { value: formatNumber(record.engagement_moments || record.friends_brought), label: isTeen ? "friends brought" : "moments stacked up" } : null
+    ].filter(Boolean);
+
+    return [
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">',
+      "<title>" + escapeXml(chapterName + " Wrapped - " + persona) + "</title>",
+      "<defs>",
+      '<linearGradient id="posterBg" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#1019aa"/><stop offset="0.38" stop-color="#6928ff"/><stop offset="0.7" stop-color="#ff3b91"/><stop offset="1" stop-color="#ffc400"/></linearGradient>',
+      '<radialGradient id="posterGlow" cx="50%" cy="34%" r="65%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/><stop offset="0.52" stop-color="#ffffff" stop-opacity="0.05"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>',
+      '<filter id="posterShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#18002e" flood-opacity="0.35"/></filter>',
+      '<style>.poster-headline{letter-spacing:-1px}.confetti{mix-blend-mode:screen}</style>',
+      "</defs>",
+      '<rect width="1080" height="1920" rx="92" fill="url(#posterBg)"/>',
+      '<rect width="1080" height="1920" rx="92" fill="url(#posterGlow)"/>',
+      '<path d="M-120 420 C180 210 320 680 650 390 C850 216 1020 254 1200 90" fill="none" stroke="#ffffff" stroke-width="26" opacity="0.15"/>',
+      '<path d="M-80 1510 C270 1330 438 1745 778 1430 C936 1284 1020 1302 1188 1190" fill="none" stroke="#00d9ff" stroke-width="30" opacity="0.18"/>',
+      createFallbackConfetti(),
+      '<rect x="52" y="60" width="976" height="1800" rx="76" fill="#16032f" opacity="0.74" stroke="#ffffff" stroke-width="8" filter="url(#posterShadow)"/>',
+      '<circle cx="914" cy="220" r="122" fill="#fff4b7" opacity="0.22"/>',
+      '<circle cx="166" cy="1574" r="164" fill="#00d9ff" opacity="0.19"/>',
+      fallbackLogoMarkup(brand, logoDataUrl),
+      svgLine(brand === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped", 274, 160, 48, 900, "#ffffff"),
+      svgLine(year, 276, 220, 34, 800, "#fff4b7"),
+      svgTextLines(headlineLines, 92, 430, 96, 900, "#ffffff", 104, "poster-headline"),
+      '<rect x="92" y="770" width="640" height="82" rx="41" fill="#fff4b7" opacity="0.96"/>',
+      svgLine(persona + " energy", 126, 826, 40, 900, "#16032f"),
+      svgTextLines(summaryLines, 92, 930, 43, 800, "#ffffff", 58, "poster-copy"),
+      fallbackStatRows(stats),
+      '<rect x="92" y="1718" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
+      svgLine(asText(record.region_name, "One movement") + " - One chapter. One movement.", 126, 1766, 31, 800, "#ffffff"),
+      "</svg>"
+    ].join("");
+  }
+
+  async function downloadRecap(container, state) {
+    var filename = state && state.experienceMode === "teen" ? slugify(state.record.teen_slug || state.record.student_slug || state.record.teen_name || "teen-test") + "-teen-wrapped.svg" : slugify(state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
+    var card = container.querySelector("[data-jsuw-card]");
+    var finalCard = getFinalCard(state);
+
+    trackAnalyticsEvent(state, "jsu_wrapped_download_click", {
+      download_format: root.html2canvas && card ? "png" : "svg"
+    });
+
+    async function downloadSvgFallback() {
+      var logoDataUrl = await fetchImageDataUrl(finalCard.logoUrl);
+      var svg = createFallbackSvg(state, logoDataUrl);
+      downloadBlob(container, new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), filename);
+      setStatus(container, "Image downloaded.");
+    }
+
+    try {
+      if (root.html2canvas && card) {
+        var canvas = await root.html2canvas(card, {
+          backgroundColor: null,
+          scale: 2,
+          useCORS: true
+        });
+
+        if (typeof canvas.toBlob !== "function") {
+          await downloadSvgFallback();
+          return;
+        }
+
+        canvas.toBlob(function (blob) {
+          if (blob) {
+            downloadBlob(container, blob, filename.replace(/\.svg$/, ".png"));
+            setStatus(container, "Image downloaded.");
+          } else {
+            downloadSvgFallback().catch(function () {
+              setStatus(container, "Take a screenshot to save this recap.");
+            });
+          }
+        }, "image/png");
+        return;
+      }
+
+      await downloadSvgFallback();
+    } catch (error) {
+      try {
+        await downloadSvgFallback();
+      } catch (fallbackError) {
+        setStatus(container, "Take a screenshot to save this recap.");
+      }
+    }
+  }
+
+  async function fetchRecords(url) {
+    var response = await root.fetch(url, { credentials: "same-origin" });
+
+    if (!response.ok) {
+      throw new Error("Could not load " + url);
+    }
+
+    return response.json();
+  }
+
+  async function init(container, options) {
+    var target = container || (root.document && root.document.getElementById(WIDGET_ID));
+    var settings = options || {};
+
+    if (!target) {
+      return null;
+    }
+
+    if (target.__jsuWrappedCleanup) {
+      target.__jsuWrappedCleanup();
+      target.__jsuWrappedCleanup = null;
+    }
+
+    target.innerHTML = '<div class="jsuw-shell"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
+
+    try {
+      var assetBase = getAssetBase(target, settings);
+      var experienceMode = getExperienceMode(settings.url, settings);
+
+      if (experienceMode === "teen") {
+        var teenDataUrl = settings.teenDataUrl || getTeenDataUrl(target);
+        var teenRecords = settings.teenRecords || await fetchRecords(teenDataUrl);
+        var teenSlug = settings.teen || getTeenSlug(settings.url);
+        var teen = findTeen(teenRecords, teenSlug);
+
+        if (!teen) {
+          renderError(
+            target,
+            "We could not find that teen test record.",
+            "This proof-of-concept uses sample data only. Try the teen test link from the main page."
+          );
+          return null;
+        }
+
+        var teenState = {
+          cards: createTeenCards(teen, { assetBase: assetBase }),
+          record: teen,
+          experienceMode: "teen",
+          analyticsEnabled: getAnalyticsPreference(target, settings),
+          analyticsYear: getAnalyticsYear(target, settings, teen),
+          autoplayEnabled: getAutoplayPreference(target, settings),
+          autoplayDelay: getAutoplayDelay(target, settings),
+          autoplayTimer: null,
+          storyStartedAt: null,
+          cardStartedAt: null,
+          storyCompletedAt: null,
+          soundEnabled: false,
+          soundEngine: null
+        };
+        teenState.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, teenState.cards.length);
+
+        target.__jsuWrappedCleanup = installInteraction(target, teenState);
+        applyPageMetadata(teenState);
+        renderStory(target, teenState);
+        activateStory(target, teenState);
+        trackStoryView(teenState, "initial");
+        return teenState;
+      }
+
+      var dataUrl = settings.dataUrl || getDataUrl(target);
+      var records = settings.records || await fetchRecords(dataUrl);
+      var chapterSlug = settings.chapter || getChapterSlug(settings.url);
+
+      if (!hasValue(chapterSlug)) {
+        renderChapterPicker(target, {
+          records: records,
+          year: target.dataset && target.dataset.year,
+          region: settings.region || getRegionParam(settings.url),
+          url: settings.url,
+          assetBase: assetBase
+        });
+        return {
+          picker: true,
+          records: records
+        };
+      }
+
+      var chapter = findChapter(records, chapterSlug);
+
+      if (!chapter) {
+        renderError(
+          target,
+          "We could not find that chapter.",
+          "Check the chapter link or ask your JSU or NCSY team for the right Wrapped URL."
+        );
+        return null;
+      }
+
+      var state = {
+        cards: createCards(chapter, { assetBase: assetBase }),
+        record: chapter,
+        experienceMode: "chapter",
+        analyticsEnabled: getAnalyticsPreference(target, settings),
+        analyticsYear: getAnalyticsYear(target, settings, chapter),
+        autoplayEnabled: getAutoplayPreference(target, settings),
+        autoplayDelay: getAutoplayDelay(target, settings),
+        autoplayTimer: null,
+        storyStartedAt: null,
+        cardStartedAt: null,
+        storyCompletedAt: null,
+        soundEnabled: false,
+        soundEngine: null
+      };
+      state.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, state.cards.length);
+
+      target.__jsuWrappedCleanup = installInteraction(target, state);
+      applyPageMetadata(state);
+      renderStory(target, state);
+      activateStory(target, state);
+      trackStoryView(state, "initial");
+      return state;
+    } catch (error) {
+      renderError(
+        target,
+        "We could not load the Wrapped data.",
+        "Try refreshing the page. If you opened this file directly, use a small local web server so the JSON file can be fetched."
+      );
+      return null;
+    }
+  }
+
+  function autoInit() {
+    var doc = root.document;
+
+    if (!doc) {
+      return;
+    }
+
+    if (doc.readyState === "loading") {
+      doc.addEventListener("DOMContentLoaded", function () {
+        init();
+      }, { once: true });
+    } else {
+      init();
+    }
+  }
+
+  autoInit();
+
+  return {
+    createCards: createCards,
+    findChapter: findChapter,
+    formatNumber: formatNumber,
+    getStatAnimationConfig: getStatAnimationConfig,
+    getKeyNavigationAction: getKeyNavigationAction,
+    getChapterSlug: getChapterSlug,
+    getRegionParam: getRegionParam,
+    getTeenSlug: getTeenSlug,
+    getExperienceMode: getExperienceMode,
+    getDataUrl: getDataUrl,
+    getTeenDataUrl: getTeenDataUrl,
+    getBrandChoice: getBrandChoice,
+    getSoundProfileForCard: getSoundProfileForCard,
+    getAutoplayPreference: getAutoplayPreference,
+    getAutoplayDelay: getAutoplayDelay,
+    getInitialCardIndex: getInitialCardIndex,
+    getAnalyticsPreference: getAnalyticsPreference,
+    createAnalyticsPayload: createAnalyticsPayload,
+    createPageMetadata: createPageMetadata,
+    applyPageMetadata: applyPageMetadata,
+    trackAnalyticsEvent: trackAnalyticsEvent,
+    trackCardEngagement: trackCardEngagement,
+    trackCardView: trackCardView,
+    trackStoryView: trackStoryView,
+    buildChapterUrl: buildChapterUrl,
+    buildRegionUrl: buildRegionUrl,
+    buildTeenUrl: buildTeenUrl,
+    createFallbackSvg: createFallbackSvg,
+    createTeenCards: createTeenCards,
+    findTeen: findTeen,
+    init: init,
+    renderCardBody: renderCardBody,
+    renderChapterPickerMarkup: renderChapterPickerMarkup,
+    renderStoryMarkup: renderStoryMarkup
+  };
+});
+</script>
