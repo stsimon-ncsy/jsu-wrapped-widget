@@ -16,7 +16,7 @@
       <span>|</span>
       <a href="/standards/">Behavioral Standards</a>
       <span>|</span>
-      <a href="/cookie-policy/">Cookie Policy</a>
+      <button type="button" data-jsuw-cookie-preferences data-fallback-href="/privacy-policy/">Cookie Policy</button>
     </nav>
   </main>
 </div>
@@ -73,13 +73,23 @@
   text-transform: uppercase;
 }
 
-#jsu-wrapped-wordpress-shell .jsuw-legal a {
+#jsu-wrapped-wordpress-shell .jsuw-legal a,
+#jsu-wrapped-wordpress-shell .jsuw-legal button {
+  appearance: none;
+  background: transparent;
+  border: 0;
   color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
   text-decoration: none;
+  text-transform: inherit;
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-legal a:hover,
-#jsu-wrapped-wordpress-shell .jsuw-legal a:focus-visible {
+#jsu-wrapped-wordpress-shell .jsuw-legal a:focus-visible,
+#jsu-wrapped-wordpress-shell .jsuw-legal button:hover,
+#jsu-wrapped-wordpress-shell .jsuw-legal button:focus-visible {
   color: #ffb81b;
   text-decoration: underline;
 }
@@ -3880,6 +3890,44 @@
 </style>
 
 <script>
+(function () {
+  function getOsanoManager() {
+    if (window.Osano && window.Osano.cm) {
+      return window.Osano.cm;
+    }
+
+    if (window.osano && window.osano.cm) {
+      return window.osano.cm;
+    }
+
+    return null;
+  }
+
+  document.addEventListener("click", function (event) {
+    var trigger = event.target.closest && event.target.closest("[data-jsuw-cookie-preferences]");
+
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+
+    var manager = getOsanoManager();
+
+    if (manager && typeof manager.showDrawer === "function") {
+      manager.showDrawer("osano-cm-dom-info-dialog-open");
+      return;
+    }
+
+    if (manager && typeof manager.emit === "function") {
+      manager.emit("osano-cm-dom-info-dialog-open");
+      return;
+    }
+
+    window.location.href = trigger.getAttribute("data-fallback-href") || "/privacy-policy/";
+  });
+})();
+
 (function (root, factory) {
   var api = factory(root);
 
