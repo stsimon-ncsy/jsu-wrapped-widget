@@ -4033,6 +4033,7 @@
   var WIDGET_ID = "jsu-wrapped";
   var SCRIPT_SRC = root && root.document && root.document.currentScript ? root.document.currentScript.src : "";
   var DEFAULT_AUTOPLAY_DELAY = 5200;
+  var SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
 
   function hasValue(value) {
     return value !== null && value !== undefined && String(value).trim() !== "";
@@ -4713,7 +4714,8 @@
 
     return {
       title: brandLabel + " - " + chapterName,
-      description: descriptionParts.join(" ")
+      description: descriptionParts.join(" "),
+      image: SOCIAL_IMAGE_URL
     };
   }
 
@@ -4755,6 +4757,15 @@
     }
 
     setDocumentMeta(doc, "property", "og:type", "website");
+    setDocumentMeta(doc, "name", "twitter:card", "summary_large_image");
+
+    if (hasValue(metadata.image)) {
+      setDocumentMeta(doc, "property", "og:image", metadata.image);
+      setDocumentMeta(doc, "property", "og:image:secure_url", metadata.image);
+      setDocumentMeta(doc, "property", "og:image:width", "1200");
+      setDocumentMeta(doc, "property", "og:image:height", "630");
+      setDocumentMeta(doc, "name", "twitter:image", metadata.image);
+    }
 
     if (root.location && hasValue(root.location.href)) {
       setDocumentMeta(doc, "property", "og:url", root.location.href);
@@ -6757,15 +6768,36 @@
     ].join("");
   }
 
-  function fallbackStatRows(stats) {
+  function fallbackSummaryText(record, card, persona, isTeen) {
+    if (isTeen) {
+      var teenSummary = [
+        hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
+        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
+        hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : ""
+      ].filter(Boolean).join(". ");
+
+      return card.subtext || (teenSummary ? teenSummary + "." : persona + " energy.");
+    }
+
+    var chapterSummary = [
+      hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
+      hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+      hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " engagement moments" : ""
+    ].filter(Boolean).join(". ");
+
+    return chapterSummary ? chapterSummary + "." : card.subtext || persona + " energy.";
+  }
+
+  function fallbackStatRows(stats, startY) {
     return (stats || []).slice(0, 5).map(function (stat, index) {
-      var y = 1010 + index * 128;
+      var y = startY + index * 112;
+      var valueSize = String(stat.value || "").length > 6 ? 46 : 52;
 
       return [
         '<g transform="translate(92 ' + y + ')">',
-        '<rect width="896" height="96" rx="28" fill="#ffffff" opacity="' + (index % 2 ? "0.16" : "0.22") + '"/>',
-        '<text x="34" y="64" font-size="54" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.value) + "</text>",
-        '<text x="310" y="60" font-size="32" font-weight="800" fill="#fff4b7" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.label) + "</text>",
+        '<rect width="896" height="88" rx="26" fill="#ffffff" opacity="' + (index % 2 ? "0.16" : "0.22") + '"/>',
+        '<text x="34" y="59" font-size="' + valueSize + '" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.value) + "</text>",
+        '<text x="310" y="57" font-size="30" font-weight="800" fill="#fff4b7" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.label) + "</text>",
         "</g>"
       ].join("");
     }).join("");
@@ -6818,12 +6850,15 @@
     var year = asText(card.yearLabel || record.year_label || record.school_year, "This year");
     var brand = card.brandChoice === "ncsy" || getBrandChoice(record) === "ncsy" ? "ncsy" : "jsu";
     var headlineLines = splitSvgLines(chapterName, 16, 3).concat(["Wrapped"]);
-    var summaryLines = splitSvgLines(card.subtext || [
-      hasValue(record.events_hosted || record.events_attended) ? formatNumber(record.events_hosted || record.events_attended) + " events" : "",
-      hasValue(record.unique_teens || record.longest_streak) ? formatNumber(record.unique_teens || record.longest_streak) + (isTeen ? " event streak" : " teens") : "",
-      hasValue(record.engagement_moments || record.friends_brought) ? formatNumber(record.engagement_moments || record.friends_brought) + (isTeen ? " friends brought" : " moments") : "",
-      persona + " energy"
-    ].filter(Boolean).join(". ") + ".", 28, 3);
+    var headlineSize = headlineLines.length > 2 ? 86 : 96;
+    var headlineLineHeight = headlineLines.length > 2 ? 92 : 104;
+    var headlineY = 410;
+    var personaY = Math.max(706, headlineY + headlineLines.length * headlineLineHeight + 42);
+    var summaryY = personaY + 134;
+    var summaryLineHeight = 52;
+    var summaryLines = splitSvgLines(fallbackSummaryText(record, card, persona, isTeen), 36, 2);
+    var statsStartY = Math.max(1058, summaryY + summaryLines.length * summaryLineHeight + 58);
+    var personaFontSize = persona.length > 24 ? 34 : 40;
     var stats = card.summaryStats || [
       hasValue(record.events_hosted || record.events_attended) ? { value: formatNumber(record.events_hosted || record.events_attended), label: isTeen ? "events showed up to" : "programs together" } : null,
       hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one chapter" } : null,
@@ -6850,11 +6885,11 @@
       fallbackLogoMarkup(brand, logoDataUrl),
       svgLine(brand === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped", 274, 160, 48, 900, "#ffffff"),
       svgLine(year, 276, 220, 34, 800, "#fff4b7"),
-      svgTextLines(headlineLines, 92, 430, 96, 900, "#ffffff", 104, "poster-headline"),
-      '<rect x="92" y="770" width="640" height="82" rx="41" fill="#fff4b7" opacity="0.96"/>',
-      svgLine(persona + " energy", 126, 826, 40, 900, "#16032f"),
-      svgTextLines(summaryLines, 92, 930, 43, 800, "#ffffff", 58, "poster-copy"),
-      fallbackStatRows(stats),
+      svgTextLines(headlineLines, 92, headlineY, headlineSize, 900, "#ffffff", headlineLineHeight, "poster-headline"),
+      '<rect x="92" y="' + personaY + '" width="896" height="82" rx="41" fill="#fff4b7" opacity="0.96"/>',
+      svgLine(persona + " energy", 126, personaY + 56, personaFontSize, 900, "#16032f"),
+      svgTextLines(summaryLines, 92, summaryY, 40, 800, "#ffffff", summaryLineHeight, "poster-copy"),
+      fallbackStatRows(stats, statsStartY),
       '<rect x="92" y="1718" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
       svgLine(asText(record.region_name, "One movement") + " - One chapter. One movement.", 126, 1766, 31, 800, "#ffffff"),
       "</svg>"
