@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSU Wrapped Embed Example</title>
-    <link rel="stylesheet" href="./jsu-wrapped.css?v=20260514-legal">
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=20260515-cta2">
     <style>
       body {
         background: #f4f7fb;
@@ -14,11 +14,56 @@
       .example-page {
         align-items: center;
         display: flex;
+        flex-direction: column;
+        gap: 18px;
         justify-content: center;
         box-sizing: border-box;
         min-height: 100vh;
         overflow-x: hidden;
         padding: 24px;
+        width: 100%;
+      }
+
+      .example-form-panel {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 18px 44px rgba(23, 7, 36, 0.18);
+        box-sizing: border-box;
+        color: #1b1230;
+        font-family: Arial, Helvetica, sans-serif;
+        max-width: 430px;
+        padding: 22px;
+        width: min(100%, 430px);
+      }
+
+      .example-form-panel[hidden] {
+        display: none;
+      }
+
+      .example-form-panel h2 {
+        font-size: 1.2rem;
+        margin: 0 0 8px;
+      }
+
+      .example-form-panel p {
+        line-height: 1.45;
+        margin: 0;
+      }
+
+      .example-form-panel label {
+        display: block;
+        font-weight: 700;
+        margin-top: 14px;
+      }
+
+      .example-form-panel input {
+        border: 1px solid #d7dbe8;
+        border-radius: 12px;
+        box-sizing: border-box;
+        display: block;
+        font: inherit;
+        margin-top: 6px;
+        padding: 11px 12px;
         width: 100%;
       }
 
@@ -33,8 +78,14 @@
   </head>
   <body>
     <main class="example-page">
-      <div id="jsu-wrapped" data-year="2026" data-source="./sample-wrapped-2026.json?v=20260514-legal" data-teen-source="./sample-teen-wrapped-2026.json?v=20260514-legal"></div>
+      <div id="jsu-wrapped" data-year="2026" data-source="./sample-wrapped-2026.json?v=20260515-cta2" data-teen-source="./sample-teen-wrapped-2026.json?v=20260515-cta2" data-cta-label="Get involved next year" data-cta-target="#jsuw-wrapped-interest"></div>
+      <section id="jsuw-wrapped-interest" class="example-form-panel" hidden>
+        <h2>Get involved with JSU/NCSY</h2>
+        <p>This local preview shows the CTA placement. On ncsy.org, this space opens the dedicated Gravity Form.</p>
+        <label>Chapter <input data-jsuw-prefill="chapter_name"></label>
+        <label>Region <input data-jsuw-prefill="region_name"></label>
+      </section>
     </main>
-    <script src="./jsu-wrapped.js?v=20260514-legal"></script>
+    <script src="./jsu-wrapped.js?v=20260515-cta2"></script>
   </body>
 </html>

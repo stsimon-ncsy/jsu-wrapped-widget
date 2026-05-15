@@ -274,6 +274,161 @@
     return getScriptBaseUrl() + "assets/";
   }
 
+  function getCtaOptions(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    return {
+      label: asText(settings.ctaLabel || dataset.ctaLabel, ""),
+      target: asText(settings.ctaTarget || dataset.ctaTarget, ""),
+      href: asText(settings.ctaHref || dataset.ctaHref, "")
+    };
+  }
+
+  function createFormPrefillContext(record, url) {
+    return {
+      chapter_slug: asText(record && record.chapter_slug, ""),
+      chapter_name: asText(record && record.chapter_name, ""),
+      region_name: asText(record && record.region_name, ""),
+      school_name: asText(record && record.school_name, ""),
+      school_year: asText(record && record.school_year, ""),
+      year_label: asText(record && record.year_label, ""),
+      wrapped_url: asText(url || root && root.location && root.location.href, "")
+    };
+  }
+
+  function selectorEscape(value) {
+    if (root.CSS && typeof root.CSS.escape === "function") {
+      return root.CSS.escape(value);
+    }
+
+    return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
+
+  function prefillKeyFromSignal(signal) {
+    var normalized = String(signal || "").toLowerCase().replace(/[_-]+/g, " ");
+
+    if (!normalized) {
+      return "";
+    }
+
+    if (/\bchapter\s*slug\b/.test(normalized) || /\bchapter\b/.test(normalized) && /\bslug\b/.test(normalized)) {
+      return "chapter_slug";
+    }
+
+    if (/\bregion\b/.test(normalized)) {
+      return "region_name";
+    }
+
+    if (/\bwrapped\b/.test(normalized) && /\b(url|link|page)\b/.test(normalized) || /\bpage\s*(url|link)\b/.test(normalized)) {
+      return "wrapped_url";
+    }
+
+    if (/\bschool\s*year\b/.test(normalized)) {
+      return "school_year";
+    }
+
+    if (/\byear\s*label\b/.test(normalized)) {
+      return "year_label";
+    }
+
+    if (/\bschool\s*name\b/.test(normalized)) {
+      return "school_name";
+    }
+
+    if (/\bschool\s*\/\s*chapter\b/.test(normalized) || /\bschool\s+or\s+chapter\b/.test(normalized) || /\bchapter\s*name\b/.test(normalized) || /\bchapter\b/.test(normalized)) {
+      return "chapter_name";
+    }
+
+    return "";
+  }
+
+  function fieldSignal(panel, field) {
+    var parts = [
+      field.getAttribute("data-jsuw-prefill"),
+      field.getAttribute("data-jsuw-prefill-field"),
+      field.getAttribute("name"),
+      field.getAttribute("id"),
+      field.getAttribute("class"),
+      field.getAttribute("placeholder"),
+      field.getAttribute("aria-label")
+    ];
+
+    if (field.id && panel && typeof panel.querySelectorAll === "function") {
+      Array.prototype.forEach.call(panel.querySelectorAll('label[for="' + selectorEscape(field.id) + '"]'), function (label) {
+        parts.push(label.textContent);
+      });
+    }
+
+    if (field.labels) {
+      Array.prototype.forEach.call(field.labels, function (label) {
+        parts.push(label.textContent);
+      });
+    }
+
+    if (typeof field.closest === "function") {
+      var wrapper = field.closest(".gfield, .ginput_container, li, p, div");
+
+      if (wrapper) {
+        parts.push(wrapper.textContent);
+        parts.push(wrapper.getAttribute("class"));
+      }
+    }
+
+    return parts.filter(Boolean).join(" ");
+  }
+
+  function setFieldValue(field, value, force) {
+    if (!field || !hasValue(value)) {
+      return false;
+    }
+
+    if (!force && hasValue(field.value)) {
+      return false;
+    }
+
+    field.value = value;
+
+    if (field.tagName && field.tagName.toLowerCase() === "input") {
+      field.setAttribute("value", value);
+    }
+
+    try {
+      field.dispatchEvent(new root.Event("input", { bubbles: true }));
+      field.dispatchEvent(new root.Event("change", { bubbles: true }));
+    } catch (error) {
+      return true;
+    }
+
+    return true;
+  }
+
+  function prefillFormPanel(panel, state) {
+    if (!panel || !state) {
+      return 0;
+    }
+
+    var context = createFormPrefillContext(state.record, root && root.location && root.location.href);
+    var fields = panel.querySelectorAll("input, select, textarea");
+    var filled = 0;
+
+    panel.setAttribute("data-jsuw-chapter-slug", context.chapter_slug);
+    panel.setAttribute("data-jsuw-chapter-name", context.chapter_name);
+    panel.setAttribute("data-jsuw-region-name", context.region_name);
+
+    Array.prototype.forEach.call(fields, function (field) {
+      var explicit = field.getAttribute("data-jsuw-prefill") || field.getAttribute("data-jsuw-prefill-field") || "";
+      var key = prefillKeyFromSignal(explicit) || prefillKeyFromSignal(fieldSignal(panel, field));
+      var value = context[key];
+
+      if (setFieldValue(field, value, field.type === "hidden" || hasValue(explicit))) {
+        filled += 1;
+      }
+    });
+
+    return filled;
+  }
+
   function getBrandChoice(record) {
     var fields = [
       "brand_logo",
@@ -834,6 +989,11 @@
     var brandLabel = brandChoice === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
     var assetBase = options && options.assetBase || "";
     var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var cta = {
+      label: asText(options && options.ctaLabel, ""),
+      target: asText(options && options.ctaTarget, ""),
+      href: asText(options && options.ctaHref, "")
+    };
     var cards = [
       {
         type: "cover",
@@ -1028,7 +1188,8 @@
         hasValue(record.chapter_persona) ? asText(record.chapter_persona) + " energy" : "JSU energy"
       ].filter(Boolean).join(". ") + ".",
       badge: yearLabel,
-      theme: "final"
+      theme: "final",
+      cta: hasValue(cta.label) && (hasValue(cta.target) || hasValue(cta.href)) ? cta : null
     });
 
     cards.forEach(function (card) {
@@ -1512,9 +1673,15 @@
     var stats = (card.summaryStats || []).map(function (stat, index) {
       return '<div style="--i:' + index + '"><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
     }).join("");
+    var hasCta = card.cta && hasValue(card.cta.label) && (hasValue(card.cta.target) || hasValue(card.cta.href));
+    var actionButtons = [
+      hasCta ? '<button class="jsuw-action-button jsuw-action-button--primary jsuw-action-button--cta" type="button" data-jsuw-action="cta" data-jsuw-cta-label="' + escapeHtml(card.cta.label) + '" data-jsuw-cta-target="' + escapeHtml(card.cta.target || "") + '" data-jsuw-cta-href="' + escapeHtml(card.cta.href || "") + '">' + escapeHtml(card.cta.label) + "</button>" : "",
+      '<button class="jsuw-action-button' + (hasCta ? "" : " jsuw-action-button--primary") + '" type="button" data-jsuw-action="share">Share this recap</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>'
+    ].filter(Boolean).join("");
 
     return renderReferenceShell(card, [
-      '<div class="jsuw-share-poster">',
+      '<div class="jsuw-share-poster' + (hasCta ? " jsuw-share-poster--with-cta" : "") + '">',
       renderBrandLockup(card),
       '<h2 class="' + getHeadlineClass(card) + '">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
       '<p class="jsuw-share-copy">' + escapeHtml(card.subtext || "") + "</p>",
@@ -1522,9 +1689,8 @@
       '<div class="jsuw-share-energy">' + escapeHtml(card.persona || "JSU energy") + "</div>",
       '<div class="jsuw-share-school">' + escapeHtml((card.schoolName || "JSU") + " - " + (card.yearLabel || "This year")) + "</div>",
       "</div>",
-      '<div class="jsuw-final-actions">',
-      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share this recap</button>',
-      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>',
+      '<div class="jsuw-final-actions' + (hasCta ? " jsuw-final-actions--with-cta" : "") + '">',
+      actionButtons,
       '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
       "</div>"
     ].join(""));
@@ -2260,12 +2426,78 @@
     });
   }
 
+  function revealCtaTarget(container, state, trigger) {
+    var card = state && state.cards ? state.cards[state.index] : {};
+    var cta = card && card.cta || {};
+    var label = asText(trigger && trigger.getAttribute("data-jsuw-cta-label") || cta.label, "Wrapped interest");
+    var targetSelector = asText(trigger && trigger.getAttribute("data-jsuw-cta-target") || cta.target, "");
+    var href = asText(trigger && trigger.getAttribute("data-jsuw-cta-href") || cta.href, "");
+    var panel = null;
+
+    trackAnalyticsEvent(state, "jsu_wrapped_cta_click", {
+      cta_label: label,
+      cta_target: targetSelector,
+      cta_href: href
+    });
+
+    if (hasValue(targetSelector) && root.document && typeof root.document.querySelector === "function") {
+      try {
+        panel = root.document.querySelector(targetSelector);
+      } catch (error) {
+        panel = null;
+      }
+    }
+
+    if (panel) {
+      panel.hidden = false;
+      panel.removeAttribute("hidden");
+      panel.classList.add("jsuw-form-panel--open");
+      panel.setAttribute("aria-hidden", "false");
+      prefillFormPanel(panel, state);
+
+      if (root.setTimeout) {
+        root.setTimeout(function () {
+          prefillFormPanel(panel, state);
+        }, 350);
+      }
+
+      setStatus(container, "Interest form opened below.");
+
+      try {
+        panel.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+      } catch (error) {
+        panel.scrollIntoView();
+      }
+
+      var focusTarget = panel.querySelector("input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])");
+
+      if (focusTarget && typeof focusTarget.focus === "function") {
+        try {
+          focusTarget.focus({ preventScroll: true });
+        } catch (focusError) {
+          focusTarget.focus();
+        }
+      }
+
+      return;
+    }
+
+    if (hasValue(href) && root.location) {
+      root.location.href = href;
+      return;
+    }
+
+    setStatus(container, "Use the interest form below to connect with JSU/NCSY.");
+  }
+
   function installInteraction(container, state) {
-    function runAction(action, options) {
+    function runAction(action, options, trigger) {
       if (action === "prev") {
         previous(container, state, options);
       } else if (action === "next") {
         next(container, state, options);
+      } else if (action === "cta") {
+        revealCtaTarget(container, state, trigger);
       } else if (action === "share") {
         shareRecap(container, state);
       } else if (action === "download") {
@@ -2286,7 +2518,7 @@
 
       if (actionTarget) {
         var action = actionTarget.getAttribute("data-jsuw-action");
-        runAction(action);
+        runAction(action, {}, actionTarget);
 
         return;
       }
@@ -2310,7 +2542,7 @@
 
         if (actionTarget && !actionTarget.disabled) {
           event.preventDefault();
-          runAction(actionTarget.getAttribute("data-jsuw-action"), { focusStory: true });
+          runAction(actionTarget.getAttribute("data-jsuw-action"), { focusStory: true }, actionTarget);
         }
 
         return;
@@ -2736,6 +2968,7 @@
       var dataUrl = settings.dataUrl || getDataUrl(target);
       var records = settings.records || await fetchRecords(dataUrl);
       var chapterSlug = settings.chapter || getChapterSlug(settings.url);
+      var ctaOptions = getCtaOptions(target, settings);
 
       if (!hasValue(chapterSlug)) {
         renderChapterPicker(target, {
@@ -2763,7 +2996,12 @@
       }
 
       var state = {
-        cards: createCards(chapter, { assetBase: assetBase }),
+        cards: createCards(chapter, {
+          assetBase: assetBase,
+          ctaLabel: ctaOptions.label,
+          ctaTarget: ctaOptions.target,
+          ctaHref: ctaOptions.href
+        }),
         record: chapter,
         experienceMode: "chapter",
         analyticsEnabled: getAnalyticsPreference(target, settings),
@@ -2841,6 +3079,7 @@
     buildChapterUrl: buildChapterUrl,
     buildRegionUrl: buildRegionUrl,
     buildTeenUrl: buildTeenUrl,
+    createFormPrefillContext: createFormPrefillContext,
     createFallbackSvg: createFallbackSvg,
     createTeenCards: createTeenCards,
     findTeen: findTeen,

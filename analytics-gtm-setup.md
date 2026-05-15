@@ -38,6 +38,7 @@ Event names:
 - `jsu_wrapped_story_complete`
 - `jsu_wrapped_share_click`
 - `jsu_wrapped_download_click`
+- `jsu_wrapped_cta_click`
 - `jsu_wrapped_sound_toggle`
 - `jsu_wrapped_autoplay_toggle`
 
@@ -88,6 +89,9 @@ story_elapsed_ms
 completion_duration_ms
 share_method
 download_format
+cta_label
+cta_target
+cta_href
 sound_enabled
 ```
 
@@ -123,6 +127,8 @@ autoplay_enabled
 navigation_method
 share_method
 download_format
+cta_label
+cta_target
 sound_enabled
 ```
 
