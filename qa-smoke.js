@@ -1,5 +1,6 @@
 const fs = require("fs");
 const api = require("./jsu-wrapped.js");
+const dataValidator = require("./validate-wrapped-data.js");
 
 function assert(condition, message) {
   if (!condition) {
@@ -413,8 +414,10 @@ function runCiWorkflowSmoke() {
   const requiredCommands = [
     "node sync-wordpress-inline.js",
     "git diff --exit-code wordpress-inline-embed.html",
+    "node validate-wrapped-data.js",
     "node --check jsu-wrapped.js",
     "node --check wrapped-builder.js",
+    "node --check validate-wrapped-data.js",
     "node --check sync-wordpress-inline.js",
     "node --check qa-smoke.js",
     "node qa-smoke.js",
@@ -430,10 +433,48 @@ function runCiWorkflowSmoke() {
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
 }
 
+function runDataValidationSmoke(records, config) {
+  const report = dataValidator.validateWrappedPackage({
+    chapterRecords: records,
+    teenRecords: loadJson("sample-teen-wrapped-2026.json"),
+    config
+  });
+  const duplicateReport = dataValidator.validateChapterRecords([
+    {
+      chapter_slug: "northwood-jsu",
+      chapter_name: "Northwood JSU",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: 1
+    },
+    {
+      chapter_slug: "northwood-jsu",
+      chapter_name: "Northwood Duplicate",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: 2
+    }
+  ]);
+  const badMetricReport = dataValidator.validateChapterRecords([
+    {
+      chapter_slug: "bad-metric",
+      chapter_name: "Bad Metric",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: "many"
+    }
+  ]);
+
+  assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
+  assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
+  assert(!badMetricReport.ok && badMetricReport.errors.some((error) => error.includes("events_hosted")), "invalid numeric metrics should fail validation");
+}
+
 function main() {
   const records = loadJson("sample-wrapped-2026.json");
   const config = loadJson("wrapped-config-2026.json");
 
+  runDataValidationSmoke(records, config);
   runLayeredVariantSmoke();
   runPickerSmoke(records, config);
   runHiddenVariantSmoke();

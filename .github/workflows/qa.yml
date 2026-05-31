@@ -24,11 +24,17 @@ jobs:
       - name: Ensure inline embed is committed
         run: git diff --exit-code wordpress-inline-embed.html
 
+      - name: Validate wrapped data
+        run: node validate-wrapped-data.js
+
       - name: Syntax check renderer
         run: node --check jsu-wrapped.js
 
       - name: Syntax check builder
         run: node --check wrapped-builder.js
+
+      - name: Syntax check data validator
+        run: node --check validate-wrapped-data.js
 
       - name: Syntax check sync script
         run: node --check sync-wordpress-inline.js

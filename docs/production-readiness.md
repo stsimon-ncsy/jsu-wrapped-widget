@@ -8,14 +8,18 @@ Run these before copying files to WordPress or relying on GitHub Pages:
 
 ```powershell
 node sync-wordpress-inline.js
+node validate-wrapped-data.js
 node --check jsu-wrapped.js
 node --check wrapped-builder.js
+node --check validate-wrapped-data.js
 node --check sync-wordpress-inline.js
 node qa-smoke.js
 git diff --check
 ```
 
 GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed.
+
+The data validator checks the static JSON/config package for duplicate chapter and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a region or chapter in the data.
 
 Then smoke these URLs:
 
