@@ -137,7 +137,8 @@ textarea {
 
 .builder-grid label,
 .builder-card-row label,
-.builder-custom-card label {
+.builder-custom-card label,
+.builder-metric-field {
   color: #43334f;
   display: grid;
   font-size: 0.78rem;
@@ -152,6 +153,7 @@ textarea {
 .builder-custom-card input,
 .builder-custom-card select,
 .builder-custom-card textarea,
+.builder-metric-field input,
 .builder-section textarea[data-builder-export] {
   background: #f9f7fc;
   border: 1px solid #dcd4e8;
@@ -166,6 +168,43 @@ textarea {
 [data-builder-custom-list] {
   display: grid;
   gap: 10px;
+}
+
+.builder-help {
+  color: #6d607c;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.38;
+  margin: 0 0 12px;
+}
+
+.builder-metric-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.builder-metric-field {
+  background: #fbf9ff;
+  border: 1px solid #e6deef;
+  border-radius: 14px;
+  padding: 11px;
+}
+
+.builder-metric-field--active {
+  background: #fff7d8;
+  border-color: #ffb627;
+}
+
+.builder-metric-field span {
+  color: #16072a;
+}
+
+.builder-metric-field em {
+  color: #756782;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 800;
 }
 
 .builder-card-row,
@@ -321,7 +360,8 @@ textarea {
 
   .builder-grid,
   .builder-card-fields,
-  .builder-custom-fields {
+  .builder-custom-fields,
+  .builder-metric-grid {
     grid-template-columns: 1fr;
   }
 }

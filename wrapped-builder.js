@@ -27,6 +27,21 @@
     movement: "Bigger movement",
     final: "Final share card"
   };
+  var METRIC_FIELDS = [
+    ["events_hosted", "Events hosted"],
+    ["unique_teens", "Unique teens"],
+    ["engagement_moments", "Engagement moments"],
+    ["new_teens", "New teens"],
+    ["repeat_attendee_rate_label", "Repeat rate label"],
+    ["largest_event_attendance", "Largest event attendance"],
+    ["largest_event_name", "Largest event name"],
+    ["schools_represented", "Schools represented"],
+    ["learning_sessions", "Learning sessions"],
+    ["shabbatons", "Shabbatons"],
+    ["region_unique_teens", "Region teens reached"],
+    ["region_schools_represented", "Region schools"],
+    ["national_engagement_moments", "National engagement moments"]
+  ];
 
   var state = {
     records: [],
@@ -225,6 +240,35 @@
     return section.card_overrides[cardId];
   }
 
+  function ensureRecordOverrides(section) {
+    section.record_overrides = section.record_overrides && typeof section.record_overrides === "object" ? section.record_overrides : {};
+    return section.record_overrides;
+  }
+
+  function coerceMetricValue(value, original) {
+    var text = String(value || "").trim();
+
+    if (!text) {
+      return "";
+    }
+
+    if (/%$/.test(text) || /[A-Za-z]/.test(text)) {
+      return text;
+    }
+
+    var numeric = Number(text.replace(/,/g, ""));
+
+    if (isFinite(numeric) && typeof original === "number") {
+      return numeric;
+    }
+
+    if (isFinite(numeric) && /^-?\d+(?:\.\d+)?$/.test(text.replace(/,/g, ""))) {
+      return numeric;
+    }
+
+    return text;
+  }
+
   function getStoryConfig(record) {
     if (!window.JSUWrapped || !window.JSUWrapped.resolveStoryConfig || !record) {
       return {};
@@ -332,6 +376,37 @@
     markPreviewRows();
   }
 
+  function renderMetricEditor() {
+    var section = getActiveSection();
+    var record = getActiveRecord() || {};
+    var overrides = ensureRecordOverrides(section);
+    var container = $("[data-builder-metric-editor]");
+
+    if (!container) {
+      return;
+    }
+
+    container.innerHTML = [
+      '<p class="builder-help">Use these only when the source data needs a local correction. The preview regenerates headlines, big numbers, final-card stats, and share/download copy from these values.</p>',
+      '<div class="builder-metric-grid">',
+      METRIC_FIELDS.map(function (item) {
+        var key = item[0];
+        var label = item[1];
+        var official = hasValue(record[key]) ? record[key] : "";
+        var value = hasValue(overrides[key]) ? overrides[key] : "";
+
+        return [
+          '<label class="' + (hasValue(value) ? "builder-metric-field builder-metric-field--active" : "builder-metric-field") + '">',
+          '<span>' + escapeHtml(label) + "</span>",
+          '<input data-builder-metric-field="' + escapeHtml(key) + '" value="' + escapeHtml(value) + '" placeholder="' + escapeHtml(official) + '">',
+          '<em>Official: ' + escapeHtml(hasValue(official) ? official : "not set") + "</em>",
+          "</label>"
+        ].join("");
+      }).join(""),
+      "</div>"
+    ].join("");
+  }
+
   function ensureCustomCards(section) {
     section.custom_cards = Array.isArray(section.custom_cards) ? section.custom_cards : [];
     return section.custom_cards;
@@ -401,6 +476,10 @@
 
     if (hidden.indexOf("final") !== -1) {
       warnings.push("The final share card is hidden. That removes the strongest CTA/share moment.");
+    }
+
+    if (section.record_overrides && Object.keys(section.record_overrides).length) {
+      warnings.push("Metric corrections are active for this " + state.scope + ". Generated text and stats will use the corrected values.");
     }
 
     if (!hasValue(effective.cta_label || effective.ctaLabel)) {
@@ -481,6 +560,7 @@
     renderSelectors();
     renderBasicFields();
     renderCardEditor();
+    renderMetricEditor();
     renderCustomCards();
     renderWarnings();
     renderExport();
@@ -552,6 +632,24 @@
         }
       }
 
+      renderWarnings();
+      renderExport();
+      schedulePreview();
+      return;
+    }
+
+    if (field.matches("[data-builder-metric-field]")) {
+      var metricKey = field.getAttribute("data-builder-metric-field");
+      var overrides = ensureRecordOverrides(section);
+      var record = getActiveRecord() || {};
+
+      if (hasValue(field.value)) {
+        overrides[metricKey] = coerceMetricValue(field.value, record[metricKey]);
+      } else {
+        delete overrides[metricKey];
+      }
+
+      renderCardEditor();
       renderWarnings();
       renderExport();
       schedulePreview();
