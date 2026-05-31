@@ -11,6 +11,10 @@ function loadJson(path) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
+function loadText(path) {
+  return fs.readFileSync(path, "utf8");
+}
+
 function assertNoBrokenText(cards) {
   const bad = /\b(undefined|null|NaN)\b/i;
 
@@ -268,6 +272,27 @@ function runFallbackSvgSmoke(records, config) {
   assert((svg.match(/poster-stat-label/g) || []).length >= 3, "long fallback SVG did not render stat labels");
 }
 
+function runInlineEmbedSmoke() {
+  const inline = loadText("wordpress-inline-embed.html");
+  const css = loadText("jsu-wrapped.css").trim();
+  const renderer = loadText("jsu-wrapped.js").trim();
+  const marker = "(function (root, factory) {";
+  const styleStart = inline.indexOf("<style>");
+  const styleEnd = inline.indexOf("</style>", styleStart);
+  const scriptStart = inline.indexOf("<script>", styleEnd);
+  const rendererStart = inline.indexOf(marker);
+  const rendererEnd = inline.lastIndexOf("</script>");
+  const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
+  const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
+
+  assert(styleStart >= 0 && styleEnd > styleStart, "WordPress embed missing top-level style block");
+  assert(scriptStart > styleEnd, "WordPress embed missing inline script after styles");
+  assert(embeddedCss === css, "WordPress inline CSS is not synced with jsu-wrapped.css");
+  assert(rendererStart >= 0, "WordPress embed missing inline renderer");
+  assert(embeddedRenderer === renderer, "WordPress inline renderer is not synced with jsu-wrapped.js");
+  assert((inline.match(/<script>/g) || []).length === 1, "WordPress embed should have one inline script block");
+}
+
 function main() {
   const records = loadJson("sample-wrapped-2026.json");
   const config = loadJson("wrapped-config-2026.json");
@@ -279,6 +304,7 @@ function main() {
   runAnalyticsSmoke();
   runStoryScopeSmoke();
   runFallbackSvgSmoke(records, config);
+  runInlineEmbedSmoke();
 
   console.log("qa smoke ok");
 }

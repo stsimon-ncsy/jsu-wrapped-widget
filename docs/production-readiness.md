@@ -7,8 +7,10 @@ This widget is static-hosting friendly: the public experience is driven by `jsu-
 Run these before copying files to WordPress or relying on GitHub Pages:
 
 ```powershell
+node sync-wordpress-inline.js
 node --check jsu-wrapped.js
 node --check wrapped-builder.js
+node --check sync-wordpress-inline.js
 node qa-smoke.js
 git diff --check
 ```
@@ -94,6 +96,12 @@ The download button prefers `html2canvas` when available. If it is not available
 
 ## WordPress Inline Embed
 
-`wordpress-inline-embed.html` contains the current inline CSS and JS. After changing `jsu-wrapped.css` or `jsu-wrapped.js`, sync that file before handing it to WordPress.
+`wordpress-inline-embed.html` contains the current inline CSS and JS. After changing `jsu-wrapped.css` or `jsu-wrapped.js`, run:
+
+```powershell
+node sync-wordpress-inline.js
+```
+
+The smoke test compares the inline CSS/renderer against `jsu-wrapped.css` and `jsu-wrapped.js`, which prevents stale WordPress handoff code from drifting behind the hosted version.
 
 The page can keep JSON/config hosted on GitHub Pages while the embed runs on `ncsy.org`, as long as the GitHub Pages URLs remain public.
