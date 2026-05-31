@@ -241,13 +241,15 @@
 
 #jsu-wrapped .jsuw-story-theme-events .jsuw-progress-segment,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-progress-segment,
-#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment {
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment,
+#jsu-wrapped .jsuw-story-theme-custom-metric .jsuw-progress-segment {
   background: rgba(21, 4, 40, 0.18);
 }
 
 #jsu-wrapped .jsuw-story-theme-events .jsuw-progress-segment span,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-progress-segment span,
-#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment span {
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-progress-segment span,
+#jsu-wrapped .jsuw-story-theme-custom-metric .jsuw-progress-segment span {
   background: #150428;
 }
 
@@ -397,6 +399,105 @@
     linear-gradient(165deg, #6a2bff 0%, #ff2e93 48%, #ff6b4a 100%);
 }
 
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-cover,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-moments,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-final {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(0, 194, 255, 0.46) 0 70px, transparent 72px),
+    linear-gradient(165deg, #151257 0%, #6a2bff 46%, #ff2e93 100%);
+}
+
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-events,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-new,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-persona,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-custom-metric {
+  background:
+    radial-gradient(circle at 82% 20%, rgba(106, 43, 255, 0.22) 0 76px, transparent 78px),
+    linear-gradient(180deg, #e7fbff 0%, #ffec9c 48%, #ffb627 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-reach,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-biggest {
+  background:
+    radial-gradient(circle at 16% 82%, rgba(255, 182, 39, 0.36) 0 78px, transparent 80px),
+    linear-gradient(165deg, #29d69a 0%, #00c2ff 46%, #6a2bff 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-repeat,
+#jsu-wrapped .jsuw-palette-electric .jsuw-theme-movement {
+  background:
+    radial-gradient(circle at 18% 82%, rgba(0, 194, 255, 0.22) 0 86px, transparent 88px),
+    linear-gradient(180deg, #070a3d 0%, #2a0f4a 58%, #151257 100%);
+}
+
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-cover,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-moments,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-final {
+  background:
+    radial-gradient(circle at 80% 16%, rgba(255, 182, 39, 0.54) 0 74px, transparent 76px),
+    linear-gradient(165deg, #150428 0%, #351071 54%, #ffb627 100%);
+}
+
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-events,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-new,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-persona,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-custom-metric {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(106, 43, 255, 0.18) 0 76px, transparent 78px),
+    linear-gradient(180deg, #fff9dc 0%, #ffde77 48%, #ffb627 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-reach,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-biggest {
+  background:
+    radial-gradient(circle at 80% 18%, rgba(255, 244, 229, 0.42) 0 80px, transparent 82px),
+    linear-gradient(165deg, #ffb627 0%, #8a36ff 54%, #321560 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-repeat,
+#jsu-wrapped .jsuw-palette-purple-gold .jsuw-theme-movement {
+  background:
+    radial-gradient(circle at 24% 82%, rgba(255, 182, 39, 0.24) 0 90px, transparent 92px),
+    linear-gradient(180deg, #12021f 0%, #2f0d58 58%, #150428 100%);
+}
+
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-cover,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-moments,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-final {
+  background:
+    radial-gradient(circle at 82% 15%, rgba(255, 182, 39, 0.5) 0 78px, transparent 80px),
+    linear-gradient(165deg, #6a2bff 0%, #ff2e93 48%, #ff6b4a 100%);
+}
+
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-events,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-new,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-persona,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-custom-metric {
+  background:
+    radial-gradient(circle at 18% 78%, rgba(106, 43, 255, 0.18) 0 88px, transparent 90px),
+    linear-gradient(180deg, #ffe7ae 0%, #ffb627 45%, #ff6b4a 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-reach,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-biggest {
+  background:
+    radial-gradient(circle at 16% 80%, rgba(255, 182, 39, 0.4) 0 82px, transparent 84px),
+    linear-gradient(165deg, #ffb627 0%, #ff2e93 52%, #6a2bff 100%);
+  color: #150428;
+}
+
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-repeat,
+#jsu-wrapped .jsuw-palette-sunset .jsuw-theme-movement {
+  background:
+    radial-gradient(circle at 82% 20%, rgba(255, 107, 74, 0.28) 0 86px, transparent 88px),
+    linear-gradient(180deg, #210522 0%, #4f104f 52%, #150428 100%);
+}
+
 #jsu-wrapped .jsuw-card-main {
   align-self: stretch;
   display: flex;
@@ -511,14 +612,16 @@
 #jsu-wrapped .jsuw-theme-events .jsuw-brand-copy em,
 #jsu-wrapped .jsuw-theme-reach .jsuw-brand-copy em,
 #jsu-wrapped .jsuw-theme-new .jsuw-brand-copy em,
-#jsu-wrapped .jsuw-theme-persona .jsuw-brand-copy em {
+#jsu-wrapped .jsuw-theme-persona .jsuw-brand-copy em,
+#jsu-wrapped .jsuw-theme-custom-metric .jsuw-brand-copy em {
   color: #150428;
 }
 
 #jsu-wrapped .jsuw-theme-events .jsuw-eyebrow,
 #jsu-wrapped .jsuw-theme-reach .jsuw-eyebrow,
 #jsu-wrapped .jsuw-theme-new .jsuw-eyebrow,
-#jsu-wrapped .jsuw-theme-persona .jsuw-eyebrow {
+#jsu-wrapped .jsuw-theme-persona .jsuw-eyebrow,
+#jsu-wrapped .jsuw-theme-custom-metric .jsuw-eyebrow {
   background: rgba(21, 4, 40, 0.1);
   border-color: rgba(21, 4, 40, 0.22);
   color: #150428;
@@ -527,7 +630,8 @@
 #jsu-wrapped .jsuw-theme-events .jsuw-stat-number,
 #jsu-wrapped .jsuw-theme-reach .jsuw-stat-number,
 #jsu-wrapped .jsuw-theme-new .jsuw-stat-number,
-#jsu-wrapped .jsuw-theme-persona .jsuw-stat-number {
+#jsu-wrapped .jsuw-theme-persona .jsuw-stat-number,
+#jsu-wrapped .jsuw-theme-custom-metric .jsuw-stat-number {
   color: #150428;
   text-shadow:
     5px 5px 0 rgba(255, 255, 255, 0.72),
@@ -1469,16 +1573,19 @@
 
 #jsu-wrapped .jsuw-story-theme-events .jsuw-card-count,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-card-count,
-#jsu-wrapped .jsuw-story-theme-persona .jsuw-card-count {
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-card-count,
+#jsu-wrapped .jsuw-story-theme-custom-metric .jsuw-card-count {
   color: rgba(21, 4, 40, 0.74);
 }
 
 #jsu-wrapped .jsuw-story-theme-events .jsuw-sound-toggle,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-sound-toggle,
 #jsu-wrapped .jsuw-story-theme-persona .jsuw-sound-toggle,
+#jsu-wrapped .jsuw-story-theme-custom-metric .jsuw-sound-toggle,
 #jsu-wrapped .jsuw-story-theme-events .jsuw-autoplay-toggle,
 #jsu-wrapped .jsuw-story-theme-new .jsuw-autoplay-toggle,
-#jsu-wrapped .jsuw-story-theme-persona .jsuw-autoplay-toggle {
+#jsu-wrapped .jsuw-story-theme-persona .jsuw-autoplay-toggle,
+#jsu-wrapped .jsuw-story-theme-custom-metric .jsuw-autoplay-toggle {
   background: rgba(21, 4, 40, 0.09);
   border-color: rgba(21, 4, 40, 0.22);
   color: #150428;
