@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "year": "2026",
+  "defaults": {
+    "brand_logo": "jsu",
+    "palette": "electric",
+    "cta_label": "Get involved next year",
+    "cta_target": "#jsuw-wrapped-interest",
+    "hidden_cards": [],
+    "card_overrides": {},
+    "custom_cards": []
+  },
+  "regions": {
+    "atlantic-seaboard": {
+      "brand_logo": "ncsy",
+      "palette": "purple-gold",
+      "cta_label": "Bring this energy into next year",
+      "card_overrides": {
+        "movement": {
+          "subtext": "One chapter. Atlantic Seaboard momentum. One national movement."
+        }
+      },
+      "custom_cards": [
+        {
+          "id": "atlantic-seaboard-regional-note",
+          "type": "text",
+          "placement": "before_final",
+          "eyebrow": "Regional note",
+          "headline": "Atlantic Seaboard kept building",
+          "subtext": "Every chapter added its own spark to a much bigger regional story.",
+          "badge": "Region custom screen"
+        }
+      ]
+    }
+  },
+  "chapters": {
+    "baltimore": {
+      "brand_logo": "ncsy",
+      "palette": "sunset",
+      "hidden_cards": [],
+      "card_overrides": {
+        "cover": {
+          "markerText": "Baltimore brought the year to life."
+        },
+        "persona": {
+          "headline": "Your chapter type: The Shabbat Powerhouse",
+          "displayHeadline": "Your chapter type: The Shabbat Powerhouse",
+          "persona": "The Shabbat Powerhouse",
+          "subtext": "You turned consistency, learning, and Shabbat energy into belonging."
+        },
+        "final": {
+          "persona": "The Shabbat Powerhouse"
+        }
+      },
+      "custom_cards": [
+        {
+          "id": "baltimore-shabbat-energy",
+          "type": "metric",
+          "placement": "after_persona",
+          "eyebrow": "Custom chapter stat",
+          "headline": "Shabbat energy showed up everywhere",
+          "value": "35",
+          "label": "Shabbatons",
+          "subtext": "A local highlight screen added by the team."
+        },
+        {
+          "id": "baltimore-story-note",
+          "type": "text",
+          "placement": "before_final",
+          "eyebrow": "Chapter voice",
+          "headline": "This was more than attendance",
+          "subtext": "It was teens choosing community again and again.",
+          "badge": "Custom copy"
+        }
+      ]
+    }
+  }
+}

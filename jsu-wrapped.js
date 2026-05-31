@@ -13,8 +13,10 @@
 
   var DEFAULT_DATA_PATH = "/wp-content/uploads/wrapped/wrapped-{year}.json";
   var DEFAULT_TEEN_DATA_PATH = "/wp-content/uploads/wrapped/teen-wrapped-{year}.json";
+  var DEFAULT_CONFIG_PATH = "/wp-content/uploads/wrapped/wrapped-config-{year}.json";
   var WIDGET_ID = "jsu-wrapped";
-  var SCRIPT_SRC = root && root.document && root.document.currentScript ? root.document.currentScript.src : "";
+  var SCRIPT_ELEMENT = root && root.document && root.document.currentScript ? root.document.currentScript : null;
+  var SCRIPT_SRC = SCRIPT_ELEMENT ? SCRIPT_ELEMENT.src : "";
   var DEFAULT_AUTOPLAY_DELAY = 5200;
   var SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
 
@@ -147,6 +149,22 @@
     }
 
     return DEFAULT_TEEN_DATA_PATH.replace("{year}", encodeURIComponent(year));
+  }
+
+  function getConfigUrl(container) {
+    var dataset = (container && container.dataset) || {};
+    var year = asText(dataset.year, String(new Date().getFullYear()));
+    var explicit = dataset.configSource || dataset.configUrl || dataset.config;
+
+    if (hasValue(explicit)) {
+      if (String(explicit).trim().toLowerCase() === "auto") {
+        return DEFAULT_CONFIG_PATH.replace("{year}", encodeURIComponent(year));
+      }
+
+      return String(explicit).replace("{year}", encodeURIComponent(year));
+    }
+
+    return "";
   }
 
   function parseBooleanFlag(value) {
@@ -992,6 +1010,358 @@
     container.innerHTML = renderChapterPickerMarkup(context);
   }
 
+  function cloneConfigValue(value) {
+    if (Array.isArray(value)) {
+      return value.map(cloneConfigValue);
+    }
+
+    if (value && typeof value === "object") {
+      var output = {};
+
+      Object.keys(value).forEach(function (key) {
+        output[key] = cloneConfigValue(value[key]);
+      });
+
+      return output;
+    }
+
+    return value;
+  }
+
+  function uniqueList(values) {
+    var seen = {};
+
+    return (values || []).filter(function (value) {
+      var normalized = normalizeCardId(value);
+
+      if (!normalized || seen[normalized]) {
+        return false;
+      }
+
+      seen[normalized] = true;
+      return true;
+    });
+  }
+
+  function mergeCardOverrides(target, source) {
+    var output = target || {};
+
+    Object.keys(source || {}).forEach(function (cardId) {
+      var normalized = normalizeCardId(cardId);
+
+      if (!normalized) {
+        return;
+      }
+
+      output[normalized] = Object.assign({}, output[normalized] || {}, cloneConfigValue(source[cardId]));
+    });
+
+    return output;
+  }
+
+  function mergeStoryConfigSection(target, source) {
+    var output = target || {};
+
+    if (!source || typeof source !== "object") {
+      return output;
+    }
+
+    Object.keys(source).forEach(function (key) {
+      var value = source[key];
+
+      if (key === "hidden_cards") {
+        output.hidden_cards = uniqueList([].concat(output.hidden_cards || [], value || []));
+        return;
+      }
+
+      if (key === "custom_cards") {
+        output.custom_cards = [].concat(output.custom_cards || [], cloneConfigValue(value || []));
+        return;
+      }
+
+      if (key === "card_overrides") {
+        output.card_overrides = mergeCardOverrides(output.card_overrides || {}, value || {});
+        return;
+      }
+
+      if (key === "record_overrides") {
+        output.record_overrides = Object.assign({}, output.record_overrides || {}, cloneConfigValue(value || {}));
+        return;
+      }
+
+      output[key] = cloneConfigValue(value);
+    });
+
+    return output;
+  }
+
+  function configEntryMatches(entry, keys) {
+    if (!entry || typeof entry !== "object") {
+      return false;
+    }
+
+    var normalizedKeys = (keys || []).map(function (key) {
+      return slugify(key);
+    }).filter(Boolean);
+
+    return [
+      entry.slug,
+      entry.region_slug,
+      entry.region_name,
+      entry.chapter_slug,
+      entry.chapter_name,
+      entry.id
+    ].some(function (value) {
+      return hasValue(value) && normalizedKeys.indexOf(slugify(value)) !== -1;
+    });
+  }
+
+  function findConfigEntry(collection, keys) {
+    if (!collection) {
+      return null;
+    }
+
+    var normalizedKeys = (keys || []).map(function (key) {
+      return slugify(key);
+    }).filter(Boolean);
+
+    if (!normalizedKeys.length) {
+      return null;
+    }
+
+    if (Array.isArray(collection)) {
+      for (var index = 0; index < collection.length; index += 1) {
+        if (configEntryMatches(collection[index], normalizedKeys)) {
+          return collection[index];
+        }
+      }
+
+      return null;
+    }
+
+    for (var offset = 0; offset < normalizedKeys.length; offset += 1) {
+      if (collection[normalizedKeys[offset]]) {
+        return collection[normalizedKeys[offset]];
+      }
+    }
+
+    var collectionKeys = Object.keys(collection);
+
+    for (var keyIndex = 0; keyIndex < collectionKeys.length; keyIndex += 1) {
+      if (normalizedKeys.indexOf(slugify(collectionKeys[keyIndex])) !== -1) {
+        return collection[collectionKeys[keyIndex]];
+      }
+    }
+
+    return null;
+  }
+
+  function resolveStoryConfig(config, record) {
+    var output = {};
+    var source = config && typeof config === "object" ? config : {};
+    var regionEntry = findConfigEntry(source.regions, [record && record.region_slug, record && record.region_name]);
+    var chapterEntry = findConfigEntry(source.chapters, [record && record.chapter_slug, record && record.chapter_name]);
+
+    mergeStoryConfigSection(output, source.defaults);
+    mergeStoryConfigSection(output, regionEntry);
+    mergeStoryConfigSection(output, chapterEntry);
+
+    return output;
+  }
+
+  function createEffectiveRecord(record, storyConfig) {
+    var output = Object.assign({}, record || {});
+    var overrides = storyConfig && storyConfig.record_overrides;
+
+    if (overrides && typeof overrides === "object") {
+      Object.assign(output, overrides);
+    }
+
+    if (hasValue(storyConfig && storyConfig.brand_logo)) {
+      output.brand_logo = storyConfig.brand_logo;
+    }
+
+    if (hasValue(storyConfig && storyConfig.chapter_persona)) {
+      output.chapter_persona = storyConfig.chapter_persona;
+    }
+
+    if (hasValue(storyConfig && storyConfig.chapter_line)) {
+      output.chapter_line = storyConfig.chapter_line;
+    }
+
+    return output;
+  }
+
+  function getEffectiveCtaOptions(base, storyConfig) {
+    var config = storyConfig || {};
+
+    return {
+      label: asText(config.cta_label || config.ctaLabel || base && base.label, ""),
+      target: asText(config.cta_target || config.ctaTarget || base && base.target, ""),
+      href: asText(config.cta_href || config.ctaHref || base && base.href, "")
+    };
+  }
+
+  function normalizeCardId(value) {
+    var id = slugify(value);
+    var aliases = {
+      event: "events",
+      "events-hosted": "events",
+      teens: "reach",
+      "teen-reach": "reach",
+      "unique-teens": "reach",
+      engagement: "moments",
+      "engagement-moments": "moments",
+      "new-teens": "new",
+      "new-faces": "new",
+      "repeat-engagement": "repeat",
+      "repeat-attendee-rate": "repeat",
+      "biggest-event": "biggest",
+      "chapter-persona": "persona",
+      "bigger-movement": "movement",
+      share: "final",
+      "final-share": "final"
+    };
+
+    return aliases[id] || id;
+  }
+
+  function applyCardOverride(card, override) {
+    var allowed = [
+      "eyebrow",
+      "displayEyebrow",
+      "headline",
+      "displayHeadline",
+      "subtext",
+      "badge",
+      "markerText",
+      "persona",
+      "chapterName",
+      "schoolName",
+      "yearLabel"
+    ];
+
+    allowed.forEach(function (key) {
+      if (hasValue(override && override[key])) {
+        card[key] = override[key];
+      }
+    });
+
+    return card;
+  }
+
+  function customCardTheme(type) {
+    var normalized = String(type || "text").toLowerCase();
+
+    if (normalized === "metric" || normalized === "stat" || normalized === "number") {
+      return "custom-metric";
+    }
+
+    if (normalized === "media" || normalized === "photo" || normalized === "image") {
+      return "custom-media";
+    }
+
+    return "custom-text";
+  }
+
+  function createCustomCard(configCard, record, storyConfig, options) {
+    var type = String(configCard && configCard.type || "text").toLowerCase();
+    var theme = customCardTheme(type);
+    var brandChoice = getBrandChoice(record);
+    var assetBase = options && options.assetBase || "";
+    var chapterName = asText(record.chapter_name, "Your JSU chapter");
+    var value = hasValue(configCard.value) ? asText(configCard.value) : "";
+
+    return {
+      id: normalizeCardId(configCard.id || "custom-" + slugify(configCard.headline || type)),
+      type: "custom",
+      customType: theme.replace("custom-", ""),
+      theme: theme,
+      palette: asText(storyConfig && (storyConfig.palette || storyConfig.accent_palette), ""),
+      eyebrow: asText(configCard.eyebrow, "Custom screen"),
+      displayEyebrow: asText(configCard.displayEyebrow || configCard.eyebrow, "Custom screen"),
+      headline: asText(configCard.headline, chapterName + " had a moment worth sharing"),
+      displayHeadline: asText(configCard.displayHeadline || configCard.headline, chapterName + " had a moment worth sharing"),
+      stat: value,
+      rawValue: numberValue(value),
+      statLabel: asText(configCard.label || configCard.statLabel, ""),
+      subtext: asText(configCard.subtext || configCard.copy, ""),
+      badge: asText(configCard.badge, ""),
+      imageUrl: asText(configCard.image_url || configCard.imageUrl || configCard.src, ""),
+      imageAlt: asText(configCard.image_alt || configCard.imageAlt || configCard.alt, ""),
+      caption: asText(configCard.caption, ""),
+      brandChoice: brandChoice,
+      logoUrl: getLogoAsset(brandChoice, assetBase)
+    };
+  }
+
+  function placementIndex(cards, placement) {
+    var normalized = String(placement || "before_final").toLowerCase().replace(/[\s-]+/g, "_");
+
+    if (normalized === "start" || normalized === "after_cover") {
+      return Math.min(cards.length, 1);
+    }
+
+    if (normalized === "before_final") {
+      for (var finalIndex = cards.length - 1; finalIndex >= 0; finalIndex -= 1) {
+        if (cards[finalIndex].id === "final" || cards[finalIndex].theme === "final") {
+          return finalIndex;
+        }
+      }
+    }
+
+    if (normalized === "end" || normalized === "after_final") {
+      return cards.length;
+    }
+
+    var afterMatch = normalized.match(/^after_(.+)$/);
+    var beforeMatch = normalized.match(/^before_(.+)$/);
+    var targetId = normalizeCardId(afterMatch && afterMatch[1] || beforeMatch && beforeMatch[1] || normalized);
+
+    for (var index = 0; index < cards.length; index += 1) {
+      if (normalizeCardId(cards[index].id || cards[index].theme) === targetId) {
+        return afterMatch ? index + 1 : index;
+      }
+    }
+
+    return cards.length;
+  }
+
+  function applyStoryConfig(cards, record, storyConfig, options) {
+    var config = storyConfig || {};
+    var hidden = uniqueList(config.hidden_cards || []);
+    var overrides = config.card_overrides || {};
+    var palette = asText(config.palette || config.accent_palette, "");
+    var filtered = (cards || []).filter(function (card) {
+      return hidden.indexOf(normalizeCardId(card.id || card.theme)) === -1;
+    }).map(function (card) {
+      var id = normalizeCardId(card.id || card.theme);
+      var next = Object.assign({}, card);
+
+      if (palette) {
+        next.palette = palette;
+      }
+
+      if (overrides[id]) {
+        applyCardOverride(next, overrides[id]);
+      }
+
+      return next;
+    });
+
+    (config.custom_cards || []).forEach(function (configCard) {
+      if (!configCard || configCard.hidden === true || String(configCard.hidden).toLowerCase() === "true") {
+        return;
+      }
+
+      var customCard = createCustomCard(configCard, record, config, options);
+      var index = placementIndex(filtered, configCard.placement || configCard.after || configCard.before);
+      filtered.splice(index, 0, customCard);
+    });
+
+    return filtered;
+  }
+
   function createCards(record, options) {
     var chapterName = asText(record.chapter_name, "Your JSU chapter");
     var yearLabel = asText(record.year_label || record.school_year, "This year");
@@ -1007,6 +1377,7 @@
     };
     var cards = [
       {
+        id: "cover",
         type: "cover",
         eyebrow: brandLabel,
         headline: chapterName + ", your year is wrapped",
@@ -1023,6 +1394,7 @@
 
     if (hasValue(record.events_hosted)) {
       cards.push({
+        id: "events",
         type: "stat",
         eyebrow: "Events hosted",
         headline: "You hosted " + formatNumber(record.events_hosted) + " events this year",
@@ -1038,6 +1410,7 @@
 
     if (hasValue(record.unique_teens)) {
       cards.push({
+        id: "reach",
         type: "stat",
         eyebrow: "Teen reach",
         headline: formatNumber(record.unique_teens) + " teens were part of the story",
@@ -1054,6 +1427,7 @@
 
     if (hasValue(record.engagement_moments)) {
       cards.push({
+        id: "moments",
         type: "stat",
         eyebrow: "Engagement moments",
         headline: formatNumber(record.engagement_moments) + " moments of connection",
@@ -1069,6 +1443,7 @@
 
     if (hasValue(record.new_teens)) {
       cards.push({
+        id: "new",
         type: "stat",
         eyebrow: "New faces",
         headline: formatNumber(record.new_teens) + " new teens joined this year",
@@ -1086,6 +1461,7 @@
 
     if (hasValue(record.repeat_attendee_rate_label)) {
       cards.push({
+        id: "repeat",
         type: "stat",
         eyebrow: "Repeat engagement",
         headline: asText(record.repeat_attendee_rate_label) + " came back again",
@@ -1102,6 +1478,7 @@
 
     if (hasValue(record.largest_event_name) && hasValue(record.largest_event_attendance)) {
       cards.push({
+        id: "biggest",
         type: "stat",
         eyebrow: "Biggest event",
         headline: "Biggest moment: " + asText(record.largest_event_name),
@@ -1120,6 +1497,7 @@
 
     if (hasValue(record.chapter_persona) || hasValue(record.chapter_line)) {
       cards.push({
+        id: "persona",
         type: "persona",
         eyebrow: "Chapter type",
         headline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
@@ -1164,6 +1542,7 @@
 
     if (movementStats.length > 0) {
       cards.push({
+        id: "movement",
         type: "movement",
         eyebrow: "Bigger movement",
         headline: "You were part of something bigger",
@@ -1177,6 +1556,7 @@
     }
 
     cards.push({
+      id: "final",
       type: "final",
       eyebrow: "Ready to share",
       headline: chapterName + " Wrapped",
@@ -1208,7 +1588,7 @@
       card.logoUrl = logoUrl;
     });
 
-    return cards;
+    return applyStoryConfig(cards, record, options && options.storyConfig, options);
   }
 
   function createTeenCards(record, options) {
@@ -1680,6 +2060,47 @@
     ].join(""));
   }
 
+  function renderCustomTextBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-custom-note">',
+      hasValue(card.badge) ? '<span>' + escapeHtml(card.badge) + "</span>" : "",
+      '<p>' + escapeHtml(card.subtext || "A custom chapter moment worth sharing.") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderCustomMetricBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<div class="jsuw-custom-stat">',
+      hasValue(card.stat) ? renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--custom") : "",
+      hasValue(card.statLabel) ? '<span>' + escapeHtml(card.statLabel) + "</span>" : "",
+      "</div>",
+      hasValue(card.subtext) ? '<p class="jsuw-subtext jsuw-subtext--center">' + escapeHtml(card.subtext) + "</p>" : ""
+    ].join(""));
+  }
+
+  function renderCustomMediaBody(card) {
+    var media = hasValue(card.imageUrl)
+      ? '<img src="' + escapeHtml(card.imageUrl) + '" alt="' + escapeHtml(card.imageAlt || card.caption || "") + '">'
+      : '<div class="jsuw-custom-media-placeholder">Add an image URL in the builder</div>';
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-reference-top">',
+      renderTopMatter(card),
+      "</div>",
+      '<figure class="jsuw-custom-media-frame">',
+      media,
+      hasValue(card.caption || card.subtext) ? '<figcaption>' + escapeHtml(card.caption || card.subtext) + "</figcaption>" : "",
+      "</figure>"
+    ].join(""));
+  }
+
   function renderFinalBody(card) {
     var stats = (card.summaryStats || []).map(function (stat, index) {
       return '<div style="--i:' + index + '"><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
@@ -1950,6 +2371,18 @@
       return renderMovementBody(card);
     }
 
+    if (card.theme === "custom-text") {
+      return renderCustomTextBody(card);
+    }
+
+    if (card.theme === "custom-metric") {
+      return renderCustomMetricBody(card);
+    }
+
+    if (card.theme === "custom-media") {
+      return renderCustomMediaBody(card);
+    }
+
     if (card.theme === "final") {
       return renderFinalBody(card);
     }
@@ -2056,7 +2489,8 @@
     var cardNumber = state.index + 1;
     var nextLabel = state.index === total - 1 ? "Replay" : "Next";
     var autoplayActive = Boolean(state.autoplayEnabled && state.index < total - 1);
-    var storyClass = "jsuw-story jsuw-story-theme-" + escapeHtml(card.theme) + (autoplayActive ? " jsuw-story--autoplay" : "");
+    var paletteClass = hasValue(card.palette) ? " jsuw-palette-" + escapeHtml(slugify(card.palette)) : "";
+    var storyClass = "jsuw-story jsuw-story-theme-" + escapeHtml(card.theme) + paletteClass + (autoplayActive ? " jsuw-story--autoplay" : "");
     var storyStyle = '--jsuw-progress-duration:' + escapeHtml(state.autoplayDelay || DEFAULT_AUTOPLAY_DELAY) + "ms";
 
     return [
@@ -2941,6 +3375,18 @@
     return response.json();
   }
 
+  async function fetchConfig(url) {
+    if (!hasValue(url)) {
+      return {};
+    }
+
+    try {
+      return await fetchRecords(url);
+    } catch (error) {
+      return {};
+    }
+  }
+
   async function init(container, options) {
     var target = container || (root.document && root.document.getElementById(WIDGET_ID));
     var settings = options || {};
@@ -2993,7 +3439,9 @@
         teenState.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, teenState.cards.length);
 
         target.__jsuWrappedCleanup = installInteraction(target, teenState);
-        applyPageMetadata(teenState);
+        if (settings.metadata !== false && settings.updateMetadata !== false) {
+          applyPageMetadata(teenState);
+        }
         renderStory(target, teenState);
         activateStory(target, teenState);
         trackStoryView(teenState, "initial");
@@ -3002,6 +3450,8 @@
 
       var dataUrl = settings.dataUrl || getDataUrl(target);
       var records = settings.records || await fetchRecords(dataUrl);
+      var configUrl = settings.configUrl !== undefined ? settings.configUrl : getConfigUrl(target);
+      var wrappedConfig = settings.config !== undefined ? settings.config : await fetchConfig(configUrl);
       var chapterSlug = settings.chapter || getChapterSlug(settings.url);
       var ctaOptions = getCtaOptions(target, settings);
 
@@ -3015,7 +3465,8 @@
         });
         return {
           picker: true,
-          records: records
+          records: records,
+          config: wrappedConfig
         };
       }
 
@@ -3030,17 +3481,24 @@
         return null;
       }
 
+      var storyConfig = resolveStoryConfig(wrappedConfig, chapter);
+      var effectiveChapter = createEffectiveRecord(chapter, storyConfig);
+      var effectiveCtaOptions = getEffectiveCtaOptions(ctaOptions, storyConfig);
+
       var state = {
-        cards: createCards(chapter, {
+        cards: createCards(effectiveChapter, {
           assetBase: assetBase,
-          ctaLabel: ctaOptions.label,
-          ctaTarget: ctaOptions.target,
-          ctaHref: ctaOptions.href
+          ctaLabel: effectiveCtaOptions.label,
+          ctaTarget: effectiveCtaOptions.target,
+          ctaHref: effectiveCtaOptions.href,
+          storyConfig: storyConfig
         }),
-        record: chapter,
+        record: effectiveChapter,
+        config: wrappedConfig,
+        storyConfig: storyConfig,
         experienceMode: "chapter",
         analyticsEnabled: getAnalyticsPreference(target, settings),
-        analyticsYear: getAnalyticsYear(target, settings, chapter),
+        analyticsYear: getAnalyticsYear(target, settings, effectiveChapter),
         autoplayEnabled: getAutoplayPreference(target, settings),
         autoplayDelay: getAutoplayDelay(target, settings),
         autoplayTimer: null,
@@ -3053,7 +3511,9 @@
       state.index = settings.initialIndex !== undefined ? settings.initialIndex : getInitialCardIndex(settings.url, state.cards.length);
 
       target.__jsuWrappedCleanup = installInteraction(target, state);
-      applyPageMetadata(state);
+      if (settings.metadata !== false && settings.updateMetadata !== false) {
+        applyPageMetadata(state);
+      }
       renderStory(target, state);
       activateStory(target, state);
       trackStoryView(state, "initial");
@@ -3072,6 +3532,10 @@
     var doc = root.document;
 
     if (!doc) {
+      return;
+    }
+
+    if (SCRIPT_ELEMENT && parseBooleanFlag(SCRIPT_ELEMENT.getAttribute("data-manual") || SCRIPT_ELEMENT.getAttribute("data-no-auto-init")) === true) {
       return;
     }
 
@@ -3098,6 +3562,7 @@
     getExperienceMode: getExperienceMode,
     getDataUrl: getDataUrl,
     getTeenDataUrl: getTeenDataUrl,
+    getConfigUrl: getConfigUrl,
     getBrandChoice: getBrandChoice,
     getSoundProfileForCard: getSoundProfileForCard,
     getAutoplayPreference: getAutoplayPreference,
@@ -3116,6 +3581,9 @@
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,
     createFallbackSvg: createFallbackSvg,
+    resolveStoryConfig: resolveStoryConfig,
+    createEffectiveRecord: createEffectiveRecord,
+    applyStoryConfig: applyStoryConfig,
     createTeenCards: createTeenCards,
     findTeen: findTeen,
     init: init,

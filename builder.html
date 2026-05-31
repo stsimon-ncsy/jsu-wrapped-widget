@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSU/NCSY Wrapped Builder</title>
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=builder1">
+    <link rel="stylesheet" href="./wrapped-builder.css?v=builder1">
+  </head>
+  <body>
+    <div id="wrapped-builder" class="wrapped-builder">
+      <header class="builder-header">
+        <div>
+          <p>Internal builder</p>
+          <h1>JSU/NCSY Wrapped customizer</h1>
+        </div>
+        <nav>
+          <a href="./?chapter=baltimore">Public preview</a>
+          <button type="button" data-builder-action="copy-export">Copy JSON</button>
+        </nav>
+      </header>
+
+      <main class="builder-layout">
+        <section class="builder-panel builder-panel--controls" aria-label="Customizer controls">
+          <div class="builder-section">
+            <h2>Target</h2>
+            <div class="builder-grid">
+              <label>
+                Region
+                <select data-builder-region></select>
+              </label>
+              <label>
+                Preview chapter
+                <select data-builder-chapter></select>
+              </label>
+              <label>
+                Edit scope
+                <select data-builder-scope>
+                  <option value="chapter">This chapter</option>
+                  <option value="region">Region default</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="builder-section">
+            <h2>Brand and CTA</h2>
+            <div class="builder-grid">
+              <label>
+                Logo
+                <select data-builder-field="brand_logo">
+                  <option value="">Use data/default</option>
+                  <option value="jsu">JSU</option>
+                  <option value="ncsy">NCSY</option>
+                </select>
+              </label>
+              <label>
+                Palette
+                <select data-builder-field="palette">
+                  <option value="">Use default</option>
+                  <option value="electric">Electric</option>
+                  <option value="purple-gold">Purple gold</option>
+                  <option value="sunset">Sunset</option>
+                </select>
+              </label>
+              <label>
+                CTA label
+                <input data-builder-field="cta_label" placeholder="Get involved next year">
+              </label>
+              <label>
+                CTA target or form selector
+                <input data-builder-field="cta_target" placeholder="#jsuw-wrapped-interest">
+              </label>
+            </div>
+          </div>
+
+          <div class="builder-section">
+            <div class="builder-section-heading">
+              <h2>Generated screens</h2>
+              <span>Hide or rewrite defaults</span>
+            </div>
+            <div class="builder-card-editor" data-builder-card-editor></div>
+          </div>
+
+          <div class="builder-section">
+            <div class="builder-section-heading">
+              <h2>Custom screens</h2>
+              <span>Text, metric, or media</span>
+            </div>
+            <div class="builder-actions">
+              <button type="button" data-builder-action="add-text">Add text</button>
+              <button type="button" data-builder-action="add-metric">Add metric</button>
+              <button type="button" data-builder-action="add-media">Add media</button>
+            </div>
+            <div data-builder-custom-list></div>
+          </div>
+
+          <div class="builder-section">
+            <h2>QA warnings</h2>
+            <div class="builder-warnings" data-builder-warnings></div>
+          </div>
+
+          <div class="builder-section">
+            <div class="builder-section-heading">
+              <h2>Export</h2>
+              <span>Save as wrapped-config-2026.json</span>
+            </div>
+            <textarea data-builder-export spellcheck="false"></textarea>
+          </div>
+        </section>
+
+        <aside class="builder-panel builder-panel--preview" aria-label="Live preview">
+          <div class="builder-preview-top">
+            <div>
+              <p>Live preview</p>
+              <strong data-builder-preview-title>Chapter Wrapped</strong>
+            </div>
+            <button type="button" data-builder-action="refresh-preview">Refresh</button>
+          </div>
+          <div class="builder-phone">
+            <div id="jsu-wrapped" data-year="2026"></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./jsu-wrapped.js?v=builder1" data-manual="true"></script>
+    <script src="./wrapped-builder.js?v=builder1"></script>
+  </body>
+</html>
