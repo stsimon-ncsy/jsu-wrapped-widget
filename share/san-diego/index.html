@@ -22,6 +22,6 @@
   </head>
   <body>
     <p><a href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=san-diego">Open San Diego Wrapped</a></p>
-    <script>location.replace("https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=san-diego");</script>
+    <script>(function () {  var target = new URL("https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=san-diego");  var source = new URLSearchParams(window.location.search);  ["variant", "version", "audience", "program", "campaign", "autoplay", "duration"].forEach(function (key) {    var value = source.get(key);    if (value) {      target.searchParams.set(key, value);    }  });  window.location.replace(target.href);}());</script>
   </body>
 </html>

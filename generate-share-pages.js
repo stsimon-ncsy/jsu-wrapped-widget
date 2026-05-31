@@ -39,6 +39,24 @@ function descriptionFor(record) {
   return parts.join(" ") + (stats.length ? ". " + stats.join(". ") + "." : ".");
 }
 
+function redirectScript(storyUrl) {
+  return [
+    "<script>",
+    "(function () {",
+    "  var target = new URL(" + JSON.stringify(storyUrl) + ");",
+    "  var source = new URLSearchParams(window.location.search);",
+    '  ["variant", "version", "audience", "program", "campaign", "autoplay", "duration"].forEach(function (key) {',
+    "    var value = source.get(key);",
+    "    if (value) {",
+    "      target.searchParams.set(key, value);",
+    "    }",
+    "  });",
+    "  window.location.replace(target.href);",
+    "}());",
+    "</script>"
+  ].join("");
+}
+
 function sharePageHtml(record) {
   var slug = String(record.chapter_slug).trim();
   var title = "JSU/NCSY Wrapped - " + record.chapter_name;
@@ -71,7 +89,7 @@ function sharePageHtml(record) {
     "  </head>",
     "  <body>",
     '    <p><a href="' + escapeHtml(storyUrl) + '">Open ' + escapeHtml(record.chapter_name) + " Wrapped</a></p>",
-    '    <script>location.replace("' + escapeHtml(storyUrl) + '");</script>',
+    "    " + redirectScript(storyUrl),
     "  </body>",
     "</html>",
     ""
@@ -108,5 +126,6 @@ module.exports = {
   descriptionFor,
   generateSharePages,
   isChapterRecord,
+  redirectScript,
   sharePageHtml
 };

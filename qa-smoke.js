@@ -200,6 +200,8 @@ function runStaticShareSmoke() {
   assert(html.includes('name="twitter:title" content="' + expectedTitle + '"'), "Baltimore static share page Twitter title mismatch");
   assert(html.includes('http-equiv="refresh"'), "Baltimore static share page missing human redirect");
   assert(html.includes("?chapter=baltimore"), "Baltimore static share page missing chapter redirect link");
+  assert(html.includes("window.location.search"), "Baltimore static share page should preserve supported query params in JS redirect");
+  assert(html.includes("variant"), "Baltimore static share page should preserve variant query params");
   assert(indexHtml.includes('data-share-base="./share/"'), "hosted preview missing static share base");
   assert(inlineHtml.includes('data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"'), "WordPress inline embed missing static share base");
   chapterRecords.forEach((record) => {
