@@ -1173,6 +1173,8 @@
     var output = Object.assign({}, record || {});
     var overrides = storyConfig && storyConfig.record_overrides;
 
+    output.__jsuw_original_record = record || {};
+
     if (overrides && typeof overrides === "object") {
       Object.assign(output, overrides);
     }
@@ -1190,6 +1192,141 @@
     }
 
     return output;
+  }
+
+  function metricTokenValue(record, key) {
+    var textFields = {
+      largest_event_name: true,
+      repeat_attendee_rate_label: true,
+      chapter_name: true,
+      region_name: true,
+      school_name: true,
+      year_label: true,
+      school_year: true,
+      chapter_persona: true
+    };
+    var value = record && record[key];
+
+    if (!hasValue(value)) {
+      return "";
+    }
+
+    return textFields[key] ? asText(value) : formatNumber(value);
+  }
+
+  function metricTokenMap(record) {
+    return {
+      events_hosted: metricTokenValue(record, "events_hosted"),
+      events: metricTokenValue(record, "events_hosted"),
+      unique_teens: metricTokenValue(record, "unique_teens"),
+      teens: metricTokenValue(record, "unique_teens"),
+      engagement_moments: metricTokenValue(record, "engagement_moments"),
+      moments: metricTokenValue(record, "engagement_moments"),
+      new_teens: metricTokenValue(record, "new_teens"),
+      repeat_attendee_rate_label: metricTokenValue(record, "repeat_attendee_rate_label"),
+      repeat_rate: metricTokenValue(record, "repeat_attendee_rate_label"),
+      largest_event_name: metricTokenValue(record, "largest_event_name"),
+      largest_event_attendance: metricTokenValue(record, "largest_event_attendance"),
+      schools_represented: metricTokenValue(record, "schools_represented"),
+      learning_sessions: metricTokenValue(record, "learning_sessions"),
+      shabbatons: metricTokenValue(record, "shabbatons"),
+      region_unique_teens: metricTokenValue(record, "region_unique_teens"),
+      region_schools_represented: metricTokenValue(record, "region_schools_represented"),
+      national_engagement_moments: metricTokenValue(record, "national_engagement_moments"),
+      chapter_name: metricTokenValue(record, "chapter_name"),
+      region_name: metricTokenValue(record, "region_name"),
+      school_name: metricTokenValue(record, "school_name"),
+      year_label: metricTokenValue(record, "year_label"),
+      school_year: metricTokenValue(record, "school_year"),
+      chapter_persona: metricTokenValue(record, "chapter_persona")
+    };
+  }
+
+  function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function replaceChangedMetricValues(text, record) {
+    var original = record && record.__jsuw_original_record || {};
+    var fields = [
+      "events_hosted",
+      "unique_teens",
+      "engagement_moments",
+      "new_teens",
+      "repeat_attendee_rate_label",
+      "largest_event_attendance",
+      "largest_event_name",
+      "schools_represented",
+      "learning_sessions",
+      "shabbatons",
+      "region_unique_teens",
+      "region_schools_represented",
+      "national_engagement_moments"
+    ];
+    var replacements = [];
+
+    fields.forEach(function (field) {
+      var fromValues = [
+        metricTokenValue(original, field),
+        hasValue(original[field]) ? asText(original[field]) : ""
+      ].filter(function (value, index, list) {
+        return hasValue(value) && list.indexOf(value) === index;
+      });
+      var toValue = metricTokenValue(record, field);
+
+      fromValues.forEach(function (fromValue) {
+        if (hasValue(toValue) && fromValue !== toValue) {
+          replacements.push({ from: fromValue, to: toValue });
+        }
+      });
+    });
+
+    replacements.sort(function (a, b) {
+      return b.from.length - a.from.length;
+    });
+
+    return replacements.reduce(function (output, replacement) {
+      if (!shouldUseLegacyMetricReplacement(replacement.from)) {
+        return output;
+      }
+
+      return replaceMetricText(output, replacement.from, replacement.to);
+    }, String(text));
+  }
+
+  function shouldUseLegacyMetricReplacement(value) {
+    var text = String(value || "").trim();
+
+    if (text.length < 2) {
+      return false;
+    }
+
+    if (/^-?\d$/.test(text)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function replaceMetricText(text, fromValue, toValue) {
+    var escaped = escapeRegExp(fromValue);
+
+    if (/^[\d,.\-%]+$/.test(String(fromValue))) {
+      return String(text).replace(new RegExp("(^|[^0-9])(" + escaped + ")(?![0-9])", "g"), function (match, prefix) {
+        return prefix + toValue;
+      });
+    }
+
+    return String(text).replace(new RegExp(escaped, "g"), toValue);
+  }
+
+  function renderOverrideTemplate(value, record) {
+    var tokens = metricTokenMap(record || {});
+    var rendered = String(value).replace(/\{\{?\s*([a-zA-Z0-9_]+)\s*\}?\}/g, function (match, key) {
+      return hasValue(tokens[key]) ? tokens[key] : match;
+    });
+
+    return replaceChangedMetricValues(rendered, record);
   }
 
   function getEffectiveCtaOptions(base, storyConfig) {
@@ -1226,7 +1363,7 @@
     return aliases[id] || id;
   }
 
-  function applyCardOverride(card, override) {
+  function applyCardOverride(card, override, record) {
     var allowed = [
       "eyebrow",
       "displayEyebrow",
@@ -1243,7 +1380,7 @@
 
     allowed.forEach(function (key) {
       if (hasValue(override && override[key])) {
-        card[key] = override[key];
+        card[key] = renderOverrideTemplate(override[key], record);
       }
     });
 
@@ -1270,7 +1407,7 @@
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
     var chapterName = asText(record.chapter_name, "Your JSU chapter");
-    var value = hasValue(configCard.value) ? asText(configCard.value) : "";
+    var value = hasValue(configCard.value) ? renderOverrideTemplate(configCard.value, record) : "";
 
     return {
       id: normalizeCardId(configCard.id || "custom-" + slugify(configCard.headline || type)),
@@ -1278,18 +1415,18 @@
       customType: theme.replace("custom-", ""),
       theme: theme,
       palette: asText(storyConfig && (storyConfig.palette || storyConfig.accent_palette), ""),
-      eyebrow: asText(configCard.eyebrow, "Custom screen"),
-      displayEyebrow: asText(configCard.displayEyebrow || configCard.eyebrow, "Custom screen"),
-      headline: asText(configCard.headline, chapterName + " had a moment worth sharing"),
-      displayHeadline: asText(configCard.displayHeadline || configCard.headline, chapterName + " had a moment worth sharing"),
+      eyebrow: hasValue(configCard.eyebrow) ? renderOverrideTemplate(configCard.eyebrow, record) : "Custom screen",
+      displayEyebrow: hasValue(configCard.displayEyebrow || configCard.eyebrow) ? renderOverrideTemplate(configCard.displayEyebrow || configCard.eyebrow, record) : "Custom screen",
+      headline: hasValue(configCard.headline) ? renderOverrideTemplate(configCard.headline, record) : chapterName + " had a moment worth sharing",
+      displayHeadline: hasValue(configCard.displayHeadline || configCard.headline) ? renderOverrideTemplate(configCard.displayHeadline || configCard.headline, record) : chapterName + " had a moment worth sharing",
       stat: value,
       rawValue: numberValue(value),
       statLabel: asText(configCard.label || configCard.statLabel, ""),
-      subtext: asText(configCard.subtext || configCard.copy, ""),
-      badge: asText(configCard.badge, ""),
+      subtext: hasValue(configCard.subtext || configCard.copy) ? renderOverrideTemplate(configCard.subtext || configCard.copy, record) : "",
+      badge: hasValue(configCard.badge) ? renderOverrideTemplate(configCard.badge, record) : "",
       imageUrl: asText(configCard.image_url || configCard.imageUrl || configCard.src, ""),
       imageAlt: asText(configCard.image_alt || configCard.imageAlt || configCard.alt, ""),
-      caption: asText(configCard.caption, ""),
+      caption: hasValue(configCard.caption) ? renderOverrideTemplate(configCard.caption, record) : "",
       brandChoice: brandChoice,
       logoUrl: getLogoAsset(brandChoice, assetBase)
     };
@@ -1343,7 +1480,7 @@
       }
 
       if (overrides[id]) {
-        applyCardOverride(next, overrides[id]);
+        applyCardOverride(next, overrides[id], record);
       }
 
       return next;
