@@ -18,10 +18,15 @@ The widget pushes these events:
 window.dataLayer.push({
   event: "jsu_wrapped_card_view",
   wrapped_mode: "chapter",
+  scope_type: "chapter",
+  scope_slug: "baltimore",
+  scope_name: "Baltimore",
   wrapped_year: "2026",
   chapter_slug: "baltimore",
   chapter_name: "Baltimore",
   region_name: "Atlantic Seaboard",
+  variant_slug: "donor-recap",
+  variant_label: "Donor recap",
   card_index: 3,
   card_total: 10,
   card_theme: "reach",
@@ -68,6 +73,9 @@ This trigger fires on: All Custom Events
 
 ```text
 wrapped_mode
+scope_type
+scope_slug
+scope_name
 wrapped_year
 school_year
 year_label
@@ -75,6 +83,8 @@ chapter_slug
 chapter_id
 chapter_name
 region_name
+variant_slug
+variant_label
 brand_logo
 card_index
 card_total
@@ -113,12 +123,17 @@ Register these as event-scoped custom dimensions:
 
 ```text
 wrapped_mode
+scope_type
+scope_slug
+scope_name
 wrapped_year
 school_year
 year_label
 chapter_slug
 chapter_name
 region_name
+variant_slug
+variant_label
 brand_logo
 card_theme
 card_type

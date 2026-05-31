@@ -158,6 +158,37 @@ function runAnalyticsSmoke() {
   assert(payload.variant_label === "Donor recap", "variant analytics label missing");
 }
 
+function runAnalyticsDocsSmoke() {
+  const docs = loadText("analytics-gtm-setup.md");
+  const payload = api.createAnalyticsPayload({
+    record: {
+      scope_type: "region",
+      scope_slug: "atlantic-seaboard",
+      scope_name: "Atlantic Seaboard",
+      region_name: "Atlantic Seaboard"
+    },
+    cards: [{ theme: "movement", type: "movement" }],
+    index: 0,
+    experienceMode: "region",
+    storyConfig: {
+      active_variant: "donor-recap",
+      active_variant_label: "Donor recap"
+    }
+  }, "docs_test");
+  const requiredKeys = [
+    "scope_type",
+    "scope_slug",
+    "scope_name",
+    "variant_slug",
+    "variant_label"
+  ];
+
+  requiredKeys.forEach((key) => {
+    assert(Object.prototype.hasOwnProperty.call(payload, key), `analytics payload missing ${key}`);
+    assert(docs.includes(key), `analytics GTM docs missing ${key}`);
+  });
+}
+
 function runStoryScopeSmoke() {
   const records = [
     {
@@ -302,6 +333,7 @@ function main() {
   runHiddenVariantSmoke();
   runSampleVariantSmoke(records, config);
   runAnalyticsSmoke();
+  runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
