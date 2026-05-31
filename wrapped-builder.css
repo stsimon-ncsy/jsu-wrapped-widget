@@ -84,9 +84,45 @@ textarea {
   margin-top: 12px;
 }
 
+.builder-version-create {
+  color: #43334f;
+  display: grid;
+  flex: 1 1 220px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.builder-version-create input {
+  background: #f9f7fc;
+  border: 1px solid #dcd4e8;
+  border-radius: 999px;
+  color: #16072a;
+  min-width: 0;
+  padding: 10px 12px;
+  width: 100%;
+}
+
 .builder-actions--versions a {
   background: #efe8fb;
   color: #16072a;
+}
+
+.builder-version-status {
+  color: #6d607c;
+  font-size: 0.8rem;
+  font-weight: 850;
+  line-height: 1.35;
+  margin-top: 8px;
+  min-height: 1.1em;
+}
+
+.builder-version-status--error {
+  color: #8d1f1f;
+}
+
+.builder-version-status--ok {
+  color: #17613e;
 }
 
 .builder-layout {

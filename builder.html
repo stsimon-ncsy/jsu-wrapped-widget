@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSU/NCSY Wrapped Builder</title>
     <link rel="stylesheet" href="./jsu-wrapped.css?v=palette1">
-    <link rel="stylesheet" href="./wrapped-builder.css?v=builder5">
+    <link rel="stylesheet" href="./wrapped-builder.css?v=builder6">
   </head>
   <body>
     <div id="wrapped-builder" class="wrapped-builder">
@@ -46,9 +46,14 @@
               </label>
             </div>
             <div class="builder-actions builder-actions--versions">
-              <button type="button" data-builder-action="duplicate-version">Duplicate current version</button>
+              <label class="builder-version-create">
+                New version name
+                <input data-builder-new-version placeholder="Donor recap">
+              </label>
+              <button type="button" data-builder-action="duplicate-version">Create from current</button>
               <a data-builder-preview-link href="./?chapter=baltimore" target="_blank" rel="noopener">Open preview</a>
             </div>
+            <div class="builder-version-status" data-builder-version-status></div>
           </div>
 
           <div class="builder-section">
@@ -141,6 +146,6 @@
     </div>
 
     <script src="./jsu-wrapped.js?v=builder3" data-manual="true"></script>
-    <script src="./wrapped-builder.js?v=builder5"></script>
+    <script src="./wrapped-builder.js?v=builder6"></script>
   </body>
 </html>

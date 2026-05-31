@@ -254,6 +254,18 @@
     }
   }
 
+  function setVersionStatus(message, isError) {
+    var status = $("[data-builder-version-status]");
+
+    if (!status) {
+      return;
+    }
+
+    status.textContent = message || "";
+    status.classList.toggle("builder-version-status--error", !!isError);
+    status.classList.toggle("builder-version-status--ok", !!message && !isError);
+  }
+
   function variantDisplayName(slug, entry) {
     var text = entry && (entry.label || entry.name || entry.title);
 
@@ -897,18 +909,20 @@
 
   function duplicateActiveVersion() {
     var base = ensureBaseSection();
-    var label = window.prompt("Name this version", state.variantSlug ? variantDisplayName(state.variantSlug, base.variants && base.variants[state.variantSlug]) + " copy" : "Donor recap");
+    var input = $("[data-builder-new-version]");
+    var label = input ? input.value : "";
     var slug;
     var source;
 
     if (!hasValue(label)) {
+      setVersionStatus("Add a name for the new version first.", true);
       return;
     }
 
     slug = slugify(label);
 
     if (!slug || slug === "default" || slug === "jsu-wrapped") {
-      window.alert("Please use a more specific version name.");
+      setVersionStatus("Use a more specific version name.", true);
       return;
     }
 
@@ -916,6 +930,7 @@
 
     if (base.variants[slug]) {
       state.variantSlug = slug;
+      setVersionStatus("That version already exists, so I selected it.", true);
       renderAll();
       return;
     }
@@ -924,6 +939,12 @@
     base.variants[slug] = cloneValue(source);
     base.variants[slug].label = label.trim();
     state.variantSlug = slug;
+
+    if (input) {
+      input.value = "";
+    }
+
+    setVersionStatus("Created " + label.trim() + " from the current version.", false);
     renderAll();
   }
 
