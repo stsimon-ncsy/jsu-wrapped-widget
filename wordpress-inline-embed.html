@@ -4934,7 +4934,7 @@
 
   function createPageMetadata(state) {
     var record = state && state.record || {};
-    var brandLabel = getBrandChoice(record) === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
+    var brandLabel = "JSU/NCSY Wrapped";
     var scope = getStoryScope(record);
     var chapterName = asText(scope.name, brandLabel);
     var yearLabel = asText(record.year_label || record.school_year, "");

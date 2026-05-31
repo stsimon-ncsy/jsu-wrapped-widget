@@ -133,6 +133,14 @@ Allowed global CSS constructs are limited to animation/support wrappers such as 
 
 The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.
 
+The runtime page metadata uses the combined social title format:
+
+```text
+JSU/NCSY Wrapped - [Chapter or Scope Name]
+```
+
+That title is applied to `document.title`, `og:title`, and `twitter:title`. The in-story logo and card branding can still use JSU or NCSY based on the record/config logo setting.
+
 `node qa-smoke.js` includes SVG fallback checks for:
 
 - real chapter data

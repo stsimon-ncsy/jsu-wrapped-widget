@@ -143,6 +143,32 @@ function runSampleVariantSmoke(records, config) {
   assertNoBrokenText(cards);
 }
 
+function runPageMetadataSmoke() {
+  const ncsyMetadata = api.createPageMetadata({
+    record: {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      brand_logo: "ncsy"
+    }
+  });
+  const jsuMetadata = api.createPageMetadata({
+    record: {
+      chapter_slug: "greater-washington",
+      chapter_name: "Greater Washington",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      brand_logo: "jsu"
+    }
+  });
+
+  assert(ncsyMetadata.title === "JSU/NCSY Wrapped - Baltimore", `NCSY metadata title mismatch: ${ncsyMetadata.title}`);
+  assert(jsuMetadata.title === "JSU/NCSY Wrapped - Greater Washington", `JSU metadata title mismatch: ${jsuMetadata.title}`);
+  assert(ncsyMetadata.description.includes("Baltimore Wrapped"), "metadata description missing chapter name");
+  assert(ncsyMetadata.image && ncsyMetadata.image.includes("wrapped-social-preview.png"), "metadata image missing social preview");
+}
+
 function runAnalyticsSmoke() {
   const payload = api.createAnalyticsPayload({
     record: { chapter_slug: "baltimore", chapter_name: "Baltimore" },
@@ -588,6 +614,7 @@ function main() {
   runPickerSmoke(records, config);
   runHiddenVariantSmoke();
   runSampleVariantSmoke(records, config);
+  runPageMetadataSmoke();
   runAnalyticsSmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
