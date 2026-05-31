@@ -374,6 +374,13 @@
     };
   }
 
+  function getShareBase(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+
+    return asText(settings.shareBase || settings.shareBaseUrl || settings.staticShareBase || dataset.shareBase || dataset.shareBaseUrl || dataset.staticShareBase, "");
+  }
+
   function createFormPrefillContext(record, url) {
     return {
       chapter_slug: asText(record && record.chapter_slug, ""),
@@ -3503,12 +3510,38 @@
     ].filter(Boolean).join(" - ");
   }
 
+  function createShareUrl(state, currentUrl) {
+    var fallback = asText(currentUrl || root.location && root.location.href, "");
+    var record = state && state.record || {};
+    var scope = getStoryScope(record);
+    var shareBase = asText(state && state.shareBase, "");
+
+    if (!shareBase || state && state.experienceMode === "teen" || scope.type !== "chapter" || !hasValue(scope.slug)) {
+      return fallback;
+    }
+
+    try {
+      var base = new URL(shareBase, fallback || root.location && root.location.href || "https://example.org/");
+      var baseHref = base.href.charAt(base.href.length - 1) === "/" ? base.href : base.href + "/";
+      var shareUrl = new URL(slugify(scope.slug) + "/", baseHref);
+      var variant = asText(state && (state.variantSlug || state.storyConfig && state.storyConfig.active_variant), "");
+
+      if (hasValue(variant)) {
+        shareUrl.searchParams.set("variant", variant);
+      }
+
+      return shareUrl.href;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
   async function shareRecap(container, state) {
     var metadata = createPageMetadata(state);
     var data = {
       title: metadata.title,
       text: shareText(state),
-      url: root.location ? root.location.href : ""
+      url: createShareUrl(state)
     };
 
     trackAnalyticsEvent(state, "jsu_wrapped_share_click", {
@@ -3948,6 +3981,7 @@
           storyStartedAt: null,
           cardStartedAt: null,
           storyCompletedAt: null,
+          shareBase: getShareBase(target, settings),
           soundEnabled: false,
           soundEngine: null
         };
@@ -4029,6 +4063,7 @@
         storyStartedAt: null,
         cardStartedAt: null,
         storyCompletedAt: null,
+        shareBase: getShareBase(target, settings),
         soundEnabled: false,
         soundEngine: null
       };
@@ -4099,6 +4134,7 @@
     getAnalyticsPreference: getAnalyticsPreference,
     createAnalyticsPayload: createAnalyticsPayload,
     createPageMetadata: createPageMetadata,
+    createShareUrl: createShareUrl,
     applyPageMetadata: applyPageMetadata,
     trackAnalyticsEvent: trackAnalyticsEvent,
     trackCardEngagement: trackCardEngagement,

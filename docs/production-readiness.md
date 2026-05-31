@@ -8,16 +8,20 @@ Run these before copying files to WordPress or relying on GitHub Pages:
 
 ```powershell
 node sync-wordpress-inline.js
+node generate-share-pages.js
+git diff --exit-code share
+git status --porcelain -- share
 node validate-wrapped-data.js
 node --check jsu-wrapped.js
 node --check wrapped-builder.js
 node --check validate-wrapped-data.js
 node --check sync-wordpress-inline.js
+node --check generate-share-pages.js
 node qa-smoke.js
 git diff --check
 ```
 
-GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed.
+GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed. Static social share pages are regenerated with `node generate-share-pages.js` and checked with both `git diff --exit-code share` and `git status --porcelain -- share`.
 
 The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data.
 
@@ -140,6 +144,18 @@ JSU/NCSY Wrapped - [Chapter or Scope Name]
 ```
 
 That title is applied to `document.title`, `og:title`, and `twitter:title`. The in-story logo and card branding can still use JSU or NCSY based on the record/config logo setting.
+
+Because many social scrapers do not execute JavaScript, chapter share links can use generated static pages under:
+
+```text
+/share/[chapter-slug]/
+```
+
+Those pages include crawler-readable Open Graph/Twitter tags and immediately redirect human visitors back to the interactive `?chapter=` story. Use `data-share-base="./share/"` for same-site hosting, or point WordPress embeds at the GitHub Pages share folder:
+
+```html
+data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
+```
 
 `node qa-smoke.js` includes SVG fallback checks for:
 

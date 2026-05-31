@@ -169,6 +169,47 @@ function runPageMetadataSmoke() {
   assert(ncsyMetadata.image && ncsyMetadata.image.includes("wrapped-social-preview.png"), "metadata image missing social preview");
 }
 
+function runStaticShareSmoke() {
+  const records = loadJson("sample-wrapped-2026.json");
+  const chapterRecords = records.filter((record) => record && record.chapter_slug && record.chapter_name && (!record.scope_type || String(record.scope_type).toLowerCase() === "chapter"));
+  const html = loadText("share/baltimore/index.html");
+  const indexHtml = loadText("index.html");
+  const inlineHtml = loadText("wordpress-inline-embed.html");
+  const expectedTitle = "JSU/NCSY Wrapped - Baltimore";
+  const shareUrl = api.createShareUrl({
+    record: {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore"
+    },
+    experienceMode: "chapter",
+    variantSlug: "donor-recap",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?chapter=baltimore&variant=donor-recap");
+  const teenShareUrl = api.createShareUrl({
+    record: {
+      teen_slug: "maya-test",
+      teen_name: "Maya"
+    },
+    experienceMode: "teen",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?mode=teen&teen=maya-test");
+
+  assert(fs.existsSync("generate-share-pages.js"), "static share page generator is missing");
+  assert(html.includes("<title>" + expectedTitle + "</title>"), "Baltimore static share page title mismatch");
+  assert(html.includes('property="og:title" content="' + expectedTitle + '"'), "Baltimore static share page OG title mismatch");
+  assert(html.includes('name="twitter:title" content="' + expectedTitle + '"'), "Baltimore static share page Twitter title mismatch");
+  assert(html.includes('http-equiv="refresh"'), "Baltimore static share page missing human redirect");
+  assert(html.includes("?chapter=baltimore"), "Baltimore static share page missing chapter redirect link");
+  assert(indexHtml.includes('data-share-base="./share/"'), "hosted preview missing static share base");
+  assert(inlineHtml.includes('data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"'), "WordPress inline embed missing static share base");
+  chapterRecords.forEach((record) => {
+    const path = `share/${record.chapter_slug}/index.html`;
+    assert(fs.existsSync(path), `static share page missing for ${record.chapter_slug}`);
+  });
+  assert(shareUrl === "https://example.org/wrapped/share/baltimore/?variant=donor-recap", `static share URL mismatch: ${shareUrl}`);
+  assert(teenShareUrl === "https://example.org/wrapped/?mode=teen&teen=maya-test", `teen share URL should fall back to current URL: ${teenShareUrl}`);
+}
+
 function runAnalyticsSmoke() {
   const payload = api.createAnalyticsPayload({
     record: { chapter_slug: "baltimore", chapter_name: "Baltimore" },
@@ -531,6 +572,10 @@ function runCiWorkflowSmoke() {
     "node --check wrapped-builder.js",
     "node --check validate-wrapped-data.js",
     "node --check sync-wordpress-inline.js",
+    "node --check generate-share-pages.js",
+    "node generate-share-pages.js",
+    "git diff --exit-code share",
+    "git status --porcelain -- share",
     "node --check qa-smoke.js",
     "node qa-smoke.js",
     "git diff --check"
@@ -615,6 +660,7 @@ function main() {
   runHiddenVariantSmoke();
   runSampleVariantSmoke(records, config);
   runPageMetadataSmoke();
+  runStaticShareSmoke();
   runAnalyticsSmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
