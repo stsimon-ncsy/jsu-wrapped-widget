@@ -130,6 +130,18 @@
     return value;
   }
 
+  function isChapterRecord(record) {
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      return false;
+    }
+
+    if (!hasValue(record.chapter_slug) || !hasValue(record.chapter_name)) {
+      return false;
+    }
+
+    return !hasValue(record.scope_type) || String(record.scope_type).trim().toLowerCase() === "chapter";
+  }
+
   async function fetchJson(url) {
     var response = await fetch(url, { credentials: "same-origin" });
 
@@ -1174,7 +1186,9 @@
     var root = $("#wrapped-builder");
 
     try {
-      state.records = await fetchJson(DATA_URL);
+      var rawRecords = await fetchJson(DATA_URL);
+
+      state.records = rawRecords.filter(isChapterRecord);
       state.config = ensureConfigShape(await fetchJson(CONFIG_URL));
       bindEvents();
       renderAll();

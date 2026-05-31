@@ -343,6 +343,8 @@ function runBuilderFutureScopeSmoke() {
   assert(builderHtml.includes('<option value="program">Program default</option>'), "builder scope selector is missing program default option");
   assert(builderJs.includes("function ensureProgramSection"), "builder is missing a program config section helper");
   assert(builderJs.includes("state.config.programs[slug]"), "builder does not write program scoped config");
+  assert(builderJs.includes("function isChapterRecord"), "builder is missing a chapter-record filter");
+  assert(builderJs.includes("rawRecords.filter(isChapterRecord)"), "builder should filter non-chapter story rows out of chapter selectors");
 }
 
 function runFallbackSvgSmoke(records, config) {
