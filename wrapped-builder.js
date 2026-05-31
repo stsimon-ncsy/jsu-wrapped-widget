@@ -34,6 +34,7 @@
     regionSlug: "",
     chapterSlug: "",
     scope: "chapter",
+    previewCardId: "cover",
     previewTimer: null
   };
 
@@ -224,30 +225,111 @@
     return section.card_overrides[cardId];
   }
 
+  function getStoryConfig(record) {
+    if (!window.JSUWrapped || !window.JSUWrapped.resolveStoryConfig || !record) {
+      return {};
+    }
+
+    return window.JSUWrapped.resolveStoryConfig(state.config, record);
+  }
+
+  function getCardsForRecord(record, options) {
+    var storyConfig = getStoryConfig(record);
+    var cardConfig = Object.assign({}, storyConfig);
+
+    if (options && options.generatedOnly) {
+      cardConfig.hidden_cards = [];
+      cardConfig.custom_cards = [];
+    }
+
+    if (!window.JSUWrapped || !window.JSUWrapped.createEffectiveRecord || !window.JSUWrapped.createCards || !record) {
+      return [];
+    }
+
+    return window.JSUWrapped.createCards(window.JSUWrapped.createEffectiveRecord(record, storyConfig), {
+      storyConfig: cardConfig,
+      assetBase: "./assets/",
+      ctaLabel: storyConfig.cta_label || storyConfig.ctaLabel || "",
+      ctaTarget: storyConfig.cta_target || storyConfig.ctaTarget || "",
+      ctaHref: storyConfig.cta_href || storyConfig.ctaHref || ""
+    });
+  }
+
+  function cardsById(cards) {
+    var output = {};
+
+    (cards || []).forEach(function (card) {
+      output[card.id] = card;
+    });
+
+    return output;
+  }
+
+  function cardFieldValue(card, field) {
+    if (!card) {
+      return "";
+    }
+
+    if (field === "headline") {
+      return card.headline || card.displayHeadline || "";
+    }
+
+    if (field === "eyebrow") {
+      return card.eyebrow || card.displayEyebrow || "";
+    }
+
+    return card[field] || "";
+  }
+
+  function setPreviewCard(cardId) {
+    if (!cardId) {
+      return;
+    }
+
+    state.previewCardId = cardId;
+    markPreviewRows();
+    schedulePreview();
+  }
+
+  function markPreviewRows() {
+    $all("[data-builder-preview-card]").forEach(function (row) {
+      row.classList.toggle("builder-card-row--active", row.getAttribute("data-builder-preview-card") === state.previewCardId);
+    });
+  }
+
   function renderCardEditor() {
     var section = getActiveSection();
     var overrides = section.card_overrides || {};
     var hidden = hiddenCards(section);
     var container = $("[data-builder-card-editor]");
+    var generatedCards = cardsById(getCardsForRecord(getActiveRecord(), { generatedOnly: true }));
 
     container.innerHTML = CARD_IDS.map(function (cardId) {
       var override = overrides[cardId] || {};
       var isHidden = hidden.indexOf(cardId) !== -1;
+      var card = generatedCards[cardId] || {};
+      var copyField = cardId === "cover" ? "markerText" : "subtext";
+      var copyLabel = cardId === "cover" ? "Footer line" : "Subtext";
+      var headline = hasValue(override.headline) ? override.headline : cardFieldValue(card, "headline");
+      var eyebrow = hasValue(override.eyebrow) ? override.eyebrow : cardFieldValue(card, "eyebrow");
+      var subtext = hasValue(override[copyField]) ? override[copyField] : cardFieldValue(card, copyField);
 
       return [
-        '<article class="builder-card-row">',
+        '<article class="builder-card-row" data-builder-preview-card="' + escapeHtml(cardId) + '">',
         '<header>',
         '<strong>' + escapeHtml(CARD_LABELS[cardId]) + "</strong>",
         '<label class="builder-toggle"><input type="checkbox" data-builder-card-hidden="' + escapeHtml(cardId) + '"' + (isHidden ? " checked" : "") + "> Hide</label>",
         "</header>",
         '<div class="builder-card-fields">',
-        '<label>Headline override<input data-builder-card-field="headline" data-builder-card-id="' + escapeHtml(cardId) + '" value="' + escapeHtml(override.headline || "") + '"></label>',
-        '<label>Eyebrow override<input data-builder-card-field="eyebrow" data-builder-card-id="' + escapeHtml(cardId) + '" value="' + escapeHtml(override.eyebrow || "") + '"></label>',
-        '<label>Subtext override<textarea data-builder-card-field="subtext" data-builder-card-id="' + escapeHtml(cardId) + '">' + escapeHtml(override.subtext || "") + "</textarea></label>",
+        '<label>Headline<input data-builder-card-field="headline" data-builder-card-id="' + escapeHtml(cardId) + '" value="' + escapeHtml(headline) + '"></label>',
+        '<label>Eyebrow<input data-builder-card-field="eyebrow" data-builder-card-id="' + escapeHtml(cardId) + '" value="' + escapeHtml(eyebrow) + '"></label>',
+        '<label>' + escapeHtml(copyLabel) + '<textarea data-builder-card-field="' + escapeHtml(copyField) + '" data-builder-card-id="' + escapeHtml(cardId) + '">' + escapeHtml(subtext) + "</textarea></label>",
         "</div>",
         "</article>"
       ].join("");
     }).join("");
+
+    markPreviewRows();
   }
 
   function ensureCustomCards(section) {
@@ -269,7 +351,7 @@
       var type = card.type || "text";
 
       return [
-        '<article class="builder-custom-card">',
+        '<article class="builder-custom-card" data-builder-preview-card="' + escapeHtml(card.id || "") + '">',
         '<header>',
         '<strong>Custom screen ' + (index + 1) + "</strong>",
         '<button type="button" data-builder-action="delete-custom" data-custom-index="' + index + '">Remove</button>',
@@ -291,6 +373,8 @@
         "</article>"
       ].join("");
     }).join("");
+
+    markPreviewRows();
   }
 
   function placementOptions(selected) {
@@ -357,10 +441,21 @@
   function renderPreview() {
     var preview = document.getElementById("jsu-wrapped");
     var record = getActiveRecord();
+    var cards = getCardsForRecord(record);
+    var previewIndex = 0;
 
     if (!preview || !record || !window.JSUWrapped) {
       return;
     }
+
+    cards.some(function (card, index) {
+      if (card.id === state.previewCardId) {
+        previewIndex = index;
+        return true;
+      }
+
+      return false;
+    });
 
     $("[data-builder-preview-title]").textContent = (record.chapter_name || record.chapter_slug) + " Wrapped";
 
@@ -370,6 +465,7 @@
       chapter: record.chapter_slug,
       url: window.location.origin + window.location.pathname + "?chapter=" + encodeURIComponent(record.chapter_slug),
       assetBase: "./assets/",
+      initialIndex: previewIndex,
       autoplay: false,
       analytics: false,
       metadata: false
@@ -408,6 +504,7 @@
       subtext: "Add the local story here."
     });
 
+    state.previewCardId = id;
     renderAll();
   }
 
@@ -515,8 +612,21 @@
       updateField(event);
     });
 
+    document.addEventListener("focusin", function (event) {
+      var previewRow = event.target && event.target.closest && event.target.closest("[data-builder-preview-card]");
+
+      if (previewRow) {
+        setPreviewCard(previewRow.getAttribute("data-builder-preview-card"));
+      }
+    });
+
     document.addEventListener("click", function (event) {
       var action = event.target && event.target.getAttribute("data-builder-action");
+      var previewRow = event.target && event.target.closest && event.target.closest("[data-builder-preview-card]");
+
+      if (previewRow) {
+        setPreviewCard(previewRow.getAttribute("data-builder-preview-card"));
+      }
 
       if (!action) {
         return;

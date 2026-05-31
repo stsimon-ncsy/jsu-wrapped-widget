@@ -178,6 +178,17 @@ textarea {
   padding: 12px;
 }
 
+.builder-card-row,
+.builder-custom-card {
+  cursor: pointer;
+}
+
+.builder-card-row--active {
+  background: #fff7d8;
+  border-color: #ffb627;
+  box-shadow: 0 0 0 3px rgba(255, 182, 39, 0.22);
+}
+
 .builder-card-row header,
 .builder-custom-card header {
   align-items: center;
