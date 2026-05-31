@@ -15,6 +15,8 @@ node qa-smoke.js
 git diff --check
 ```
 
+GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed.
+
 Then smoke these URLs:
 
 ```text

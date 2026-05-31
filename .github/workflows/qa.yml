@@ -1,0 +1,43 @@
+name: QA
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    name: Static widget smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Sync WordPress inline embed
+        run: node sync-wordpress-inline.js
+
+      - name: Ensure inline embed is committed
+        run: git diff --exit-code wordpress-inline-embed.html
+
+      - name: Syntax check renderer
+        run: node --check jsu-wrapped.js
+
+      - name: Syntax check builder
+        run: node --check wrapped-builder.js
+
+      - name: Syntax check sync script
+        run: node --check sync-wordpress-inline.js
+
+      - name: Syntax check smoke script
+        run: node --check qa-smoke.js
+
+      - name: Run smoke tests
+        run: node qa-smoke.js
+
+      - name: Check whitespace
+        run: git diff --check

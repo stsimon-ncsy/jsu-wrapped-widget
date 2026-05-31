@@ -403,6 +403,33 @@ function runCssIsolationSmoke() {
   assert(docs.includes("#jsu-wrapped"), "production docs missing #jsu-wrapped CSS scope contract");
 }
 
+function runCiWorkflowSmoke() {
+  const workflowPath = ".github/workflows/qa.yml";
+  const docs = loadText("docs/production-readiness.md");
+
+  assert(fs.existsSync(workflowPath), "GitHub Actions QA workflow is missing");
+
+  const workflow = loadText(workflowPath);
+  const requiredCommands = [
+    "node sync-wordpress-inline.js",
+    "git diff --exit-code wordpress-inline-embed.html",
+    "node --check jsu-wrapped.js",
+    "node --check wrapped-builder.js",
+    "node --check sync-wordpress-inline.js",
+    "node --check qa-smoke.js",
+    "node qa-smoke.js",
+    "git diff --check"
+  ];
+
+  requiredCommands.forEach((command) => {
+    assert(workflow.includes(command), `GitHub Actions QA workflow missing ${command}`);
+  });
+
+  assert(workflow.includes("pull_request"), "GitHub Actions QA workflow should run on pull requests");
+  assert(workflow.includes("push"), "GitHub Actions QA workflow should run on push");
+  assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
+}
+
 function main() {
   const records = loadJson("sample-wrapped-2026.json");
   const config = loadJson("wrapped-config-2026.json");
@@ -417,6 +444,7 @@ function main() {
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runCssIsolationSmoke();
+  runCiWorkflowSmoke();
 
   console.log("qa smoke ok");
 }
