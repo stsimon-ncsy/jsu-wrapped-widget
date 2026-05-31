@@ -154,6 +154,120 @@ function runAnalyticsSmoke() {
   assert(payload.variant_label === "Donor recap", "variant analytics label missing");
 }
 
+function runStoryScopeSmoke() {
+  const records = [
+    {
+      scope_type: "region",
+      scope_slug: "atlantic-seaboard",
+      scope_name: "Atlantic Seaboard",
+      region_slug: "atlantic-seaboard",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: 420,
+      unique_teens: 2850,
+      engagement_moments: 9200,
+      region_unique_teens: 2850,
+      national_engagement_moments: 92000,
+      chapter_persona: "The Regional Spark"
+    },
+    {
+      scope_type: "program",
+      scope_slug: "shabbat",
+      program_slug: "shabbat",
+      program_name: "Shabbat Across JSU",
+      year_label: "2025-2026",
+      events_hosted: 88,
+      unique_teens: 760,
+      engagement_moments: 2800,
+      chapter_persona: "The Shabbat Powerhouse"
+    },
+    {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore",
+      region_name: "Atlantic Seaboard",
+      events_hosted: 338,
+      unique_teens: 533,
+      engagement_moments: 2232
+    }
+  ];
+  const regionRequest = api.getStoryRequest("https://example.org/wrapped/?scope=region&region=atlantic-seaboard");
+  const programRequest = api.getStoryRequest("https://example.org/wrapped/?scope=program&program=shabbat");
+  const pickerRequest = api.getStoryRequest("https://example.org/wrapped/?region=atlantic-seaboard");
+  const region = api.findStoryRecord(records, regionRequest);
+  const program = api.findStoryRecord(records, programRequest);
+  const chapter = api.findStoryRecord(records, { type: "chapter", slug: "baltimore" });
+  const regionCards = api.createCards(region);
+  const final = regionCards.find((card) => card.id === "final");
+  const movement = regionCards.find((card) => card.id === "movement");
+  const payload = api.createAnalyticsPayload({
+    record: region,
+    cards: regionCards,
+    index: 0,
+    experienceMode: "region"
+  }, "scope_test");
+  const namedChapterScope = api.getStoryScope({
+    chapter_name: "Northwood JSU",
+    region_name: "Atlantic Seaboard"
+  });
+
+  assert(regionRequest.type === "region", "region story request type missing");
+  assert(regionRequest.slug === "atlantic-seaboard", "region story request slug missing");
+  assert(programRequest.type === "program", "program story request type missing");
+  assert(program && program.program_name === "Shabbat Across JSU", "program story record not found");
+  assert(!pickerRequest, "plain region picker URL should not become a region story");
+  assert(region && region.scope_name === "Atlantic Seaboard", "region story record not found");
+  assert(chapter && chapter.chapter_name === "Baltimore", "chapter story record not found");
+  assert(final.headline === "Atlantic Seaboard Wrapped", `region final headline mismatch: ${final.headline}`);
+  assert(final.summaryStats.some((stat) => stat.label === "of us, one region"), "region final stat label still uses chapter language");
+  assert(movement.subtext === "One region. One national movement.", `region movement copy mismatch: ${movement.subtext}`);
+  assert(payload.scope_type === "region", "scope analytics type missing");
+  assert(payload.scope_slug === "atlantic-seaboard", "scope analytics slug missing");
+  assert(namedChapterScope.type === "chapter", "chapter name with region name should not infer region scope");
+}
+
+function runFallbackSvgSmoke(records, config) {
+  const slugs = ["philadelphia", "baltimore", "greater-washington"];
+
+  slugs.forEach((slug) => {
+    const record = records.find((item) => item.chapter_slug === slug);
+
+    if (!record) {
+      return;
+    }
+
+    const storyConfig = api.resolveStoryConfig(config, record);
+    const effective = api.createEffectiveRecord(record, storyConfig);
+    const cards = api.createCards(effective, { storyConfig, assetBase: "./assets/" });
+    const svg = api.createFallbackSvg({ record: effective, cards, storyConfig, experienceMode: "chapter" }, "");
+
+    assert(svg.includes("<svg"), `${slug} fallback SVG missing root`);
+    assert(!/\b(undefined|null|NaN)\b/i.test(svg), `${slug} fallback SVG has broken text`);
+    assert((svg.match(/poster-stat-value/g) || []).length <= 5, `${slug} fallback SVG rendered too many stat rows`);
+    assert(svg.includes("poster-footer"), `${slug} fallback SVG missing footer`);
+  });
+
+  const longRecord = {
+    chapter_slug: "long-test",
+    chapter_name: "Northwest Suburban Philadelphia Leadership Chapter",
+    region_name: "Atlantic Seaboard",
+    year_label: "2025-2026",
+    events_hosted: 1234,
+    unique_teens: 9876,
+    engagement_moments: 54321,
+    new_teens: 432,
+    repeat_attendee_rate_label: "67%",
+    chapter_persona: "The Extraordinarily Dedicated Community Builders"
+  };
+  const storyConfig = api.resolveStoryConfig({}, longRecord);
+  const effective = api.createEffectiveRecord(longRecord, storyConfig);
+  const cards = api.createCards(effective, { storyConfig });
+  const svg = api.createFallbackSvg({ record: effective, cards, storyConfig, experienceMode: "chapter" }, "");
+
+  assert(!/\b(undefined|null|NaN)\b/i.test(svg), "long fallback SVG has broken text");
+  assert((svg.match(/poster-persona/g) || []).length >= 1, "long fallback SVG did not render persona text");
+  assert((svg.match(/poster-stat-label/g) || []).length >= 3, "long fallback SVG did not render stat labels");
+}
+
 function main() {
   const records = loadJson("sample-wrapped-2026.json");
   const config = loadJson("wrapped-config-2026.json");
@@ -163,6 +277,8 @@ function main() {
   runHiddenVariantSmoke();
   runSampleVariantSmoke(records, config);
   runAnalyticsSmoke();
+  runStoryScopeSmoke();
+  runFallbackSvgSmoke(records, config);
 
   console.log("qa smoke ok");
 }

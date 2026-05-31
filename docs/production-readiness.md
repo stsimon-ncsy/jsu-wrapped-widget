@@ -42,6 +42,16 @@ Public URLs:
 /?chapter=baltimore&program=shabbat&variant=recruitment
 ```
 
+Future region or cross-region program stories should use explicit story scope URLs so the picker can keep using plain `?region=` as a filter:
+
+```text
+/?scope=region&region=atlantic-seaboard
+/?scope=program&program=shabbat
+/?scope=program&program=shabbat&variant=recruitment
+```
+
+Those URLs expect first-class records in the JSON with fields such as `scope_type`, `scope_slug`, and `scope_name`. Do not fake a region/program as a chapter record; use the scope fields and let the renderer normalize it as the story subject.
+
 Hidden variants can be linked directly but will not appear in the picker:
 
 ```json
@@ -70,6 +80,17 @@ Use placeholders in edited copy and custom screens when a number or chapter fiel
 ```
 
 The builder stores placeholder templates behind the scenes so corrected metrics do not drift from edited copy.
+
+## Share/Download Fallback
+
+The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.
+
+`node qa-smoke.js` includes SVG fallback checks for:
+
+- real chapter data
+- long chapter/persona copy
+- missing broken text such as `undefined`, `null`, or `NaN`
+- variant-aware generated copy
 
 ## WordPress Inline Embed
 

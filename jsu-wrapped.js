@@ -231,6 +231,60 @@
     return getSearchValue(url, ["program", "campaign"]);
   }
 
+  function getScopeParam(url) {
+    return getSearchValue(url, ["scope", "level", "entity"]);
+  }
+
+  function normalizeScopeType(value) {
+    var normalized = String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+
+    if (normalized === "chapter" || normalized === "chapters") {
+      return "chapter";
+    }
+
+    if (normalized === "region" || normalized === "regional" || normalized === "regions") {
+      return "region";
+    }
+
+    if (normalized === "program" || normalized === "programs" || normalized === "campaign" || normalized === "campaigns") {
+      return "program";
+    }
+
+    return "";
+  }
+
+  function getStoryRequest(url, options) {
+    var settings = options || {};
+    var href = url || settings.url;
+    var chapterSlug = settings.chapter || settings.chapterSlug || getChapterSlug(href);
+    var requestedScope = normalizeScopeType(settings.scope || settings.scopeType || getScopeParam(href));
+    var regionSlug = settings.region || settings.regionSlug || getRegionParam(href);
+    var programSlug = settings.program || settings.programSlug || settings.campaign || getProgramSlug(href);
+
+    if (hasValue(chapterSlug)) {
+      return {
+        type: "chapter",
+        slug: String(chapterSlug).trim()
+      };
+    }
+
+    if (requestedScope === "region" && hasValue(regionSlug)) {
+      return {
+        type: "region",
+        slug: String(regionSlug).trim()
+      };
+    }
+
+    if (requestedScope === "program" && hasValue(programSlug)) {
+      return {
+        type: "program",
+        slug: String(programSlug).trim()
+      };
+    }
+
+    return null;
+  }
+
   function getTeenSlug(url) {
     return getSearchValue(url, ["teen", "student"]);
   }
@@ -594,9 +648,13 @@
     var card = cards[index] || {};
     var mode = asText(state && state.experienceMode, "chapter");
     var storyConfig = state && state.storyConfig || {};
+    var scope = getStoryScope(record);
     var base = {
       event: eventName,
       wrapped_mode: mode,
+      scope_type: scope.type,
+      scope_slug: asText(scope.slug, ""),
+      scope_name: asText(scope.name, ""),
       wrapped_year: asText(state && state.analyticsYear || record.year_label || record.school_year, ""),
       school_year: asText(record.school_year, ""),
       year_label: asText(record.year_label, ""),
@@ -723,7 +781,8 @@
   function createPageMetadata(state) {
     var record = state && state.record || {};
     var brandLabel = getBrandChoice(record) === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped";
-    var chapterName = asText(record.chapter_name, brandLabel);
+    var scope = getStoryScope(record);
+    var chapterName = asText(scope.name, brandLabel);
     var yearLabel = asText(record.year_label || record.school_year, "");
     var regionName = asText(record.region_name, "");
     var descriptionParts = [
@@ -806,6 +865,102 @@
 
       if (String(record && record.chapter_slug || "").trim().toLowerCase() === requested) {
         return record;
+      }
+    }
+
+    return null;
+  }
+
+  function getStoryScope(record) {
+    var source = record || {};
+    var type = normalizeScopeType(source.scope_type || source.scopeType || source.story_scope || source.storyScope || source.wrapped_scope || source.entity_type);
+
+    if (!type) {
+      var hasChapterIdentity = hasValue(source.chapter_slug) || hasValue(source.chapter_name);
+
+      if (!hasChapterIdentity && (hasValue(source.program_slug) || hasValue(source.program_name))) {
+        type = "program";
+      } else if (!hasChapterIdentity && (hasValue(source.region_slug) || hasValue(source.region_name))) {
+        type = "region";
+      } else {
+        type = "chapter";
+      }
+    }
+
+    var name = "";
+    var slug = "";
+
+    if (type === "region") {
+      name = asText(source.scope_name || source.region_name || source.chapter_name, "JSU region");
+      slug = asText(source.scope_slug || source.region_slug || slugify(source.region_name || source.scope_name), "");
+    } else if (type === "program") {
+      name = asText(source.scope_name || source.program_name || source.campaign_name || source.chapter_name || source.top_program_type, "JSU program");
+      slug = asText(source.scope_slug || source.program_slug || source.campaign_slug || slugify(source.program_name || source.scope_name || source.top_program_type), "");
+    } else {
+      name = asText(source.chapter_name || source.scope_name, asText(source.chapter_slug, "Your JSU chapter"));
+      slug = asText(source.chapter_slug || source.scope_slug, "");
+    }
+
+    return {
+      type: type,
+      slug: slug,
+      name: name,
+      noun: type === "region" ? "region" : type === "program" ? "program" : "chapter"
+    };
+  }
+
+  function recordMatchesStoryRequest(record, request) {
+    var scope = getStoryScope(record);
+    var requestedType = normalizeScopeType(request && (request.type || request.scopeType || request.scope_type));
+    var requestedSlug = configSlug(request && (request.slug || request.scopeSlug || request.scope_slug));
+
+    if (!record || !requestedType || !requestedSlug || scope.type !== requestedType) {
+      return false;
+    }
+
+    var candidateValues = requestedType === "region" ? [
+      scope.slug,
+      record.scope_slug,
+      record.region_slug,
+      record.region_name,
+      record.scope_name
+    ] : requestedType === "program" ? [
+      scope.slug,
+      record.scope_slug,
+      record.program_slug,
+      record.campaign_slug,
+      record.program_name,
+      record.campaign_name,
+      record.top_program_type,
+      record.scope_name
+    ] : [
+      scope.slug,
+      record.chapter_slug,
+      record.chapter_name,
+      record.scope_slug,
+      record.scope_name
+    ];
+
+    return candidateValues.some(function (value) {
+      return hasValue(value) && configSlug(value) === requestedSlug;
+    });
+  }
+
+  function findStoryRecord(records, request) {
+    if (!Array.isArray(records) || !request) {
+      return null;
+    }
+
+    var type = normalizeScopeType(request.type || request.scopeType || request.scope_type);
+    var slug = request.slug || request.scopeSlug || request.scope_slug;
+
+    if (type === "chapter") {
+      return findChapter(records, slug);
+    }
+
+    for (var index = 0; index < records.length; index += 1) {
+      if (recordMatchesStoryRequest(records[index], request)) {
+        return records[index];
       }
     }
 
@@ -1159,8 +1314,14 @@
 
     return [
       entry.slug,
+      entry.scope_slug,
+      entry.scope_name,
       entry.region_slug,
       entry.region_name,
+      entry.program_slug,
+      entry.program_name,
+      entry.campaign_slug,
+      entry.campaign_name,
       entry.chapter_slug,
       entry.chapter_name,
       entry.id
@@ -1340,8 +1501,14 @@
     var textFields = {
       largest_event_name: true,
       repeat_attendee_rate_label: true,
+      scope_name: true,
+      scope_slug: true,
+      scope_type: true,
       chapter_name: true,
+      program_name: true,
+      program_slug: true,
       region_name: true,
+      region_slug: true,
       school_name: true,
       year_label: true,
       school_year: true,
@@ -1548,7 +1715,8 @@
     var theme = customCardTheme(type);
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
-    var chapterName = asText(record.chapter_name, "Your JSU chapter");
+    var storyScope = getStoryScope(record);
+    var chapterName = asText(storyScope.name, "Your JSU chapter");
     var value = hasValue(configCard.value) ? renderOverrideTemplate(configCard.value, record) : "";
 
     return {
@@ -1642,7 +1810,9 @@
   }
 
   function createCards(record, options) {
-    var chapterName = asText(record.chapter_name, "Your JSU chapter");
+    var storyScope = getStoryScope(record);
+    var chapterName = asText(storyScope.name, "Your JSU chapter");
+    var storyNoun = storyScope.noun;
     var yearLabel = asText(record.year_label || record.school_year, "This year");
     var regionName = asText(record.region_name, "JSU");
     var brandChoice = getBrandChoice(record);
@@ -1666,7 +1836,7 @@
         regionName: regionName,
         yearLabel: yearLabel,
         subtext: yearLabel + " - " + regionName,
-        badge: asText(record.school_name, "Chapter recap"),
+        badge: asText(record.school_name, storyNoun.charAt(0).toUpperCase() + storyNoun.slice(1) + " recap"),
         theme: "cover"
       }
     ];
@@ -1778,10 +1948,10 @@
       cards.push({
         id: "persona",
         type: "persona",
-        eyebrow: "Chapter type",
-        headline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
-        displayHeadline: "Your chapter type: " + asText(record.chapter_persona, "The Momentum Maker"),
-        displayEyebrow: "Chapter persona",
+        eyebrow: storyNoun.charAt(0).toUpperCase() + storyNoun.slice(1) + " type",
+        headline: "Your " + storyNoun + " type: " + asText(record.chapter_persona, "The Momentum Maker"),
+        displayHeadline: "Your " + storyNoun + " type: " + asText(record.chapter_persona, "The Momentum Maker"),
+        displayEyebrow: storyNoun.charAt(0).toUpperCase() + storyNoun.slice(1) + " persona",
         persona: asText(record.chapter_persona, "The Momentum Maker"),
         chapterName: chapterName,
         tags: [
@@ -1829,7 +1999,7 @@
         displayEyebrow: "Bigger movement",
         chapterName: chapterName,
         stats: movementStats,
-        subtext: "One chapter. One region. One national movement.",
+        subtext: storyScope.type === "chapter" ? "One chapter. One region. One national movement." : "One " + storyNoun + ". One national movement.",
         theme: "movement"
       });
     }
@@ -1845,7 +2015,7 @@
       yearLabel: yearLabel,
       summaryStats: [
         hasValue(record.events_hosted) ? { value: formatNumber(record.events_hosted), label: "programs together" } : null,
-        hasValue(record.unique_teens) ? { value: formatNumber(record.unique_teens), label: "of us, one chapter" } : null,
+        hasValue(record.unique_teens) ? { value: formatNumber(record.unique_teens), label: "of us, one " + storyNoun } : null,
         hasValue(record.engagement_moments) ? { value: formatNumber(record.engagement_moments), label: "moments stacked up" } : null,
         hasValue(record.new_teens) ? { value: formatNumber(record.new_teens), label: "new faces joined us" } : null,
         hasValue(record.repeat_attendee_rate_label) ? { value: asText(record.repeat_attendee_rate_label), label: "kept coming back" } : null
@@ -3321,7 +3491,8 @@
       ].filter(Boolean).join(" - ");
     }
 
-    var chapterName = asText(record.chapter_name, "Our JSU chapter");
+    var scope = getStoryScope(record);
+    var chapterName = asText(scope.name, "Our JSU chapter");
 
     return [
       chapterName + " Wrapped:",
@@ -3382,6 +3553,20 @@
     return '<text x="' + x + '" y="' + y + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(text) + "</text>";
   }
 
+  function estimateSvgTextWidth(text, size) {
+    return String(text || "").length * size * 0.58;
+  }
+
+  function fitSvgFontSize(text, maxWidth, maxSize, minSize) {
+    var size = maxSize;
+
+    while (size > minSize && estimateSvgTextWidth(text, size) > maxWidth) {
+      size -= 2;
+    }
+
+    return Math.max(minSize, size);
+  }
+
   function splitSvgLines(value, maxChars, maxLines) {
     var words = String(value || "").replace(/\s+/g, " ").trim().split(" ");
     var lines = [];
@@ -3410,8 +3595,46 @@
     return lines.length ? lines : [""];
   }
 
-  function svgTextLines(lines, x, y, size, weight, fill, lineHeight, className) {
+  function splitSvgLinesByWidth(value, maxWidth, size, maxLines) {
+    var words = String(value || "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+    var lines = [];
+    var current = "";
+
+    words.forEach(function (word) {
+      var next = current ? current + " " + word : word;
+
+      if (current && estimateSvgTextWidth(next, size) > maxWidth) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = next;
+      }
+    });
+
+    if (current) {
+      lines.push(current);
+    }
+
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/\s+$/, "") + "...";
+    }
+
+    return lines.length ? lines : [""];
+  }
+
+  function svgFittedLine(text, x, y, maxWidth, maxSize, minSize, weight, fill, className) {
+    var size = fitSvgFontSize(text, maxWidth, maxSize, minSize);
+
+    return '<text class="' + escapeXml(className || "") + '" x="' + x + '" y="' + y + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(text) + "</text>";
+  }
+
+  function svgTextLines(lines, x, y, size, weight, fill, lineHeight, className, maxWidth, minSize) {
     return lines.map(function (line, index) {
+      if (maxWidth) {
+        return svgFittedLine(line, x, y + index * lineHeight, maxWidth, size, minSize || Math.max(18, size - 16), weight, fill, className);
+      }
+
       return '<text class="' + escapeXml(className || "") + '" x="' + x + '" y="' + (y + index * lineHeight) + '" font-size="' + size + '" font-weight="' + weight + '" fill="' + fill + '" font-family="Arial, Helvetica, sans-serif">' + escapeXml(line) + "</text>";
     }).join("");
   }
@@ -3484,16 +3707,19 @@
     return chapterSummary ? chapterSummary + "." : card.subtext || persona + " energy.";
   }
 
-  function fallbackStatRows(stats, startY) {
+  function fallbackStatRows(stats, startY, rowGap) {
     return (stats || []).slice(0, 5).map(function (stat, index) {
-      var y = startY + index * 112;
+      var y = startY + index * (rowGap || 108);
       var valueSize = String(stat.value || "").length > 6 ? 46 : 52;
+      var labelLines = splitSvgLinesByWidth(stat.label, 540, 30, 2);
+      var labelY = labelLines.length > 1 ? 43 : 57;
+      var labelLineHeight = labelLines.length > 1 ? 32 : 0;
 
       return [
         '<g transform="translate(92 ' + y + ')">',
         '<rect width="896" height="88" rx="26" fill="#ffffff" opacity="' + (index % 2 ? "0.16" : "0.22") + '"/>',
-        '<text x="34" y="59" font-size="' + valueSize + '" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.value) + "</text>",
-        '<text x="310" y="57" font-size="30" font-weight="800" fill="#fff4b7" font-family="Arial, Helvetica, sans-serif">' + escapeXml(stat.label) + "</text>",
+        svgFittedLine(stat.value, 34, 59, 230, valueSize, 34, 900, "#ffffff", "poster-stat-value"),
+        svgTextLines(labelLines, 310, labelY, 30, 800, "#fff4b7", labelLineHeight, "poster-stat-label", 540, 22),
         "</g>"
       ].join("");
     }).join("");
@@ -3540,26 +3766,35 @@
     var record = state.record || {};
     var card = getFinalCard(state);
     var isTeen = state && state.experienceMode === "teen";
+    var scope = getStoryScope(record);
+    var storyNoun = scope.noun;
     var teenName = asText(record.teen_name || record.student_name || record.first_name, "Maya");
-    var chapterName = isTeen ? teenName + "'s JSU" : asText(record.chapter_name, "JSU Wrapped");
+    var chapterName = isTeen ? teenName + "'s JSU" : asText(scope.name, "JSU Wrapped");
     var persona = isTeen ? asText(card.persona || record.persona, "JSU energy") : asText(card.persona || record.chapter_persona, "JSU energy");
     var year = asText(card.yearLabel || record.year_label || record.school_year, "This year");
     var brand = card.brandChoice === "ncsy" || getBrandChoice(record) === "ncsy" ? "ncsy" : "jsu";
-    var headlineLines = splitSvgLines(chapterName, 16, 3).concat(["Wrapped"]);
-    var headlineSize = headlineLines.length > 2 ? 86 : 96;
-    var headlineLineHeight = headlineLines.length > 2 ? 92 : 104;
+    var headlineLines = splitSvgLinesByWidth(chapterName, 880, 88, 2).concat(["Wrapped"]);
+    var headlineSize = headlineLines.length > 2 ? 82 : 96;
+    var headlineLineHeight = headlineLines.length > 2 ? 90 : 104;
     var headlineY = 410;
+    var personaText = persona + " energy";
+    var personaLines = splitSvgLinesByWidth(personaText, 820, 40, 2);
+    var personaFontSize = personaLines.length > 1 ? 32 : fitSvgFontSize(personaText, 820, 40, 28);
+    var personaLineHeight = personaLines.length > 1 ? 36 : 0;
+    var personaPillHeight = personaLines.length > 1 ? 122 : 82;
     var personaY = Math.max(706, headlineY + headlineLines.length * headlineLineHeight + 42);
-    var summaryY = personaY + 134;
-    var summaryLineHeight = 52;
-    var summaryLines = splitSvgLines(fallbackSummaryText(record, card, persona, isTeen), 36, 2);
-    var statsStartY = Math.max(1058, summaryY + summaryLines.length * summaryLineHeight + 58);
-    var personaFontSize = persona.length > 24 ? 34 : 40;
+    var summaryY = personaY + personaPillHeight + 62;
+    var summaryLineHeight = 48;
+    var summaryLines = splitSvgLinesByWidth(fallbackSummaryText(record, card, persona, isTeen), 872, 40, 3);
     var stats = card.summaryStats || [
       hasValue(record.events_hosted || record.events_attended) ? { value: formatNumber(record.events_hosted || record.events_attended), label: isTeen ? "events showed up to" : "programs together" } : null,
-      hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one chapter" } : null,
+      hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one " + storyNoun } : null,
       hasValue(record.engagement_moments || record.friends_brought) ? { value: formatNumber(record.engagement_moments || record.friends_brought), label: isTeen ? "friends brought" : "moments stacked up" } : null
     ].filter(Boolean);
+    var statCount = Math.min(5, stats.length || 3);
+    var rowGap = statCount > 4 ? 98 : 108;
+    var statsStartY = Math.max(1054, summaryY + summaryLines.length * summaryLineHeight + 46);
+    statsStartY = Math.min(statsStartY, 1688 - statCount * rowGap);
 
     return [
       '<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">',
@@ -3581,19 +3816,20 @@
       fallbackLogoMarkup(brand, logoDataUrl),
       svgLine(brand === "ncsy" ? "NCSY Wrapped" : "JSU Wrapped", 274, 160, 48, 900, "#ffffff"),
       svgLine(year, 276, 220, 34, 800, "#fff4b7"),
-      svgTextLines(headlineLines, 92, headlineY, headlineSize, 900, "#ffffff", headlineLineHeight, "poster-headline"),
-      '<rect x="92" y="' + personaY + '" width="896" height="82" rx="41" fill="#fff4b7" opacity="0.96"/>',
-      svgLine(persona + " energy", 126, personaY + 56, personaFontSize, 900, "#16032f"),
-      svgTextLines(summaryLines, 92, summaryY, 40, 800, "#ffffff", summaryLineHeight, "poster-copy"),
-      fallbackStatRows(stats, statsStartY),
+      svgTextLines(headlineLines, 92, headlineY, headlineSize, 900, "#ffffff", headlineLineHeight, "poster-headline", 896, 60),
+      '<rect x="92" y="' + personaY + '" width="896" height="' + personaPillHeight + '" rx="41" fill="#fff4b7" opacity="0.96"/>',
+      svgTextLines(personaLines, 126, personaY + (personaLines.length > 1 ? 45 : 56), personaFontSize, 900, "#16032f", personaLineHeight, "poster-persona", 820, 24),
+      svgTextLines(summaryLines, 92, summaryY, 40, 800, "#ffffff", summaryLineHeight, "poster-copy", 896, 28),
+      fallbackStatRows(stats, statsStartY, rowGap),
       '<rect x="92" y="1718" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
-      svgLine(asText(record.region_name, "One movement") + " - One chapter. One movement.", 126, 1766, 31, 800, "#ffffff"),
+      svgFittedLine(asText(record.region_name, "One movement") + " - One " + storyNoun + ". One movement.", 126, 1766, 828, 31, 22, 800, "#ffffff", "poster-footer"),
       "</svg>"
     ].join("");
   }
 
   async function downloadRecap(container, state) {
-    var filename = state && state.experienceMode === "teen" ? slugify(state.record.teen_slug || state.record.student_slug || state.record.teen_name || "teen-test") + "-teen-wrapped.svg" : slugify(state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
+    var scope = state && state.record ? getStoryScope(state.record) : null;
+    var filename = state && state.experienceMode === "teen" ? slugify(state.record.teen_slug || state.record.student_slug || state.record.teen_name || "teen-test") + "-teen-wrapped.svg" : slugify(scope && (scope.slug || scope.name) || state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
     var card = container.querySelector("[data-jsuw-card]");
     var finalCard = getFinalCard(state);
 
@@ -3731,12 +3967,12 @@
       var records = settings.records || await fetchRecords(dataUrl);
       var configUrl = settings.configUrl !== undefined ? settings.configUrl : getConfigUrl(target);
       var wrappedConfig = settings.config !== undefined ? settings.config : await fetchConfig(configUrl);
-      var chapterSlug = settings.chapter || getChapterSlug(settings.url);
+      var storyRequest = getStoryRequest(settings.url, settings);
       var variantSlug = settings.variant || getVariantSlug(settings.url);
       var programSlug = settings.program || getProgramSlug(settings.url);
       var ctaOptions = getCtaOptions(target, settings);
 
-      if (!hasValue(chapterSlug)) {
+      if (!storyRequest) {
         renderChapterPicker(target, {
           records: records,
           year: target.dataset && target.dataset.year,
@@ -3753,39 +3989,40 @@
         };
       }
 
-      var chapter = findChapter(records, chapterSlug);
+      var storyRecord = findStoryRecord(records, storyRequest);
 
-      if (!chapter) {
+      if (!storyRecord) {
         renderError(
           target,
-          "We could not find that chapter.",
-          "Check the chapter link or ask your JSU or NCSY team for the right Wrapped URL."
+          "We could not find that " + storyRequest.type + ".",
+          "Check the Wrapped link or ask your JSU or NCSY team for the right URL."
         );
         return null;
       }
 
-      var storyConfig = resolveStoryConfig(wrappedConfig, chapter, {
+      var storyScope = getStoryScope(storyRecord);
+      var storyConfig = resolveStoryConfig(wrappedConfig, storyRecord, {
         variant: variantSlug,
         program: programSlug
       });
-      var effectiveChapter = createEffectiveRecord(chapter, storyConfig);
+      var effectiveRecord = createEffectiveRecord(storyRecord, storyConfig);
       var effectiveCtaOptions = getEffectiveCtaOptions(ctaOptions, storyConfig);
 
       var state = {
-        cards: createCards(effectiveChapter, {
+        cards: createCards(effectiveRecord, {
           assetBase: assetBase,
           ctaLabel: effectiveCtaOptions.label,
           ctaTarget: effectiveCtaOptions.target,
           ctaHref: effectiveCtaOptions.href,
           storyConfig: storyConfig
         }),
-        record: effectiveChapter,
+        record: effectiveRecord,
         config: wrappedConfig,
         storyConfig: storyConfig,
         variantSlug: variantSlug,
-        experienceMode: "chapter",
+        experienceMode: storyScope.type,
         analyticsEnabled: getAnalyticsPreference(target, settings),
-        analyticsYear: getAnalyticsYear(target, settings, effectiveChapter),
+        analyticsYear: getAnalyticsYear(target, settings, effectiveRecord),
         autoplayEnabled: getAutoplayPreference(target, settings),
         autoplayDelay: getAutoplayDelay(target, settings),
         autoplayTimer: null,
@@ -3840,11 +4077,15 @@
   return {
     createCards: createCards,
     findChapter: findChapter,
+    findStoryRecord: findStoryRecord,
     formatNumber: formatNumber,
     getStatAnimationConfig: getStatAnimationConfig,
     getKeyNavigationAction: getKeyNavigationAction,
     getChapterSlug: getChapterSlug,
     getRegionParam: getRegionParam,
+    getScopeParam: getScopeParam,
+    getStoryRequest: getStoryRequest,
+    getStoryScope: getStoryScope,
     getTeenSlug: getTeenSlug,
     getExperienceMode: getExperienceMode,
     getDataUrl: getDataUrl,
