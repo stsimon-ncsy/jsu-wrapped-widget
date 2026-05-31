@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSU/NCSY Wrapped Builder</title>
     <link rel="stylesheet" href="./jsu-wrapped.css?v=palette1">
-    <link rel="stylesheet" href="./wrapped-builder.css?v=builder4">
+    <link rel="stylesheet" href="./wrapped-builder.css?v=builder5">
   </head>
   <body>
     <div id="wrapped-builder" class="wrapped-builder">
@@ -40,6 +40,14 @@
                   <option value="region">Region default</option>
                 </select>
               </label>
+              <label>
+                Version
+                <select data-builder-variant></select>
+              </label>
+            </div>
+            <div class="builder-actions builder-actions--versions">
+              <button type="button" data-builder-action="duplicate-version">Duplicate current version</button>
+              <a data-builder-preview-link href="./?chapter=baltimore" target="_blank" rel="noopener">Open preview</a>
             </div>
           </div>
 
@@ -132,7 +140,7 @@
       </main>
     </div>
 
-    <script src="./jsu-wrapped.js?v=builder2" data-manual="true"></script>
-    <script src="./wrapped-builder.js?v=builder4"></script>
+    <script src="./jsu-wrapped.js?v=builder3" data-manual="true"></script>
+    <script src="./wrapped-builder.js?v=builder5"></script>
   </body>
 </html>

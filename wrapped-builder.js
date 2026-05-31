@@ -2,7 +2,7 @@
   "use strict";
 
   var DATA_URL = "./sample-wrapped-2026.json?v=builder1";
-  var CONFIG_URL = "./wrapped-config-2026.json?v=builder1";
+  var CONFIG_URL = "./wrapped-config-2026.json?v=builder2";
   var CARD_IDS = [
     "cover",
     "events",
@@ -76,6 +76,7 @@
     regionSlug: "",
     chapterSlug: "",
     scope: "chapter",
+    variantSlug: "",
     previewCardId: "cover",
     previewTimer: null
   };
@@ -109,6 +110,26 @@
       .replace(/'/g, "&#039;");
   }
 
+  function cloneValue(value) {
+    if (Array.isArray(value)) {
+      return value.map(cloneValue);
+    }
+
+    if (value && typeof value === "object") {
+      var output = {};
+
+      Object.keys(value).forEach(function (key) {
+        if (key !== "variants") {
+          output[key] = cloneValue(value[key]);
+        }
+      });
+
+      return output;
+    }
+
+    return value;
+  }
+
   async function fetchJson(url) {
     var response = await fetch(url, { credentials: "same-origin" });
 
@@ -126,6 +147,7 @@
     next.year = next.year || "2026";
     next.defaults = next.defaults && typeof next.defaults === "object" ? next.defaults : {};
     next.regions = next.regions && typeof next.regions === "object" && !Array.isArray(next.regions) ? next.regions : {};
+    next.programs = next.programs && typeof next.programs === "object" && !Array.isArray(next.programs) ? next.programs : {};
     next.chapters = next.chapters && typeof next.chapters === "object" && !Array.isArray(next.chapters) ? next.chapters : {};
 
     return next;
@@ -198,8 +220,30 @@
     return state.config.chapters[slug];
   }
 
-  function getActiveSection() {
+  function ensureBaseSection() {
     return state.scope === "region" ? ensureRegionSection() : ensureChapterSection();
+  }
+
+  function getVariantKeys(section) {
+    return section && section.variants && typeof section.variants === "object" && !Array.isArray(section.variants) ? Object.keys(section.variants).sort() : [];
+  }
+
+  function ensureVariantSection(section, slug) {
+    var normalized = slugify(slug);
+
+    if (!normalized) {
+      return section;
+    }
+
+    section.variants = section.variants && typeof section.variants === "object" && !Array.isArray(section.variants) ? section.variants : {};
+    section.variants[normalized] = section.variants[normalized] && typeof section.variants[normalized] === "object" ? section.variants[normalized] : {};
+    return section.variants[normalized];
+  }
+
+  function getActiveSection() {
+    var base = ensureBaseSection();
+
+    return state.variantSlug ? ensureVariantSection(base, state.variantSlug) : base;
   }
 
   function setValue(selector, value) {
@@ -210,12 +254,27 @@
     }
   }
 
+  function variantDisplayName(slug, entry) {
+    var text = entry && (entry.label || entry.name || entry.title);
+
+    if (hasValue(text)) {
+      return text;
+    }
+
+    return slugify(slug).replace(/-/g, " ").replace(/\b\w/g, function (letter) {
+      return letter.toUpperCase();
+    });
+  }
+
   function renderSelectors() {
     var regions = getRegions();
     var region = getActiveRegion() || regions[0];
     var regionSelect = $("[data-builder-region]");
     var chapterSelect = $("[data-builder-chapter]");
     var scopeSelect = $("[data-builder-scope]");
+    var variantSelect = $("[data-builder-variant]");
+    var baseSection;
+    var variantKeys;
 
     if (!state.regionSlug && region) {
       state.regionSlug = region.slug;
@@ -235,6 +294,20 @@
     }).join("");
 
     scopeSelect.value = state.scope;
+
+    if (variantSelect) {
+      baseSection = ensureBaseSection();
+      variantKeys = getVariantKeys(baseSection);
+
+      if (state.variantSlug && variantKeys.indexOf(state.variantSlug) === -1) {
+        state.variantSlug = "";
+      }
+
+      variantSelect.innerHTML = ['<option value="">Default version</option>'].concat(variantKeys.map(function (slug) {
+        return '<option value="' + escapeHtml(slug) + '"' + (slug === state.variantSlug ? " selected" : "") + ">" + escapeHtml(variantDisplayName(slug, baseSection.variants[slug])) + "</option>";
+      })).join("");
+      variantSelect.value = state.variantSlug;
+    }
   }
 
   function renderBasicFields() {
@@ -422,7 +495,9 @@
       return {};
     }
 
-    return window.JSUWrapped.resolveStoryConfig(state.config, record);
+    return window.JSUWrapped.resolveStoryConfig(state.config, record, {
+      variant: state.variantSlug
+    });
   }
 
   function getCardsForRecord(record, options) {
@@ -672,7 +747,7 @@
     var record = getActiveRecord();
     var section = getActiveSection();
     var warnings = [];
-    var effective = window.JSUWrapped && window.JSUWrapped.resolveStoryConfig ? window.JSUWrapped.resolveStoryConfig(state.config, record) : section;
+    var effective = window.JSUWrapped && window.JSUWrapped.resolveStoryConfig ? window.JSUWrapped.resolveStoryConfig(state.config, record, { variant: state.variantSlug }) : section;
     var customCards = section.custom_cards || [];
     var hidden = hiddenCards(section);
 
@@ -681,7 +756,11 @@
     }
 
     if (section.record_overrides && Object.keys(section.record_overrides).length) {
-      warnings.push("Metric corrections are active for this " + state.scope + ". Generated text and stats will use the corrected values.");
+      warnings.push("Metric corrections are active for this " + (state.variantSlug ? variantDisplayName(state.variantSlug, section) + " " : "") + state.scope + ". Generated text and stats will use the corrected values.");
+    }
+
+    if (state.variantSlug) {
+      warnings.push("You are editing the " + variantDisplayName(state.variantSlug, ensureBaseSection().variants && ensureBaseSection().variants[state.variantSlug]) + " variant for this " + state.scope + ".");
     }
 
     if (!hasValue(effective.cta_label || effective.ctaLabel)) {
@@ -719,6 +798,24 @@
     exportField.textContent = json;
   }
 
+  function buildPreviewUrl(record) {
+    var base = window.location.origin + window.location.pathname.replace(/builder\.html$/, "");
+    var url = new URL(base || "./", window.location.href);
+
+    url.searchParams.set("chapter", record.chapter_slug);
+    url.searchParams.delete("deploy");
+    url.searchParams.delete("retry");
+    url.searchParams.delete("qa");
+
+    if (state.variantSlug) {
+      url.searchParams.set("variant", state.variantSlug);
+    } else {
+      url.searchParams.delete("variant");
+    }
+
+    return url.href;
+  }
+
   function renderPreview() {
     var preview = document.getElementById("jsu-wrapped");
     var record = getActiveRecord();
@@ -738,13 +835,21 @@
       return false;
     });
 
-    $("[data-builder-preview-title]").textContent = (record.chapter_name || record.chapter_slug) + " Wrapped";
+    var previewUrl = buildPreviewUrl(record);
+    var previewLink = $("[data-builder-preview-link]");
+
+    $("[data-builder-preview-title]").textContent = (record.chapter_name || record.chapter_slug) + (state.variantSlug ? " - " + variantDisplayName(state.variantSlug, ensureBaseSection().variants && ensureBaseSection().variants[state.variantSlug]) : "") + " Wrapped";
+
+    if (previewLink) {
+      previewLink.href = previewUrl;
+    }
 
     window.JSUWrapped.init(preview, {
       records: state.records,
       config: state.config,
       chapter: record.chapter_slug,
-      url: window.location.origin + window.location.pathname + "?chapter=" + encodeURIComponent(record.chapter_slug),
+      variant: state.variantSlug,
+      url: previewUrl,
       assetBase: "./assets/",
       initialIndex: previewIndex,
       autoplay: false,
@@ -787,6 +892,38 @@
     });
 
     state.previewCardId = id;
+    renderAll();
+  }
+
+  function duplicateActiveVersion() {
+    var base = ensureBaseSection();
+    var label = window.prompt("Name this version", state.variantSlug ? variantDisplayName(state.variantSlug, base.variants && base.variants[state.variantSlug]) + " copy" : "Donor recap");
+    var slug;
+    var source;
+
+    if (!hasValue(label)) {
+      return;
+    }
+
+    slug = slugify(label);
+
+    if (!slug || slug === "default" || slug === "jsu-wrapped") {
+      window.alert("Please use a more specific version name.");
+      return;
+    }
+
+    base.variants = base.variants && typeof base.variants === "object" && !Array.isArray(base.variants) ? base.variants : {};
+
+    if (base.variants[slug]) {
+      state.variantSlug = slug;
+      renderAll();
+      return;
+    }
+
+    source = state.variantSlug && base.variants[state.variantSlug] ? base.variants[state.variantSlug] : base;
+    base.variants[slug] = cloneValue(source);
+    base.variants[slug].label = label.trim();
+    state.variantSlug = slug;
     renderAll();
   }
 
@@ -907,18 +1044,27 @@
         state.regionSlug = target.value;
         var region = getActiveRegion();
         state.chapterSlug = region && region.records[0] ? region.records[0].chapter_slug : "";
+        state.variantSlug = "";
         renderAll();
         return;
       }
 
       if (target.matches("[data-builder-chapter]")) {
         state.chapterSlug = target.value;
+        state.variantSlug = "";
         renderAll();
         return;
       }
 
       if (target.matches("[data-builder-scope]")) {
         state.scope = target.value;
+        state.variantSlug = "";
+        renderAll();
+        return;
+      }
+
+      if (target.matches("[data-builder-variant]")) {
+        state.variantSlug = target.value;
         renderAll();
         return;
       }
@@ -957,6 +1103,8 @@
         var cards = ensureCustomCards(section);
         cards.splice(Number(event.target.getAttribute("data-custom-index")), 1);
         renderAll();
+      } else if (action === "duplicate-version") {
+        duplicateActiveVersion();
       } else if (action === "clear-metric") {
         var metricKey = event.target.getAttribute("data-metric-key");
         var recordOverrides = ensureRecordOverrides(getActiveSection());

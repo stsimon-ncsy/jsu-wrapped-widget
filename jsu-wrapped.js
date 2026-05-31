@@ -115,6 +115,14 @@
       .slice(0, 80) || "jsu-wrapped";
   }
 
+  function configSlug(value) {
+    if (!hasValue(value)) {
+      return "";
+    }
+
+    return slugify(value);
+  }
+
   function getChapterSlug(url) {
     var href = url || (root && root.location && root.location.href) || "";
 
@@ -213,6 +221,14 @@
 
   function getRegionParam(url) {
     return getSearchValue(url, ["region"]);
+  }
+
+  function getVariantSlug(url) {
+    return getSearchValue(url, ["variant", "version", "audience"]);
+  }
+
+  function getProgramSlug(url) {
+    return getSearchValue(url, ["program", "campaign"]);
   }
 
   function getTeenSlug(url) {
@@ -577,6 +593,7 @@
     var index = state && isFinite(Number(state.index)) ? Number(state.index) : 0;
     var card = cards[index] || {};
     var mode = asText(state && state.experienceMode, "chapter");
+    var storyConfig = state && state.storyConfig || {};
     var base = {
       event: eventName,
       wrapped_mode: mode,
@@ -587,6 +604,8 @@
       chapter_id: hasValue(record.chapter_id) ? record.chapter_id : "",
       chapter_name: asText(record.chapter_name, ""),
       region_name: asText(record.region_name, ""),
+      variant_slug: asText(storyConfig.active_variant || state && state.variantSlug, ""),
+      variant_label: asText(storyConfig.active_variant_label, ""),
       brand_logo: getBrandChoice(record),
       card_index: index + 1,
       card_total: cards.length,
@@ -840,10 +859,11 @@
     return "New to " + asText(chapterName, "JSU");
   }
 
-  function buildChapterUrl(record, url) {
+  function buildChapterUrl(record, url, variant) {
     var slug = record && record.chapter_slug;
     var href = url || (root && root.location && root.location.href) || "";
     var base = root && root.location && root.location.href || "https://example.org/";
+    var hasVariantArgument = arguments.length >= 3;
 
     if (!hasValue(slug)) {
       return href || "#";
@@ -852,11 +872,26 @@
     try {
       var parsed = new root.URL(href || base, base);
       parsed.searchParams.set("chapter", String(slug).trim());
+
+      if (hasVariantArgument) {
+        if (hasValue(variant)) {
+          parsed.searchParams.set("variant", String(variant).trim());
+        } else {
+          parsed.searchParams.delete("variant");
+        }
+      }
+
       parsed.searchParams.delete("card");
       return parsed.href;
     } catch (error) {
       var bare = String(href || "").split("#")[0].split("?")[0] || "";
-      return bare + "?chapter=" + encodeURIComponent(String(slug).trim());
+      var query = "?chapter=" + encodeURIComponent(String(slug).trim());
+
+      if (hasVariantArgument && hasValue(variant)) {
+        query += "&variant=" + encodeURIComponent(String(variant).trim());
+      }
+
+      return bare + query;
     }
   }
 
@@ -901,7 +936,9 @@
       return record && hasValue(record.chapter_slug);
     }).slice() : [];
     var assetBase = settings.assetBase || "";
+    var config = settings.config || {};
     var url = settings.url || (root && root.location && root.location.href) || "";
+    var program = settings.program || getProgramSlug(url);
     var firstRecord = records[0] || {};
     var year = asText(settings.year || firstRecord.year_label || firstRecord.school_year, "this year");
     var requestedRegion = asText(settings.region || getRegionParam(url), "");
@@ -920,9 +957,19 @@
         hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
         hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : ""
       ].filter(Boolean).join(" | ");
+      var variants = collectVariantEntries(config, record, { program: program });
+      var variantLinks = variants.length ? [
+        '<div class="jsuw-picker-variants" aria-label="' + escapeHtml(chapterLabel(record)) + ' versions">',
+        '<a href="' + escapeHtml(buildChapterUrl(record, url, "")) + '">Default</a>',
+        variants.map(function (variant) {
+          return '<a href="' + escapeHtml(buildChapterUrl(record, url, variant.slug)) + '">' + escapeHtml(variant.label) + "</a>";
+        }).join(""),
+        "</div>"
+      ].join("") : "";
 
       return [
-        '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url)) + '">',
+        '<article class="jsuw-picker-entry">',
+        '<a class="jsuw-picker-item jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildChapterUrl(record, url, "")) + '">',
         '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
         '<span class="jsuw-picker-copy">',
         '<strong>' + escapeHtml(chapterLabel(record)) + "</strong>",
@@ -930,7 +977,9 @@
         stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
         "</span>",
         '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
-        "</a>"
+        "</a>",
+        variantLinks,
+        "</article>"
       ].join("");
     }
 
@@ -1069,6 +1118,10 @@
     Object.keys(source).forEach(function (key) {
       var value = source[key];
 
+      if (key === "variants" || key === "label" || key === "name" || key === "title" || key === "description" || key === "hidden_from_picker" || key === "hiddenFromPicker") {
+        return;
+      }
+
       if (key === "hidden_cards") {
         output.hidden_cards = uniqueList([].concat(output.hidden_cards || [], value || []));
         return;
@@ -1101,7 +1154,7 @@
     }
 
     var normalizedKeys = (keys || []).map(function (key) {
-      return slugify(key);
+      return configSlug(key);
     }).filter(Boolean);
 
     return [
@@ -1112,7 +1165,7 @@
       entry.chapter_name,
       entry.id
     ].some(function (value) {
-      return hasValue(value) && normalizedKeys.indexOf(slugify(value)) !== -1;
+      return hasValue(value) && normalizedKeys.indexOf(configSlug(value)) !== -1;
     });
   }
 
@@ -1122,7 +1175,7 @@
     }
 
     var normalizedKeys = (keys || []).map(function (key) {
-      return slugify(key);
+      return configSlug(key);
     }).filter(Boolean);
 
     if (!normalizedKeys.length) {
@@ -1148,7 +1201,7 @@
     var collectionKeys = Object.keys(collection);
 
     for (var keyIndex = 0; keyIndex < collectionKeys.length; keyIndex += 1) {
-      if (normalizedKeys.indexOf(slugify(collectionKeys[keyIndex])) !== -1) {
+      if (normalizedKeys.indexOf(configSlug(collectionKeys[keyIndex])) !== -1) {
         return collection[collectionKeys[keyIndex]];
       }
     }
@@ -1156,15 +1209,104 @@
     return null;
   }
 
-  function resolveStoryConfig(config, record) {
+  function isVariantHidden(entry, treatHiddenAsUnavailable) {
+    var value = entry && (entry.hidden_from_picker !== undefined ? entry.hidden_from_picker : entry.hiddenFromPicker);
+    var parsed = parseBooleanFlag(value);
+
+    if (parsed !== null) {
+      return parsed;
+    }
+
+    return treatHiddenAsUnavailable && value === true;
+  }
+
+  function variantLabel(entry, slug) {
+    return asText(entry && (entry.label || entry.name || entry.title), slugify(slug).replace(/-/g, " ").replace(/\b\w/g, function (letter) {
+      return letter.toUpperCase();
+    }));
+  }
+
+  function mergeVariantSection(target, source, variantSlug) {
+    var output = mergeStoryConfigSection(target || {}, source);
+    var normalized = configSlug(variantSlug);
+    var variantEntry = normalized ? findConfigEntry(source && source.variants, [normalized, variantSlug]) : null;
+
+    if (variantEntry) {
+      output.active_variant = normalized;
+      output.active_variant_label = variantLabel(variantEntry, normalized);
+      mergeStoryConfigSection(output, variantEntry);
+    }
+
+    return output;
+  }
+
+  function collectVariantEntries(config, record, options) {
+    var source = config && typeof config === "object" ? config : {};
+    var settings = options || {};
+    var programSlug = settings.program || settings.programSlug || settings.campaign || record && (record.program_slug || record.program_name || record.program_type || record.top_program_type);
+    var regionEntry = findConfigEntry(source.regions, [record && record.region_slug, record && record.region_name]);
+    var programEntry = findConfigEntry(source.programs || source.campaigns, [programSlug]);
+    var chapterEntry = findConfigEntry(source.chapters, [record && record.chapter_slug, record && record.chapter_name]);
+    var entries = {};
+
+    function addVariants(section) {
+      var variants = section && section.variants;
+
+      if (!variants) {
+        return;
+      }
+
+      if (Array.isArray(variants)) {
+        variants.forEach(function (entry) {
+          var slug = configSlug(entry && (entry.slug || entry.id || entry.label || entry.name || entry.title));
+
+          if (slug && !isVariantHidden(entry, false)) {
+            entries[slug] = {
+              slug: slug,
+              label: variantLabel(entry, slug)
+            };
+          }
+        });
+
+        return;
+      }
+
+      Object.keys(variants).forEach(function (key) {
+        var entry = variants[key];
+        var slug = configSlug(entry && (entry.slug || entry.id) || key);
+
+        if (slug && !isVariantHidden(entry, false)) {
+          entries[slug] = {
+            slug: slug,
+            label: variantLabel(entry, slug)
+          };
+        }
+      });
+    }
+
+    [source.defaults, regionEntry, programEntry, chapterEntry].forEach(addVariants);
+
+    return Object.keys(entries).sort(function (a, b) {
+      return entries[a].label.localeCompare(entries[b].label);
+    }).map(function (slug) {
+      return entries[slug];
+    });
+  }
+
+  function resolveStoryConfig(config, record, options) {
     var output = {};
     var source = config && typeof config === "object" ? config : {};
+    var settings = options || {};
+    var variantSlug = settings.variant || settings.variantSlug || settings.version || "";
+    var programSlug = settings.program || settings.programSlug || settings.campaign || record && (record.program_slug || record.program_name || record.program_type || record.top_program_type);
     var regionEntry = findConfigEntry(source.regions, [record && record.region_slug, record && record.region_name]);
+    var programEntry = findConfigEntry(source.programs || source.campaigns, [programSlug]);
     var chapterEntry = findConfigEntry(source.chapters, [record && record.chapter_slug, record && record.chapter_name]);
 
-    mergeStoryConfigSection(output, source.defaults);
-    mergeStoryConfigSection(output, regionEntry);
-    mergeStoryConfigSection(output, chapterEntry);
+    mergeVariantSection(output, source.defaults, variantSlug);
+    mergeVariantSection(output, regionEntry, variantSlug);
+    mergeVariantSection(output, programEntry, variantSlug);
+    mergeVariantSection(output, chapterEntry, variantSlug);
 
     return output;
   }
@@ -3590,6 +3732,8 @@
       var configUrl = settings.configUrl !== undefined ? settings.configUrl : getConfigUrl(target);
       var wrappedConfig = settings.config !== undefined ? settings.config : await fetchConfig(configUrl);
       var chapterSlug = settings.chapter || getChapterSlug(settings.url);
+      var variantSlug = settings.variant || getVariantSlug(settings.url);
+      var programSlug = settings.program || getProgramSlug(settings.url);
       var ctaOptions = getCtaOptions(target, settings);
 
       if (!hasValue(chapterSlug)) {
@@ -3597,6 +3741,8 @@
           records: records,
           year: target.dataset && target.dataset.year,
           region: settings.region || getRegionParam(settings.url),
+          program: programSlug,
+          config: wrappedConfig,
           url: settings.url,
           assetBase: assetBase
         });
@@ -3618,7 +3764,10 @@
         return null;
       }
 
-      var storyConfig = resolveStoryConfig(wrappedConfig, chapter);
+      var storyConfig = resolveStoryConfig(wrappedConfig, chapter, {
+        variant: variantSlug,
+        program: programSlug
+      });
       var effectiveChapter = createEffectiveRecord(chapter, storyConfig);
       var effectiveCtaOptions = getEffectiveCtaOptions(ctaOptions, storyConfig);
 
@@ -3633,6 +3782,7 @@
         record: effectiveChapter,
         config: wrappedConfig,
         storyConfig: storyConfig,
+        variantSlug: variantSlug,
         experienceMode: "chapter",
         analyticsEnabled: getAnalyticsPreference(target, settings),
         analyticsYear: getAnalyticsYear(target, settings, effectiveChapter),
@@ -3718,6 +3868,9 @@
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,
     createFallbackSvg: createFallbackSvg,
+    getVariantSlug: getVariantSlug,
+    getProgramSlug: getProgramSlug,
+    collectVariantEntries: collectVariantEntries,
     resolveStoryConfig: resolveStoryConfig,
     createEffectiveRecord: createEffectiveRecord,
     applyStoryConfig: applyStoryConfig,

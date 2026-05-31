@@ -65,6 +65,7 @@ textarea {
 
 .builder-header a,
 .builder-header button,
+.builder-actions a,
 .builder-actions button,
 .builder-preview-top button,
 .builder-custom-card button {
@@ -76,6 +77,16 @@ textarea {
   font-weight: 900;
   padding: 10px 14px;
   text-decoration: none;
+}
+
+.builder-actions--versions {
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.builder-actions--versions a {
+  background: #efe8fb;
+  color: #16072a;
 }
 
 .builder-layout {

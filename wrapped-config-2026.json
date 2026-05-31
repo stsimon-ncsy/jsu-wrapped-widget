@@ -72,7 +72,22 @@
           "subtext": "It was teens choosing community again and again.",
           "badge": "Custom copy"
         }
-      ]
+      ],
+      "variants": {
+        "donor-recap": {
+          "label": "Donor recap",
+          "cta_label": "Help power next year",
+          "card_overrides": {
+            "events": {
+              "headline": "Supporters helped power {events_hosted} events",
+              "displayHeadline": "Supporters helped power {events_hosted} events"
+            },
+            "final": {
+              "subtext": "{events_hosted} events. {unique_teens} teens reached. {engagement_moments} engagement moments made possible together."
+            }
+          }
+        }
+      }
     }
   }
 }

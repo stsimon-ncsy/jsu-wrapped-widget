@@ -1351,6 +1351,11 @@
   gap: 10px;
 }
 
+#jsu-wrapped .jsuw-picker-entry {
+  display: grid;
+  gap: 8px;
+}
+
 #jsu-wrapped .jsuw-picker-item {
   align-items: center;
   background: rgba(255, 255, 255, 0.94);
@@ -1441,6 +1446,36 @@
   font-weight: 1000;
   padding: 9px 12px;
   white-space: nowrap;
+}
+
+#jsu-wrapped .jsuw-picker-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px 0 10px;
+}
+
+#jsu-wrapped .jsuw-picker-variants a {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 950;
+  line-height: 1;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+
+#jsu-wrapped .jsuw-picker-variants a:first-child {
+  background: rgba(21, 4, 40, 0.56);
+}
+
+#jsu-wrapped .jsuw-picker-variants a:not(:first-child) {
+  background: #ffb627;
+  border-color: rgba(21, 4, 40, 0.32);
+  color: #150428;
 }
 
 #jsu-wrapped .jsuw-teen-test-link {
@@ -3526,6 +3561,10 @@
     grid-column: 2;
     justify-self: start;
     padding: 8px 11px;
+  }
+
+  #jsu-wrapped .jsuw-picker-variants {
+    padding-left: 4px;
   }
 
   #jsu-wrapped .jsuw-teen-test-link {
