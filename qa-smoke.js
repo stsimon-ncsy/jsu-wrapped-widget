@@ -261,6 +261,90 @@ function runStoryScopeSmoke() {
   assert(namedChapterScope.type === "chapter", "chapter name with region name should not infer region scope");
 }
 
+function runScopedStoryValidationSmoke() {
+  const storyRecords = [
+    {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: 338
+    },
+    {
+      scope_type: "region",
+      scope_slug: "atlantic-seaboard",
+      scope_name: "Atlantic Seaboard",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026",
+      events_hosted: 1112,
+      unique_teens: 3364
+    },
+    {
+      scope_type: "program",
+      scope_slug: "shabbat",
+      scope_name: "Shabbat Across JSU",
+      program_slug: "shabbat",
+      program_name: "Shabbat Across JSU",
+      year_label: "2025-2026",
+      events_hosted: 88,
+      unique_teens: 760
+    }
+  ];
+  const teenRecords = [{
+    teen_slug: "maya-test",
+    teen_name: "Maya",
+    chapter_name: "Northwood JSU",
+    year_label: "2025-2026"
+  }];
+  const config = {
+    regions: {
+      "atlantic-seaboard": { palette: "purple-gold" }
+    },
+    programs: {
+      shabbat: { palette: "sunset" }
+    },
+    chapters: {
+      baltimore: { palette: "electric" }
+    }
+  };
+  const report = dataValidator.validateWrappedPackage({
+    storyRecords,
+    teenRecords,
+    config
+  });
+  const duplicateScopeReport = dataValidator.validateChapterRecords([
+    storyRecords[1],
+    Object.assign({}, storyRecords[1], { scope_name: "Duplicate Atlantic Seaboard" })
+  ]);
+  const badProgramConfigReport = dataValidator.validateConfig({
+    programs: {
+      "missing-program": {}
+    }
+  }, storyRecords);
+  const badCampaignConfigReport = dataValidator.validateConfig({
+    programs: {
+      shabbat: {}
+    },
+    campaigns: {
+      "missing-campaign": {}
+    }
+  }, storyRecords);
+
+  assert(report.ok, `mixed story scope validation failed: ${report.errors.join("; ")}`);
+  assert(!duplicateScopeReport.ok && duplicateScopeReport.errors.some((error) => error.includes("Duplicate")), "duplicate region scope slugs should fail validation");
+  assert(!badProgramConfigReport.ok && badProgramConfigReport.errors.some((error) => error.includes("config program")), "unknown program config should fail validation");
+  assert(!badCampaignConfigReport.ok && badCampaignConfigReport.errors.some((error) => error.includes("config campaign")), "unknown campaign config should fail validation");
+}
+
+function runBuilderFutureScopeSmoke() {
+  const builderHtml = loadText("builder.html");
+  const builderJs = loadText("wrapped-builder.js");
+
+  assert(builderHtml.includes('<option value="program">Program default</option>'), "builder scope selector is missing program default option");
+  assert(builderJs.includes("function ensureProgramSection"), "builder is missing a program config section helper");
+  assert(builderJs.includes("state.config.programs[slug]"), "builder does not write program scoped config");
+}
+
 function runFallbackSvgSmoke(records, config) {
   const slugs = ["philadelphia", "baltimore", "greater-washington"];
 
@@ -505,6 +589,8 @@ function main() {
   runAnalyticsSmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
+  runScopedStoryValidationSmoke();
+  runBuilderFutureScopeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runCssIsolationSmoke();

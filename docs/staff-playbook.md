@@ -80,6 +80,12 @@ Good variant reasons:
 
 Keep shared metrics consistent across variants. If a metric correction is needed, use the builder's stat correction flow so generated copy, final card, analytics, and downloads stay aligned.
 
+Choose the smallest scope that fits the audience:
+
+- Chapter scope for one local chapter's public recap.
+- Region scope when every chapter in a region should inherit the same CTA, logo choice, or custom screen.
+- Program scope when a cross-region effort, Shabbaton series, donor campaign, or program category needs shared framing across chapters.
+
 ## Measurement
 
 Review the analytics after launch in three layers:

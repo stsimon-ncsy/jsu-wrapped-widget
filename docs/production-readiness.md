@@ -19,7 +19,7 @@ git diff --check
 
 GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed.
 
-The data validator checks the static JSON/config package for duplicate chapter and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a region or chapter in the data.
+The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data.
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 
@@ -42,7 +42,7 @@ program/campaign -> program/campaign.variants[variant]
 chapter -> chapter.variants[variant]
 ```
 
-That keeps chapter, region, and future cross-region program versions on the same pattern.
+That keeps chapter, region, and cross-region program versions on the same pattern. The builder's **Edit scope** control can write a chapter-specific config, a region default, or a program default keyed from the selected preview chapter's `program_slug`, `program_name`, `campaign_slug`, `campaign_name`, or `top_program_type`.
 
 Public URLs:
 
@@ -60,7 +60,37 @@ Future region or cross-region program stories should use explicit story scope UR
 /?scope=program&program=shabbat&variant=recruitment
 ```
 
-Those URLs expect first-class records in the JSON with fields such as `scope_type`, `scope_slug`, and `scope_name`. Do not fake a region/program as a chapter record; use the scope fields and let the renderer normalize it as the story subject.
+Those URLs expect first-class story records in the JSON with fields such as `scope_type`, `scope_slug`, and `scope_name`. Do not fake a region/program as a chapter record; use the scope fields and let the renderer normalize it as the story subject.
+
+Example region story record:
+
+```json
+{
+  "scope_type": "region",
+  "scope_slug": "atlantic-seaboard",
+  "scope_name": "Atlantic Seaboard",
+  "region_name": "Atlantic Seaboard",
+  "year_label": "2025-2026",
+  "events_hosted": 1112,
+  "unique_teens": 3364,
+  "engagement_moments": 158717
+}
+```
+
+Example program story record:
+
+```json
+{
+  "scope_type": "program",
+  "scope_slug": "shabbat",
+  "scope_name": "Shabbat Across JSU",
+  "program_slug": "shabbat",
+  "program_name": "Shabbat Across JSU",
+  "year_label": "2025-2026",
+  "events_hosted": 88,
+  "unique_teens": 760
+}
+```
 
 Hidden variants can be linked directly but will not appear in the picker:
 

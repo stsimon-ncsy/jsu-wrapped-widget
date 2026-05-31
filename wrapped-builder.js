@@ -220,8 +220,33 @@
     return state.config.chapters[slug];
   }
 
+  function getActiveProgramSlug() {
+    var record = getActiveRecord() || {};
+
+    return slugify(record.program_slug || record.program_name || record.campaign_slug || record.campaign_name || record.top_program_type || "");
+  }
+
+  function ensureProgramSection() {
+    var slug = getActiveProgramSlug();
+
+    if (!slug || slug === "jsu-wrapped") {
+      return {};
+    }
+
+    state.config.programs[slug] = state.config.programs[slug] || {};
+    return state.config.programs[slug];
+  }
+
   function ensureBaseSection() {
-    return state.scope === "region" ? ensureRegionSection() : ensureChapterSection();
+    if (state.scope === "region") {
+      return ensureRegionSection();
+    }
+
+    if (state.scope === "program") {
+      return ensureProgramSection();
+    }
+
+    return ensureChapterSection();
   }
 
   function getVariantKeys(section) {

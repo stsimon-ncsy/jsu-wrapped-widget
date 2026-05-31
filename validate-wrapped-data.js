@@ -120,6 +120,78 @@ function validateUniqueSlug(report, seen, slug, label, index) {
   seen[normalized] = index;
 }
 
+function normalizeScopeType(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  if (normalized === "chapter" || normalized === "chapters") {
+    return "chapter";
+  }
+
+  if (normalized === "region" || normalized === "regional" || normalized === "regions") {
+    return "region";
+  }
+
+  if (normalized === "program" || normalized === "programs" || normalized === "campaign" || normalized === "campaigns") {
+    return "program";
+  }
+
+  return "";
+}
+
+function getRecordScopeType(record) {
+  const explicit = normalizeScopeType(record.scope_type || record.scopeType || record.story_scope || record.storyScope || record.wrapped_scope || record.entity_type);
+
+  if (explicit) {
+    return explicit;
+  }
+
+  if (!hasValue(record.chapter_slug) && !hasValue(record.chapter_name)) {
+    if (hasValue(record.program_slug) || hasValue(record.program_name) || hasValue(record.campaign_slug) || hasValue(record.campaign_name)) {
+      return "program";
+    }
+
+    if (hasValue(record.region_slug) || hasValue(record.region_name)) {
+      return "region";
+    }
+  }
+
+  return "chapter";
+}
+
+function getRecordScopeSlug(record, type) {
+  if (type === "region") {
+    return record.scope_slug || record.region_slug || record.region_name || record.scope_name;
+  }
+
+  if (type === "program") {
+    return record.scope_slug || record.program_slug || record.campaign_slug || record.program_name || record.campaign_name || record.scope_name || record.top_program_type;
+  }
+
+  return record.chapter_slug || record.scope_slug;
+}
+
+function getRecordScopeName(record, type) {
+  if (type === "region") {
+    return record.scope_name || record.region_name || record.chapter_name;
+  }
+
+  if (type === "program") {
+    return record.scope_name || record.program_name || record.campaign_name || record.chapter_name || record.top_program_type;
+  }
+
+  return record.chapter_name || record.scope_name;
+}
+
+function validateRequiredValue(report, value, label, index, field) {
+  if (!hasValue(value)) {
+    addError(report, `${label}[${index}].${field} is required`);
+  }
+}
+
 function validateNumericFields(report, record, fields, label, index) {
   fields.forEach((field) => {
     if (!isNonNegativeNumber(record[field])) {
@@ -129,8 +201,12 @@ function validateNumericFields(report, record, fields, label, index) {
 }
 
 function validateChapterRecords(records) {
-  const report = validateRecordsArray(records, "chapter records");
-  const seen = {};
+  const report = validateRecordsArray(records, "story records");
+  const seen = {
+    chapter: {},
+    region: {},
+    program: {}
+  };
 
   if (!report.ok) {
     return report;
@@ -138,21 +214,35 @@ function validateChapterRecords(records) {
 
   records.forEach((record, index) => {
     if (!record || typeof record !== "object" || Array.isArray(record)) {
-      addError(report, `chapter records[${index}] must be an object`);
+      addError(report, `story records[${index}] must be an object`);
       return;
     }
 
-    CHAPTER_REQUIRED_FIELDS.forEach((field) => {
-      if (!hasValue(record[field])) {
-        addError(report, `chapter records[${index}].${field} is required`);
-      }
-    });
+    const explicitScope = record.scope_type || record.scopeType || record.story_scope || record.storyScope || record.wrapped_scope || record.entity_type;
+    const type = getRecordScopeType(record);
+    const scopeSlug = getRecordScopeSlug(record, type);
+    const scopeName = getRecordScopeName(record, type);
 
-    validateUniqueSlug(report, seen, record.chapter_slug, "chapter_slug", index);
-    validateNumericFields(report, record, CHAPTER_NUMERIC_FIELDS, "chapter records", index);
+    if (hasValue(explicitScope) && !normalizeScopeType(explicitScope)) {
+      addError(report, `story records[${index}].scope_type must be chapter, region, or program`);
+    }
+
+    if (type === "chapter") {
+      CHAPTER_REQUIRED_FIELDS.forEach((field) => {
+        validateRequiredValue(report, record[field], "story records", index, field);
+      });
+      validateUniqueSlug(report, seen.chapter, record.chapter_slug, "chapter_slug", index);
+    } else {
+      validateRequiredValue(report, scopeSlug, "story records", index, "scope_slug");
+      validateRequiredValue(report, scopeName, "story records", index, "scope_name");
+      validateRequiredValue(report, record.year_label || record.school_year, "story records", index, "year_label");
+      validateUniqueSlug(report, seen[type], scopeSlug, `${type} scope_slug`, index);
+    }
+
+    validateNumericFields(report, record, CHAPTER_NUMERIC_FIELDS, "story records", index);
 
     if (hasValue(record.brand_logo) && !["jsu", "ncsy"].includes(String(record.brand_logo).trim().toLowerCase())) {
-      addError(report, `chapter records[${index}].brand_logo must be jsu or ncsy`);
+      addError(report, `story records[${index}].brand_logo must be jsu or ncsy`);
     }
   });
 
@@ -188,13 +278,68 @@ function validateTeenRecords(records) {
 
 function validateConfig(config, chapterRecords) {
   const report = createReport();
-  const chapterSlugs = new Set((chapterRecords || []).map((record) => slugify(record && record.chapter_slug)).filter(Boolean));
-  const regionSlugs = new Set((chapterRecords || []).map((record) => slugify(record && record.region_name)).filter(Boolean));
+  const chapterSlugs = new Set();
+  const regionSlugs = new Set();
+  const programSlugs = new Set();
 
   if (!config || typeof config !== "object" || Array.isArray(config)) {
     addError(report, "wrapped config must be an object");
     return report;
   }
+
+  (chapterRecords || []).forEach((record) => {
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      return;
+    }
+
+    const type = getRecordScopeType(record);
+
+    if (type === "chapter") {
+      [record.chapter_slug, record.chapter_name].forEach((value) => {
+        const slug = slugify(value);
+
+        if (slug) {
+          chapterSlugs.add(slug);
+        }
+      });
+    }
+
+    [record.region_slug, record.region_name].forEach((value) => {
+      const slug = slugify(value);
+
+      if (slug) {
+        regionSlugs.add(slug);
+      }
+    });
+
+    [record.program_slug, record.program_name, record.campaign_slug, record.campaign_name, record.top_program_type].forEach((value) => {
+      const slug = slugify(value);
+
+      if (slug) {
+        programSlugs.add(slug);
+      }
+    });
+
+    if (type === "region") {
+      [record.scope_slug, record.scope_name].forEach((value) => {
+        const slug = slugify(value);
+
+        if (slug) {
+          regionSlugs.add(slug);
+        }
+      });
+    }
+
+    if (type === "program") {
+      [record.scope_slug, record.scope_name].forEach((value) => {
+        const slug = slugify(value);
+
+        if (slug) {
+          programSlugs.add(slug);
+        }
+      });
+    }
+  });
 
   Object.keys(config.chapters || {}).forEach((slug) => {
     if (!chapterSlugs.has(slugify(slug))) {
@@ -208,12 +353,24 @@ function validateConfig(config, chapterRecords) {
     }
   });
 
+  Object.keys(config.programs || {}).forEach((slug) => {
+    if (!programSlugs.has(slugify(slug))) {
+      addError(report, `config program "${slug}" does not match a program_slug, program_name, or top_program_type in data`);
+    }
+  });
+
+  Object.keys(config.campaigns || {}).forEach((slug) => {
+    if (!programSlugs.has(slugify(slug))) {
+      addError(report, `config campaign "${slug}" does not match a program_slug, program_name, campaign_slug, campaign_name, or top_program_type in data`);
+    }
+  });
+
   return report;
 }
 
 function validateWrappedPackage(input) {
   const report = createReport();
-  const chapterRecords = input && input.chapterRecords;
+  const chapterRecords = input && (input.storyRecords || input.chapterRecords);
   const teenRecords = input && input.teenRecords;
   const config = input && input.config;
 
