@@ -1,6 +1,7 @@
 const fs = require("fs");
 const api = require("./jsu-wrapped.js");
 const dataValidator = require("./validate-wrapped-data.js");
+const shareGenerator = require("./generate-share-pages.js");
 
 function assert(condition, message) {
   if (!condition) {
@@ -185,6 +186,14 @@ function runStaticShareSmoke() {
     variantSlug: "donor-recap",
     shareBase: "https://example.org/wrapped/share/"
   }, "https://example.org/wrapped/?chapter=baltimore&variant=donor-recap");
+  const doubleHyphenChapterShareUrl = api.createShareUrl({
+    record: {
+      chapter_slug: "la--city",
+      chapter_name: "LA - City"
+    },
+    experienceMode: "chapter",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?chapter=la--city");
   const teenShareUrl = api.createShareUrl({
     record: {
       teen_slug: "maya-test",
@@ -193,6 +202,50 @@ function runStaticShareSmoke() {
     experienceMode: "teen",
     shareBase: "https://example.org/wrapped/share/"
   }, "https://example.org/wrapped/?mode=teen&teen=maya-test");
+  const regionShareUrl = api.createShareUrl({
+    record: {
+      scope_type: "region",
+      scope_slug: "atlantic-seaboard",
+      scope_name: "Atlantic Seaboard",
+      region_slug: "atlantic-seaboard",
+      region_name: "Atlantic Seaboard"
+    },
+    experienceMode: "region",
+    variantSlug: "donor-recap",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?scope=region&region=atlantic-seaboard&variant=donor-recap");
+  const programShareUrl = api.createShareUrl({
+    record: {
+      scope_type: "program",
+      scope_slug: "shabbat",
+      scope_name: "Shabbat Across JSU",
+      program_slug: "shabbat",
+      program_name: "Shabbat Across JSU"
+    },
+    experienceMode: "program",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?scope=program&program=shabbat");
+  const regionHtml = shareGenerator.sharePageHtml({
+    scope_type: "region",
+    scope_slug: "atlantic-seaboard",
+    scope_name: "Atlantic Seaboard",
+    region_slug: "atlantic-seaboard",
+    region_name: "Atlantic Seaboard",
+    year_label: "2025-2026",
+    events_hosted: 420,
+    unique_teens: 2850,
+    engagement_moments: 9200
+  });
+  const programHtml = shareGenerator.sharePageHtml({
+    scope_type: "program",
+    scope_slug: "shabbat",
+    scope_name: "Shabbat Across JSU",
+    program_slug: "shabbat",
+    program_name: "Shabbat Across JSU",
+    year_label: "2025-2026",
+    events_hosted: 88,
+    unique_teens: 760
+  });
 
   assert(fs.existsSync("generate-share-pages.js"), "static share page generator is missing");
   assert(html.includes("<title>" + expectedTitle + "</title>"), "Baltimore static share page title mismatch");
@@ -209,7 +262,17 @@ function runStaticShareSmoke() {
     assert(fs.existsSync(path), `static share page missing for ${record.chapter_slug}`);
   });
   assert(shareUrl === "https://example.org/wrapped/share/baltimore/?variant=donor-recap", `static share URL mismatch: ${shareUrl}`);
+  assert(doubleHyphenChapterShareUrl === "https://example.org/wrapped/share/la--city/", `chapter share URL should preserve existing slug: ${doubleHyphenChapterShareUrl}`);
+  assert(regionShareUrl === "https://example.org/wrapped/share/region/atlantic-seaboard/?variant=donor-recap", `region static share URL mismatch: ${regionShareUrl}`);
+  assert(programShareUrl === "https://example.org/wrapped/share/program/shabbat/", `program static share URL mismatch: ${programShareUrl}`);
   assert(teenShareUrl === "https://example.org/wrapped/?mode=teen&teen=maya-test", `teen share URL should fall back to current URL: ${teenShareUrl}`);
+  assert(shareGenerator.sharePagePath({ chapter_slug: "la--city", chapter_name: "LA - City" }) === "la--city/", "share page path should preserve existing chapter slug");
+  assert(regionHtml.includes("<title>JSU/NCSY Wrapped - Atlantic Seaboard</title>"), "region share page title mismatch");
+  assert(regionHtml.includes("/share/region/atlantic-seaboard/"), "region share page URL path mismatch");
+  assert(regionHtml.includes("?scope=region&amp;region=atlantic-seaboard"), "region share page story redirect mismatch");
+  assert(programHtml.includes("<title>JSU/NCSY Wrapped - Shabbat Across JSU</title>"), "program share page title mismatch");
+  assert(programHtml.includes("/share/program/shabbat/"), "program share page URL path mismatch");
+  assert(programHtml.includes("?scope=program&amp;program=shabbat"), "program share page story redirect mismatch");
 }
 
 function runAnalyticsSmoke() {

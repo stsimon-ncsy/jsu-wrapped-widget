@@ -7671,14 +7671,16 @@
     var scope = getStoryScope(record);
     var shareBase = asText(state && state.shareBase, "");
 
-    if (!shareBase || state && state.experienceMode === "teen" || scope.type !== "chapter" || !hasValue(scope.slug)) {
+    if (!shareBase || state && state.experienceMode === "teen" || ["chapter", "region", "program"].indexOf(scope.type) === -1 || !hasValue(scope.slug)) {
       return fallback;
     }
 
     try {
       var base = new URL(shareBase, fallback || root.location && root.location.href || "https://example.org/");
       var baseHref = base.href.charAt(base.href.length - 1) === "/" ? base.href : base.href + "/";
-      var shareUrl = new URL(slugify(scope.slug) + "/", baseHref);
+      var scopeSlug = encodeURIComponent(String(scope.slug).trim().replace(/[\\/]+/g, "-"));
+      var scopePath = scope.type === "chapter" ? scopeSlug + "/" : scope.type + "/" + scopeSlug + "/";
+      var shareUrl = new URL(scopePath, baseHref);
       var variant = asText(state && (state.variantSlug || state.storyConfig && state.storyConfig.active_variant), "");
 
       if (hasValue(variant)) {

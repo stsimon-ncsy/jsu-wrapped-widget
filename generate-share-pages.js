@@ -20,13 +20,75 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+function pathSlug(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[\\/]+/g, "-");
+}
+
 function isChapterRecord(record) {
   return record && typeof record === "object" && !Array.isArray(record) && hasValue(record.chapter_slug) && hasValue(record.chapter_name) && (!hasValue(record.scope_type) || String(record.scope_type).trim().toLowerCase() === "chapter");
 }
 
+function getShareScope(record) {
+  var scope = api.getStoryScope(record);
+
+  if (!scope || ["chapter", "region", "program"].indexOf(scope.type) === -1 || !hasValue(scope.slug) || !hasValue(scope.name)) {
+    return null;
+  }
+
+  return scope;
+}
+
+function isShareableStoryRecord(record) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    return false;
+  }
+
+  return Boolean(getShareScope(record));
+}
+
+function sharePathSegments(record) {
+  var scope = getShareScope(record);
+  var slug = scope ? pathSlug(scope.slug) : "";
+
+  if (!scope || !slug) {
+    return [];
+  }
+
+  if (scope.type === "chapter") {
+    return [slug];
+  }
+
+  return [scope.type, slug];
+}
+
+function sharePagePath(record) {
+  return sharePathSegments(record).join("/") + "/";
+}
+
+function storyUrlFor(record) {
+  var scope = getShareScope(record);
+  var url = new URL(SITE_BASE);
+
+  if (!scope) {
+    return url.href;
+  }
+
+  if (scope.type === "chapter") {
+    url.searchParams.set("chapter", scope.slug);
+  } else {
+    url.searchParams.set("scope", scope.type);
+    url.searchParams.set(scope.type, scope.slug);
+  }
+
+  return url.href;
+}
+
 function descriptionFor(record) {
+  var scope = getShareScope(record) || { name: record.chapter_name || "JSU", noun: "chapter" };
   var parts = [
-    record.chapter_name + " Wrapped",
+    scope.name + " Wrapped",
     hasValue(record.year_label || record.school_year) ? "for " + (record.year_label || record.school_year) : "",
     hasValue(record.region_name) ? "- " + record.region_name : ""
   ].filter(Boolean);
@@ -58,11 +120,11 @@ function redirectScript(storyUrl) {
 }
 
 function sharePageHtml(record) {
-  var slug = String(record.chapter_slug).trim();
-  var title = "JSU/NCSY Wrapped - " + record.chapter_name;
+  var scope = getShareScope(record);
+  var title = "JSU/NCSY Wrapped - " + scope.name;
   var description = descriptionFor(record);
-  var shareUrl = new URL("share/" + encodeURIComponent(slug) + "/", SITE_BASE).href;
-  var storyUrl = new URL("?chapter=" + encodeURIComponent(slug), SITE_BASE).href;
+  var shareUrl = new URL("share/" + sharePagePath(record), SITE_BASE).href;
+  var storyUrl = storyUrlFor(record);
 
   return [
     "<!doctype html>",
@@ -88,7 +150,7 @@ function sharePageHtml(record) {
     '    <meta http-equiv="refresh" content="0; url=' + escapeHtml(storyUrl) + '">',
     "  </head>",
     "  <body>",
-    '    <p><a href="' + escapeHtml(storyUrl) + '">Open ' + escapeHtml(record.chapter_name) + " Wrapped</a></p>",
+    '    <p><a href="' + escapeHtml(storyUrl) + '">Open ' + escapeHtml(scope.name) + " Wrapped</a></p>",
     "    " + redirectScript(storyUrl),
     "  </body>",
     "</html>",
@@ -97,18 +159,18 @@ function sharePageHtml(record) {
 }
 
 function generateSharePages(records) {
-  var chapters = (records || []).filter(isChapterRecord);
+  var stories = (records || []).filter(isShareableStoryRecord);
 
   fs.mkdirSync(OUTPUT_ROOT, { recursive: true });
 
-  chapters.forEach((record) => {
-    var dir = path.join(OUTPUT_ROOT, String(record.chapter_slug).trim());
+  stories.forEach((record) => {
+    var dir = path.join.apply(path, [OUTPUT_ROOT].concat(sharePathSegments(record)));
 
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "index.html"), sharePageHtml(record));
   });
 
-  return chapters.length;
+  return stories.length;
 }
 
 function main() {
@@ -126,6 +188,8 @@ module.exports = {
   descriptionFor,
   generateSharePages,
   isChapterRecord,
+  isShareableStoryRecord,
   redirectScript,
+  sharePagePath,
   sharePageHtml
 };
