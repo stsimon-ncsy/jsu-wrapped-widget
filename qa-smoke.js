@@ -324,6 +324,85 @@ function runInlineEmbedSmoke() {
   assert((inline.match(/<script>/g) || []).length === 1, "WordPress embed should have one inline script block");
 }
 
+function findMatchingBrace(css, openIndex) {
+  let depth = 0;
+
+  for (let index = openIndex; index < css.length; index += 1) {
+    if (css[index] === "{") {
+      depth += 1;
+    } else if (css[index] === "}") {
+      depth -= 1;
+
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
+}
+
+function collectCssSelectors(css) {
+  const selectors = [];
+  let cursor = 0;
+
+  while (cursor < css.length) {
+    const open = css.indexOf("{", cursor);
+
+    if (open === -1) {
+      break;
+    }
+
+    const prelude = css.slice(cursor, open).replace(/\/\*[\s\S]*?\*\//g, "").trim();
+    const close = findMatchingBrace(css, open);
+
+    if (close === -1) {
+      break;
+    }
+
+    if (prelude.startsWith("@keyframes")) {
+      cursor = close + 1;
+      continue;
+    }
+
+    if (prelude.startsWith("@media") || prelude.startsWith("@supports")) {
+      selectors.push(...collectCssSelectors(css.slice(open + 1, close)));
+      cursor = close + 1;
+      continue;
+    }
+
+    if (prelude && !prelude.startsWith("@")) {
+      selectors.push(...prelude.split(",").map((selector) => selector.trim()).filter(Boolean));
+    }
+
+    cursor = close + 1;
+  }
+
+  return selectors;
+}
+
+function runCssIsolationSmoke() {
+  const css = loadText("jsu-wrapped.css");
+  const docs = loadText("docs/production-readiness.md");
+  const allowedTopLevel = [
+    "#jsu-wrapped",
+    ":root #jsu-wrapped"
+  ];
+  const violations = [];
+
+  collectCssSelectors(css).forEach((selector) => {
+    const normalized = selector.replace(/\s+/g, " ");
+
+    if (!allowedTopLevel.some((prefix) => normalized === prefix || normalized.indexOf(prefix + " ") === 0 || normalized.indexOf(prefix + ".") === 0 || normalized.indexOf(prefix + ":") === 0 || normalized.indexOf(prefix + "[") === 0)) {
+      violations.push(normalized);
+    }
+  });
+
+  assert(!violations.length, `Unscoped CSS selectors: ${violations.slice(0, 8).join(", ")}`);
+  assert(docs.includes("CSS Isolation"), "production docs missing CSS Isolation section");
+  assert(docs.includes("#jsu-wrapped"), "production docs missing #jsu-wrapped CSS scope contract");
+}
+
 function main() {
   const records = loadJson("sample-wrapped-2026.json");
   const config = loadJson("wrapped-config-2026.json");
@@ -337,6 +416,7 @@ function main() {
   runStoryScopeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
+  runCssIsolationSmoke();
 
   console.log("qa smoke ok");
 }

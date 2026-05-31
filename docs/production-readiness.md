@@ -83,6 +83,14 @@ Use placeholders in edited copy and custom screens when a number or chapter fiel
 
 The builder stores placeholder templates behind the scenes so corrected metrics do not drift from edited copy.
 
+## CSS Isolation
+
+`jsu-wrapped.css` is the deployable widget stylesheet and must stay scoped under `#jsu-wrapped`. Do not add global selectors such as `body`, `html`, `button`, `h1`, or generic utility classes to that file.
+
+Allowed global CSS constructs are limited to animation/support wrappers such as `@keyframes`, `@media`, and `@supports`; selectors inside media/support blocks still need to start with `#jsu-wrapped`.
+
+`wordpress-inline-embed.html` also contains a page wrapper and Osano helper styles for the no-header/no-footer WordPress page. Those belong to the WordPress handoff file only; keep the reusable hosted stylesheet isolated to `#jsu-wrapped`.
+
 ## Share/Download Fallback
 
 The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.
