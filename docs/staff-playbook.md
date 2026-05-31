@@ -1,0 +1,118 @@
+# JSU/NCSY Wrapped Staff Playbook
+
+This playbook is for staff using Wrapped as a relationship and momentum tool. It should not live inside the public experience; keep the widget focused and use this as the rollout guide behind the scenes.
+
+## Launch Goals
+
+Use Wrapped to create three concrete outcomes:
+
+- Help chapter staff celebrate teens, schools, advisors, parents, and donors with a polished recap.
+- Turn positive attention into next-step interest through the final CTA and Gravity Form.
+- Give regional and national teams a measurable way to see which chapters, variants, and audiences are engaging.
+
+Success is not just views. A strong rollout produces shares, replies, form submissions, sponsor conversations, and staff follow-up.
+
+## Audience Paths
+
+Use one default chapter link for broad celebration, then create or link variants only when there is a clear audience reason.
+
+- Chapter Staff: Share the default chapter Wrapped with advisors, teen leaders, school contacts, and families. Add a short personal note, not only the link.
+- Regional Staff: Use region-filtered home links to help staff find their chapter, compare momentum across chapters, and spot chapters that need follow-up support.
+- Donors and Board Members: Use donor/recruitment variants when copy should emphasize what support made possible and what next year's investment can power.
+- Teen Test Version: Keep teen mode clearly labeled as proof of concept until real teen-level data, consent, and privacy review are ready.
+
+## CTA
+
+The final card should invite action, not only sharing. Recommended CTA language:
+
+```text
+Build next year's story
+```
+
+or:
+
+```text
+Get involved next year
+```
+
+Point the CTA to the embedded Gravity Form panel when the widget is hosted on WordPress. The widget pre-populates chapter context where possible, so staff should review submissions with the chapter, region, and URL/source information intact.
+
+Good CTA destinations:
+
+- teen leadership or club interest
+- parent/community support
+- sponsor or donor interest
+- staff follow-up for a stronger 2026-2027 launch
+
+Avoid CTAs that only say "learn more" unless there is a real follow-up workflow behind them.
+
+## Outreach
+
+Send Wrapped in waves instead of one blast.
+
+1. Internal preview: regional directors and chapter staff check the numbers, logo, CTA, and final card.
+2. Chapter launch: staff send personal links to advisors, teen leaders, and engaged parents.
+3. Social push: post the final card or screenshot with a direct link and a local caption.
+4. Donor follow-up: use a donor variant or personalized email framing the same numbers as impact.
+5. Re-engagement: follow up with everyone who submitted the form or replied with interest.
+
+Suggested staff copy:
+
+```text
+We pulled together a quick Wrapped-style recap of what JSU/NCSY made happen this year in [Chapter]. It is a fun read, but also a real picture of the momentum teens built together.
+
+[Link]
+
+If you want to help build next year's story, use the form at the end and we will follow up.
+```
+
+## Variants
+
+Use variants sparingly. A variant should exist when the audience needs different framing, not just because the builder can make one.
+
+Good variant reasons:
+
+- donor recap
+- school partner recap
+- teen leader recruitment
+- parent/community support
+- regional campaign or Shabbaton follow-up
+
+Keep shared metrics consistent across variants. If a metric correction is needed, use the builder's stat correction flow so generated copy, final card, analytics, and downloads stay aligned.
+
+## Measurement
+
+Review the analytics after launch in three layers:
+
+- Reach: `jsu_wrapped_story_view`, chapter/region scope, and variant usage.
+- Engagement: card views, card duration, story completion, autoplay, sound toggles.
+- Action: share clicks, download clicks, CTA clicks, and Gravity Form submissions.
+
+Watch for chapters with strong views but low CTA clicks. Those likely need stronger staff follow-up or more specific CTA copy.
+
+Watch for chapters with low views but strong completion. Those likely need better distribution, not a better Wrapped.
+
+## Staff Follow-Up
+
+Every form submission should get a human response. Suggested routing:
+
+- Chapter interest: local chapter staff or regional JSU director.
+- Parent/community support: regional development or engagement lead.
+- Donor/sponsor interest: development staff.
+- School contact: regional director or school-facing staff.
+
+Use the chapter and region fields from the widget prefill to avoid asking the person to repeat context they already came from.
+
+## Review Before Sharing
+
+Before a chapter link goes public, check:
+
+- correct chapter and region
+- correct JSU or NCSY logo
+- final card has no overlapping text
+- CTA opens the intended Gravity Form or destination
+- share/download image includes the logo and key stats
+- no missing numbers, `undefined`, `null`, or stale placeholder text
+- analytics events are visible in GTM Preview or GA4 DebugView for the page
+
+When in doubt, fix the data or config first. Do not ask staff to explain around broken numbers in public copy.

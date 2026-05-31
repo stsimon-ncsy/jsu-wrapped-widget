@@ -433,6 +433,29 @@ function runCiWorkflowSmoke() {
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
 }
 
+function runStaffPlaybookSmoke() {
+  const path = "docs/staff-playbook.md";
+
+  assert(fs.existsSync(path), "staff playbook doc is missing");
+
+  const playbook = loadText(path);
+  const requiredPhrases = [
+    "Launch Goals",
+    "Audience Paths",
+    "Chapter Staff",
+    "Regional Staff",
+    "CTA",
+    "Outreach",
+    "Measurement",
+    "Gravity Form",
+    "Variants"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(playbook.includes(phrase), `staff playbook missing ${phrase}`);
+  });
+}
+
 function runDataValidationSmoke(records, config) {
   const report = dataValidator.validateWrappedPackage({
     chapterRecords: records,
@@ -486,6 +509,7 @@ function main() {
   runInlineEmbedSmoke();
   runCssIsolationSmoke();
   runCiWorkflowSmoke();
+  runStaffPlaybookSmoke();
 
   console.log("qa smoke ok");
 }

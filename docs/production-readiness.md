@@ -21,6 +21,8 @@ GitHub Actions runs the same QA workflow on every push and pull request. The wor
 
 The data validator checks the static JSON/config package for duplicate chapter and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a region or chapter in the data.
 
+Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
+
 Then smoke these URLs:
 
 ```text
