@@ -772,8 +772,18 @@
     return root ? String(root.getAttribute("data-review-url") || "").trim() : "";
   }
 
-  function reviewFormUrlWithContext(payload, submissionText) {
+  function safeReviewFormUrl() {
     var url = reviewFormUrl();
+
+    if (!url) {
+      return "";
+    }
+
+    return isSafeStaticUrl(url) ? url : "";
+  }
+
+  function reviewFormUrlWithContext(payload, submissionText) {
+    var url = safeReviewFormUrl();
     var scopedUrl;
     var params;
     var withSubmission;
@@ -970,7 +980,8 @@
   function renderReviewEmailStatus() {
     var status = $("[data-builder-review-email-status]");
     var email = reviewEmailAddress();
-    var formUrl = reviewFormUrl();
+    var rawFormUrl = reviewFormUrl();
+    var formUrl = safeReviewFormUrl();
     var formButton = $("[data-builder-action=\"form-submission\"]");
     var messages = [];
 
@@ -993,9 +1004,13 @@
       messages.push("Review form is available.");
     }
 
+    if (rawFormUrl && !formUrl) {
+      messages.push("Unsafe review form URL ignored. Use https://, http://, /, ./, or ../ links.");
+    }
+
     if (messages.length) {
       status.textContent = messages.join(" ");
-      status.classList.add("builder-review-email-status--ok");
+      status.classList.add(formUrl || email ? "builder-review-email-status--ok" : "builder-review-email-status--warning");
     } else {
       status.textContent = "No review email or review form is set yet. Email drafts will open without a recipient.";
       status.classList.add("builder-review-email-status--warning");
@@ -1076,7 +1091,12 @@
       return;
     }
 
-    if (!reviewFormUrl()) {
+    if (reviewFormUrl() && !safeReviewFormUrl()) {
+      setVersionStatus("Unsafe review form URL ignored. Use email, copy, or download instead.", true);
+      return;
+    }
+
+    if (!safeReviewFormUrl()) {
       setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
       return;
     }

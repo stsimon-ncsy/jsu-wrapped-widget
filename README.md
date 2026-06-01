@@ -84,6 +84,8 @@ https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrap
 
 The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. For small edit packets, it also adds `wrapped_submission` so a Gravity Forms textarea can be dynamically populated with the submission JSON. Keep the builder's clipboard copy and download options as fallbacks for larger submissions or locked-down browsers.
 
+Review form URLs must use `https://`, `http://`, `/`, `./`, or `../` links. Unsafe schemes are ignored by the builder.
+
 For final-card CTAs, use `cta_target` when the button should open an embedded form panel such as `#jsuw-wrapped-interest`, or `cta_href` when it should navigate to a safe direct URL such as `https://ncsy.org/ncsy-wrapped/` or `/ncsy-wrapped/`.
 
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
