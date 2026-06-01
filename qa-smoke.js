@@ -1337,6 +1337,36 @@ function runStaffPlaybookSmoke() {
   });
 }
 
+function runPilotStaffGuideSmoke() {
+  const path = "docs/pilot-staff-builder-guide.md";
+
+  assert(fs.existsSync(path), "pilot staff builder guide is missing");
+
+  const guide = loadText(path);
+  const readme = loadText("README.md");
+  const playbook = loadText("docs/staff-playbook.md");
+  const requiredPhrases = [
+    "Pilot Staff Builder Guide",
+    "review_email",
+    "Pick your region and chapter",
+    "Make only the changes you want reviewed",
+    "Fill in Submission info",
+    "Open email draft",
+    "Copy submission",
+    "Download submission",
+    "Do not use Copy JSON",
+    "Do not edit the submission JSON by hand",
+    "If you are unsure, download the submission file"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(guide.includes(phrase), `pilot staff guide missing ${phrase}`);
+  });
+
+  assert(readme.includes("docs/pilot-staff-builder-guide.md"), "README should link the pilot staff guide");
+  assert(playbook.includes("docs/pilot-staff-builder-guide.md"), "staff playbook should link the pilot staff guide");
+}
+
 function runStaffSubmissionPrivacySmoke() {
   const gitignore = loadText(".gitignore");
   const readme = loadText("README.md");
@@ -1542,6 +1572,7 @@ function main() {
   runProductionCheckSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
+  runPilotStaffGuideSmoke();
   runStaffSubmissionPrivacySmoke();
 
   console.log("qa smoke ok");

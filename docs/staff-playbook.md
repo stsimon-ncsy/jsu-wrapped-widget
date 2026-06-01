@@ -88,6 +88,8 @@ Choose the smallest scope that fits the audience:
 
 For pilot staff who should not edit GitHub directly, ask them to fill in the builder's submission info fields, then use **Open email draft**, **Copy submission**, or **Download submission**. That review payload is intentionally smaller than the full config export: it includes the submitter name/email/note, the active chapter, region, or program scope, the variant if one is selected, a change summary, and the exact `merge_path` where the reviewed patch belongs in `wrapped-config-2026.json`.
 
+Send pilot users `docs/pilot-staff-builder-guide.md` with their builder link. It is the short staff-facing version of this workflow.
+
 Use **Open email draft** when staff are sending the JSON straight back to the maintainer; it copies the submission JSON first, then opens a short email note. To make that easy for a pilot group, distribute a pre-addressed builder link with `review_email`, for example `builder.html?review_email=wrapped-review@example.org`. Use **Copy submission** when staff will paste the JSON into Slack or a Gravity Form review field. Use **Download submission** when attaching a file is easier.
 
 The builder blocks no-change review packets. Staff should make at least one copy, metric, CTA, logo, palette, hide/show, or custom-screen change before sending a submission back.
