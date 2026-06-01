@@ -55,8 +55,9 @@ Duration fields are sent on engagement/completion events:
 
 Teen-mode events intentionally do not include teen name, teen slug, teen ID,
 student name, email, phone, or other teen-identifying fields. The static data
-validator also rejects teen ID/contact fields and obvious email or phone values
-before the package is published.
+validator rejects teen ID/contact fields and obvious email or phone values
+before the package is published, and the runtime strips those keys from
+teen-mode event extras before pushing to `dataLayer`.
 
 ## GTM Configuration
 

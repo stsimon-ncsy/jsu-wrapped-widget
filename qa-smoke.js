@@ -438,6 +438,36 @@ function runAnalyticsSmoke() {
 
   assert(payload.variant_slug === "donor-recap", "variant analytics slug missing");
   assert(payload.variant_label === "Donor recap", "variant analytics label missing");
+
+  const teenPayload = api.createAnalyticsPayload({
+    record: {
+      teen_slug: "maya-test",
+      teen_name: "Maya",
+      student_name: "Maya Student",
+      chapter_slug: "northwood-jsu",
+      chapter_name: "Northwood JSU",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026"
+    },
+    cards: [{ theme: "cover", type: "cover" }],
+    index: 0,
+    experienceMode: "teen"
+  }, "teen_privacy_test", {
+    teen_slug: "maya-test",
+    teen_name: "Maya",
+    teen_id: "real-teen-123",
+    student_name: "Maya Student",
+    student_id: "student-123",
+    email: "maya@example.org",
+    phone: "410-555-1212",
+    cta_label: "Get involved"
+  });
+
+  ["teen_slug", "teen_name", "teen_id", "student_name", "student_id", "email", "phone"].forEach((key) => {
+    assert(!Object.prototype.hasOwnProperty.call(teenPayload, key), `teen analytics payload leaked ${key}`);
+  });
+  assert(teenPayload.chapter_slug === "northwood-jsu", "teen analytics should keep chapter context");
+  assert(teenPayload.cta_label === "Get involved", "teen analytics should keep non-identifying event context");
 }
 
 function runFormPrefillSmoke() {
@@ -896,7 +926,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
-  const releaseToken = "jsuw-prod-20260601e";
+  const releaseToken = "jsuw-prod-20260601f";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;

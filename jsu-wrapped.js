@@ -649,6 +649,62 @@
     return output;
   }
 
+  function normalizeAnalyticsKey(key) {
+    return String(key || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function isTeenAnalyticsIdentifierKey(key) {
+    var normalized = normalizeAnalyticsKey(key);
+    var blocked = {
+      teen_slug: true,
+      teen_name: true,
+      teen_id: true,
+      student_slug: true,
+      student_name: true,
+      student_id: true,
+      participant_id: true,
+      person_id: true,
+      contact_id: true,
+      first_name: true,
+      last_name: true,
+      full_name: true,
+      legal_name: true,
+      email: true,
+      phone: true,
+      mobile: true,
+      cell: true,
+      address: true,
+      birthdate: true,
+      birthday: true,
+      date_of_birth: true,
+      dob: true
+    };
+
+    if (blocked[normalized]) {
+      return true;
+    }
+
+    return /(^|_)(email|phone|mobile|cell|address|birthdate|birthday|dob)($|_)/.test(normalized);
+  }
+
+  function safeAnalyticsExtra(mode, extra) {
+    var output = {};
+
+    Object.keys(extra || {}).forEach(function (key) {
+      if (mode === "teen" && isTeenAnalyticsIdentifierKey(key)) {
+        return;
+      }
+
+      output[key] = extra[key];
+    });
+
+    return output;
+  }
+
   function nowMs() {
     if (root.performance && typeof root.performance.now === "function") {
       return root.performance.now();
@@ -719,7 +775,7 @@
       autoplay_enabled: state && state.autoplayEnabled ? "true" : "false"
     };
 
-    return compactPayload(Object.assign(base, extra || {}));
+    return compactPayload(Object.assign(base, safeAnalyticsExtra(mode, extra || {})));
   }
 
   function pushAnalyticsPayload(payload) {
