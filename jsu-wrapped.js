@@ -115,6 +115,18 @@
       .slice(0, 80) || "jsu-wrapped";
   }
 
+  function sharePathSlug(value) {
+    var slug = String(value || "")
+      .trim()
+      .replace(/[\\/]+/g, "-")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/^\.+/, "")
+      .replace(/\.+$/, "")
+      .replace(/^-+|-+$/g, "");
+
+    return slug || "story";
+  }
+
   function configSlug(value) {
     if (!hasValue(value)) {
       return "";
@@ -3755,7 +3767,7 @@
     try {
       var base = new URL(shareBase, fallback || root.location && root.location.href || "https://example.org/");
       var baseHref = base.href.charAt(base.href.length - 1) === "/" ? base.href : base.href + "/";
-      var scopeSlug = encodeURIComponent(String(scope.slug).trim().replace(/[\\/]+/g, "-"));
+      var scopeSlug = encodeURIComponent(sharePathSlug(scope.slug));
       var scopePath = scope.type === "chapter" ? scopeSlug + "/" : scope.type + "/" + scopeSlug + "/";
       var shareUrl = new URL(scopePath, baseHref);
       var variant = asText(state && (state.variantSlug || state.storyConfig && state.storyConfig.active_variant), "");

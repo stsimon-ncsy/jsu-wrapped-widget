@@ -340,6 +340,17 @@ function runStaticShareSmoke() {
     experienceMode: "program",
     shareBase: "https://example.org/wrapped/share/"
   }, "https://example.org/wrapped/?scope=program&program=shabbat");
+  const spacedProgramRecord = {
+    scope_type: "program",
+    scope_slug: "Shabbat Across JSU",
+    scope_name: "Shabbat Across JSU",
+    program_name: "Shabbat Across JSU"
+  };
+  const spacedProgramShareUrl = api.createShareUrl({
+    record: spacedProgramRecord,
+    experienceMode: "program",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?scope=program&program=Shabbat%20Across%20JSU");
   const regionHtml = shareGenerator.sharePageHtml({
     scope_type: "region",
     scope_slug: "atlantic-seaboard",
@@ -382,6 +393,8 @@ function runStaticShareSmoke() {
   assert(doubleHyphenChapterShareUrl === "https://example.org/wrapped/share/la--city/", `chapter share URL should preserve existing slug: ${doubleHyphenChapterShareUrl}`);
   assert(regionShareUrl === "https://example.org/wrapped/share/region/atlantic-seaboard/?variant=donor-recap", `region static share URL mismatch: ${regionShareUrl}`);
   assert(programShareUrl === "https://example.org/wrapped/share/program/shabbat/", `program static share URL mismatch: ${programShareUrl}`);
+  assert(shareGenerator.sharePagePath(spacedProgramRecord) === "program/Shabbat-Across-JSU/", "share generator should sanitize scoped story paths with spaces");
+  assert(spacedProgramShareUrl === "https://example.org/wrapped/share/program/Shabbat-Across-JSU/", `runtime share URL should match generated scoped story path: ${spacedProgramShareUrl}`);
   assert(teenShareUrl === "https://example.org/wrapped/?mode=teen&teen=maya-test", `teen share URL should fall back to current URL: ${teenShareUrl}`);
   assert(shareGenerator.sharePagePath({ chapter_slug: "la--city", chapter_name: "LA - City" }) === "la--city/", "share page path should preserve existing chapter slug");
   assert(regionHtml.includes("<title>JSU/NCSY Wrapped - Atlantic Seaboard</title>"), "region share page title mismatch");
