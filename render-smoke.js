@@ -135,8 +135,8 @@ function findBrowserCandidates(settings) {
   const candidates = [];
   const pathBrowser = findBrowserOnPath();
 
-  if (explicit && fs.existsSync(explicit)) {
-    candidates.push(explicit);
+  if (explicit) {
+    return fs.existsSync(explicit) ? [explicit] : [];
   }
 
   if (pathBrowser) {
@@ -150,6 +150,12 @@ function findBrowserCandidates(settings) {
   });
 
   return uniqueValues(candidates);
+}
+
+function probeTimeoutMs(settings) {
+  const timeout = Number(settings && settings.timeoutMs) || DEFAULT_TIMEOUT_MS;
+
+  return settings && settings.browser ? timeout : Math.min(timeout, 4000);
 }
 
 function contentType(filePath) {
@@ -295,7 +301,7 @@ function probeBrowser(browser, settings) {
     const result = childProcess.spawnSync(browser, args, {
       encoding: "utf8",
       maxBuffer: 2 * 1024 * 1024,
-      timeout: Math.min(settings.timeoutMs, 4000)
+      timeout: probeTimeoutMs(settings)
     });
 
     if (result.error) {
@@ -462,7 +468,9 @@ if (require.main === module) {
 }
 
 module.exports = {
+  findBrowserCandidates,
   findBrowserExecutable,
+  probeTimeoutMs,
   renderPlan,
   runRenderSmoke,
   validateRenderedDom

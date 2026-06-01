@@ -1926,6 +1926,14 @@ function runRenderSmokeScriptSmoke() {
   assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
   assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
   assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
+  assert(typeof renderSmoke.findBrowserCandidates === "function", "render smoke should expose browser candidate resolution for smoke coverage");
+  assert(typeof renderSmoke.probeTimeoutMs === "function", "render smoke should expose probe timeout selection for smoke coverage");
+
+  const explicitCandidates = renderSmoke.findBrowserCandidates({ browser: process.execPath });
+
+  assert(explicitCandidates.length === 1 && explicitCandidates[0] === process.execPath, "render smoke should only try the explicit browser path when --browser is provided");
+  assert(renderSmoke.probeTimeoutMs({ browser: process.execPath, timeoutMs: 30000 }) === 30000, "explicit render smoke browser probe should respect the requested timeout");
+  assert(renderSmoke.probeTimeoutMs({ browser: "", timeoutMs: 30000 }) === 4000, "auto-discovered render smoke probes should keep the short local fallback timeout");
 }
 
 function runReadmeSmoke() {
