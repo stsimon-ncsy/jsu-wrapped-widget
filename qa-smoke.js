@@ -1276,6 +1276,17 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const typoRecordOverrideReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    chapters: {
+      baltimore: {
+        record_overrides: {
+          unique_teeens: 999
+        }
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -1285,6 +1296,7 @@ function runDataValidationSmoke(records, config) {
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("emergency_phone")), "teen phone fields should fail validation");
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.chaptrers")), "unknown top-level config keys should fail validation");
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.defaults.ctaa_label")), "unknown config section keys should fail validation");
+  assert(!typoRecordOverrideReport.ok && typoRecordOverrideReport.errors.some((error) => error.includes("record_overrides.unique_teeens")), "unknown record override keys should fail validation");
 }
 
 function main() {

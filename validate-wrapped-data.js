@@ -538,7 +538,45 @@ function validateKnownKeys(report, object, allowedKeys, label) {
   });
 }
 
-function validateConfigSection(report, section, label) {
+function createStoryRecordFieldSet(chapterRecords) {
+  const fields = new Set(CHAPTER_REQUIRED_FIELDS.concat(CHAPTER_NUMERIC_FIELDS, [
+    "school_year",
+    "school_name",
+    "brand_logo",
+    "largest_event_name",
+    "most_active_month",
+    "top_program_type",
+    "chapter_persona",
+    "chapter_line"
+  ]));
+
+  (chapterRecords || []).forEach((record) => {
+    if (record && typeof record === "object" && !Array.isArray(record)) {
+      Object.keys(record).forEach((key) => fields.add(key));
+    }
+  });
+
+  return fields;
+}
+
+function validateRecordOverrides(report, section, label, storyRecordFields) {
+  if (section.record_overrides === undefined) {
+    return;
+  }
+
+  if (!section.record_overrides || typeof section.record_overrides !== "object" || Array.isArray(section.record_overrides)) {
+    addError(report, `${label}.record_overrides must be an object`);
+    return;
+  }
+
+  Object.keys(section.record_overrides).forEach((key) => {
+    if (!storyRecordFields.has(key)) {
+      addError(report, `${label}.record_overrides.${key} is not a field in the story data`);
+    }
+  });
+}
+
+function validateConfigSection(report, section, label, storyRecordFields) {
   if (section === undefined) {
     return;
   }
@@ -552,6 +590,7 @@ function validateConfigSection(report, section, label) {
   validateHiddenCards(report, section, label);
   validateCardOverrides(report, section, label);
   validateCustomCards(report, section, label);
+  validateRecordOverrides(report, section, label, storyRecordFields);
 
   if (section.variants !== undefined) {
     if (!section.variants || typeof section.variants !== "object" || Array.isArray(section.variants)) {
@@ -560,7 +599,7 @@ function validateConfigSection(report, section, label) {
     }
 
     Object.keys(section.variants).forEach((slug) => {
-      validateConfigSection(report, section.variants[slug], `${label}.variants.${slug}`);
+      validateConfigSection(report, section.variants[slug], `${label}.variants.${slug}`, storyRecordFields);
     });
   }
 }
@@ -577,7 +616,9 @@ function validateConfig(config, chapterRecords) {
   }
 
   validateKnownKeys(report, config, CONFIG_TOP_LEVEL_KEYS, "config");
-  validateConfigSection(report, config.defaults || {}, "config.defaults");
+  const storyRecordFields = createStoryRecordFieldSet(chapterRecords);
+
+  validateConfigSection(report, config.defaults || {}, "config.defaults", storyRecordFields);
 
   (chapterRecords || []).forEach((record) => {
     if (!record || typeof record !== "object" || Array.isArray(record)) {
@@ -638,7 +679,7 @@ function validateConfig(config, chapterRecords) {
       addError(report, `config chapter "${slug}" does not match a chapter_slug in data`);
     }
 
-    validateConfigSection(report, config.chapters[slug], `config chapter "${slug}"`);
+    validateConfigSection(report, config.chapters[slug], `config chapter "${slug}"`, storyRecordFields);
   });
 
   Object.keys(config.regions || {}).forEach((slug) => {
@@ -646,7 +687,7 @@ function validateConfig(config, chapterRecords) {
       addError(report, `config region "${slug}" does not match a region_name in data`);
     }
 
-    validateConfigSection(report, config.regions[slug], `config region "${slug}"`);
+    validateConfigSection(report, config.regions[slug], `config region "${slug}"`, storyRecordFields);
   });
 
   Object.keys(config.programs || {}).forEach((slug) => {
@@ -654,7 +695,7 @@ function validateConfig(config, chapterRecords) {
       addError(report, `config program "${slug}" does not match a program_slug, program_name, or top_program_type in data`);
     }
 
-    validateConfigSection(report, config.programs[slug], `config program "${slug}"`);
+    validateConfigSection(report, config.programs[slug], `config program "${slug}"`, storyRecordFields);
   });
 
   Object.keys(config.campaigns || {}).forEach((slug) => {
@@ -662,7 +703,7 @@ function validateConfig(config, chapterRecords) {
       addError(report, `config campaign "${slug}" does not match a program_slug, program_name, campaign_slug, campaign_name, or top_program_type in data`);
     }
 
-    validateConfigSection(report, config.campaigns[slug], `config campaign "${slug}"`);
+    validateConfigSection(report, config.campaigns[slug], `config campaign "${slug}"`, storyRecordFields);
   });
 
   return report;
