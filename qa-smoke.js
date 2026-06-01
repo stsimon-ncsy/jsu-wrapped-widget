@@ -1146,6 +1146,7 @@ function runBuilderSubmissionBatchReviewSmoke() {
   const configPath = path.join(tempDir, "wrapped-config-2026.json");
   const validSubmissionPath = path.join(submissionsDir, "valid-builder-submission.json");
   const formWrappedSubmissionPath = path.join(submissionsDir, "gravity-form-entry.json");
+  const formExportPath = path.join(submissionsDir, "gravity-export.json");
   const invalidSubmissionPath = path.join(submissionsDir, "invalid-builder-submission.json");
 
   fs.mkdirSync(submissionsDir, { recursive: true });
@@ -1184,6 +1185,23 @@ function runBuilderSubmissionBatchReviewSmoke() {
     entry_id: "43",
     wrapped_submission: fs.readFileSync(validSubmissionPath, "utf8")
   }, null, 2));
+  fs.writeFileSync(formExportPath, JSON.stringify([
+    {
+      entry_id: "44",
+      wrapped_submission: fs.readFileSync(validSubmissionPath, "utf8")
+    },
+    {
+      entry_id: "45",
+      wrapped_submission: JSON.stringify({
+        schema: "jsu-wrapped-builder-submission",
+        version: 1,
+        scope_type: "chapter",
+        scope_slug: "baltimore",
+        merge_path: ["chapters", "baltimore"],
+        config_patch: {}
+      }, null, 2)
+    }
+  ], null, 2));
   fs.writeFileSync(invalidSubmissionPath, JSON.stringify({
     schema: "jsu-wrapped-builder-submission",
     version: 1,
@@ -1205,14 +1223,16 @@ function runBuilderSubmissionBatchReviewSmoke() {
   }
 
   assert(fs.existsSync(scriptPath), "staff submission batch review script is missing");
-  assert(batchOutput.includes("Reviewing 3 staff submission JSON files"), "batch review should report how many files it checked");
+  assert(batchOutput.includes("Reviewing 5 staff submission JSON entries"), "batch review should report how many submission entries it checked");
   assert(batchOutput.includes("[OK] valid-builder-submission.json"), "batch review should mark valid staff submissions");
   assert(batchOutput.includes("[OK] gravity-form-entry.json"), "batch review should accept Gravity Forms entries with wrapped_submission JSON");
+  assert(batchOutput.includes("[OK] gravity-export.json[1]"), "batch review should accept valid submissions inside JSON array exports");
+  assert(batchOutput.includes("[INVALID] gravity-export.json[2]"), "batch review should mark invalid submissions inside JSON array exports");
   assert(batchOutput.includes("Submitter: Leah Rosen <leah@example.org>"), "batch review should show submitter details");
   assert(batchOutput.includes("- palette: electric"), "batch review should summarize submitted changes");
   assert(batchOutput.includes("[INVALID] invalid-builder-submission.json"), "batch review should mark invalid staff submissions");
   assert(batchOutput.includes("Submission config_patch has no changes"), "batch review should show validation errors");
-  assert(batchOutput.includes("Summary: 2 valid, 1 invalid"), "batch review should summarize valid and invalid counts");
+  assert(batchOutput.includes("Summary: 3 valid, 2 invalid"), "batch review should summarize valid and invalid counts");
 
   const noFilesOutput = childProcess.execFileSync(process.execPath, [scriptPath, path.join(tempDir, "empty-submissions"), configPath], {
     cwd: __dirname,
@@ -1229,6 +1249,7 @@ function runBuilderSubmissionBatchReviewSmoke() {
   assert(readme.includes("Gravity Forms-style entry JSON object containing the builder packet in `wrapped_submission`"), "README should document Gravity Forms entry review support");
   assert(playbook.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "staff playbook should document Gravity Forms entry review support");
   assert(productionDocs.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "production docs should document Gravity Forms entry review support");
+  assert(productionDocs.includes("single exported JSON array of entries"), "production docs should document array export review support");
 }
 
 function runFallbackSvgSmoke(records, config) {

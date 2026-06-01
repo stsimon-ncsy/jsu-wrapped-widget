@@ -28,6 +28,25 @@ function jsonFilesInDir(dirPath) {
     .map((file) => path.join(dirPath, file));
 }
 
+function submissionEntriesInDir(dirPath) {
+  return jsonFilesInDir(dirPath).flatMap((filePath) => {
+    const fileName = path.basename(filePath);
+    const parsed = readJson(filePath);
+
+    if (Array.isArray(parsed)) {
+      return parsed.map((submission, index) => ({
+        label: `${fileName}[${index + 1}]`,
+        submission
+      }));
+    }
+
+    return [{
+      label: fileName,
+      submission: parsed
+    }];
+  });
+}
+
 function formatSubmitter(submission) {
   const name = textValue(submission.submitter_name);
   const email = textValue(submission.submitter_email);
@@ -72,8 +91,8 @@ function formatChangeSummaryItem(item) {
   return label;
 }
 
-function reviewSubmissionFile(filePath, config) {
-  const submission = merger.normalizeSubmission(readJson(filePath));
+function reviewSubmissionEntry(entry, config) {
+  const submission = merger.normalizeSubmission(entry.submission);
   const merged = merger.mergeSubmission(cloneValue(config), submission);
   const validation = merger.validateMergedConfig(merged);
 
@@ -113,32 +132,30 @@ function printSubmissionSummary(submission) {
 }
 
 function reviewSubmissions(submissionsDir, configPath) {
-  const files = jsonFilesInDir(submissionsDir);
+  const entries = submissionEntriesInDir(submissionsDir);
   const config = readJson(configPath);
   const totals = {
     invalid: 0,
     valid: 0
   };
 
-  if (!files.length) {
+  if (!entries.length) {
     console.log(`No staff submission JSON files found in ${submissionsDir}.`);
     return totals;
   }
 
-  console.log(`Reviewing ${files.length} staff submission JSON files in ${submissionsDir}`);
+  console.log(`Reviewing ${entries.length} staff submission JSON entries in ${submissionsDir}`);
 
-  files.forEach((filePath) => {
-    const fileName = path.basename(filePath);
-
+  entries.forEach((entry) => {
     try {
-      const submission = reviewSubmissionFile(filePath, config);
+      const submission = reviewSubmissionEntry(entry, config);
 
       totals.valid += 1;
-      console.log(`\n[OK] ${fileName}`);
+      console.log(`\n[OK] ${entry.label}`);
       printSubmissionSummary(submission);
     } catch (error) {
       totals.invalid += 1;
-      console.log(`\n[INVALID] ${fileName}`);
+      console.log(`\n[INVALID] ${entry.label}`);
       console.log(`Error: ${error.message}`);
     }
   });
@@ -183,5 +200,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-  reviewSubmissions
+  reviewSubmissions,
+  submissionEntriesInDir
 };
