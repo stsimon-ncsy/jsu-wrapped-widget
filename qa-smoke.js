@@ -890,6 +890,9 @@ function runAssetVersionSmoke() {
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+  const readmePattern = /https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:jsu-wrapped|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"`<\s]+/g;
 
   files.forEach((file) => {
     const html = loadText(file);
@@ -908,6 +911,15 @@ function runAssetVersionSmoke() {
   inlineReferences.forEach((reference) => {
     assert(reference.includes(`?v=${releaseToken}`), `WordPress embed has stale or missing remote data version: ${reference}`);
   });
+
+  const readmeReferences = readme.match(readmePattern) || [];
+
+  assert(readmeReferences.length === 5, "README WordPress snippet should version CSS, JS, chapter data, config, and teen data URLs");
+  readmeReferences.forEach((reference) => {
+    assert(reference.includes(`?v=${releaseToken}`), `README WordPress snippet has stale or missing asset version: ${reference}`);
+  });
+  assert(readme.includes("Bump the shared cache token"), "README should remind maintainers to update the pasteable snippet cache token");
+  assert(docs.includes("README.md"), "production docs should include README in the shared cache token bump list");
 }
 
 function findMatchingBrace(css, openIndex) {

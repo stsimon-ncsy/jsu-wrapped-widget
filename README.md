@@ -51,6 +51,8 @@ For a normal HTML block that loads assets from GitHub Pages:
 
 Use `wordpress-inline-embed.html` when the page template works better with a self-contained inline block.
 
+Bump the shared cache token in this pasteable snippet whenever the hosted JS, CSS, data, or config URLs need to force-refresh for staff or public reviewers.
+
 ## Builder Workflow
 
 Pilot staff can use `builder.html` to preview chapter, region, program, and variant changes without editing GitHub directly.
