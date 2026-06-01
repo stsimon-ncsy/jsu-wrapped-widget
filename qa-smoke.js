@@ -1174,6 +1174,19 @@ function runCssPolishSmoke() {
   assert(!negativeLetterSpacing.length, `Negative letter-spacing declarations: ${negativeLetterSpacing.join(", ")}`);
 }
 
+function runMobileFullscreenLayoutSmoke() {
+  const css = loadText("jsu-wrapped.css");
+  const docs = loadText("docs/production-readiness.md");
+
+  assert(/#jsu-wrapped\s*\{/.test(css), "widget root CSS block is missing");
+  assert(css.includes("overflow-x: hidden;"), "widget root should clip horizontal overflow inside the scoped container");
+  assert(css.includes("@media (max-width: 600px)"), "mobile fullscreen media query is missing");
+  assert(/#jsu-wrapped \.jsuw-shell\s*\{[^}]*max-width:\s*100%;/.test(css), "mobile shell should fill the available embed width");
+  assert(/#jsu-wrapped \.jsuw-story\s*\{[^}]*aspect-ratio:\s*auto;/.test(css), "mobile story should not be constrained to desktop aspect sizing");
+  assert(css.includes("height: calc(100svh - 16px);"), "mobile story should use small-viewport height for fullscreen feel");
+  assert(docs.includes("Mobile Fullscreen Contract"), "production docs missing mobile fullscreen contract");
+}
+
 function runBiggestCardMobileLayoutSmoke() {
   const css = loadText("jsu-wrapped.css");
 
@@ -1477,6 +1490,7 @@ function main() {
   runAssetVersionSmoke();
   runCssIsolationSmoke();
   runCssPolishSmoke();
+  runMobileFullscreenLayoutSmoke();
   runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
   runProductionCheckSmoke();

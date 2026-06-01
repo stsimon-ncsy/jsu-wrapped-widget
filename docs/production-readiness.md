@@ -138,6 +138,10 @@ Allowed global CSS constructs are limited to animation/support wrappers such as 
 
 `wordpress-inline-embed.html` also contains a page wrapper and Osano helper styles for the no-header/no-footer WordPress page. Those belong to the WordPress handoff file only; keep the reusable hosted stylesheet isolated to `#jsu-wrapped`.
 
+## Mobile Fullscreen Contract
+
+On mobile, the widget should feel like a story surface rather than a small embedded card. Keep `#jsu-wrapped` full-width and horizontally clipped inside its own scoped container, then let `.jsuw-shell` and `.jsuw-story` fill the available mobile viewport under the small-screen media queries. The production smoke test checks for the scoped overflow guard, full-width mobile shell, `100svh` story sizing, and the mobile aspect-ratio override.
+
 ## Share/Download Fallback
 
 The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.
