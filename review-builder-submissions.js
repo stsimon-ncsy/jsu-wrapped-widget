@@ -35,16 +35,40 @@ function submissionEntriesInDir(dirPath) {
 
     if (Array.isArray(parsed)) {
       return parsed.map((submission, index) => ({
+        entryNumber: index + 1,
+        filePath,
         label: `${fileName}[${index + 1}]`,
         submission
       }));
     }
 
     return [{
+      entryNumber: null,
+      filePath,
       label: fileName,
       submission: parsed
     }];
   });
+}
+
+function quoteCommandArg(value) {
+  return `"${String(value).replace(/"/g, '\\"')}"`;
+}
+
+function dryRunCommand(entry, configPath) {
+  const parts = [
+    "node",
+    "merge-builder-submission.js",
+    quoteCommandArg(entry.filePath),
+    quoteCommandArg(configPath)
+  ];
+
+  if (entry.entryNumber) {
+    parts.push("--entry", String(entry.entryNumber));
+  }
+
+  parts.push("--dry-run");
+  return parts.join(" ");
 }
 
 function formatSubmitter(submission) {
@@ -103,7 +127,7 @@ function reviewSubmissionEntry(entry, config) {
   return submission;
 }
 
-function printSubmissionSummary(submission) {
+function printSubmissionSummary(submission, entry, configPath) {
   const submitter = formatSubmitter(submission);
   const note = textValue(submission.submitter_note);
   const previewUrl = textValue(submission.preview_url);
@@ -129,6 +153,8 @@ function printSubmissionSummary(submission) {
       console.log(`- ${change}`);
     });
   }
+
+  console.log(`Dry run: ${dryRunCommand(entry, configPath)}`);
 }
 
 function reviewSubmissions(submissionsDir, configPath) {
@@ -152,7 +178,7 @@ function reviewSubmissions(submissionsDir, configPath) {
 
       totals.valid += 1;
       console.log(`\n[OK] ${entry.label}`);
-      printSubmissionSummary(submission);
+      printSubmissionSummary(submission, entry, configPath);
     } catch (error) {
       totals.invalid += 1;
       console.log(`\n[INVALID] ${entry.label}`);
@@ -200,6 +226,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  dryRunCommand,
   reviewSubmissions,
   submissionEntriesInDir
 };

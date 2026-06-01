@@ -1265,8 +1265,11 @@ function runBuilderSubmissionBatchReviewSmoke() {
   assert(fs.existsSync(scriptPath), "staff submission batch review script is missing");
   assert(batchOutput.includes("Reviewing 5 staff submission JSON entries"), "batch review should report how many submission entries it checked");
   assert(batchOutput.includes("[OK] valid-builder-submission.json"), "batch review should mark valid staff submissions");
+  assert(batchOutput.includes("Dry run: node merge-builder-submission.js"), "batch review should print a ready-to-run dry-run merge command");
+  assert(batchOutput.includes("valid-builder-submission.json\" \""), "batch review dry-run command should include direct submission file names");
   assert(batchOutput.includes("[OK] gravity-form-entry.json"), "batch review should accept Gravity Forms entries with wrapped_submission JSON");
   assert(batchOutput.includes("[OK] gravity-export.json[1]"), "batch review should accept valid submissions inside JSON array exports");
+  assert(batchOutput.includes("gravity-export.json\" \"") && batchOutput.includes("--entry 1 --dry-run"), "batch review dry-run command should include --entry for JSON array exports");
   assert(batchOutput.includes("[INVALID] gravity-export.json[2]"), "batch review should mark invalid submissions inside JSON array exports");
   assert(batchOutput.includes("Submitter: Leah Rosen <leah@example.org>"), "batch review should show submitter details");
   assert(batchOutput.includes("- palette: electric"), "batch review should summarize submitted changes");
@@ -1288,11 +1291,14 @@ function runBuilderSubmissionBatchReviewSmoke() {
 
   assert(readme.includes("Gravity Forms-style entry JSON object containing the builder packet in `wrapped_submission`"), "README should document Gravity Forms entry review support");
   assert(readme.includes("--entry 2"), "README should document merging a specific JSON array export entry");
+  assert(readme.includes("Dry run:"), "README should document printed dry-run command hints");
   assert(playbook.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "staff playbook should document Gravity Forms entry review support");
   assert(playbook.includes("--entry 2"), "staff playbook should document merging a specific JSON array export entry");
+  assert(playbook.includes("Dry run:"), "staff playbook should document printed dry-run command hints");
   assert(productionDocs.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "production docs should document Gravity Forms entry review support");
   assert(productionDocs.includes("single exported JSON array of entries"), "production docs should document array export review support");
   assert(productionDocs.includes("--entry 2"), "production docs should document merging a specific JSON array export entry");
+  assert(productionDocs.includes("Dry run:"), "production docs should document printed dry-run command hints");
 }
 
 function runFallbackSvgSmoke(records, config) {
