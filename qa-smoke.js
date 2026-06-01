@@ -689,6 +689,15 @@ function runBuilderFutureScopeSmoke() {
   assert(builderJs.includes("rawRecords.filter(isChapterRecord)"), "builder should filter non-chapter story rows out of chapter selectors");
 }
 
+function runBuilderProtectedCardsSmoke() {
+  const builderJs = loadText("wrapped-builder.js");
+
+  assert(builderJs.includes("function isProtectedCard"), "builder should identify protected generated cards");
+  assert(builderJs.includes("data-builder-card-protected"), "builder should mark protected cards in the editor");
+  assert(builderJs.includes("Required"), "builder should label protected cover/final cards as required");
+  assert(builderJs.includes("Cannot hide required cover or final share screens"), "builder should warn staff that cover/final cannot be hidden");
+}
+
 function runFallbackSvgSmoke(records, config) {
   const slugs = ["philadelphia", "baltimore", "greater-washington"];
 
@@ -986,6 +995,7 @@ function main() {
   runStoryScopeSmoke();
   runScopedStoryValidationSmoke();
   runBuilderFutureScopeSmoke();
+  runBuilderProtectedCardsSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runAssetVersionSmoke();

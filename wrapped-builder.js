@@ -15,6 +15,10 @@
     "movement",
     "final"
   ];
+  var PROTECTED_CARD_IDS = [
+    "cover",
+    "final"
+  ];
   var CARD_LABELS = {
     cover: "Cover",
     events: "Events hosted",
@@ -368,10 +372,24 @@
   }
 
   function hiddenCards(section) {
-    return Array.isArray(section.hidden_cards) ? section.hidden_cards : [];
+    return Array.isArray(section.hidden_cards) ? section.hidden_cards.filter(function (cardId) {
+      return !isProtectedCard(cardId);
+    }) : [];
+  }
+
+  function protectedHiddenCards(section) {
+    return Array.isArray(section.hidden_cards) ? section.hidden_cards.filter(isProtectedCard) : [];
+  }
+
+  function isProtectedCard(cardId) {
+    return PROTECTED_CARD_IDS.indexOf(slugify(cardId)) !== -1;
   }
 
   function setHiddenCard(section, cardId, isHidden) {
+    if (isProtectedCard(cardId)) {
+      return;
+    }
+
     var list = hiddenCards(section).filter(function (id) {
       return id !== cardId;
     });
@@ -381,6 +399,52 @@
     }
 
     section.hidden_cards = list;
+  }
+
+  function cloneConfigForExport(value) {
+    if (Array.isArray(value)) {
+      return value.map(cloneConfigForExport);
+    }
+
+    if (value && typeof value === "object") {
+      return Object.keys(value).reduce(function (output, key) {
+        output[key] = cloneConfigForExport(value[key]);
+        return output;
+      }, {});
+    }
+
+    return value;
+  }
+
+  function sanitizeConfigSectionForExport(section) {
+    if (!section || typeof section !== "object" || Array.isArray(section)) {
+      return;
+    }
+
+    if (Array.isArray(section.hidden_cards)) {
+      section.hidden_cards = section.hidden_cards.filter(function (cardId) {
+        return !isProtectedCard(cardId);
+      });
+    }
+
+    if (section.variants && typeof section.variants === "object" && !Array.isArray(section.variants)) {
+      Object.keys(section.variants).forEach(function (slug) {
+        sanitizeConfigSectionForExport(section.variants[slug]);
+      });
+    }
+  }
+
+  function sanitizedConfigForExport() {
+    var config = cloneConfigForExport(state.config || {});
+
+    sanitizeConfigSectionForExport(config.defaults);
+    ["regions", "programs", "campaigns", "chapters"].forEach(function (scopeKey) {
+      Object.keys(config[scopeKey] || {}).forEach(function (slug) {
+        sanitizeConfigSectionForExport(config[scopeKey][slug]);
+      });
+    });
+
+    return config;
   }
 
   function ensureCardOverride(section, cardId) {
@@ -625,6 +689,7 @@
     container.innerHTML = CARD_IDS.map(function (cardId) {
       var override = overrides[cardId] || {};
       var isHidden = hidden.indexOf(cardId) !== -1;
+      var isProtected = isProtectedCard(cardId);
       var card = generatedCards[cardId] || {};
       var copyField = cardId === "cover" ? "markerText" : "subtext";
       var copyLabel = cardId === "cover" ? "Footer line" : "Subtext";
@@ -636,7 +701,7 @@
         '<article class="builder-card-row" data-builder-preview-card="' + escapeHtml(cardId) + '">',
         '<header>',
         '<strong>' + escapeHtml(CARD_LABELS[cardId]) + "</strong>",
-        '<label class="builder-toggle"><input type="checkbox" data-builder-card-hidden="' + escapeHtml(cardId) + '"' + (isHidden ? " checked" : "") + "> Hide</label>",
+        '<label class="builder-toggle' + (isProtected ? " builder-toggle--locked" : "") + '"><input type="checkbox" data-builder-card-hidden="' + escapeHtml(cardId) + '"' + (isHidden ? " checked" : "") + (isProtected ? ' disabled aria-disabled="true" data-builder-card-protected="true"' : "") + "> " + (isProtected ? "Required" : "Hide") + "</label>",
         "</header>",
         '<div class="builder-card-fields">',
         '<label>Headline<input data-builder-card-field="headline" data-builder-card-id="' + escapeHtml(cardId) + '" value="' + escapeHtml(headline) + '"></label>',
@@ -798,10 +863,10 @@
     var warnings = [];
     var effective = window.JSUWrapped && window.JSUWrapped.resolveStoryConfig ? window.JSUWrapped.resolveStoryConfig(state.config, record, { variant: state.variantSlug }) : section;
     var customCards = section.custom_cards || [];
-    var hidden = hiddenCards(section);
+    var protectedHidden = protectedHiddenCards(section);
 
-    if (hidden.indexOf("final") !== -1) {
-      warnings.push("The final share card is hidden. That removes the strongest CTA/share moment.");
+    if (protectedHidden.length) {
+      warnings.push("Cannot hide required cover or final share screens. The builder will ignore those hidden-card entries on export.");
     }
 
     if (section.record_overrides && Object.keys(section.record_overrides).length) {
@@ -840,7 +905,7 @@
   }
 
   function renderExport() {
-    var json = JSON.stringify(state.config, null, 2);
+    var json = JSON.stringify(sanitizedConfigForExport(), null, 2);
     var exportField = $("[data-builder-export]");
 
     exportField.value = json;
@@ -1005,7 +1070,18 @@
     }
 
     if (field.matches("[data-builder-card-hidden]")) {
-      setHiddenCard(section, field.getAttribute("data-builder-card-hidden"), field.checked);
+      var hiddenCardId = field.getAttribute("data-builder-card-hidden");
+
+      if (isProtectedCard(hiddenCardId)) {
+        field.checked = false;
+        renderCardEditor();
+        renderWarnings();
+        renderExport();
+        schedulePreview();
+        return;
+      }
+
+      setHiddenCard(section, hiddenCardId, field.checked);
       renderWarnings();
       renderExport();
       schedulePreview();
@@ -1177,7 +1253,7 @@
       } else if (action === "refresh-preview") {
         renderPreview();
       } else if (action === "copy-export") {
-        navigator.clipboard.writeText(JSON.stringify(state.config, null, 2)).catch(function () {});
+        navigator.clipboard.writeText(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }
     });
   }

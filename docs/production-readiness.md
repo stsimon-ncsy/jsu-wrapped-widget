@@ -50,6 +50,8 @@ chapter -> chapter.variants[variant]
 
 That keeps chapter, region, and cross-region program versions on the same pattern. The builder's **Edit scope** control can write a chapter-specific config, a region default, or a program default keyed from the selected preview chapter's `program_slug`, `program_name`, `campaign_slug`, `campaign_name`, or `top_program_type`.
 
+Keep this distinction intact: region/program defaults are config overlays for chapter stories, while region/program Wrapped stories are first-class JSON records with their own `scope_type`. If staff need to self-serve standalone region or cross-region program stories in the builder, add a story-subject selector for scoped records instead of overloading `chapter_slug`.
+
 Public URLs:
 
 ```text
@@ -109,6 +111,8 @@ Hidden variants can be linked directly but will not appear in the picker:
 ```
 
 Generated screens can be hidden at a config scope, but the cover and final share/CTA screens are protected. Rewrite those screens with `card_overrides` when needed instead of hiding them.
+
+The builder marks the cover and final share screens as required and strips those protected ids from exported `hidden_cards` values. This keeps staff-created configs aligned with the runtime and validator.
 
 ## Data Consistency
 

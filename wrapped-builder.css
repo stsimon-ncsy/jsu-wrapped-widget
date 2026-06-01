@@ -377,6 +377,14 @@ textarea {
   accent-color: #6a2bff;
 }
 
+.builder-toggle--locked {
+  color: #5f596f;
+}
+
+.builder-toggle--locked input {
+  accent-color: #9a92aa;
+}
+
 .builder-card-fields,
 .builder-custom-fields {
   display: grid;
