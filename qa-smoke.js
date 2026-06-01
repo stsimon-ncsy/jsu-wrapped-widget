@@ -1352,6 +1352,16 @@ function runDataValidationSmoke(records, config) {
       events_hosted: "many"
     }
   ]);
+  const placeholderPublicStoryReport = dataValidator.validateChapterRecords([
+    {
+      chapter_slug: "test",
+      chapter_name: "Test",
+      region_name: "National",
+      year_label: "2025-2026",
+      events_hosted: 1,
+      largest_event_name: "Test event"
+    }
+  ]);
   const teenPrivacyReport = dataValidator.validateTeenRecords([
     {
       teen_slug: "maya-test",
@@ -1448,6 +1458,7 @@ function runDataValidationSmoke(records, config) {
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
   assert(!badMetricReport.ok && badMetricReport.errors.some((error) => error.includes("events_hosted")), "invalid numeric metrics should fail validation");
+  assert(!placeholderPublicStoryReport.ok && placeholderPublicStoryReport.errors.some((error) => error.includes("placeholder public story text")), "placeholder public story data should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("teen_id")), "teen ids should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("email")), "teen emails should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("emergency_phone")), "teen phone fields should fail validation");

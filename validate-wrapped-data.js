@@ -79,6 +79,23 @@ const TEEN_BLOCKED_FIELD_PARTS = [
 const EMAIL_VALUE_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
 const PHONE_VALUE_PATTERN = /\b(?:\+?1[\s.-]?)?(?:\(?[2-9]\d{2}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/;
 
+const PUBLIC_STORY_PLACEHOLDER_VALUES = new Set([
+  "dummy",
+  "dummy-event",
+  "lorem",
+  "lorem-ipsum",
+  "null",
+  "placeholder",
+  "sample",
+  "sample-event",
+  "tbd",
+  "test",
+  "test-chapter",
+  "test-event",
+  "todo",
+  "undefined"
+]);
+
 const BRAND_LOGO_VALUES = new Set([
   "jsu",
   "ncsy"
@@ -391,6 +408,24 @@ function normalizeFieldName(value) {
     .replace(/^_+|_+$/g, "");
 }
 
+function normalizePlaceholderValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function validatePublicStoryText(report, record, index) {
+  Object.keys(record).forEach((field) => {
+    const value = record[field];
+
+    if (typeof value === "string" && PUBLIC_STORY_PLACEHOLDER_VALUES.has(normalizePlaceholderValue(value))) {
+      addError(report, `story records[${index}].${field} contains placeholder public story text`);
+    }
+  });
+}
+
 function validateTeenPrivacyFields(report, record, index) {
   Object.keys(record).forEach((field) => {
     const normalized = normalizeFieldName(field);
@@ -452,6 +487,7 @@ function validateChapterRecords(records) {
     }
 
     validateNumericFields(report, record, CHAPTER_NUMERIC_FIELDS, "story records", index);
+    validatePublicStoryText(report, record, index);
 
     if (hasValue(record.brand_logo) && !BRAND_LOGO_VALUES.has(String(record.brand_logo).trim().toLowerCase())) {
       addError(report, `story records[${index}].brand_logo must be jsu or ncsy`);
