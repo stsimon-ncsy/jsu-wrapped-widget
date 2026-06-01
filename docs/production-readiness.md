@@ -16,7 +16,7 @@ The check runs `git diff --exit-code wordpress-inline-embed.html` immediately af
 
 The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data. Teen proof-of-concept records are also blocked from using obvious ID/contact fields such as teen IDs, student IDs, email fields, phone fields, names split into first/last/legal names, addresses, or date-of-birth fields.
 
-Hosted preview pages, the WordPress inline embed, and the pasteable README snippet use a shared static asset cache token, currently `jsuw-prod-20260601f`, on JS/CSS/JSON references. Bump that token in `index.html`, `embed-example.html`, `builder.html`, `wordpress-inline-embed.html`, `README.md`, and `qa-smoke.js` whenever hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers.
+Hosted preview pages, the WordPress inline embed, the builder JSON fetches, and the pasteable README snippet use a shared static asset cache token, currently `jsuw-prod-20260601f`, on JS/CSS/JSON references. Bump that token in `index.html`, `embed-example.html`, `builder.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, `README.md`, and `qa-smoke.js` whenever hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers.
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 

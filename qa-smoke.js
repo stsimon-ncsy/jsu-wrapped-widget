@@ -966,6 +966,7 @@ function runAssetVersionSmoke() {
   const releaseToken = "jsuw-prod-20260601f";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
+  const builderJs = loadText("wrapped-builder.js");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
@@ -981,6 +982,10 @@ function runAssetVersionSmoke() {
     });
     assert(!/[?&]v=(?:builder|palette)\d+/i.test(html), `${file} still uses builder/palette cache tokens`);
   });
+
+  assert(builderJs.includes(`sample-wrapped-2026.json?v=${releaseToken}`), "builder data fetch should use the shared production cache token");
+  assert(builderJs.includes(`wrapped-config-2026.json?v=${releaseToken}`), "builder config fetch should use the shared production cache token");
+  assert(!/[?&]v=(?:builder|palette)\d+/i.test(builderJs), "wrapped-builder.js still uses builder/palette cache tokens");
 
   const inlineReferences = inline.match(inlinePattern) || [];
 
