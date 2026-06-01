@@ -1819,7 +1819,7 @@
 #jsu-wrapped .jsuw-reference-stat {
   font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
   font-weight: 1000;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 0.78;
 }
 
@@ -2135,7 +2135,7 @@
   font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, system-ui, sans-serif;
   font-size: 4.5rem;
   font-weight: 1000;
-  letter-spacing: -0.06em;
+  letter-spacing: 0;
   line-height: 0.9;
 }
 
@@ -2243,7 +2243,7 @@
   font-size: clamp(2rem, 10vw, 2.5rem);
   font-style: italic;
   font-weight: 1000;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 0.94;
   margin-top: 16px;
 }
@@ -2480,7 +2480,7 @@
 #jsu-wrapped .jsuw-reference-stat--custom {
   color: #150428;
   font-size: clamp(7.4rem, 33vw, 11rem);
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   text-shadow: 5px 5px 0 rgba(255, 255, 255, 0.52);
 }
 
@@ -3914,7 +3914,7 @@
 
   #jsu-wrapped .jsuw-reference-stat--moments {
     font-size: clamp(4.4rem, 24vw, 6rem);
-    letter-spacing: -0.08em;
+    letter-spacing: 0;
   }
 
   #jsu-wrapped .jsuw-waveform {

@@ -656,6 +656,13 @@ function runCssIsolationSmoke() {
   assert(docs.includes("#jsu-wrapped"), "production docs missing #jsu-wrapped CSS scope contract");
 }
 
+function runCssPolishSmoke() {
+  const css = loadText("jsu-wrapped.css");
+  const negativeLetterSpacing = css.match(/letter-spacing\s*:\s*-\s*[^;]+/g) || [];
+
+  assert(!negativeLetterSpacing.length, `Negative letter-spacing declarations: ${negativeLetterSpacing.join(", ")}`);
+}
+
 function runCiWorkflowSmoke() {
   const workflowPath = ".github/workflows/qa.yml";
   const docs = loadText("docs/production-readiness.md");
@@ -769,6 +776,7 @@ function main() {
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runCssIsolationSmoke();
+  runCssPolishSmoke();
   runCiWorkflowSmoke();
   runStaffPlaybookSmoke();
 
