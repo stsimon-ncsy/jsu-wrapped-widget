@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const childProcess = require("child_process");
+const vm = require("vm");
 const api = require("./jsu-wrapped.js");
 const dataValidator = require("./validate-wrapped-data.js");
 const shareGenerator = require("./generate-share-pages.js");
@@ -18,6 +19,55 @@ function loadJson(path) {
 
 function loadText(path) {
   return fs.readFileSync(path, "utf8");
+}
+
+function loadBuilderTools(currentHref) {
+  const sandbox = {
+    Blob: function Blob() {},
+    console,
+    document: {
+      addEventListener() {},
+      createElement() {
+        return {
+          click() {},
+          focus() {},
+          remove() {},
+          select() {},
+          setAttribute() {},
+          style: {}
+        };
+      },
+      body: {
+        appendChild() {}
+      },
+      querySelector() {
+        return null;
+      },
+      querySelectorAll() {
+        return [];
+      },
+      readyState: "loading"
+    },
+    fetch() {
+      throw new Error("fetch should not run in builder tools smoke");
+    },
+    navigator: {},
+    setTimeout() {},
+    URL,
+    window: {
+      addEventListener() {},
+      clearTimeout() {},
+      location: {
+        href: currentHref
+      },
+      setTimeout() {}
+    }
+  };
+
+  sandbox.window.document = sandbox.document;
+  vm.createContext(sandbox);
+  vm.runInContext(loadText("wrapped-builder.js"), sandbox);
+  return sandbox.window.JSUWrappedBuilderTools;
 }
 
 function assertNoBrokenText(cards) {
@@ -931,6 +981,51 @@ function runBuilderSubmissionSmoke() {
   assert(playbook.includes("wrapped_submission"), "staff playbook should document the review form JSON prefill parameter");
   assert(playbook.includes("usually includes the submission JSON automatically"), "staff playbook should document the low-friction email handoff");
   assert(playbook.includes("Copy staff link"), "staff playbook should document the pilot staff link helper");
+}
+
+function runBuilderPilotLinkUrlSmoke() {
+  const tools = loadBuilderTools("https://example.org/wrapped/builder.html?reviewEmail=old@example.org&review_form=javascript%3Aalert(1)&chapter=old&deploy=old&retry=1&qa=debug");
+
+  assert(tools && typeof tools.buildPilotBuilderUrlFromContext === "function", "builder should expose a pure pilot-link URL helper for smoke tests");
+
+  const url = new URL(tools.buildPilotBuilderUrlFromContext(
+    "https://example.org/wrapped/builder.html?reviewEmail=old@example.org&reviewUrl=https%3A%2F%2Fold.example%2Fform&review_form=javascript%3Aalert(1)&chapter=old&deploy=old&retry=1&qa=debug",
+    {
+      chapterSlug: "baltimore",
+      regionSlug: "atlantic-seaboard",
+      reviewEmail: "wrapped-review@example.org",
+      reviewUrl: "https://ncsy.org/wrapped-review/",
+      scope: "region",
+      variantSlug: "donor-recap"
+    }
+  ));
+
+  assert(url.searchParams.get("chapter") === "baltimore", "pilot staff link should preserve selected chapter");
+  assert(url.searchParams.get("region") === "atlantic-seaboard", "pilot staff link should preserve selected region");
+  assert(url.searchParams.get("scope") === "region", "pilot staff link should preserve non-default edit scope");
+  assert(url.searchParams.get("variant") === "donor-recap", "pilot staff link should preserve selected variant");
+  assert(url.searchParams.get("review_email") === "wrapped-review@example.org", "pilot staff link should use canonical review_email");
+  assert(url.searchParams.get("review_url") === "https://ncsy.org/wrapped-review/", "pilot staff link should use canonical review_url");
+  ["reviewEmail", "reviewUrl", "review_form", "reviewForm", "deploy", "retry", "qa"].forEach((key) => {
+    assert(!url.searchParams.has(key), `pilot staff link should remove stale ${key} params`);
+  });
+
+  const defaultScopeUrl = new URL(tools.buildPilotBuilderUrlFromContext(
+    "https://example.org/wrapped/builder.html?scope=region&variant=donor-recap&review_url=https%3A%2F%2Fold.example%2F",
+    {
+      chapterSlug: "baltimore",
+      regionSlug: "atlantic-seaboard",
+      reviewEmail: "",
+      reviewUrl: "javascript:alert(1)",
+      scope: "chapter",
+      variantSlug: ""
+    }
+  ));
+
+  assert(!defaultScopeUrl.searchParams.has("scope"), "pilot staff link should omit default chapter scope");
+  assert(!defaultScopeUrl.searchParams.has("variant"), "pilot staff link should remove stale variants when no variant is selected");
+  assert(!defaultScopeUrl.searchParams.has("review_email"), "pilot staff link should remove review email when none is set");
+  assert(!defaultScopeUrl.searchParams.has("review_url"), "pilot staff link should remove unsafe review form URLs");
 }
 
 function runBuilderIndexingSmoke() {
@@ -2234,6 +2329,7 @@ function main() {
   runBuilderFutureScopeSmoke();
   runBuilderProtectedCardsSmoke();
   runBuilderSubmissionSmoke();
+  runBuilderPilotLinkUrlSmoke();
   runBuilderIndexingSmoke();
   runBuilderSubmissionMergeSmoke();
   runBuilderSubmissionBatchReviewSmoke();

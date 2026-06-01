@@ -1186,56 +1186,65 @@
     status.classList.toggle("builder-pilot-link-status--error", !!message && !!isError);
   }
 
-  function buildPilotBuilderUrl() {
-    var url = new URL(window.location.href);
-    var email = reviewEmailAddress();
-    var formUrl = reviewFormUrl();
-
-    ["deploy", "retry", "qa"].forEach(function (key) {
+  function deleteSearchParams(url, keys) {
+    keys.forEach(function (key) {
       url.searchParams.delete(key);
     });
+  }
 
-    if (state.regionSlug) {
-      url.searchParams.set("region", state.regionSlug);
+  function setSearchParamIfValue(url, key, value) {
+    if (hasValue(value)) {
+      url.searchParams.set(key, value);
     } else {
-      url.searchParams.delete("region");
+      url.searchParams.delete(key);
     }
+  }
 
-    if (state.chapterSlug) {
-      url.searchParams.set("chapter", state.chapterSlug);
-    } else {
-      url.searchParams.delete("chapter");
-    }
+  function buildPilotBuilderUrlFromContext(currentHref, context) {
+    var url = new URL(currentHref || window.location.href, window.location.href);
+    var values = context || {};
+    var scope = values.scope || "chapter";
 
-    if (state.scope && state.scope !== "chapter") {
-      url.searchParams.set("scope", state.scope);
+    deleteSearchParams(url, [
+      "deploy",
+      "retry",
+      "qa",
+      "review_email",
+      "reviewEmail",
+      "review_url",
+      "reviewUrl",
+      "review_form",
+      "reviewForm"
+    ]);
+
+    setSearchParamIfValue(url, "region", values.regionSlug);
+    setSearchParamIfValue(url, "chapter", values.chapterSlug);
+
+    if (scope && scope !== "chapter") {
+      url.searchParams.set("scope", scope);
     } else {
       url.searchParams.delete("scope");
     }
 
-    if (state.variantSlug) {
-      url.searchParams.set("variant", state.variantSlug);
-    } else {
-      url.searchParams.delete("variant");
-    }
+    setSearchParamIfValue(url, "variant", values.variantSlug);
+    setSearchParamIfValue(url, "review_email", values.reviewEmail);
 
-    if (email) {
-      url.searchParams.set("review_email", email);
-    } else {
-      url.searchParams.delete("review_email");
-      url.searchParams.delete("reviewEmail");
-    }
-
-    if (formUrl && isSafeStaticUrl(formUrl)) {
-      url.searchParams.set("review_url", formUrl);
-    } else {
-      url.searchParams.delete("review_url");
-      url.searchParams.delete("reviewUrl");
-      url.searchParams.delete("review_form");
-      url.searchParams.delete("reviewForm");
+    if (hasValue(values.reviewUrl) && isSafeStaticUrl(values.reviewUrl)) {
+      url.searchParams.set("review_url", values.reviewUrl);
     }
 
     return url.href;
+  }
+
+  function buildPilotBuilderUrl() {
+    return buildPilotBuilderUrlFromContext(window.location.href, {
+      chapterSlug: state.chapterSlug,
+      regionSlug: state.regionSlug,
+      reviewEmail: reviewEmailAddress(),
+      reviewUrl: reviewFormUrl(),
+      scope: state.scope,
+      variantSlug: state.variantSlug
+    });
   }
 
   function copyPilotBuilderLink() {
@@ -2260,4 +2269,8 @@
   } else {
     init();
   }
+
+  window.JSUWrappedBuilderTools = {
+    buildPilotBuilderUrlFromContext: buildPilotBuilderUrlFromContext
+  };
 })();
