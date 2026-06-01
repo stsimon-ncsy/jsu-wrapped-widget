@@ -27,7 +27,7 @@ GitHub Actions runs the same QA workflow on every push and pull request. The wor
 
 The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data.
 
-Hosted preview pages and the WordPress inline embed use a shared static asset cache token, currently `jsuw-prod-20260601b`, on JS/CSS/JSON references. Bump that token in `index.html`, `embed-example.html`, `builder.html`, `wordpress-inline-embed.html`, and `qa-smoke.js` whenever hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers.
+Hosted preview pages and the WordPress inline embed use a shared static asset cache token, currently `jsuw-prod-20260601c`, on JS/CSS/JSON references. Bump that token in `index.html`, `embed-example.html`, `builder.html`, `wordpress-inline-embed.html`, and `qa-smoke.js` whenever hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers.
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 

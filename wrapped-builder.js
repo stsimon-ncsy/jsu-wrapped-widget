@@ -577,12 +577,25 @@
     return changes;
   }
 
+  function submissionMeta() {
+    var nameField = $("[data-builder-submitter-name]");
+    var emailField = $("[data-builder-submitter-email]");
+    var noteField = $("[data-builder-submitter-note]");
+
+    return {
+      submitter_name: nameField ? nameField.value.trim() : "",
+      submitter_email: emailField ? emailField.value.trim() : "",
+      submitter_note: noteField ? noteField.value.trim() : ""
+    };
+  }
+
   function buildSubmissionPayload() {
     var record = getActiveRecord() || {};
     var section = getActiveSection();
     var target = activeScopeTarget(record);
     var mergePath = target.mergePath.slice();
     var variantLabel = "";
+    var meta = submissionMeta();
 
     if (state.variantSlug) {
       var base = ensureBaseSection();
@@ -602,6 +615,9 @@
       scope_label: target.label,
       variant_slug: state.variantSlug || "",
       variant_label: variantLabel,
+      submitter_name: meta.submitter_name,
+      submitter_email: meta.submitter_email,
+      submitter_note: meta.submitter_note,
       merge_path: mergePath,
       preview_chapter_slug: target.previewChapterSlug,
       preview_chapter_name: target.previewChapterName,

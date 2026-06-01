@@ -200,6 +200,7 @@ textarea {
 
 .builder-grid input,
 .builder-grid select,
+.builder-grid textarea,
 .builder-card-row input,
 .builder-card-row textarea,
 .builder-custom-card input,
@@ -214,6 +215,15 @@ textarea {
   min-width: 0;
   padding: 10px 11px;
   width: 100%;
+}
+
+.builder-grid textarea {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.builder-grid-span {
+  grid-column: 1 / -1;
 }
 
 .builder-card-editor,

@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSU/NCSY Wrapped Builder</title>
-    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601b">
-    <link rel="stylesheet" href="./wrapped-builder.css?v=jsuw-prod-20260601b">
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601c">
+    <link rel="stylesheet" href="./wrapped-builder.css?v=jsuw-prod-20260601c">
   </head>
   <body>
     <div id="wrapped-builder" class="wrapped-builder">
@@ -56,6 +56,25 @@
               <a data-builder-preview-link href="./?chapter=baltimore" target="_blank" rel="noopener">Open preview</a>
             </div>
             <div class="builder-version-status" data-builder-version-status></div>
+          </div>
+
+          <div class="builder-section">
+            <h2>Submission info</h2>
+            <p class="builder-help">For pilot staff, add who should be contacted if the reviewer has questions about this submission.</p>
+            <div class="builder-grid builder-grid--submission">
+              <label>
+                Your name
+                <input data-builder-submitter-name placeholder="Name">
+              </label>
+              <label>
+                Your email
+                <input data-builder-submitter-email type="email" placeholder="name@example.org">
+              </label>
+              <label class="builder-grid-span">
+                Reviewer note
+                <textarea data-builder-submitter-note placeholder="Anything the reviewer should know before merging this JSON?"></textarea>
+              </label>
+            </div>
           </div>
 
           <div class="builder-section">
@@ -148,7 +167,7 @@
       </main>
     </div>
 
-    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601b" data-manual="true"></script>
-    <script src="./wrapped-builder.js?v=jsuw-prod-20260601b"></script>
+    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601c" data-manual="true"></script>
+    <script src="./wrapped-builder.js?v=jsuw-prod-20260601c"></script>
   </body>
 </html>
