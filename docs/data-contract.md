@@ -112,7 +112,7 @@ Supported placements include:
 - `before_final`
 - `end`
 
-Media cards need an image URL through `image_url`, `imageUrl`, or `src`.
+Media cards need an image URL through `image_url`, `imageUrl`, or `src`. Use `https://`, `http://`, root-relative paths, dot-relative paths, query strings, or fragments. Unsafe protocols such as `javascript:` and `data:` are rejected.
 
 ## Privacy And Placeholder Rules
 

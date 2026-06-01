@@ -616,8 +616,20 @@ function validateCustomCards(report, section, label) {
       addError(report, `${cardLabel}.type must be one of: ${CUSTOM_CARD_TYPE_LABEL}`);
     }
 
-    if (MEDIA_CUSTOM_CARD_TYPES.has(type) && !hasValue(card.image_url) && !hasValue(card.imageUrl) && !hasValue(card.src)) {
-      addError(report, `${cardLabel}.image_url is required for media custom cards`);
+    if (MEDIA_CUSTOM_CARD_TYPES.has(type)) {
+      [
+        ["image_url", card.image_url],
+        ["imageUrl", card.imageUrl],
+        ["src", card.src]
+      ].forEach(([field, value]) => {
+        if (!isSafeStaticUrl(value)) {
+          addError(report, `${cardLabel}.${field} must be an http(s), root-relative, dot-relative, query, or fragment URL`);
+        }
+      });
+
+      if (!hasValue(card.image_url) && !hasValue(card.imageUrl) && !hasValue(card.src)) {
+        addError(report, `${cardLabel}.image_url is required for media custom cards`);
+      }
     }
 
     [
@@ -693,7 +705,7 @@ function validateSectionDisplayValues(report, section, label) {
   });
 }
 
-function isSafeCtaHref(value) {
+function isSafeStaticUrl(value) {
   if (!hasValue(value)) {
     return true;
   }
@@ -725,7 +737,7 @@ function validateSectionCtaValues(report, section, label) {
     ["cta_href", section.cta_href],
     ["ctaHref", section.ctaHref]
   ].forEach(([field, value]) => {
-    if (!isSafeCtaHref(value)) {
+    if (!isSafeStaticUrl(value)) {
       addError(report, `${label}.${field} must be an http(s), root-relative, dot-relative, query, or fragment URL`);
     }
   });

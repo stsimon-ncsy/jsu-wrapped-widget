@@ -1593,6 +1593,7 @@ function runDataContractDocSmoke() {
     "card_overrides",
     "custom_cards",
     "Unsafe protocols",
+    "Media cards need an image URL",
     "brand_logo",
     "palette",
     "repeat_attendee_rate_label",
@@ -1780,6 +1781,44 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const safeMediaImageReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    chapters: {
+      baltimore: {
+        custom_cards: [
+          {
+            type: "media",
+            placement: "before_final",
+            headline: "Photo moment",
+            image_url: "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+          }
+        ]
+      }
+    }
+  }, records);
+  const unsafeMediaImageReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    chapters: {
+      baltimore: {
+        custom_cards: [
+          {
+            type: "media",
+            placement: "before_final",
+            headline: "Unsafe photo",
+            image_url: "javascript:alert(1)"
+          },
+          {
+            type: "image",
+            placement: "before_final",
+            headline: "Unsafe alternate photo",
+            src: "data:text/html,<script>alert(1)</script>"
+          }
+        ]
+      }
+    }
+  }, records);
   const invalidBrandPaletteReport = dataValidator.validateConfig({
     version: 1,
     year: "2026",
@@ -1835,6 +1874,9 @@ function runDataValidationSmoke(records, config) {
   assert(!typoCardOverrideReport.ok && typoCardOverrideReport.errors.some((error) => error.includes("card_overrides.events.headlne")), "unknown card override keys should fail validation");
   assert(!typoCustomCardReport.ok && typoCustomCardReport.errors.some((error) => error.includes("custom_cards[0].image_urll")), "unknown custom card keys should fail validation");
   assert(!missingMediaImageReport.ok && missingMediaImageReport.errors.some((error) => error.includes("custom_cards[0].image_url")), "media custom cards without an image URL should fail validation");
+  assert(safeMediaImageReport.ok, `safe media image URL config should pass validation: ${safeMediaImageReport.errors.join("; ")}`);
+  assert(!unsafeMediaImageReport.ok && unsafeMediaImageReport.errors.some((error) => error.includes("custom_cards[0].image_url")), "unsafe media image_url should fail validation");
+  assert(!unsafeMediaImageReport.ok && unsafeMediaImageReport.errors.some((error) => error.includes("custom_cards[1].src")), "unsafe media src should fail validation");
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.brand_logo")), "invalid config brand logos should fail validation");
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.palette")), "invalid config palettes should fail validation");
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config chapter \"baltimore\".accent_palette")), "invalid config accent palettes should fail validation");
