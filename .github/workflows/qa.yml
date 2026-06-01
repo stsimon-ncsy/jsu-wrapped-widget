@@ -23,12 +23,21 @@ jobs:
           JSUW_SKIP_OPTIONAL_RENDER_SMOKE: "1"
         run: node check-production.js
 
-      - name: Set up Chrome for render smoke
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
-          install-dependencies: true
+      - name: Resolve Chrome for render smoke
+        id: chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          for candidate in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              browser_path="$(command -v "$candidate")"
+              echo "chrome-path=$browser_path" >> "$GITHUB_OUTPUT"
+              "$browser_path" --version
+              exit 0
+            fi
+          done
+          echo "No Chrome or Chromium executable found on the runner." >&2
+          exit 1
 
       - name: Run enforced render smoke
-        run: node render-smoke.js --browser "${{ steps.setup-chrome.outputs.chrome-path }}" --timeout-ms 30000
+        run: node render-smoke.js --browser "${{ steps.chrome.outputs.chrome-path }}" --timeout-ms 30000

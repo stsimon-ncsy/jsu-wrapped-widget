@@ -1756,10 +1756,11 @@ function runCiWorkflowSmoke() {
 
   assert(workflow.includes("pull_request"), "GitHub Actions QA workflow should run on pull requests");
   assert(workflow.includes("push"), "GitHub Actions QA workflow should run on push");
-  assert(workflow.includes("browser-actions/setup-chrome@v2"), "GitHub Actions QA workflow should install Chrome for enforced render smoke");
-  assert(workflow.includes("chrome-version: stable"), "GitHub Actions render smoke should use stable Chrome instead of a latest snapshot");
-  assert(workflow.includes("install-dependencies: true"), "GitHub Actions render smoke should install Chrome runtime dependencies");
-  assert(workflow.includes("steps.setup-chrome.outputs.chrome-path"), "GitHub Actions QA workflow should pass the installed Chrome path to render smoke");
+  assert(workflow.includes("Resolve Chrome for render smoke"), "GitHub Actions QA workflow should resolve runner Chrome for enforced render smoke");
+  assert(workflow.includes("google-chrome google-chrome-stable chromium chromium-browser"), "GitHub Actions render smoke should prefer runner system browser candidates instead of Chrome for Testing");
+  assert(workflow.includes('command -v "$candidate"'), "GitHub Actions render smoke should resolve the selected runner browser path");
+  assert(workflow.includes("steps.chrome.outputs.chrome-path"), "GitHub Actions QA workflow should pass the resolved Chrome path to render smoke");
+  assert(!workflow.includes("browser-actions/setup-chrome"), "GitHub Actions render smoke should not use setup-chrome Chrome for Testing");
   assert(workflow.includes("--timeout-ms 30000"), "GitHub Actions render smoke should allow enough time for DOM rendering");
   assert(workflow.includes("JSUW_SKIP_OPTIONAL_RENDER_SMOKE"), "GitHub Actions should skip the optional pre-Chrome render smoke inside check-production");
   assert(!workflow.includes("node render-smoke.js --skip-if-missing"), "GitHub Actions render smoke should fail instead of skipping when Chrome cannot render");
