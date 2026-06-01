@@ -591,6 +591,8 @@ function validateCardOverrides(report, section, label) {
 }
 
 function validateCustomCards(report, section, label) {
+  const seenIds = new Map();
+
   if (section.custom_cards === undefined) {
     return;
   }
@@ -609,6 +611,20 @@ function validateCustomCards(report, section, label) {
     }
 
     validateKnownKeys(report, card, CUSTOM_CARD_KEYS, cardLabel);
+
+    if (hasValue(card.id)) {
+      const normalizedId = normalizeCardId(card.id);
+
+      if (STORY_CARD_IDS.has(normalizedId)) {
+        addError(report, `${cardLabel}.id cannot use generated card id "${normalizedId}"`);
+      }
+
+      if (seenIds.has(normalizedId)) {
+        addError(report, `${cardLabel}.id is a Duplicate custom_cards id "${normalizedId}" already used at ${seenIds.get(normalizedId)}`);
+      } else {
+        seenIds.set(normalizedId, cardLabel);
+      }
+    }
 
     const type = String(card.type || "text").trim().toLowerCase();
 

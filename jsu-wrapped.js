@@ -2051,6 +2051,29 @@
     return cards.length;
   }
 
+  function uniqueCustomCardId(candidate, existingCards, fallback) {
+    var existing = {};
+    var base = normalizeCardId(candidate || fallback || "custom-screen");
+    var next = base;
+    var counter = 2;
+
+    (existingCards || []).forEach(function (card) {
+      existing[normalizeCardId(card && (card.id || card.theme))] = true;
+    });
+
+    if (existing[base] && base.indexOf("custom-") !== 0) {
+      base = "custom-" + base;
+      next = base;
+    }
+
+    while (existing[next]) {
+      next = base + "-" + counter;
+      counter += 1;
+    }
+
+    return next;
+  }
+
   function applyStoryConfig(cards, record, storyConfig, options) {
     var config = storyConfig || {};
     var hidden = uniqueList(config.hidden_cards || []);
@@ -2085,6 +2108,7 @@
       }
 
       var customCard = createCustomCard(configCard, record, config, options);
+      customCard.id = uniqueCustomCardId(customCard.id, filtered, "custom-" + slugify(customCard.headline || customCard.customType));
       var index = placementIndex(filtered, configCard.placement || configCard.after || configCard.before);
       filtered.splice(index, 0, customCard);
     });

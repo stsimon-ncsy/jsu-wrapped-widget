@@ -564,8 +564,26 @@ function runRuntimeUrlSafetySmoke() {
       }
     ]
   };
+  const collidingCustomIdConfig = {
+    custom_cards: [
+      {
+        id: "final",
+        type: "text",
+        placement: "before_final",
+        headline: "Custom final"
+      },
+      {
+        id: "final",
+        type: "text",
+        placement: "before_final",
+        headline: "Another custom final"
+      }
+    ]
+  };
   const safeMediaCard = api.createCards(record, { storyConfig: safeMediaConfig }).find((card) => card.id === "safe-photo");
   const unsafeMediaCard = api.createCards(record, { storyConfig: unsafeMediaConfig }).find((card) => card.id === "unsafe-photo");
+  const collidingCards = api.createCards(record, { storyConfig: collidingCustomIdConfig });
+  const collidingIds = collidingCards.map((card) => card.id);
 
   assert(typeof api.isSafeStaticUrl === "function", "runtime should expose the shared static URL safety helper for smoke tests");
   assert(api.isSafeStaticUrl("https://ncsy.org/ncsy-wrapped/"), "runtime should allow https CTA URLs");
@@ -580,6 +598,8 @@ function runRuntimeUrlSafetySmoke() {
   assert(safeMediaCard && safeMediaCard.imageUrl === "https://res.cloudinary.com/demo/image/upload/sample.jpg", "runtime should keep safe custom media image URLs");
   assert(unsafeMediaCard && unsafeMediaCard.imageUrl === "", "runtime should strip unsafe custom media image URLs before rendering");
   assert(source.includes("isSafeStaticUrl(rawImageUrl)"), "runtime should sanitize configured custom media image URLs");
+  assert(collidingIds.filter((id) => id === "final").length === 1, "runtime should not let custom cards duplicate the generated final card id");
+  assert(new Set(collidingIds).size === collidingIds.length, "runtime should dedupe custom card ids before rendering");
 }
 
 function runAnalyticsDocsSmoke() {
@@ -1844,6 +1864,36 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const collidingCustomIdReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    chapters: {
+      baltimore: {
+        custom_cards: [
+          {
+            id: "final",
+            type: "text",
+            headline: "Custom final"
+          },
+          {
+            id: "Final Share",
+            type: "text",
+            headline: "Custom final alias"
+          },
+          {
+            id: "local-note",
+            type: "text",
+            headline: "Local note"
+          },
+          {
+            id: "local note",
+            type: "text",
+            headline: "Duplicate local note"
+          }
+        ]
+      }
+    }
+  }, records);
   const safeMediaImageReport = dataValidator.validateConfig({
     version: 1,
     year: "2026",
@@ -1936,6 +1986,9 @@ function runDataValidationSmoke(records, config) {
   assert(!typoRecordOverrideReport.ok && typoRecordOverrideReport.errors.some((error) => error.includes("record_overrides.unique_teeens")), "unknown record override keys should fail validation");
   assert(!typoCardOverrideReport.ok && typoCardOverrideReport.errors.some((error) => error.includes("card_overrides.events.headlne")), "unknown card override keys should fail validation");
   assert(!typoCustomCardReport.ok && typoCustomCardReport.errors.some((error) => error.includes("custom_cards[0].image_urll")), "unknown custom card keys should fail validation");
+  assert(!collidingCustomIdReport.ok && collidingCustomIdReport.errors.some((error) => error.includes("custom_cards[0].id cannot use generated card id")), "custom cards should not reuse generated card ids");
+  assert(!collidingCustomIdReport.ok && collidingCustomIdReport.errors.some((error) => error.includes("custom_cards[1].id cannot use generated card id")), "custom card aliases should not reuse generated card ids");
+  assert(!collidingCustomIdReport.ok && collidingCustomIdReport.errors.some((error) => error.includes("Duplicate custom_cards id")), "duplicate custom card ids should fail validation");
   assert(!missingMediaImageReport.ok && missingMediaImageReport.errors.some((error) => error.includes("custom_cards[0].image_url")), "media custom cards without an image URL should fail validation");
   assert(safeMediaImageReport.ok, `safe media image URL config should pass validation: ${safeMediaImageReport.errors.join("; ")}`);
   assert(!unsafeMediaImageReport.ok && unsafeMediaImageReport.errors.some((error) => error.includes("custom_cards[0].image_url")), "unsafe media image_url should fail validation");

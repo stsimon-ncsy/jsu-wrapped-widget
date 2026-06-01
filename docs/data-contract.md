@@ -103,6 +103,8 @@ Supported `custom_cards` types:
 - `media`
 - aliases: `stat`, `number`, `photo`, `image`
 
+Custom card `id` values are optional. When provided, they must be unique within the same config section and cannot reuse generated story card ids such as `cover`, `events`, `reach`, `moments`, `new`, `repeat`, `biggest`, `persona`, `movement`, or `final`.
+
 Supported placements include:
 
 - `after_cover`
