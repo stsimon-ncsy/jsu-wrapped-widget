@@ -1001,20 +1001,7 @@ function runCiWorkflowSmoke() {
 
   const workflow = loadText(workflowPath);
   const requiredCommands = [
-    "node sync-wordpress-inline.js",
-    "git diff --exit-code wordpress-inline-embed.html",
-    "node validate-wrapped-data.js",
-    "node --check jsu-wrapped.js",
-    "node --check wrapped-builder.js",
-    "node --check validate-wrapped-data.js",
-    "node --check sync-wordpress-inline.js",
-    "node --check generate-share-pages.js",
-    "node generate-share-pages.js",
-    "git diff --exit-code share",
-    "git status --porcelain -- share",
-    "node --check qa-smoke.js",
-    "node qa-smoke.js",
-    "git diff --check"
+    "node check-production.js"
   ];
 
   requiredCommands.forEach((command) => {
@@ -1024,6 +1011,39 @@ function runCiWorkflowSmoke() {
   assert(workflow.includes("pull_request"), "GitHub Actions QA workflow should run on pull requests");
   assert(workflow.includes("push"), "GitHub Actions QA workflow should run on push");
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
+}
+
+function runProductionCheckSmoke() {
+  const scriptPath = "check-production.js";
+  const workflow = loadText(".github/workflows/qa.yml");
+  const docs = loadText("docs/production-readiness.md");
+
+  assert(fs.existsSync(scriptPath), "single production QA command is missing");
+  const listed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], { encoding: "utf8" });
+  const requiredCommands = [
+    "node sync-wordpress-inline.js",
+    "node generate-share-pages.js",
+    "node --check jsu-wrapped.js",
+    "node --check wrapped-builder.js",
+    "node --check validate-wrapped-data.js",
+    "node --check sync-wordpress-inline.js",
+    "node --check generate-share-pages.js",
+    "node --check merge-builder-submission.js",
+    "node --check qa-smoke.js",
+    "node validate-wrapped-data.js",
+    "node qa-smoke.js",
+    "git diff --exit-code wordpress-inline-embed.html",
+    "git diff --exit-code share",
+    "git status --porcelain -- share",
+    "git diff --check"
+  ];
+
+  requiredCommands.forEach((command) => {
+    assert(listed.includes(command), `production QA command missing ${command}`);
+  });
+
+  assert(workflow.includes("node check-production.js"), "GitHub Actions should run the single production QA command");
+  assert(docs.includes("node check-production.js"), "production docs should point to the single production QA command");
 }
 
 function runStaffPlaybookSmoke() {
@@ -1117,6 +1137,7 @@ function main() {
   runCssPolishSmoke();
   runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
+  runProductionCheckSmoke();
   runStaffPlaybookSmoke();
 
   console.log("qa smoke ok");

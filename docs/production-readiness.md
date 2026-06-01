@@ -7,23 +7,12 @@ This widget is static-hosting friendly: the public experience is driven by `jsu-
 Run these before copying files to WordPress or relying on GitHub Pages:
 
 ```powershell
-node sync-wordpress-inline.js
-node generate-share-pages.js
-git diff --exit-code share
-git status --porcelain -- share
-node validate-wrapped-data.js
-node --check jsu-wrapped.js
-node --check wrapped-builder.js
-node --check validate-wrapped-data.js
-node --check sync-wordpress-inline.js
-node --check generate-share-pages.js
-node --check merge-builder-submission.js
-node --check qa-smoke.js
-node qa-smoke.js
-git diff --check
+node check-production.js
 ```
 
-GitHub Actions runs the same QA workflow on every push and pull request. The workflow also runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed. Static social share pages are regenerated with `node generate-share-pages.js` and checked with both `git diff --exit-code share` and `git status --porcelain -- share`. The generator also removes stale generated share-page directories when a story is removed from the JSON, so old chapter, region, or program share previews do not stay live by accident.
+GitHub Actions runs the same `node check-production.js` workflow on every push and pull request. The script syncs the WordPress inline embed, regenerates static share pages, runs syntax checks, validates JSON/config, runs the smoke suite, checks generated-file drift, and fails on whitespace errors. Because CI and local publishing use the same script, update `check-production.js` whenever the pre-publish gate changes.
+
+The check runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed. Static social share pages are regenerated with `node generate-share-pages.js` and checked with both `git diff --exit-code share` and `git status --porcelain -- share`. The generator also removes stale generated share-page directories when a story is removed from the JSON, so old chapter, region, or program share previews do not stay live by accident.
 
 The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data.
 
