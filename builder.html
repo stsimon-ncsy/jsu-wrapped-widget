@@ -17,9 +17,6 @@
         </div>
         <nav>
           <a href="./?chapter=baltimore">Public preview</a>
-          <button type="button" data-builder-action="copy-submission">Copy submission</button>
-          <button type="button" data-builder-action="download-submission">Download submission</button>
-          <button type="button" data-builder-action="email-submission">Open email draft</button>
           <button type="button" data-builder-action="copy-export">Copy JSON</button>
         </nav>
       </header>
@@ -77,6 +74,17 @@
                 Reviewer note
                 <textarea data-builder-submitter-note placeholder="Anything the reviewer should know before merging this JSON?"></textarea>
               </label>
+            </div>
+            <div class="builder-review-actions" data-builder-review-actions>
+              <div>
+                <strong>Send for review</strong>
+                <p>Copy, email, or download the smaller submission packet after making at least one change.</p>
+              </div>
+              <div class="builder-actions builder-actions--review">
+                <button type="button" data-builder-action="email-submission">Open email draft</button>
+                <button type="button" data-builder-action="copy-submission">Copy submission</button>
+                <button type="button" data-builder-action="download-submission">Download submission</button>
+              </div>
             </div>
           </div>
 

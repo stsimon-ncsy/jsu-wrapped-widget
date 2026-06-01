@@ -732,10 +732,13 @@ function runBuilderProtectedCardsSmoke() {
 function runBuilderSubmissionSmoke() {
   const builderHtml = loadText("builder.html");
   const builderJs = loadText("wrapped-builder.js");
+  const builderCss = loadText("wrapped-builder.css");
 
   assert(builderHtml.includes('data-builder-action="download-submission"'), "builder should expose a staff submission download button");
   assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
   assert(builderHtml.includes('data-builder-action="email-submission"'), "builder should expose a staff submission email draft button");
+  assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
+  assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
   assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
   assert(builderHtml.includes("data-builder-submitter-name"), "builder should collect submitter name for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-email"), "builder should collect submitter email for staff submissions");
@@ -757,6 +760,7 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
   assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
   assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
+  assert(builderCss.includes(".builder-actions--review button"), "builder review action buttons should have mobile-specific sizing");
 }
 
 function runBuilderIndexingSmoke() {
