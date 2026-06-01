@@ -10,6 +10,7 @@ const COMMANDS = [
   nodeCommand("--check", "generate-share-pages.js"),
   nodeCommand("--check", "merge-builder-submission.js"),
   nodeCommand("--check", "review-builder-submissions.js"),
+  nodeCommand("--check", "hosted-smoke.js"),
   nodeCommand("--check", "bump-cache-token.js"),
   nodeCommand("--check", "qa-smoke.js"),
   nodeCommand("validate-wrapped-data.js"),

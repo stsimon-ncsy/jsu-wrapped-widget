@@ -107,6 +107,14 @@ node check-production.js
 
 That command syncs the inline WordPress handoff, regenerates static share pages, syntax-checks scripts, validates data/config, runs the smoke suite, checks generated-file drift, and catches whitespace errors. GitHub Actions runs the same command on push and pull request.
 
+After pushing to GitHub Pages, run the hosted smoke check to confirm the live static files and Baltimore share metadata are being served:
+
+```bash
+node hosted-smoke.js
+```
+
+Use `--base` when testing a fork, preview host, or WordPress-hosted copy.
+
 ## Documentation
 
 - `docs/production-readiness.md` - technical production notes, URL patterns, QA expectations, CSS isolation, social sharing, WordPress embed details

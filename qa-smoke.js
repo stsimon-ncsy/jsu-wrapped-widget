@@ -1413,6 +1413,74 @@ function runProductionCheckSmoke() {
   assert(docs.includes("node check-production.js"), "production docs should point to the single production QA command");
 }
 
+function runHostedSmokeScriptSmoke() {
+  const scriptPath = "hosted-smoke.js";
+
+  assert(fs.existsSync(scriptPath), "hosted GitHub Pages smoke script is missing");
+
+  const hostedSmoke = require("./hosted-smoke.js");
+  const goodAssets = {
+    "": {
+      status: 200,
+      text: '<div id="jsu-wrapped" data-share-base="./share/"></div><script src="./jsu-wrapped.js?v=jsuw-prod-20260601h"></script>'
+    },
+    "builder.html": {
+      status: 200,
+      text: '<meta name="robots" content="noindex,nofollow"><div id="wrapped-builder"></div>'
+    },
+    "jsu-wrapped.css": {
+      status: 200,
+      text: "#jsu-wrapped { color: #fff; }"
+    },
+    "jsu-wrapped.js": {
+      status: 200,
+      text: "window.JSUWrapped = {};"
+    },
+    "sample-wrapped-2026.json": {
+      status: 200,
+      text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
+    },
+    "wrapped-config-2026.json": {
+      status: 200,
+      text: JSON.stringify({ version: 1, year: "2026" })
+    },
+    "share/baltimore/": {
+      status: 200,
+      text: [
+        "<title>JSU/NCSY Wrapped - Baltimore</title>",
+        'property="og:title" content="JSU/NCSY Wrapped - Baltimore"',
+        'property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"',
+        'http-equiv="refresh"',
+        "?chapter=baltimore"
+      ].join("")
+    }
+  };
+  const goodReport = hostedSmoke.validateHostedAssets(goodAssets);
+  const badAssets = Object.assign({}, goodAssets, {
+    "share/baltimore/": {
+      status: 200,
+      text: "<title>Broken</title>"
+    }
+  });
+  const badReport = hostedSmoke.validateHostedAssets(badAssets);
+  const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+
+  assert(goodReport.ok, `hosted smoke validator rejected good assets: ${goodReport.errors.join("; ")}`);
+  assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
+  assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
+  assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
+  assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
+  assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
+  assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
+}
+
 function runReadmeSmoke() {
   const path = "README.md";
 
@@ -1745,6 +1813,7 @@ function main() {
   runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
   runProductionCheckSmoke();
+  runHostedSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
   runDataContractDocSmoke();

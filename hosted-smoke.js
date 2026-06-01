@@ -1,0 +1,254 @@
+const DEFAULT_BASE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
+const DEFAULT_TIMEOUT_MS = 15000;
+
+const ASSET_CHECKS = [
+  {
+    label: "entry page",
+    path: "",
+    validate(text, errors) {
+      mustInclude(text, 'id="jsu-wrapped"', "entry page missing widget container", errors);
+      mustInclude(text, 'data-share-base="./share/"', "entry page missing static share base", errors);
+      mustInclude(text, "jsu-wrapped.js", "entry page missing widget script reference", errors);
+    }
+  },
+  {
+    label: "builder page",
+    path: "builder.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "builder page missing noindex guard", errors);
+      mustInclude(text, 'id="wrapped-builder"', "builder page missing builder root", errors);
+    }
+  },
+  {
+    label: "widget stylesheet",
+    path: "jsu-wrapped.css",
+    validate(text, errors) {
+      mustInclude(text, "#jsu-wrapped", "widget stylesheet missing scoped root selector", errors);
+    }
+  },
+  {
+    label: "widget script",
+    path: "jsu-wrapped.js",
+    validate(text, errors) {
+      mustInclude(text, "JSUWrapped", "widget script missing public runtime export", errors);
+    }
+  },
+  {
+    label: "chapter data JSON",
+    path: "sample-wrapped-2026.json",
+    validate(text, errors) {
+      const data = parseJson(text, "chapter data JSON", errors);
+
+      if (!Array.isArray(data)) {
+        errors.push("chapter data JSON is not an array");
+        return;
+      }
+
+      if (!data.some((record) => record && record.chapter_slug === "baltimore")) {
+        errors.push("chapter data JSON missing Baltimore sample record");
+      }
+    }
+  },
+  {
+    label: "config JSON",
+    path: "wrapped-config-2026.json",
+    validate(text, errors) {
+      const config = parseJson(text, "config JSON", errors);
+
+      if (!config || typeof config !== "object" || Array.isArray(config)) {
+        errors.push("config JSON is not an object");
+      }
+    }
+  },
+  {
+    label: "Baltimore share page",
+    path: "share/baltimore/",
+    validate(text, errors) {
+      mustInclude(text, "JSU/NCSY Wrapped - Baltimore", "Baltimore share page missing title metadata", errors);
+      mustInclude(text, 'property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"', "Baltimore share page missing social image alt text", errors);
+      mustInclude(text, 'http-equiv="refresh"', "Baltimore share page missing human redirect", errors);
+      mustInclude(text, "?chapter=baltimore", "Baltimore share page missing chapter redirect", errors);
+    }
+  }
+];
+
+function normalizeBaseUrl(baseUrl) {
+  const value = String(baseUrl || DEFAULT_BASE_URL).trim() || DEFAULT_BASE_URL;
+  return value.endsWith("/") ? value : `${value}/`;
+}
+
+function assetUrl(baseUrl, assetPath) {
+  return new URL(assetPath, normalizeBaseUrl(baseUrl)).toString();
+}
+
+function fetchPlan(baseUrl) {
+  return ASSET_CHECKS.map((check) => ({
+    label: check.label,
+    path: check.path,
+    url: assetUrl(baseUrl, check.path)
+  }));
+}
+
+function mustInclude(text, expected, message, errors) {
+  if (!String(text || "").includes(expected)) {
+    errors.push(message);
+  }
+}
+
+function parseJson(text, label, errors) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    errors.push(`${label} did not parse as JSON: ${error.message}`);
+    return null;
+  }
+}
+
+function validateHostedAssets(assets) {
+  const errors = [];
+
+  ASSET_CHECKS.forEach((check) => {
+    const asset = assets[check.path];
+    const status = asset && Number(asset.status);
+    const text = asset && asset.text;
+
+    if (!asset) {
+      errors.push(`${check.label} was not fetched`);
+      return;
+    }
+
+    if (status < 200 || status >= 300) {
+      errors.push(`${check.label} returned HTTP ${status || "unknown"}`);
+      return;
+    }
+
+    check.validate(String(text || ""), errors);
+  });
+
+  return {
+    errors,
+    ok: errors.length === 0
+  };
+}
+
+async function fetchWithTimeout(url, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal
+    });
+
+    return {
+      status: response.status,
+      text: await response.text()
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchHostedAssets(baseUrl, options) {
+  const settings = options || {};
+  const timeoutMs = settings.timeoutMs || DEFAULT_TIMEOUT_MS;
+  const assets = {};
+
+  await Promise.all(ASSET_CHECKS.map(async (check) => {
+    const url = assetUrl(baseUrl, check.path);
+
+    try {
+      assets[check.path] = await fetchWithTimeout(url, timeoutMs);
+    } catch (error) {
+      assets[check.path] = {
+        status: 0,
+        text: "",
+        error
+      };
+    }
+  }));
+
+  return assets;
+}
+
+function parseArgs(args) {
+  const settings = {
+    baseUrl: DEFAULT_BASE_URL,
+    dryRun: false,
+    timeoutMs: DEFAULT_TIMEOUT_MS
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === "--base") {
+      settings.baseUrl = args[index + 1] || "";
+      index += 1;
+    } else if (arg === "--timeout-ms") {
+      settings.timeoutMs = Number(args[index + 1]) || DEFAULT_TIMEOUT_MS;
+      index += 1;
+    } else if (arg === "--dry-run") {
+      settings.dryRun = true;
+    } else if (arg === "--help" || arg === "-h") {
+      settings.help = true;
+    }
+  }
+
+  settings.baseUrl = normalizeBaseUrl(settings.baseUrl);
+  return settings;
+}
+
+function usage() {
+  return [
+    "Usage:",
+    "  node hosted-smoke.js [--base https://stsimon-ncsy.github.io/jsu-wrapped-widget/] [--timeout-ms 15000] [--dry-run]",
+    "",
+    "Fetches the hosted GitHub Pages widget, JSON, and Baltimore share page to confirm deployment basics."
+  ].join("\n");
+}
+
+async function main() {
+  const settings = parseArgs(process.argv.slice(2));
+
+  if (settings.help) {
+    console.log(usage());
+    return;
+  }
+
+  if (settings.dryRun) {
+    console.log(`Hosted smoke plan for ${settings.baseUrl}`);
+    fetchPlan(settings.baseUrl).forEach((item) => {
+      console.log(`- ${item.label}: ${item.url}`);
+    });
+    return;
+  }
+
+  console.log(`Hosted smoke checking ${settings.baseUrl}`);
+  const assets = await fetchHostedAssets(settings.baseUrl, settings);
+  const report = validateHostedAssets(assets);
+
+  if (!report.ok) {
+    console.error("Hosted smoke failed:");
+    report.errors.forEach((error) => {
+      console.error(`- ${error}`);
+    });
+    process.exit(1);
+  }
+
+  console.log("hosted smoke ok");
+}
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(`hosted smoke failed: ${error.message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  assetUrl,
+  fetchPlan,
+  normalizeBaseUrl,
+  validateHostedAssets
+};
