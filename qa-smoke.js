@@ -1169,10 +1169,25 @@ function runDataValidationSmoke(records, config) {
       events_hosted: "many"
     }
   ]);
+  const teenPrivacyReport = dataValidator.validateTeenRecords([
+    {
+      teen_slug: "maya-test",
+      teen_name: "Maya",
+      chapter_name: "Northwood JSU",
+      year_label: "2025-2026",
+      teen_id: "real-teen-123",
+      email: "maya@example.org",
+      emergency_phone: "410-555-1212",
+      events_attended: 5
+    }
+  ]);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
   assert(!badMetricReport.ok && badMetricReport.errors.some((error) => error.includes("events_hosted")), "invalid numeric metrics should fail validation");
+  assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("teen_id")), "teen ids should fail validation");
+  assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("email")), "teen emails should fail validation");
+  assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("emergency_phone")), "teen phone fields should fail validation");
 }
 
 function main() {

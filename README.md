@@ -92,4 +92,4 @@ That command syncs the inline WordPress handoff, regenerates static share pages,
 - `docs/staff-playbook.md` - rollout strategy, CTA guidance, variant usage, staff follow-up, analytics review
 - `analytics-gtm-setup.md` - GA4/GTM event setup notes
 
-Teen mode remains a proof of concept and is marked `noindex,nofollow` until real teen-level data, consent, and privacy review are ready.
+Teen mode remains a proof of concept and is marked `noindex,nofollow` until real teen-level data, consent, and privacy review are ready. The production validator rejects teen ID/contact fields and obvious email or phone values in teen data.

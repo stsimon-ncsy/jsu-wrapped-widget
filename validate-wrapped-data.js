@@ -47,6 +47,38 @@ const TEEN_NUMERIC_FIELDS = [
   "national_engagement_moments"
 ];
 
+const TEEN_BLOCKED_FIELD_NAMES = new Set([
+  "teen_id",
+  "student_id",
+  "participant_id",
+  "person_id",
+  "individual_id",
+  "user_id",
+  "contact_id",
+  "crm_id",
+  "external_id",
+  "first_name",
+  "last_name",
+  "full_name",
+  "student_name",
+  "legal_name"
+]);
+
+const TEEN_BLOCKED_FIELD_PARTS = [
+  "email",
+  "phone",
+  "mobile",
+  "cell",
+  "address",
+  "birthdate",
+  "birthday",
+  "date_of_birth",
+  "dob"
+];
+
+const EMAIL_VALUE_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
+const PHONE_VALUE_PATTERN = /\b(?:\+?1[\s.-]?)?(?:\(?[2-9]\d{2}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/;
+
 const STORY_CARD_IDS = new Set([
   "cover",
   "events",
@@ -261,6 +293,35 @@ function validateNumericFields(report, record, fields, label, index) {
   });
 }
 
+function normalizeFieldName(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function validateTeenPrivacyFields(report, record, index) {
+  Object.keys(record).forEach((field) => {
+    const normalized = normalizeFieldName(field);
+    const value = record[field];
+
+    if (TEEN_BLOCKED_FIELD_NAMES.has(normalized) || TEEN_BLOCKED_FIELD_PARTS.some((part) => normalized.includes(part))) {
+      addError(report, `teen records[${index}].${field} is not allowed in teen proof-of-concept data`);
+    }
+
+    if (typeof value === "string") {
+      if (EMAIL_VALUE_PATTERN.test(value)) {
+        addError(report, `teen records[${index}].${field} must not contain an email address`);
+      }
+
+      if (PHONE_VALUE_PATTERN.test(value)) {
+        addError(report, `teen records[${index}].${field} must not contain a phone number`);
+      }
+    }
+  });
+}
+
 function validateChapterRecords(records) {
   const report = validateRecordsArray(records, "story records");
   const seen = {
@@ -332,6 +393,7 @@ function validateTeenRecords(records) {
 
     validateUniqueSlug(report, seen, record.teen_slug, "teen_slug", index);
     validateNumericFields(report, record, TEEN_NUMERIC_FIELDS, "teen records", index);
+    validateTeenPrivacyFields(report, record, index);
   });
 
   return report;

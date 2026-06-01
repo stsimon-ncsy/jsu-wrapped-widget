@@ -14,7 +14,7 @@ GitHub Actions runs the same `node check-production.js` workflow on every push a
 
 The check runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed. Static social share pages are regenerated with `node generate-share-pages.js` and checked with both `git diff --exit-code share` and `git status --porcelain -- share`. The generator also removes stale generated share-page directories when a story is removed from the JSON, so old chapter, region, or program share previews do not stay live by accident.
 
-The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data.
+The data validator checks the static JSON/config package for duplicate story and teen slugs, missing required display fields, invalid numeric metrics, and config entries that no longer match a chapter, region, program, or campaign in the data. Teen proof-of-concept records are also blocked from using obvious ID/contact fields such as teen IDs, student IDs, email fields, phone fields, names split into first/last/legal names, addresses, or date-of-birth fields.
 
 Hosted preview pages, the WordPress inline embed, and the pasteable README snippet use a shared static asset cache token, currently `jsuw-prod-20260601c`, on JS/CSS/JSON references. Bump that token in `index.html`, `embed-example.html`, `builder.html`, `wordpress-inline-embed.html`, `README.md`, and `qa-smoke.js` whenever hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers.
 
@@ -185,4 +185,4 @@ The page can keep JSON/config hosted on GitHub Pages while the embed runs on `nc
 
 For Gravity Forms, add hidden fields whose labels or input names clearly include the context they should receive, such as `chapter name`, `region`, `scope type`, `scope slug`, `scope name`, `program`, `variant`, `year label`, and `wrapped url`. The widget fills matching empty fields when the CTA opens the form.
 
-Teen mode is still a proof of concept. Runtime metadata labels it as a test version and sets `robots` to `noindex,nofollow`; do not remove that guard until real teen-level data, consent, and privacy review are complete.
+Teen mode is still a proof of concept. Runtime metadata labels it as a test version and sets `robots` to `noindex,nofollow`; do not remove that guard until real teen-level data, consent, and privacy review are complete. The data validator intentionally rejects teen record ID/contact fields and obvious email or phone values so accidental real identifying data does not enter the static package silently.
