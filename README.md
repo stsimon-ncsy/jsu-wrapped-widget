@@ -120,6 +120,14 @@ node hosted-smoke.js
 
 Use `--base` when testing a fork, preview host, or WordPress-hosted copy.
 
+For a local render check on machines with Chrome or Edge installed, run:
+
+```bash
+node render-smoke.js --skip-if-missing
+```
+
+This serves the static files locally and confirms the Baltimore story and builder render real DOM in mobile and desktop headless viewports. `node check-production.js` runs the same render smoke with `--skip-if-missing`, so it remains dependency-free on minimal machines.
+
 ## Documentation
 
 - `docs/production-readiness.md` - technical production notes, URL patterns, QA expectations, CSS isolation, social sharing, WordPress embed details

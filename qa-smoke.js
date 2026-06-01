@@ -1670,10 +1670,12 @@ function runProductionCheckSmoke() {
     "node --check generate-share-pages.js",
     "node --check merge-builder-submission.js",
     "node --check review-builder-submissions.js",
+    "node --check render-smoke.js",
     "node --check bump-cache-token.js",
     "node --check qa-smoke.js",
     "node validate-wrapped-data.js",
     "node qa-smoke.js",
+    "node render-smoke.js --skip-if-missing",
     "git diff --exit-code wordpress-inline-embed.html",
     "git diff --exit-code share",
     "git status --porcelain -- share",
@@ -1755,6 +1757,43 @@ function runHostedSmokeScriptSmoke() {
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
+}
+
+function runRenderSmokeScriptSmoke() {
+  const scriptPath = "render-smoke.js";
+
+  assert(fs.existsSync(scriptPath), "headless render smoke script is missing");
+
+  const renderSmoke = require("./render-smoke.js");
+  const goodReport = renderSmoke.validateRenderedDom({
+    label: "chapter story",
+    html: '<main><div id="jsu-wrapped"><section class="jsuw-story"><h1>Baltimore Wrapped</h1><button>Share this recap</button></section></div></main>',
+    requiredText: ["Baltimore Wrapped", "Share this recap"],
+    requiredSelectors: ['id="jsu-wrapped"', "jsuw-story"]
+  });
+  const badReport = renderSmoke.validateRenderedDom({
+    label: "chapter story",
+    html: '<main><div id="jsu-wrapped"></div></main>',
+    requiredText: ["Baltimore Wrapped"],
+    requiredSelectors: ["jsuw-story"]
+  });
+  const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+
+  assert(goodReport.ok, `render smoke validator rejected good DOM: ${goodReport.errors.join("; ")}`);
+  assert(!badReport.ok && badReport.errors.some((error) => error.includes("chapter story")), "render smoke validator should reject blank story DOM");
+  assert(dryRunOutput.includes("/?chapter=baltimore"), "render smoke dry run should list the Baltimore story URL");
+  assert(dryRunOutput.includes("/builder.html"), "render smoke dry run should list the builder URL");
+  assert(listed.includes("node --check render-smoke.js"), "production QA should syntax-check the render smoke helper");
+  assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
+  assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
+  assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
 }
 
 function runReadmeSmoke() {
@@ -2200,6 +2239,7 @@ function main() {
   runCiWorkflowSmoke();
   runProductionCheckSmoke();
   runHostedSmokeScriptSmoke();
+  runRenderSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
   runDataContractDocSmoke();
