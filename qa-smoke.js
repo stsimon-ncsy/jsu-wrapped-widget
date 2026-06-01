@@ -91,7 +91,18 @@ function runLayeredVariantSmoke() {
 function runPickerSmoke(records, config) {
   const baltimore = records.find((record) => record.chapter_slug === "baltimore");
   const html = api.renderChapterPickerMarkup({
-    records: [baltimore],
+    records: [
+      baltimore,
+      {
+        scope_type: "region",
+        scope_slug: "atlantic-seaboard",
+        scope_name: "Atlantic Seaboard",
+        chapter_slug: "atlantic-seaboard-summary",
+        chapter_name: "Atlantic Seaboard Regional Summary",
+        region_name: "Atlantic Seaboard",
+        year_label: "2025-2026"
+      }
+    ],
     config,
     url: "https://example.org/wrapped/"
   });
@@ -99,6 +110,7 @@ function runPickerSmoke(records, config) {
   assert(html.includes("variant=donor-recap"), "sample picker variant link missing");
   assert(html.includes("Donor recap"), "sample picker variant label missing");
   assert((html.match(/jsuw-picker-item /g) || []).length === 1, "picker duplicated chapter rows");
+  assert(!html.includes("Regional Summary"), "picker should not show non-chapter story records");
 }
 
 function runHiddenVariantSmoke() {

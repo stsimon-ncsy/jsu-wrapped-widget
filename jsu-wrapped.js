@@ -1095,7 +1095,7 @@
   function renderChapterPickerMarkup(context) {
     var settings = context || {};
     var records = Array.isArray(settings.records) ? settings.records.filter(function (record) {
-      return record && hasValue(record.chapter_slug);
+      return record && hasValue(record.chapter_slug) && getStoryScope(record).type === "chapter";
     }).slice() : [];
     var assetBase = settings.assetBase || "";
     var config = settings.config || {};
