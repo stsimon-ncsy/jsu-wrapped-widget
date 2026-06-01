@@ -99,11 +99,12 @@ Do not commit downloaded staff submission JSON. These files can include submitte
 After review, merge a submitted file locally with:
 
 ```bash
+node review-builder-submissions.js staff-submissions wrapped-config-2026.json
 node merge-builder-submission.js path/to/staff-submission.json wrapped-config-2026.json --dry-run
 node merge-builder-submission.js path/to/staff-submission.json wrapped-config-2026.json
 ```
 
-Use the dry run first. It validates the packet and prints the submitter, reviewer note, preview URL, and change summary without writing to the deployable config. Then run the real merge, the normal QA gate, and commit/push the updated config.
+If several staff send JSON back, put the files in an ignored local `staff-submissions/` folder and run `review-builder-submissions.js` first. It validates every file without writing to the deployable config and prints a quick valid/invalid summary with submitter details. Then use the merge dry run on the specific file you want to accept. It validates the packet and prints the submitter, reviewer note, preview URL, and change summary without writing to the deployable config. Then run the real merge, the normal QA gate, and commit/push the updated config.
 
 The merge helper only accepts builder-generated scope or variant paths and validates the resulting config against the current Wrapped data before writing. If it reports validation errors, do not hand-edit around them; fix the submission in the builder or adjust the source data/config intentionally, then rerun the merge.
 

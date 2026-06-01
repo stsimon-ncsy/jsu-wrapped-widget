@@ -1028,6 +1028,84 @@ function runBuilderSubmissionMergeSmoke() {
   assert(emptyPatchOutput.includes("no changes"), "empty staff submissions should fail clearly");
 }
 
+function runBuilderSubmissionBatchReviewSmoke() {
+  const scriptPath = "review-builder-submissions.js";
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-review-"));
+  const submissionsDir = path.join(tempDir, "staff-submissions");
+  const configPath = path.join(tempDir, "wrapped-config-2026.json");
+  const validSubmissionPath = path.join(submissionsDir, "valid-builder-submission.json");
+  const invalidSubmissionPath = path.join(submissionsDir, "invalid-builder-submission.json");
+
+  fs.mkdirSync(submissionsDir, { recursive: true });
+  fs.writeFileSync(configPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {}
+    }
+  }, null, 2));
+  fs.writeFileSync(validSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    scope_type: "chapter",
+    scope_slug: "baltimore",
+    scope_label: "Baltimore",
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
+    preview_url: "https://example.org/wrapped/?chapter=baltimore",
+    change_summary: [
+      {
+        type: "setting",
+        label: "palette",
+        value: "electric"
+      }
+    ],
+    merge_path: ["chapters", "baltimore"],
+    config_patch: {
+      palette: "electric"
+    }
+  }, null, 2));
+  fs.writeFileSync(invalidSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    scope_type: "chapter",
+    scope_slug: "baltimore",
+    merge_path: ["chapters", "baltimore"],
+    config_patch: {}
+  }, null, 2));
+
+  let batchOutput = "";
+  try {
+    childProcess.execFileSync(process.execPath, [scriptPath, submissionsDir, configPath], {
+      cwd: __dirname,
+      encoding: "utf8",
+      stdio: "pipe"
+    });
+  } catch (error) {
+    batchOutput = String(error.stdout || error.stderr || error.message || "");
+  }
+
+  assert(fs.existsSync(scriptPath), "staff submission batch review script is missing");
+  assert(batchOutput.includes("Reviewing 2 staff submission JSON files"), "batch review should report how many files it checked");
+  assert(batchOutput.includes("[OK] valid-builder-submission.json"), "batch review should mark valid staff submissions");
+  assert(batchOutput.includes("Submitter: Leah Rosen <leah@example.org>"), "batch review should show submitter details");
+  assert(batchOutput.includes("- palette: electric"), "batch review should summarize submitted changes");
+  assert(batchOutput.includes("[INVALID] invalid-builder-submission.json"), "batch review should mark invalid staff submissions");
+  assert(batchOutput.includes("Submission config_patch has no changes"), "batch review should show validation errors");
+  assert(batchOutput.includes("Summary: 1 valid, 1 invalid"), "batch review should summarize valid and invalid counts");
+
+  const noFilesOutput = childProcess.execFileSync(process.execPath, [scriptPath, path.join(tempDir, "empty-submissions"), configPath], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+
+  assert(noFilesOutput.includes("No staff submission JSON files found"), "batch review should handle missing submission folders cleanly");
+}
+
 function runFallbackSvgSmoke(records, config) {
   const slugs = ["philadelphia", "baltimore", "greater-washington"];
 
@@ -1315,6 +1393,7 @@ function runProductionCheckSmoke() {
     "node --check sync-wordpress-inline.js",
     "node --check generate-share-pages.js",
     "node --check merge-builder-submission.js",
+    "node --check review-builder-submissions.js",
     "node --check bump-cache-token.js",
     "node --check qa-smoke.js",
     "node validate-wrapped-data.js",
@@ -1352,6 +1431,7 @@ function runReadmeSmoke() {
     "Open review form",
     "Download submission",
     "merge-builder-submission.js",
+    "review-builder-submissions.js",
     "docs/production-readiness.md",
     "docs/staff-playbook.md"
   ];
@@ -1382,6 +1462,7 @@ function runStaffPlaybookSmoke() {
     "Download submission",
     "Copy submission",
     "merge-builder-submission.js",
+    "review-builder-submissions.js",
     "Do not commit downloaded staff submission JSON"
   ];
 
@@ -1653,6 +1734,7 @@ function main() {
   runBuilderSubmissionSmoke();
   runBuilderIndexingSmoke();
   runBuilderSubmissionMergeSmoke();
+  runBuilderSubmissionBatchReviewSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runAssetVersionSmoke();
