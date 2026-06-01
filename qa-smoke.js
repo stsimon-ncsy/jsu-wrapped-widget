@@ -1046,6 +1046,31 @@ function runProductionCheckSmoke() {
   assert(docs.includes("node check-production.js"), "production docs should point to the single production QA command");
 }
 
+function runReadmeSmoke() {
+  const path = "README.md";
+
+  assert(fs.existsSync(path), "top-level production handoff README is missing");
+  const readme = loadText(path);
+  const requiredPhrases = [
+    "JSU/NCSY Wrapped",
+    "GitHub Pages",
+    "WordPress",
+    "node check-production.js",
+    "jsu-wrapped.js",
+    "jsu-wrapped.css",
+    "sample-wrapped-2026.json",
+    "wrapped-config-2026.json",
+    "Download submission",
+    "merge-builder-submission.js",
+    "docs/production-readiness.md",
+    "docs/staff-playbook.md"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(readme.includes(phrase), `README missing ${phrase}`);
+  });
+}
+
 function runStaffPlaybookSmoke() {
   const path = "docs/staff-playbook.md";
 
@@ -1138,6 +1163,7 @@ function main() {
   runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
   runProductionCheckSmoke();
+  runReadmeSmoke();
   runStaffPlaybookSmoke();
 
   console.log("qa smoke ok");
