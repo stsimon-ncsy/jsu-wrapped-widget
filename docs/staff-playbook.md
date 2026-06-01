@@ -19,7 +19,7 @@ Use one default chapter link for broad celebration, then create or link variants
 - Chapter Staff: Share the default chapter Wrapped with advisors, teen leaders, school contacts, and families. Add a short personal note, not only the link.
 - Regional Staff: Use region-filtered home links to help staff find their chapter, compare momentum across chapters, and spot chapters that need follow-up support.
 - Donors and Board Members: Use donor/recruitment variants when copy should emphasize what support made possible and what next year's investment can power.
-- Teen Test Version: Keep teen mode clearly labeled as proof of concept until real teen-level data, consent, and privacy review are ready.
+- Teen Test Version: Keep teen mode clearly labeled as proof of concept until real teen-level data, consent, and privacy review are ready. The public test URL is intentionally marked noindex.
 
 ## CTA
 

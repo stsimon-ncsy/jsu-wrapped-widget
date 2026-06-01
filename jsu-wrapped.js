@@ -827,6 +827,17 @@
   function createPageMetadata(state) {
     var record = state && state.record || {};
     var brandLabel = "JSU/NCSY Wrapped";
+    var mode = asText(state && state.experienceMode, "chapter");
+
+    if (mode === "teen") {
+      return {
+        title: brandLabel + " - Teen Test Version",
+        description: "JSU/NCSY Wrapped teen mode is a proof of concept using sample test data only.",
+        image: SOCIAL_IMAGE_URL,
+        robots: "noindex,nofollow"
+      };
+    }
+
     var scope = getStoryScope(record);
     var chapterName = asText(scope.name, brandLabel);
     var yearLabel = asText(record.year_label || record.school_year, "");
@@ -879,6 +890,10 @@
       setDocumentMeta(doc, "name", "description", metadata.description);
       setDocumentMeta(doc, "property", "og:description", metadata.description);
       setDocumentMeta(doc, "name", "twitter:description", metadata.description);
+    }
+
+    if (hasValue(metadata.robots)) {
+      setDocumentMeta(doc, "name", "robots", metadata.robots);
     }
 
     setDocumentMeta(doc, "property", "og:type", "website");

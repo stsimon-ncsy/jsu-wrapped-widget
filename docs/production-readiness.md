@@ -181,3 +181,5 @@ The smoke test compares the inline CSS/renderer against `jsu-wrapped.css` and `j
 The page can keep JSON/config hosted on GitHub Pages while the embed runs on `ncsy.org`, as long as the GitHub Pages URLs remain public.
 
 For Gravity Forms, add hidden fields whose labels or input names clearly include the context they should receive, such as `chapter name`, `region`, `scope type`, `scope slug`, `scope name`, `program`, `variant`, `year label`, and `wrapped url`. The widget fills matching empty fields when the CTA opens the form.
+
+Teen mode is still a proof of concept. Runtime metadata labels it as a test version and sets `robots` to `noindex,nofollow`; do not remove that guard until real teen-level data, consent, and privacy review are complete.

@@ -169,6 +169,34 @@ function runSampleVariantSmoke(records, config) {
 }
 
 function runPageMetadataSmoke() {
+  const previousDocument = global.document;
+  const fakeDocument = {
+    title: "",
+    elements: [],
+    head: {
+      appendChild(element) {
+        fakeDocument.elements.push(element);
+      }
+    },
+    createElement(tagName) {
+      return {
+        tagName,
+        attrs: {},
+        setAttribute(name, value) {
+          this.attrs[name] = value;
+        }
+      };
+    },
+    querySelector(selector) {
+      const match = selector.match(/^meta\[(name|property)="([^"]+)"\]$/);
+
+      if (!match) {
+        return null;
+      }
+
+      return fakeDocument.elements.find((element) => element.attrs && element.attrs[match[1]] === match[2]) || null;
+    }
+  };
   const ncsyMetadata = api.createPageMetadata({
     record: {
       chapter_slug: "baltimore",
@@ -187,11 +215,40 @@ function runPageMetadataSmoke() {
       brand_logo: "jsu"
     }
   });
+  const teenMetadata = api.createPageMetadata({
+    experienceMode: "teen",
+    record: {
+      teen_slug: "maya-test",
+      teen_name: "Maya",
+      chapter_name: "Northwood JSU",
+      year_label: "2025-2026"
+    }
+  });
 
   assert(ncsyMetadata.title === "JSU/NCSY Wrapped - Baltimore", `NCSY metadata title mismatch: ${ncsyMetadata.title}`);
   assert(jsuMetadata.title === "JSU/NCSY Wrapped - Greater Washington", `JSU metadata title mismatch: ${jsuMetadata.title}`);
   assert(ncsyMetadata.description.includes("Baltimore Wrapped"), "metadata description missing chapter name");
   assert(ncsyMetadata.image && ncsyMetadata.image.includes("wrapped-social-preview.png"), "metadata image missing social preview");
+  assert(teenMetadata.title === "JSU/NCSY Wrapped - Teen Test Version", `teen metadata title mismatch: ${teenMetadata.title}`);
+  assert(teenMetadata.description.includes("proof of concept"), "teen metadata description should label proof of concept");
+  assert(teenMetadata.robots === "noindex,nofollow", "teen metadata should be noindex");
+
+  try {
+    global.document = fakeDocument;
+    api.applyPageMetadata({
+      experienceMode: "teen",
+      record: {
+        teen_slug: "maya-test",
+        teen_name: "Maya",
+        chapter_name: "Northwood JSU",
+        year_label: "2025-2026"
+      }
+    });
+  } finally {
+    global.document = previousDocument;
+  }
+
+  assert(fakeDocument.elements.some((element) => element.attrs.name === "robots" && element.attrs.content === "noindex,nofollow"), "teen metadata should write robots noindex tag");
 }
 
 function runStaticShareSmoke() {
