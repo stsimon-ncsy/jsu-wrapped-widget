@@ -2054,6 +2054,39 @@ function runStaffPlaybookSmoke() {
   });
 }
 
+function runLaunchChecklistDocSmoke() {
+  const path = "docs/launch-checklist.md";
+
+  assert(fs.existsSync(path), "launch checklist doc is missing");
+
+  const checklist = loadText(path);
+  const readme = loadText("README.md");
+  const productionDocs = loadText("docs/production-readiness.md");
+  const playbook = loadText("docs/staff-playbook.md");
+  const requiredPhrases = [
+    "Launch Checklist",
+    "Preflight",
+    "WordPress",
+    "Gravity Forms",
+    "Analytics",
+    "Social Preview",
+    "Staff Pilot",
+    "Go/No-Go",
+    "node check-production.js",
+    "node hosted-smoke.js",
+    "GTM Preview",
+    "GA4 DebugView"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(checklist.includes(phrase), `launch checklist missing ${phrase}`);
+  });
+
+  assert(readme.includes(path), "README should link the launch checklist");
+  assert(productionDocs.includes(path), "production readiness docs should link the launch checklist");
+  assert(playbook.includes(path), "staff playbook should link the launch checklist");
+}
+
 function runDataContractDocSmoke() {
   const path = "docs/data-contract.md";
 
@@ -2474,6 +2507,7 @@ function main() {
   runRenderSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
+  runLaunchChecklistDocSmoke();
   runDataContractDocSmoke();
   runPilotStaffGuideSmoke();
   runStaffSubmissionIntakeDocSmoke();

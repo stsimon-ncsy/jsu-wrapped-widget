@@ -2,6 +2,8 @@
 
 This playbook is for staff using Wrapped as a relationship and momentum tool. It should not live inside the public experience; keep the widget focused and use this as the rollout guide behind the scenes.
 
+Before a public rollout, use `docs/launch-checklist.md` as the final go/no-go checklist for WordPress, Gravity Forms, analytics, social previews, and staff pilot readiness.
+
 ## Launch Goals
 
 Use Wrapped to create three concrete outcomes:
