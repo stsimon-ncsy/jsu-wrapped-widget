@@ -530,6 +530,7 @@ function runFallbackSvgSmoke(records, config) {
 
     assert(svg.includes("<svg"), `${slug} fallback SVG missing root`);
     assert(!/\b(undefined|null|NaN)\b/i.test(svg), `${slug} fallback SVG has broken text`);
+    assert(!/letter-spacing\s*:\s*-\s*[^;}]+/.test(svg), `${slug} fallback SVG should not use negative letter spacing`);
     assert((svg.match(/poster-stat-value/g) || []).length <= 5, `${slug} fallback SVG rendered too many stat rows`);
     assert(svg.includes("poster-footer"), `${slug} fallback SVG missing footer`);
   });
@@ -552,6 +553,7 @@ function runFallbackSvgSmoke(records, config) {
   const svg = api.createFallbackSvg({ record: effective, cards, storyConfig, experienceMode: "chapter" }, "");
 
   assert(!/\b(undefined|null|NaN)\b/i.test(svg), "long fallback SVG has broken text");
+  assert(!/letter-spacing\s*:\s*-\s*[^;}]+/.test(svg), "long fallback SVG should not use negative letter spacing");
   assert((svg.match(/poster-persona/g) || []).length >= 1, "long fallback SVG did not render persona text");
   assert((svg.match(/poster-stat-label/g) || []).length >= 3, "long fallback SVG did not render stat labels");
 }
