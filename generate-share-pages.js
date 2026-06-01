@@ -7,6 +7,7 @@ const OUTPUT_ROOT = "share";
 const SITE_BASE = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
 const GENERATED_MARKER = "jsu-wrapped-static-share-page";
+const SITE_NAME = "JSU/NCSY Wrapped";
 
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -132,6 +133,7 @@ function sharePageHtml(record) {
   var description = descriptionFor(record);
   var shareUrl = new URL("share/" + sharePagePath(record), SITE_BASE).href;
   var storyUrl = storyUrlFor(record);
+  var imageAlt = "JSU/NCSY Wrapped social preview for " + scope.name;
 
   return [
     "<!doctype html>",
@@ -143,17 +145,20 @@ function sharePageHtml(record) {
     '    <meta name="description" content="' + escapeHtml(description) + '">',
     '    <meta name="generator" content="' + GENERATED_MARKER + '">',
     '    <meta property="og:type" content="website">',
+    '    <meta property="og:site_name" content="' + escapeHtml(SITE_NAME) + '">',
     '    <meta property="og:title" content="' + escapeHtml(title) + '">',
     '    <meta property="og:description" content="' + escapeHtml(description) + '">',
     '    <meta property="og:url" content="' + escapeHtml(shareUrl) + '">',
     '    <meta property="og:image" content="' + escapeHtml(SOCIAL_IMAGE_URL) + '">',
     '    <meta property="og:image:secure_url" content="' + escapeHtml(SOCIAL_IMAGE_URL) + '">',
+    '    <meta property="og:image:alt" content="' + escapeHtml(imageAlt) + '">',
     '    <meta property="og:image:width" content="1200">',
     '    <meta property="og:image:height" content="630">',
     '    <meta name="twitter:card" content="summary_large_image">',
     '    <meta name="twitter:title" content="' + escapeHtml(title) + '">',
     '    <meta name="twitter:description" content="' + escapeHtml(description) + '">',
     '    <meta name="twitter:image" content="' + escapeHtml(SOCIAL_IMAGE_URL) + '">',
+    '    <meta name="twitter:image:alt" content="' + escapeHtml(imageAlt) + '">',
     '    <link rel="canonical" href="' + escapeHtml(storyUrl) + '">',
     '    <meta http-equiv="refresh" content="0; url=' + escapeHtml(storyUrl) + '">',
     "  </head>",

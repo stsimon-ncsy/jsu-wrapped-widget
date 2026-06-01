@@ -376,7 +376,10 @@ function runStaticShareSmoke() {
   assert(fs.existsSync("generate-share-pages.js"), "static share page generator is missing");
   assert(html.includes("<title>" + expectedTitle + "</title>"), "Baltimore static share page title mismatch");
   assert(html.includes('property="og:title" content="' + expectedTitle + '"'), "Baltimore static share page OG title mismatch");
+  assert(html.includes('property="og:site_name" content="JSU/NCSY Wrapped"'), "Baltimore static share page missing OG site name");
   assert(html.includes('name="twitter:title" content="' + expectedTitle + '"'), "Baltimore static share page Twitter title mismatch");
+  assert(html.includes('property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"'), "Baltimore static share page missing OG image alt text");
+  assert(html.includes('name="twitter:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"'), "Baltimore static share page missing Twitter image alt text");
   assert(html.includes('http-equiv="refresh"'), "Baltimore static share page missing human redirect");
   assert(html.includes("?chapter=baltimore"), "Baltimore static share page missing chapter redirect link");
   assert(html.includes("window.location.search"), "Baltimore static share page should preserve supported query params in JS redirect");
