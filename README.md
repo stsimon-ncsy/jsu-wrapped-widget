@@ -112,7 +112,7 @@ Before pushing, copying to WordPress, or trusting GitHub Pages for a launch prev
 node check-production.js
 ```
 
-That command syncs the inline WordPress handoff, regenerates static share pages, syntax-checks scripts, validates data/config, runs the smoke suite, checks generated-file drift, and catches whitespace errors. GitHub Actions runs the same command on push and pull request.
+That command syncs the inline WordPress handoff, regenerates static share pages, syntax-checks scripts, validates data/config, runs the smoke suite, checks generated-file drift, and catches whitespace errors. GitHub Actions runs the same command on push and pull request, then installs Chrome and runs the render smoke without the local `--skip-if-missing` escape hatch.
 
 After pushing to GitHub Pages, run the hosted smoke check to confirm the live static files and Baltimore share metadata are being served:
 

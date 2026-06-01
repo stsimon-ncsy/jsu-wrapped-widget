@@ -20,3 +20,10 @@ jobs:
 
       - name: Run production check
         run: node check-production.js
+
+      - name: Set up Chrome for render smoke
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Run enforced render smoke
+        run: node render-smoke.js --browser "${{ steps.setup-chrome.outputs.chrome-path }}" --timeout-ms 30000

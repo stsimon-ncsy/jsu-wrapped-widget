@@ -1746,7 +1746,8 @@ function runCiWorkflowSmoke() {
 
   const workflow = loadText(workflowPath);
   const requiredCommands = [
-    "node check-production.js"
+    "node check-production.js",
+    "node render-smoke.js --browser"
   ];
 
   requiredCommands.forEach((command) => {
@@ -1755,7 +1756,12 @@ function runCiWorkflowSmoke() {
 
   assert(workflow.includes("pull_request"), "GitHub Actions QA workflow should run on pull requests");
   assert(workflow.includes("push"), "GitHub Actions QA workflow should run on push");
+  assert(workflow.includes("browser-actions/setup-chrome@v1"), "GitHub Actions QA workflow should install Chrome for enforced render smoke");
+  assert(workflow.includes("steps.setup-chrome.outputs.chrome-path"), "GitHub Actions QA workflow should pass the installed Chrome path to render smoke");
+  assert(workflow.includes("--timeout-ms 30000"), "GitHub Actions render smoke should allow enough time for DOM rendering");
+  assert(!workflow.includes("node render-smoke.js --skip-if-missing"), "GitHub Actions render smoke should fail instead of skipping when Chrome cannot render");
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
+  assert(docs.includes("non-skipping headless render smoke"), "production docs should document the enforced CI render smoke");
 }
 
 function runProductionCheckSmoke() {
