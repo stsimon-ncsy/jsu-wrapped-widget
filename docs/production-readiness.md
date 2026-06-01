@@ -179,3 +179,5 @@ node sync-wordpress-inline.js
 The smoke test compares the inline CSS/renderer against `jsu-wrapped.css` and `jsu-wrapped.js`, which prevents stale WordPress handoff code from drifting behind the hosted version.
 
 The page can keep JSON/config hosted on GitHub Pages while the embed runs on `ncsy.org`, as long as the GitHub Pages URLs remain public.
+
+For Gravity Forms, add hidden fields whose labels or input names clearly include the context they should receive, such as `chapter name`, `region`, `scope type`, `scope slug`, `scope name`, `program`, `variant`, `year label`, and `wrapped url`. The widget fills matching empty fields when the CTA opens the form.

@@ -4595,14 +4595,25 @@
   }
 
   function createFormPrefillContext(record, url) {
+    var scope = getStoryScope(record);
+    var href = asText(url || root && root.location && root.location.href, "");
+
     return {
       chapter_slug: asText(record && record.chapter_slug, ""),
       chapter_name: asText(record && record.chapter_name, ""),
       region_name: asText(record && record.region_name, ""),
+      scope_type: asText(scope.type, ""),
+      scope_slug: asText(scope.slug, ""),
+      scope_name: asText(scope.name, ""),
+      program_slug: asText(record && (record.program_slug || record.campaign_slug), ""),
+      program_name: asText(record && (record.program_name || record.campaign_name), ""),
+      campaign_slug: asText(record && record.campaign_slug, ""),
+      campaign_name: asText(record && record.campaign_name, ""),
+      variant_slug: asText(getVariantSlug(href), ""),
       school_name: asText(record && record.school_name, ""),
       school_year: asText(record && record.school_year, ""),
       year_label: asText(record && record.year_label, ""),
-      wrapped_url: asText(url || root && root.location && root.location.href, "")
+      wrapped_url: href
     };
   }
 
@@ -4627,6 +4638,30 @@
 
     if (/\bregion\b/.test(normalized)) {
       return "region_name";
+    }
+
+    if (/\bscope\s*type\b/.test(normalized) || /\bstory\s*type\b/.test(normalized) || /\bwrapped\s*type\b/.test(normalized)) {
+      return "scope_type";
+    }
+
+    if (/\bscope\s*slug\b/.test(normalized) || /\bstory\s*slug\b/.test(normalized)) {
+      return "scope_slug";
+    }
+
+    if (/\bscope\s*name\b/.test(normalized) || /\bstory\s*name\b/.test(normalized)) {
+      return "scope_name";
+    }
+
+    if (/\bvariant\b/.test(normalized) || /\bversion\b/.test(normalized) || /\baudience\b/.test(normalized)) {
+      return "variant_slug";
+    }
+
+    if (/\bprogram\s*slug\b/.test(normalized) || /\bcampaign\s*slug\b/.test(normalized)) {
+      return "program_slug";
+    }
+
+    if (/\bprogram\b/.test(normalized) || /\bcampaign\b/.test(normalized)) {
+      return "program_name";
     }
 
     if (/\bwrapped\b/.test(normalized) && /\b(url|link|page)\b/.test(normalized) || /\bpage\s*(url|link)\b/.test(normalized)) {
@@ -4724,6 +4759,10 @@
     panel.setAttribute("data-jsuw-chapter-slug", context.chapter_slug);
     panel.setAttribute("data-jsuw-chapter-name", context.chapter_name);
     panel.setAttribute("data-jsuw-region-name", context.region_name);
+    panel.setAttribute("data-jsuw-scope-type", context.scope_type);
+    panel.setAttribute("data-jsuw-scope-slug", context.scope_slug);
+    panel.setAttribute("data-jsuw-scope-name", context.scope_name);
+    panel.setAttribute("data-jsuw-variant-slug", context.variant_slug);
 
     Array.prototype.forEach.call(fields, function (field) {
       var explicit = field.getAttribute("data-jsuw-prefill") || field.getAttribute("data-jsuw-prefill-field") || "";

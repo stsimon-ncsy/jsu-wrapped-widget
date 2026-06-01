@@ -368,6 +368,26 @@ function runAnalyticsSmoke() {
   assert(payload.variant_label === "Donor recap", "variant analytics label missing");
 }
 
+function runFormPrefillSmoke() {
+  const context = api.createFormPrefillContext({
+    scope_type: "program",
+    scope_slug: "shabbat",
+    scope_name: "Shabbat Across JSU",
+    program_slug: "shabbat",
+    program_name: "Shabbat Across JSU",
+    region_name: "Atlantic Seaboard",
+    year_label: "2025-2026"
+  }, "https://example.org/wrapped/?scope=program&program=shabbat&variant=donor-recap");
+
+  assert(context.scope_type === "program", "form prefill scope type missing");
+  assert(context.scope_slug === "shabbat", "form prefill scope slug missing");
+  assert(context.scope_name === "Shabbat Across JSU", "form prefill scope name missing");
+  assert(context.program_slug === "shabbat", "form prefill program slug missing");
+  assert(context.program_name === "Shabbat Across JSU", "form prefill program name missing");
+  assert(context.variant_slug === "donor-recap", "form prefill variant slug missing");
+  assert(context.wrapped_url.includes("variant=donor-recap"), "form prefill wrapped URL missing variant context");
+}
+
 function runAnalyticsDocsSmoke() {
   const docs = loadText("analytics-gtm-setup.md");
   const payload = api.createAnalyticsPayload({
@@ -836,6 +856,7 @@ function main() {
   runStaticShareSmoke();
   runShareGeneratorCleanupSmoke();
   runAnalyticsSmoke();
+  runFormPrefillSmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
   runScopedStoryValidationSmoke();
