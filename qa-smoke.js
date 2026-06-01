@@ -394,6 +394,7 @@ function runStaticShareSmoke() {
 
 function runShareGeneratorCleanupSmoke() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-"));
+  const unsafeRoot = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-unsafe-"));
 
   try {
     fs.mkdirSync(path.join(root, "stale-chapter"), { recursive: true });
@@ -419,8 +420,21 @@ function runShareGeneratorCleanupSmoke() {
     assert(fs.existsSync(path.join(root, "active-chapter", "index.html")), "active chapter share page missing in custom output root");
     assert(fs.existsSync(path.join(root, "region", "atlantic-seaboard", "index.html")), "region share page missing in custom output root");
     assert(!fs.existsSync(path.join(root, "stale-chapter")), "stale generated share directory should be removed");
+
+    shareGenerator.generateSharePages([
+      {
+        chapter_slug: "..",
+        chapter_name: "Unsafe Chapter",
+        region_name: "Atlantic Seaboard",
+        year_label: "2025-2026"
+      }
+    ], { outputRoot: path.join(unsafeRoot, "share") });
+
+    assert(!fs.existsSync(path.join(unsafeRoot, "index.html")), "share generator should not write outside the output root for unsafe slugs");
+    assert(fs.existsSync(path.join(unsafeRoot, "share", "story", "index.html")), "share generator should fall back to a safe slug for unsafe story paths");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(unsafeRoot, { recursive: true, force: true });
   }
 }
 

@@ -22,9 +22,15 @@ function escapeHtml(value) {
 }
 
 function pathSlug(value) {
-  return String(value || "")
+  var slug = String(value || "")
     .trim()
-    .replace(/[\\/]+/g, "-");
+    .replace(/[\\/]+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^\.+/, "")
+    .replace(/\.+$/, "")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "story";
 }
 
 function isChapterRecord(record) {

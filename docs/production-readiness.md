@@ -164,6 +164,8 @@ Those pages include crawler-readable Open Graph/Twitter tags and immediately red
 data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
 ```
 
+The share generator sanitizes filesystem path segments before writing pages, so a malformed slug cannot write outside the configured `share/` output root. Keep that guard in place even though the production check validates data before share generation.
+
 `node qa-smoke.js` includes SVG fallback checks for:
 
 - real chapter data
