@@ -1893,6 +1893,9 @@ function runHostedSmokeScriptSmoke() {
     },
     "assets/wrapped-social-preview.png": {
       buffer: socialPreviewPng,
+      headers: {
+        "content-type": "image/png"
+      },
       status: 200
     },
     "share/baltimore/": {
@@ -1915,8 +1918,18 @@ function runHostedSmokeScriptSmoke() {
   });
   const missingSocialPreviewAssets = Object.assign({}, goodAssets);
   delete missingSocialPreviewAssets["assets/wrapped-social-preview.png"];
+  const wrongSocialPreviewTypeAssets = Object.assign({}, goodAssets, {
+    "assets/wrapped-social-preview.png": {
+      buffer: socialPreviewPng,
+      headers: {
+        "content-type": "text/plain"
+      },
+      status: 200
+    }
+  });
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
+  const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
@@ -1929,6 +1942,7 @@ function runHostedSmokeScriptSmoke() {
   assert(goodReport.ok, `hosted smoke validator rejected good assets: ${goodReport.errors.join("; ")}`);
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
   assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
+  assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");

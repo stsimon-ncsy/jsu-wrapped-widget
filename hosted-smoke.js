@@ -74,8 +74,9 @@ const ASSET_CHECKS = [
     binary: true,
     label: "social preview image",
     path: "assets/wrapped-social-preview.png",
-    validate(buffer, errors) {
-      validatePngDimensions(buffer, 1200, 630, "social preview image", errors);
+    validate(asset, errors) {
+      validateContentType(asset.headers, "image/png", "social preview image", errors);
+      validatePngDimensions(asset.buffer, 1200, 630, "social preview image", errors);
     }
   }
 ];
@@ -139,6 +140,27 @@ function validatePngDimensions(buffer, expectedWidth, expectedHeight, label, err
   }
 }
 
+function headerValue(headers, name) {
+  const source = headers || {};
+  const target = String(name || "").toLowerCase();
+  const key = Object.keys(source).find((item) => item.toLowerCase() === target);
+
+  return key ? String(source[key] || "") : "";
+}
+
+function validateContentType(headers, expectedType, label, errors) {
+  const contentType = headerValue(headers, "content-type").toLowerCase();
+
+  if (!contentType) {
+    errors.push(`${label} is missing content type ${expectedType}`);
+    return;
+  }
+
+  if (contentType.split(";")[0].trim() !== expectedType) {
+    errors.push(`${label} content type is ${contentType}, expected ${expectedType}`);
+  }
+}
+
 function validateHostedAssets(assets) {
   const errors = [];
 
@@ -156,7 +178,7 @@ function validateHostedAssets(assets) {
       return;
     }
 
-    check.validate(check.binary ? asset.buffer : String(asset.text || ""), errors);
+    check.validate(check.binary ? asset : String(asset.text || ""), errors);
   });
 
   return {
@@ -177,6 +199,7 @@ async function fetchWithTimeout(url, timeoutMs, options) {
     });
 
     return {
+      headers: Object.fromEntries(response.headers.entries()),
       status: response.status,
       buffer: settings.binary ? Buffer.from(await response.arrayBuffer()) : null,
       text: settings.binary ? "" : await response.text()
@@ -199,6 +222,7 @@ async function fetchHostedAssets(baseUrl, options) {
     } catch (error) {
       assets[check.path] = {
         buffer: Buffer.alloc(0),
+        headers: {},
         status: 0,
         text: "",
         error
@@ -286,7 +310,9 @@ if (require.main === module) {
 module.exports = {
   assetUrl,
   fetchPlan,
+  headerValue,
   normalizeBaseUrl,
+  validateContentType,
   validatePngDimensions,
   validateHostedAssets
 };
