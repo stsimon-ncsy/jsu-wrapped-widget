@@ -1200,6 +1200,7 @@ function runProductionCheckSmoke() {
     assert(listed.includes(command), `production QA command missing ${command}`);
   });
 
+  assert(listed.indexOf("node validate-wrapped-data.js") < listed.indexOf("node generate-share-pages.js"), "production QA should validate data before generating share pages");
   assert(workflow.includes("node check-production.js"), "GitHub Actions should run the single production QA command");
   assert(docs.includes("node check-production.js"), "production docs should point to the single production QA command");
 }

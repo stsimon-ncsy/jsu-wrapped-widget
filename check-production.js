@@ -2,7 +2,6 @@ const childProcess = require("child_process");
 
 const COMMANDS = [
   nodeCommand("sync-wordpress-inline.js"),
-  nodeCommand("generate-share-pages.js"),
   nodeCommand("--check", "check-production.js"),
   nodeCommand("--check", "jsu-wrapped.js"),
   nodeCommand("--check", "wrapped-builder.js"),
@@ -12,6 +11,7 @@ const COMMANDS = [
   nodeCommand("--check", "merge-builder-submission.js"),
   nodeCommand("--check", "qa-smoke.js"),
   nodeCommand("validate-wrapped-data.js"),
+  nodeCommand("generate-share-pages.js"),
   nodeCommand("qa-smoke.js"),
   command("git", ["diff", "--exit-code", "wordpress-inline-embed.html"], "git diff --exit-code wordpress-inline-embed.html"),
   command("git", ["diff", "--exit-code", "share"], "git diff --exit-code share"),
