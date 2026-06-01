@@ -32,7 +32,7 @@ Good pilot edits:
 - adjust a headline or subtext for local tone
 - choose JSU or NCSY logo
 - choose a palette
-- update the final CTA
+- update the final CTA, either with an embedded form selector or a direct URL
 - add one custom text, metric, or media screen
 - create a duplicate version for a donor, parent, school partner, or recruitment audience
 

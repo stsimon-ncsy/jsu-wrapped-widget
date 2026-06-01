@@ -35,7 +35,7 @@ or:
 Get involved next year
 ```
 
-Point the CTA to the embedded Gravity Form panel when the widget is hosted on WordPress. The widget pre-populates chapter context where possible, so staff should review submissions with the chapter, region, and URL/source information intact.
+Point the CTA to the embedded Gravity Form panel when the widget is hosted on WordPress. Use a direct CTA URL only when the next step lives on a separate page. The widget pre-populates chapter context where possible, so staff should review submissions with the chapter, region, and URL/source information intact.
 
 Good CTA destinations:
 

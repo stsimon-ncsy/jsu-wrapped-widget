@@ -780,6 +780,7 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes('data-builder-action="form-submission"'), "builder should expose an optional review form button");
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
   assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
+  assert(builderHtml.includes('data-builder-field="cta_href"'), "builder should expose a direct CTA URL field");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
   assert(builderHtml.includes("Recommended: Open email draft"), "builder should make the recommended staff review path explicit");
   assert(builderHtml.includes("paste the copied JSON into the email"), "builder should tell staff exactly how to return the submission JSON");
@@ -795,6 +796,8 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("merge_path"), "submission payload should include where the patch belongs in wrapped-config");
   assert(builderJs.includes("change_summary"), "submission payload should include a human-readable change summary");
   assert(builderJs.includes("config_patch"), "submission payload should include only the active scope/variant config patch");
+  assert(builderJs.includes('"cta_href"'), "builder change summary should include direct CTA URL changes");
+  assert(builderJs.includes("effective.cta_href || effective.ctaHref"), "builder warnings should account for direct CTA URL destinations");
   assert(builderJs.includes("submitter_name"), "submission payload should include submitter name");
   assert(builderJs.includes("submitter_email"), "submission payload should include submitter email");
   assert(builderJs.includes("submitter_note"), "submission payload should include reviewer note");

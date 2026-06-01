@@ -511,7 +511,7 @@
     var cardOverrides = source.card_overrides && typeof source.card_overrides === "object" ? source.card_overrides : {};
     var customCards = Array.isArray(source.custom_cards) ? source.custom_cards : [];
 
-    ["brand_logo", "palette", "cta_label", "cta_target"].forEach(function (key) {
+    ["brand_logo", "palette", "cta_label", "cta_target", "cta_href"].forEach(function (key) {
       if (hasValue(source[key])) {
         changes.push({
           type: "setting",
@@ -1373,6 +1373,8 @@
 
     if (!hasValue(effective.cta_label || effective.ctaLabel)) {
       warnings.push("No CTA label is set at this scope or inherited scopes.");
+    } else if (!hasValue(effective.cta_target || effective.ctaTarget || effective.cta_href || effective.ctaHref)) {
+      warnings.push("CTA label is set, but no form selector or direct URL is configured.");
     }
 
     customCards.forEach(function (card, index) {

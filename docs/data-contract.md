@@ -65,7 +65,8 @@ Common section keys:
 - `brand_logo`: `jsu` or `ncsy`.
 - `palette`: `electric`, `purple-gold`, or `sunset`.
 - `cta_label`: final-card button label.
-- `cta_target`, `cta_href`, or `ctaTarget`: final-card destination.
+- `cta_target` or `ctaTarget`: embedded form panel selector, such as `#jsuw-wrapped-interest`.
+- `cta_href` or `ctaHref`: direct final-card destination URL.
 - `record_overrides`: corrected data values, such as a fixed `events_hosted` count.
 - `card_overrides`: generated-card copy overrides keyed by card id.
 - `custom_cards`: extra screens for local story needs.

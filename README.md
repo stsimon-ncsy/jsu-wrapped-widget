@@ -84,6 +84,8 @@ https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrap
 
 The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. Staff still need to paste the copied submission JSON into the review form.
 
+For final-card CTAs, use `cta_target` when the button should open an embedded form panel such as `#jsuw-wrapped-interest`, or `cta_href` when it should navigate to a direct URL.
+
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 
 To merge a reviewed staff submission locally:
