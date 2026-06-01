@@ -243,6 +243,7 @@ function removeProfile(profile) {
 function browserDumpDomArgs(options) {
   const settings = options || {};
   const viewport = settings.viewport || {};
+  const virtualTimeBudgetMs = Number(settings.virtualTimeBudgetMs) || 0;
   const args = [
     "--headless",
     "--disable-gpu",
@@ -254,11 +255,14 @@ function browserDumpDomArgs(options) {
     "--no-sandbox",
     `--user-data-dir=${settings.profile}`,
     `--window-size=${viewport.width},${viewport.height}`,
-    `--virtual-time-budget=${Number(settings.virtualTimeBudgetMs) || 0}`,
     `--timeout=${Number(settings.timeoutMs) || DEFAULT_TIMEOUT_MS}`,
     "--dump-dom",
     settings.url
   ];
+
+  if (virtualTimeBudgetMs > 0) {
+    args.splice(args.indexOf("--dump-dom"), 0, `--virtual-time-budget=${virtualTimeBudgetMs}`);
+  }
 
   return args;
 }
@@ -367,7 +371,7 @@ async function probeBrowser(browser, settings) {
     timeoutMs,
     url: "data:text/html,<title>render-smoke-probe</title><main>render smoke probe</main>",
     viewport: { height: 844, width: 390 },
-    virtualTimeBudgetMs: 1000
+    virtualTimeBudgetMs: 0
   });
 
   try {

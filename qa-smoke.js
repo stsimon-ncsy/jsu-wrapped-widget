@@ -1940,11 +1940,19 @@ function runRenderSmokeScriptSmoke() {
     viewport: { height: 844, width: 390 },
     virtualTimeBudgetMs: 5678
   });
+  const probeDumpDomArgs = renderSmoke.browserDumpDomArgs({
+    profile: "render-smoke-profile",
+    timeoutMs: 1234,
+    url: "data:text/html,<main>ok</main>",
+    viewport: { height: 844, width: 390 },
+    virtualTimeBudgetMs: 0
+  });
 
   assert(explicitCandidates.length === 1 && explicitCandidates[0] === process.execPath, "render smoke should only try the explicit browser path when --browser is provided");
   assert(dumpDomArgs.includes("--headless"), "Chrome dump-DOM args should use standard headless mode");
   assert(dumpDomArgs.includes("--timeout=1234"), "Chrome dump-DOM args should include a browser-side timeout");
   assert(dumpDomArgs.includes("--virtual-time-budget=5678"), "Chrome dump-DOM args should preserve the requested virtual-time budget");
+  assert(!probeDumpDomArgs.some((arg) => arg.indexOf("--virtual-time-budget") === 0), "Chrome probe args should omit virtual-time budget when it is not needed");
   assert(renderSmoke.probeTimeoutMs({ browser: process.execPath, timeoutMs: 30000 }) === 30000, "explicit render smoke browser probe should respect the requested timeout");
   assert(renderSmoke.probeTimeoutMs({ browser: "", timeoutMs: 30000 }) === 4000, "auto-discovered render smoke probes should keep the short local fallback timeout");
 }
