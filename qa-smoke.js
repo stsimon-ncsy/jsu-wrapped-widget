@@ -532,6 +532,40 @@ function runFormPrefillSmoke() {
 
 function runRuntimeUrlSafetySmoke() {
   const source = loadText("jsu-wrapped.js");
+  const record = {
+    chapter_slug: "baltimore",
+    chapter_name: "Baltimore",
+    region_name: "Atlantic Seaboard",
+    year_label: "2025-2026",
+    events_hosted: 10,
+    unique_teens: 100,
+    engagement_moments: 200,
+    chapter_persona: "The Connector"
+  };
+  const safeMediaConfig = {
+    custom_cards: [
+      {
+        id: "safe-photo",
+        type: "media",
+        placement: "before_final",
+        headline: "Photo moment",
+        image_url: "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+      }
+    ]
+  };
+  const unsafeMediaConfig = {
+    custom_cards: [
+      {
+        id: "unsafe-photo",
+        type: "media",
+        placement: "before_final",
+        headline: "Unsafe photo",
+        image_url: "javascript:alert(1)"
+      }
+    ]
+  };
+  const safeMediaCard = api.createCards(record, { storyConfig: safeMediaConfig }).find((card) => card.id === "safe-photo");
+  const unsafeMediaCard = api.createCards(record, { storyConfig: unsafeMediaConfig }).find((card) => card.id === "unsafe-photo");
 
   assert(typeof api.isSafeStaticUrl === "function", "runtime should expose the shared static URL safety helper for smoke tests");
   assert(api.isSafeStaticUrl("https://ncsy.org/ncsy-wrapped/"), "runtime should allow https CTA URLs");
@@ -543,6 +577,9 @@ function runRuntimeUrlSafetySmoke() {
   assert(source.includes("isSafeStaticUrl(rawHref)"), "runtime should sanitize configured CTA href values before rendering");
   assert(source.includes("isSafeStaticUrl(href) ? href : \"\""), "runtime should guard CTA navigation at click time");
   assert(source.includes("CTA link is not available."), "runtime should report blocked unsafe CTA navigation without leaving the page");
+  assert(safeMediaCard && safeMediaCard.imageUrl === "https://res.cloudinary.com/demo/image/upload/sample.jpg", "runtime should keep safe custom media image URLs");
+  assert(unsafeMediaCard && unsafeMediaCard.imageUrl === "", "runtime should strip unsafe custom media image URLs before rendering");
+  assert(source.includes("isSafeStaticUrl(rawImageUrl)"), "runtime should sanitize configured custom media image URLs");
 }
 
 function runAnalyticsDocsSmoke() {

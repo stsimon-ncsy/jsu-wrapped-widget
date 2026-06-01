@@ -6256,6 +6256,7 @@
     var storyScope = getStoryScope(record);
     var chapterName = asText(storyScope.name, "Your JSU chapter");
     var value = hasValue(configCard.value) ? renderOverrideTemplate(configCard.value, record) : "";
+    var rawImageUrl = configCard.image_url || configCard.imageUrl || configCard.src;
 
     return {
       id: normalizeCardId(configCard.id || "custom-" + slugify(configCard.headline || type)),
@@ -6272,7 +6273,7 @@
       statLabel: asText(configCard.label || configCard.statLabel, ""),
       subtext: hasValue(configCard.subtext || configCard.copy) ? renderOverrideTemplate(configCard.subtext || configCard.copy, record) : "",
       badge: hasValue(configCard.badge) ? renderOverrideTemplate(configCard.badge, record) : "",
-      imageUrl: asText(configCard.image_url || configCard.imageUrl || configCard.src, ""),
+      imageUrl: isSafeStaticUrl(rawImageUrl) ? asText(rawImageUrl, "") : "",
       imageAlt: asText(configCard.image_alt || configCard.imageAlt || configCard.alt, ""),
       caption: hasValue(configCard.caption) ? renderOverrideTemplate(configCard.caption, record) : "",
       brandChoice: brandChoice,
