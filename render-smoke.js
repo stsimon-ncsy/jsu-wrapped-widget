@@ -13,7 +13,7 @@ const PAGE_CHECKS = [
     label: "Baltimore story",
     path: "/?chapter=baltimore&qa=render-smoke",
     requiredSelectors: ['id="jsu-wrapped"', "jsuw-story"],
-    requiredText: ["Baltimore", "Share this recap"]
+    requiredText: ["Baltimore", "your year is wrapped"]
   },
   {
     label: "builder",
@@ -240,10 +240,11 @@ function removeProfile(profile) {
   }
 }
 
-function renderWithBrowser(browser, url, viewport, settings) {
-  const profile = profileRoot();
+function browserDumpDomArgs(options) {
+  const settings = options || {};
+  const viewport = settings.viewport || {};
   const args = [
-    "--headless=new",
+    "--headless",
     "--disable-gpu",
     "--disable-dev-shm-usage",
     "--disable-extensions",
@@ -251,23 +252,102 @@ function renderWithBrowser(browser, url, viewport, settings) {
     "--no-first-run",
     "--no-default-browser-check",
     "--no-sandbox",
-    `--user-data-dir=${profile}`,
+    `--user-data-dir=${settings.profile}`,
     `--window-size=${viewport.width},${viewport.height}`,
-    "--virtual-time-budget=7000",
+    `--virtual-time-budget=${Number(settings.virtualTimeBudgetMs) || 0}`,
+    `--timeout=${Number(settings.timeoutMs) || DEFAULT_TIMEOUT_MS}`,
     "--dump-dom",
-    url
+    settings.url
   ];
 
+  return args;
+}
+
+function runBrowserProcess(browser, args, options) {
+  const settings = options || {};
+  const maxBuffer = settings.maxBuffer || 2 * 1024 * 1024;
+  const timeout = settings.timeout || DEFAULT_TIMEOUT_MS;
+
+  return new Promise((resolve, reject) => {
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let timedOut = false;
+    const child = childProcess.spawn(browser, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true
+    });
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill("SIGKILL");
+    }, timeout);
+
+    function finish(error, result) {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearTimeout(timer);
+
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(result);
+    }
+
+    function appendOutput(stream, chunk) {
+      const next = stream === "stdout" ? stdout + String(chunk) : stderr + String(chunk);
+
+      if (Buffer.byteLength(next, "utf8") > maxBuffer) {
+        finish(new Error("browser output exceeded maxBuffer"));
+        child.kill("SIGKILL");
+        return;
+      }
+
+      if (stream === "stdout") {
+        stdout = next;
+      } else {
+        stderr = next;
+      }
+    }
+
+    child.stdout.on("data", (chunk) => appendOutput("stdout", chunk));
+    child.stderr.on("data", (chunk) => appendOutput("stderr", chunk));
+    child.on("error", (error) => finish(error));
+    child.on("close", (status, signal) => {
+      if (timedOut) {
+        finish(new Error(`spawn ${browser} ETIMEDOUT`));
+        return;
+      }
+
+      finish(null, {
+        signal,
+        status,
+        stderr,
+        stdout
+      });
+    });
+  });
+}
+
+async function renderWithBrowser(browser, url, viewport, settings) {
+  const profile = profileRoot();
+  const args = browserDumpDomArgs({
+    profile,
+    timeoutMs: settings.timeoutMs,
+    url,
+    viewport,
+    virtualTimeBudgetMs: 7000
+  });
+
   try {
-    const result = childProcess.spawnSync(browser, args, {
-      encoding: "utf8",
+    const result = await runBrowserProcess(browser, args, {
       maxBuffer: 20 * 1024 * 1024,
       timeout: settings.timeoutMs + 10000
     });
-
-    if (result.error) {
-      throw result.error;
-    }
 
     if (result.status !== 0) {
       throw new Error((result.stderr || result.stdout || `browser exited with code ${result.status}`).trim());
@@ -279,34 +359,22 @@ function renderWithBrowser(browser, url, viewport, settings) {
   }
 }
 
-function probeBrowser(browser, settings) {
+async function probeBrowser(browser, settings) {
   const profile = profileRoot();
-  const args = [
-    "--headless=new",
-    "--disable-gpu",
-    "--disable-dev-shm-usage",
-    "--disable-extensions",
-    "--disable-background-networking",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--no-sandbox",
-    `--user-data-dir=${profile}`,
-    "--window-size=390,844",
-    "--virtual-time-budget=1000",
-    "--dump-dom",
-    "data:text/html,<title>render-smoke-probe</title><main>render smoke probe</main>"
-  ];
+  const timeoutMs = probeTimeoutMs(settings);
+  const args = browserDumpDomArgs({
+    profile,
+    timeoutMs,
+    url: "data:text/html,<title>render-smoke-probe</title><main>render smoke probe</main>",
+    viewport: { height: 844, width: 390 },
+    virtualTimeBudgetMs: 1000
+  });
 
   try {
-    const result = childProcess.spawnSync(browser, args, {
-      encoding: "utf8",
+    const result = await runBrowserProcess(browser, args, {
       maxBuffer: 2 * 1024 * 1024,
-      timeout: probeTimeoutMs(settings)
+      timeout: timeoutMs + 5000
     });
-
-    if (result.error) {
-      throw result.error;
-    }
 
     if (result.status !== 0 || !String(result.stdout || "").includes("render smoke probe")) {
       throw new Error((result.stderr || result.stdout || `browser exited with code ${result.status}`).trim());
@@ -346,10 +414,10 @@ async function runRenderSmoke(settings) {
   try {
     for (const browser of browsers) {
       try {
-        probeBrowser(browser, settings);
+        await probeBrowser(browser, settings);
 
-        renderPlan(baseUrl).forEach((item) => {
-          const html = renderWithBrowser(browser, item.url, item.viewport, settings);
+        for (const item of renderPlan(baseUrl)) {
+          const html = await renderWithBrowser(browser, item.url, item.viewport, settings);
           const pageCheck = PAGE_CHECKS.find((check) => item.label.indexOf(check.label) === 0);
           const report = validateRenderedDom(Object.assign({}, pageCheck, {
             html,
@@ -357,7 +425,7 @@ async function runRenderSmoke(settings) {
           }));
 
           errors.push(...report.errors);
-        });
+        }
 
         return {
           browser,
@@ -468,6 +536,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  browserDumpDomArgs,
   findBrowserCandidates,
   findBrowserExecutable,
   probeTimeoutMs,

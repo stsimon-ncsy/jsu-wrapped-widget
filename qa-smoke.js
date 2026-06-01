@@ -1917,6 +1917,7 @@ function runRenderSmokeScriptSmoke() {
   });
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
+  const renderSmokeSource = loadText(scriptPath);
 
   assert(goodReport.ok, `render smoke validator rejected good DOM: ${goodReport.errors.join("; ")}`);
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("chapter story")), "render smoke validator should reject blank story DOM");
@@ -1926,12 +1927,24 @@ function runRenderSmokeScriptSmoke() {
   assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
   assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
   assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
+  assert(!renderSmokeSource.includes("spawnSync"), "render smoke should launch browsers asynchronously so the local static server can answer requests");
   assert(typeof renderSmoke.findBrowserCandidates === "function", "render smoke should expose browser candidate resolution for smoke coverage");
+  assert(typeof renderSmoke.browserDumpDomArgs === "function", "render smoke should expose Chrome dump-DOM args for smoke coverage");
   assert(typeof renderSmoke.probeTimeoutMs === "function", "render smoke should expose probe timeout selection for smoke coverage");
 
   const explicitCandidates = renderSmoke.findBrowserCandidates({ browser: process.execPath });
+  const dumpDomArgs = renderSmoke.browserDumpDomArgs({
+    profile: "render-smoke-profile",
+    timeoutMs: 1234,
+    url: "data:text/html,<main>ok</main>",
+    viewport: { height: 844, width: 390 },
+    virtualTimeBudgetMs: 5678
+  });
 
   assert(explicitCandidates.length === 1 && explicitCandidates[0] === process.execPath, "render smoke should only try the explicit browser path when --browser is provided");
+  assert(dumpDomArgs.includes("--headless"), "Chrome dump-DOM args should use standard headless mode");
+  assert(dumpDomArgs.includes("--timeout=1234"), "Chrome dump-DOM args should include a browser-side timeout");
+  assert(dumpDomArgs.includes("--virtual-time-budget=5678"), "Chrome dump-DOM args should preserve the requested virtual-time budget");
   assert(renderSmoke.probeTimeoutMs({ browser: process.execPath, timeoutMs: 30000 }) === 30000, "explicit render smoke browser probe should respect the requested timeout");
   assert(renderSmoke.probeTimeoutMs({ browser: "", timeoutMs: 30000 }) === 4000, "auto-discovered render smoke probes should keep the short local fallback timeout");
 }
