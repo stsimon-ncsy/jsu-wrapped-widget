@@ -1759,6 +1759,7 @@ function runCiWorkflowSmoke() {
   assert(workflow.includes("browser-actions/setup-chrome@v1"), "GitHub Actions QA workflow should install Chrome for enforced render smoke");
   assert(workflow.includes("steps.setup-chrome.outputs.chrome-path"), "GitHub Actions QA workflow should pass the installed Chrome path to render smoke");
   assert(workflow.includes("--timeout-ms 30000"), "GitHub Actions render smoke should allow enough time for DOM rendering");
+  assert(workflow.includes("JSUW_SKIP_OPTIONAL_RENDER_SMOKE"), "GitHub Actions should skip the optional pre-Chrome render smoke inside check-production");
   assert(!workflow.includes("node render-smoke.js --skip-if-missing"), "GitHub Actions render smoke should fail instead of skipping when Chrome cannot render");
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
   assert(docs.includes("non-skipping headless render smoke"), "production docs should document the enforced CI render smoke");
@@ -1771,6 +1772,10 @@ function runProductionCheckSmoke() {
 
   assert(fs.existsSync(scriptPath), "single production QA command is missing");
   const listed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], { encoding: "utf8" });
+  const ciListed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], {
+    encoding: "utf8",
+    env: Object.assign({}, process.env, { JSUW_SKIP_OPTIONAL_RENDER_SMOKE: "1" })
+  });
   const requiredCommands = [
     "node sync-wordpress-inline.js",
     "node generate-share-pages.js",
@@ -1798,6 +1803,7 @@ function runProductionCheckSmoke() {
   });
 
   assert(listed.indexOf("node validate-wrapped-data.js") < listed.indexOf("node generate-share-pages.js"), "production QA should validate data before generating share pages");
+  assert(!ciListed.includes("node render-smoke.js --skip-if-missing"), "CI production QA should skip the optional render smoke before the enforced Chrome step");
   assert(workflow.includes("node check-production.js"), "GitHub Actions should run the single production QA command");
   assert(docs.includes("node check-production.js"), "production docs should point to the single production QA command");
 }

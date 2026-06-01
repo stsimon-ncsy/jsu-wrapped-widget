@@ -17,7 +17,7 @@ const COMMANDS = [
   nodeCommand("validate-wrapped-data.js"),
   nodeCommand("generate-share-pages.js"),
   nodeCommand("qa-smoke.js"),
-  nodeCommand("render-smoke.js", "--skip-if-missing"),
+  ...optionalRenderSmokeCommands(),
   command("git", ["diff", "--exit-code", "wordpress-inline-embed.html"], "git diff --exit-code wordpress-inline-embed.html"),
   command("git", ["diff", "--exit-code", "share"], "git diff --exit-code share"),
   command("git", ["status", "--porcelain", "--", "share"], "git status --porcelain -- share", { expectEmptyStdout: true }),
@@ -35,6 +35,12 @@ function command(file, args, display, options = {}) {
     expectEmptyStdout: Boolean(options.expectEmptyStdout),
     file
   };
+}
+
+function optionalRenderSmokeCommands() {
+  return process.env.JSUW_SKIP_OPTIONAL_RENDER_SMOKE === "1"
+    ? []
+    : [nodeCommand("render-smoke.js", "--skip-if-missing")];
 }
 
 function listCommands() {

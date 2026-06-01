@@ -19,6 +19,8 @@ jobs:
           node-version: "24"
 
       - name: Run production check
+        env:
+          JSUW_SKIP_OPTIONAL_RENDER_SMOKE: "1"
         run: node check-production.js
 
       - name: Set up Chrome for render smoke
