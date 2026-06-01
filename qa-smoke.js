@@ -1592,6 +1592,7 @@ function runDataContractDocSmoke() {
     "record_overrides",
     "card_overrides",
     "custom_cards",
+    "Unsafe protocols",
     "brand_logo",
     "palette",
     "repeat_attendee_rate_label",
@@ -1792,6 +1793,34 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const validCtaHrefReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    defaults: {
+      cta_href: "https://ncsy.org/ncsy-wrapped/#interest"
+    },
+    chapters: {
+      baltimore: {
+        ctaHref: "/ncsy-wrapped/#interest"
+      }
+    }
+  }, records);
+  const unsafeCtaHrefReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    defaults: {
+      cta_href: "javascript:alert(1)"
+    },
+    chapters: {
+      baltimore: {
+        variants: {
+          unsafe: {
+            ctaHref: "data:text/html,<script>alert(1)</script>"
+          }
+        }
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -1809,6 +1838,9 @@ function runDataValidationSmoke(records, config) {
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.brand_logo")), "invalid config brand logos should fail validation");
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.palette")), "invalid config palettes should fail validation");
   assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config chapter \"baltimore\".accent_palette")), "invalid config accent palettes should fail validation");
+  assert(validCtaHrefReport.ok, `safe CTA href config should pass validation: ${validCtaHrefReport.errors.join("; ")}`);
+  assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("config.defaults.cta_href")), "unsafe default CTA href should fail validation");
+  assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("variants.unsafe.ctaHref")), "unsafe variant CTA href should fail validation");
 }
 
 function main() {

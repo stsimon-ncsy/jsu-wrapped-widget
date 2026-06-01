@@ -66,7 +66,7 @@ Common section keys:
 - `palette`: `electric`, `purple-gold`, or `sunset`.
 - `cta_label`: final-card button label.
 - `cta_target` or `ctaTarget`: embedded form panel selector, such as `#jsuw-wrapped-interest`.
-- `cta_href` or `ctaHref`: direct final-card destination URL.
+- `cta_href` or `ctaHref`: direct final-card destination URL. Use `https://`, `http://`, root-relative paths such as `/ncsy-wrapped/`, dot-relative paths, query strings, or fragments. Unsafe protocols such as `javascript:` and `data:` are rejected.
 - `record_overrides`: corrected data values, such as a fixed `events_hosted` count.
 - `card_overrides`: generated-card copy overrides keyed by card id.
 - `custom_cards`: extra screens for local story needs.

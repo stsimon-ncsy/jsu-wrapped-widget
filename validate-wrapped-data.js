@@ -693,6 +693,44 @@ function validateSectionDisplayValues(report, section, label) {
   });
 }
 
+function isSafeCtaHref(value) {
+  if (!hasValue(value)) {
+    return true;
+  }
+
+  const text = String(value).trim();
+
+  if (/[\u0000-\u001F\u007F\s]/.test(text)) {
+    return false;
+  }
+
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      const parsed = new URL(text);
+      return parsed.protocol === "https:" || parsed.protocol === "http:";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  if (text.startsWith("//") || /^[a-z][a-z0-9+.-]*:/i.test(text)) {
+    return false;
+  }
+
+  return text.startsWith("/") || text.startsWith("./") || text.startsWith("../") || text.startsWith("#") || text.startsWith("?");
+}
+
+function validateSectionCtaValues(report, section, label) {
+  [
+    ["cta_href", section.cta_href],
+    ["ctaHref", section.ctaHref]
+  ].forEach(([field, value]) => {
+    if (!isSafeCtaHref(value)) {
+      addError(report, `${label}.${field} must be an http(s), root-relative, dot-relative, query, or fragment URL`);
+    }
+  });
+}
+
 function validateConfigSection(report, section, label, storyRecordFields) {
   if (section === undefined) {
     return;
@@ -705,6 +743,7 @@ function validateConfigSection(report, section, label, storyRecordFields) {
 
   validateKnownKeys(report, section, CONFIG_SECTION_KEYS, label);
   validateSectionDisplayValues(report, section, label);
+  validateSectionCtaValues(report, section, label);
   validateHiddenCards(report, section, label);
   validateCardOverrides(report, section, label);
   validateCustomCards(report, section, label);
