@@ -69,6 +69,14 @@ const ASSET_CHECKS = [
       mustInclude(text, 'http-equiv="refresh"', "Baltimore share page missing human redirect", errors);
       mustInclude(text, "?chapter=baltimore", "Baltimore share page missing chapter redirect", errors);
     }
+  },
+  {
+    binary: true,
+    label: "social preview image",
+    path: "assets/wrapped-social-preview.png",
+    validate(buffer, errors) {
+      validatePngDimensions(buffer, 1200, 630, "social preview image", errors);
+    }
   }
 ];
 
@@ -104,13 +112,39 @@ function parseJson(text, label, errors) {
   }
 }
 
+function validatePngDimensions(buffer, expectedWidth, expectedHeight, label, errors) {
+  const bytes = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer || []);
+  const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+
+  if (bytes.length < 24) {
+    errors.push(`${label} is too small to be a valid PNG`);
+    return;
+  }
+
+  if (!signature.every((value, index) => bytes[index] === value)) {
+    errors.push(`${label} is not a PNG`);
+    return;
+  }
+
+  if (bytes.toString("ascii", 12, 16) !== "IHDR") {
+    errors.push(`${label} is missing a PNG IHDR chunk`);
+    return;
+  }
+
+  const width = bytes.readUInt32BE(16);
+  const height = bytes.readUInt32BE(20);
+
+  if (width !== expectedWidth || height !== expectedHeight) {
+    errors.push(`${label} dimensions are ${width}x${height}, expected ${expectedWidth}x${expectedHeight}`);
+  }
+}
+
 function validateHostedAssets(assets) {
   const errors = [];
 
   ASSET_CHECKS.forEach((check) => {
     const asset = assets[check.path];
     const status = asset && Number(asset.status);
-    const text = asset && asset.text;
 
     if (!asset) {
       errors.push(`${check.label} was not fetched`);
@@ -122,7 +156,7 @@ function validateHostedAssets(assets) {
       return;
     }
 
-    check.validate(String(text || ""), errors);
+    check.validate(check.binary ? asset.buffer : String(asset.text || ""), errors);
   });
 
   return {
@@ -131,7 +165,8 @@ function validateHostedAssets(assets) {
   };
 }
 
-async function fetchWithTimeout(url, timeoutMs) {
+async function fetchWithTimeout(url, timeoutMs, options) {
+  const settings = options || {};
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -143,7 +178,8 @@ async function fetchWithTimeout(url, timeoutMs) {
 
     return {
       status: response.status,
-      text: await response.text()
+      buffer: settings.binary ? Buffer.from(await response.arrayBuffer()) : null,
+      text: settings.binary ? "" : await response.text()
     };
   } finally {
     clearTimeout(timer);
@@ -159,9 +195,10 @@ async function fetchHostedAssets(baseUrl, options) {
     const url = assetUrl(baseUrl, check.path);
 
     try {
-      assets[check.path] = await fetchWithTimeout(url, timeoutMs);
+      assets[check.path] = await fetchWithTimeout(url, timeoutMs, { binary: check.binary });
     } catch (error) {
       assets[check.path] = {
+        buffer: Buffer.alloc(0),
         status: 0,
         text: "",
         error
@@ -250,5 +287,6 @@ module.exports = {
   assetUrl,
   fetchPlan,
   normalizeBaseUrl,
+  validatePngDimensions,
   validateHostedAssets
 };

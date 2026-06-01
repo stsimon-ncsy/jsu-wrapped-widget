@@ -1861,6 +1861,11 @@ function runHostedSmokeScriptSmoke() {
   assert(fs.existsSync(scriptPath), "hosted GitHub Pages smoke script is missing");
 
   const hostedSmoke = require("./hosted-smoke.js");
+  const socialPreviewPng = Buffer.alloc(24);
+  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(socialPreviewPng, 0);
+  socialPreviewPng.write("IHDR", 12, "ascii");
+  socialPreviewPng.writeUInt32BE(1200, 16);
+  socialPreviewPng.writeUInt32BE(630, 20);
   const goodAssets = {
     "": {
       status: 200,
@@ -1886,6 +1891,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: JSON.stringify({ version: 1, year: "2026" })
     },
+    "assets/wrapped-social-preview.png": {
+      buffer: socialPreviewPng,
+      status: 200
+    },
     "share/baltimore/": {
       status: 200,
       text: [
@@ -1904,7 +1913,10 @@ function runHostedSmokeScriptSmoke() {
       text: "<title>Broken</title>"
     }
   });
+  const missingSocialPreviewAssets = Object.assign({}, goodAssets);
+  delete missingSocialPreviewAssets["assets/wrapped-social-preview.png"];
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
+  const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
@@ -1916,11 +1928,14 @@ function runHostedSmokeScriptSmoke() {
 
   assert(goodReport.ok, `hosted smoke validator rejected good assets: ${goodReport.errors.join("; ")}`);
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
+  assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
+  assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
+  assert(docs.includes("social preview image"), "production docs should mention hosted social preview image checks");
 }
 
 function runRenderSmokeScriptSmoke() {
