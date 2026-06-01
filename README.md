@@ -88,6 +88,8 @@ The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`,
 
 Review form URLs must use `https://`, `http://`, `/`, `./`, or `../` links. Unsafe schemes are ignored by the builder.
 
+For a pilot group, use `docs/staff-submission-intake.md` to set up a dedicated Gravity Forms intake, generate the right staff links, and process returned JSON exports.
+
 For final-card CTAs, use `cta_target` when the button should open an embedded form panel such as `#jsuw-wrapped-interest`, or `cta_href` when it should navigate to a safe direct URL such as `https://ncsy.org/ncsy-wrapped/` or `/ncsy-wrapped/`.
 
 Do not commit downloaded staff submission JSON. These files include submitter name and email, and can include reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
@@ -135,6 +137,7 @@ This serves the static files locally and confirms the Baltimore story and builde
 - `docs/production-readiness.md` - technical production notes, URL patterns, QA expectations, CSS isolation, social sharing, WordPress embed details
 - `docs/data-contract.md` - JSON and config contract for story data, overrides, custom screens, and privacy boundaries
 - `docs/staff-playbook.md` - rollout strategy, CTA guidance, variant usage, staff follow-up, analytics review
+- `docs/staff-submission-intake.md` - maintainer setup for Gravity Forms or email-based staff builder submissions
 - `docs/pilot-staff-builder-guide.md` - short sendable guide for pilot staff returning builder submission JSON
 - `analytics-gtm-setup.md` - GA4/GTM event setup notes
 
