@@ -852,6 +852,7 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes('data-builder-action="form-submission"'), "builder should expose an optional review form button");
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
   assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
+  assert(builderHtml.includes("data-builder-submission-status"), "builder should show submission validation feedback near review actions");
   assert(builderHtml.includes('data-builder-field="cta_href"'), "builder should expose a direct CTA URL field");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
   assert(builderHtml.includes("Recommended: Open email draft"), "builder should make the recommended staff review path explicit");
@@ -863,8 +864,13 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes("data-builder-submitter-name"), "builder should collect submitter name for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-email"), "builder should collect submitter email for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-note"), "builder should collect reviewer notes for staff submissions");
+  assert(builderHtml.includes("data-builder-submitter-name required"), "builder should require submitter name before staff submission actions");
+  assert(builderHtml.includes('data-builder-submitter-email type="email" required'), "builder should require a valid submitter email before staff submission actions");
   assert(builderJs.includes("function buildSubmissionPayload"), "builder should build a scoped staff submission payload");
   assert(builderJs.includes("function submissionMeta"), "builder should read submitter metadata into submissions");
+  assert(builderJs.includes("function setSubmissionStatus"), "builder should keep submission feedback near the review actions");
+  assert(builderJs.includes("function submitterContactError"), "builder should validate submitter contact info before handoff");
+  assert(builderJs.includes("Add your name and email before sending this for review."), "builder should explain missing submitter contact info");
   assert(builderJs.includes("merge_path"), "submission payload should include where the patch belongs in wrapped-config");
   assert(builderJs.includes("change_summary"), "submission payload should include a human-readable change summary");
   assert(builderJs.includes("config_patch"), "submission payload should include only the active scope/variant config patch");
@@ -1086,6 +1092,8 @@ function runBuilderSubmissionMergeSmoke() {
   fs.writeFileSync(invalidSubmissionPath, JSON.stringify({
     schema: "jsu-wrapped-builder-submission",
     version: 1,
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
     merge_path: ["chapters", "baltimore"],
     config_patch: {
       hidden_cards: ["evnts"]
@@ -1124,6 +1132,8 @@ function runBuilderSubmissionMergeSmoke() {
   fs.writeFileSync(deepPathSubmissionPath, JSON.stringify({
     schema: "jsu-wrapped-builder-submission",
     version: 1,
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
     merge_path: ["chapters", "baltimore", "card_overrides", "events"],
     config_patch: {
       headline: "Deep path should not merge"
@@ -1161,6 +1171,8 @@ function runBuilderSubmissionMergeSmoke() {
   fs.writeFileSync(emptyPatchSubmissionPath, JSON.stringify({
     schema: "jsu-wrapped-builder-submission",
     version: 1,
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
     merge_path: ["chapters", "baltimore"],
     config_patch: {}
   }, null, 2));
@@ -1177,6 +1189,41 @@ function runBuilderSubmissionMergeSmoke() {
   }
 
   assert(emptyPatchOutput.includes("no changes"), "empty staff submissions should fail clearly");
+
+  const missingContactConfigPath = path.join(tempDir, "missing-contact-config.json");
+  const missingContactSubmissionPath = path.join(tempDir, "missing-contact-submission.json");
+
+  fs.writeFileSync(missingContactConfigPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {}
+    }
+  }, null, 2));
+  fs.writeFileSync(missingContactSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    merge_path: ["chapters", "baltimore"],
+    config_patch: {
+      palette: "sunset"
+    }
+  }, null, 2));
+
+  let missingContactOutput = "";
+  try {
+    childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", missingContactSubmissionPath, missingContactConfigPath, "--dry-run"], {
+      cwd: __dirname,
+      encoding: "utf8",
+      stdio: "pipe"
+    });
+  } catch (error) {
+    missingContactOutput = String(error.stderr || error.stdout || error.message || "");
+  }
+
+  assert(missingContactOutput.includes("submitter name and email"), "staff submissions without contact info should fail clearly");
 }
 
 function runBuilderSubmissionBatchReviewSmoke() {
@@ -1237,6 +1284,8 @@ function runBuilderSubmissionBatchReviewSmoke() {
         version: 1,
         scope_type: "chapter",
         scope_slug: "baltimore",
+        submitter_name: "Leah Rosen",
+        submitter_email: "leah@example.org",
         merge_path: ["chapters", "baltimore"],
         config_patch: {}
       }, null, 2)
@@ -1247,6 +1296,8 @@ function runBuilderSubmissionBatchReviewSmoke() {
     version: 1,
     scope_type: "chapter",
     scope_slug: "baltimore",
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
     merge_path: ["chapters", "baltimore"],
     config_patch: {}
   }, null, 2));

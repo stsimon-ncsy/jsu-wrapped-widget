@@ -229,6 +229,12 @@ textarea {
   resize: vertical;
 }
 
+.builder-grid input[aria-invalid="true"],
+.builder-grid textarea[aria-invalid="true"] {
+  border-color: #c82131;
+  box-shadow: 0 0 0 3px rgba(200, 33, 49, 0.14);
+}
+
 .builder-grid-span {
   grid-column: 1 / -1;
 }
@@ -277,6 +283,24 @@ textarea {
   display: inline-flex;
   max-width: 100%;
   padding: 7px 10px;
+}
+
+.builder-submission-status {
+  border-radius: 10px;
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 1.1em;
+  padding: 7px 10px;
+}
+
+.builder-review-actions .builder-submission-status--ok {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0f766e;
+}
+
+.builder-review-actions .builder-submission-status--error {
+  background: rgba(200, 33, 49, 0.12);
+  color: #8d1f1f;
 }
 
 .builder-review-actions .builder-review-email-status--ok {

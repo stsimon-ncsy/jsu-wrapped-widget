@@ -64,11 +64,11 @@
             <div class="builder-grid builder-grid--submission">
               <label>
                 Your name
-                <input data-builder-submitter-name placeholder="Name">
+                <input data-builder-submitter-name required placeholder="Name">
               </label>
               <label>
                 Your email
-                <input data-builder-submitter-email type="email" placeholder="name@example.org">
+                <input data-builder-submitter-email type="email" required placeholder="name@example.org">
               </label>
               <label class="builder-grid-span">
                 Reviewer note
@@ -81,6 +81,7 @@
                 <p>Recommended: Open email draft after making at least one change, then paste the copied JSON into the email before sending.</p>
                 <p>Download submission if email paste is awkward, or copy the submission JSON for Slack, Teams, or a review form.</p>
                 <p class="builder-review-email-status" data-builder-review-email-status></p>
+                <p class="builder-submission-status" data-builder-submission-status aria-live="polite"></p>
               </div>
               <div class="builder-actions builder-actions--review">
                 <button type="button" data-builder-action="email-submission">Open email draft</button>

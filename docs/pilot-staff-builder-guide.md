@@ -19,7 +19,7 @@ Some links may also include `review_url`. If they do, the builder will show an *
 1. Pick your region and chapter.
 2. Pick the edit scope. Use **This chapter** unless your reviewer specifically asks you to test a region or program default.
 3. Make only the changes you want reviewed.
-4. Fill in Submission info with your name, email, and a short reviewer note.
+4. Fill in Submission info with your name and email. Add a short reviewer note if there is anything specific to check.
 5. Use **Open email draft**, **Open review form** if it is available, **Copy submission**, or **Download submission**.
 
 The preview updates as you work. Click a screen in the editor to jump the preview to that screen.
@@ -65,6 +65,8 @@ Do not use Copy JSON unless your reviewer specifically asks for the full config 
 Do not edit the submission JSON by hand. If you notice a typo after exporting, fix it in the builder and send a new submission.
 
 Do not send a no-change submission. The builder will ask you to make at least one change before sending.
+
+Do not remove your contact info from the submission. The builder and review tools require name and email so the maintainer can follow up if something needs clarification.
 
 ## Quick Message Template
 

@@ -66,7 +66,7 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
-3. Fill in the submission info fields.
+3. Fill in the required submission info fields with your name and email, plus an optional reviewer note.
 4. Click **Open email draft** to copy the smaller JSON and start a review email. The draft usually includes the submission JSON automatically; if the edit packet is too large, paste the copied JSON before sending. Staff can also click **Open review form** if a form link was provided, **Copy submission** to paste into email, Slack, Teams, or a review form, or **Download submission** to attach it as a file.
 5. Send that submission JSON to the repo maintainer for review.
 
@@ -88,7 +88,7 @@ Review form URLs must use `https://`, `http://`, `/`, `./`, or `../` links. Unsa
 
 For final-card CTAs, use `cta_target` when the button should open an embedded form panel such as `#jsuw-wrapped-interest`, or `cta_href` when it should navigate to a safe direct URL such as `https://ncsy.org/ncsy-wrapped/` or `/ncsy-wrapped/`.
 
-Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
+Do not commit downloaded staff submission JSON. These files include submitter name and email, and can include reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 
 To merge a reviewed staff submission locally:
 

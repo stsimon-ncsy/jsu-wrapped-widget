@@ -84,6 +84,23 @@ function assertPatchHasChanges(value) {
   }
 }
 
+function isLikelyEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(textValue(value));
+}
+
+function assertSubmitterContact(submission) {
+  const name = textValue(submission.submitter_name);
+  const email = textValue(submission.submitter_email);
+
+  if (!name || !email) {
+    throw new Error("Submission must include submitter name and email.");
+  }
+
+  if (!isLikelyEmail(email)) {
+    throw new Error("Submission submitter email must look like a valid email address.");
+  }
+}
+
 function parseWrappedSubmissionJson(value, key) {
   const text = textValue(value);
 
@@ -198,6 +215,7 @@ function validateSubmission(submission) {
     throw new Error("Submission schema must be " + SUBMISSION_SCHEMA + ".");
   }
 
+  assertSubmitterContact(submission);
   assertSafeMergePath(submission.merge_path);
   assertSafePatch(submission.config_patch, ["config_patch"]);
   assertPatchHasChanges(submission.config_patch);

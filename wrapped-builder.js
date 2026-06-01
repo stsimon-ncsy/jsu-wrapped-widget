@@ -340,6 +340,19 @@
     status.classList.toggle("builder-version-status--ok", !!message && !isError);
   }
 
+  function setSubmissionStatus(message, isError) {
+    var status = $("[data-builder-submission-status]");
+
+    if (!status) {
+      setVersionStatus(message, isError);
+      return;
+    }
+
+    status.textContent = message || "";
+    status.classList.toggle("builder-submission-status--error", !!message && !!isError);
+    status.classList.toggle("builder-submission-status--ok", !!message && !isError);
+  }
+
   function variantDisplayName(slug, entry) {
     var text = entry && (entry.label || entry.name || entry.title);
 
@@ -912,7 +925,7 @@
     var opened;
 
     if (!formUrl.url) {
-      setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
+      setSubmissionStatus("No review form URL is set. Use email, copy, or download instead.", true);
       return false;
     }
 
@@ -958,12 +971,80 @@
     });
   }
 
+  function submitterContactError(payload) {
+    var name = payload && String(payload.submitter_name || "").trim();
+    var email = payload && String(payload.submitter_email || "").trim();
+
+    if (!name && !email) {
+      return "Add your name and email before sending this for review.";
+    }
+
+    if (!name) {
+      return "Add your name before sending this for review.";
+    }
+
+    if (!email) {
+      return "Add your email before sending this for review.";
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Use a valid email address before sending this for review.";
+    }
+
+    return "";
+  }
+
+  function markSubmitterContactFields(payload) {
+    var nameField = $("[data-builder-submitter-name]");
+    var emailField = $("[data-builder-submitter-email]");
+    var nameMissing = !(payload && String(payload.submitter_name || "").trim());
+    var email = payload && String(payload.submitter_email || "").trim();
+    var emailInvalid = !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (nameField) {
+      nameField.setAttribute("aria-invalid", nameMissing ? "true" : "false");
+    }
+
+    if (emailField) {
+      emailField.setAttribute("aria-invalid", emailInvalid ? "true" : "false");
+    }
+  }
+
+  function focusSubmitterContactField(payload) {
+    var nameField = $("[data-builder-submitter-name]");
+    var emailField = $("[data-builder-submitter-email]");
+    var nameMissing = !(payload && String(payload.submitter_name || "").trim());
+
+    if (nameMissing && nameField) {
+      nameField.focus();
+      return;
+    }
+
+    if (emailField) {
+      emailField.focus();
+    }
+  }
+
+  function ensureSubmissionHasContact(payload) {
+    var error = submitterContactError(payload);
+
+    markSubmitterContactFields(payload);
+
+    if (!error) {
+      return true;
+    }
+
+    setSubmissionStatus(error, true);
+    focusSubmitterContactField(payload);
+    return false;
+  }
+
   function ensureSubmissionHasChanges(payload) {
     if (submissionHasChanges(payload)) {
       return true;
     }
 
-    setVersionStatus("Add at least one change before sending this for review.", true);
+    setSubmissionStatus("Add at least one change before sending this for review.", true);
     return false;
   }
 
@@ -972,7 +1053,7 @@
       return true;
     }
 
-    setVersionStatus("Fix unsafe URLs before sending this for review.", true);
+    setSubmissionStatus("Fix unsafe URLs before sending this for review.", true);
     renderWarnings();
     return false;
   }
@@ -1020,6 +1101,10 @@
   function downloadSubmission() {
     var payload = buildSubmissionPayload();
 
+    if (!ensureSubmissionHasContact(payload)) {
+      return;
+    }
+
     if (!ensureSubmissionHasChanges(payload)) {
       return;
     }
@@ -1029,11 +1114,15 @@
     }
 
     downloadJson(submissionFileName(payload), payload);
-    setVersionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
+    setSubmissionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
   }
 
   function copySubmission() {
     var payload = buildSubmissionPayload();
+
+    if (!ensureSubmissionHasContact(payload)) {
+      return;
+    }
 
     if (!ensureSubmissionHasChanges(payload)) {
       return;
@@ -1045,16 +1134,20 @@
 
     copyTextToClipboard(JSON.stringify(payload, null, 2))
       .then(function () {
-        setVersionStatus("Submission JSON copied. Paste it into email, Slack, or the review form.", false);
+        setSubmissionStatus("Submission JSON copied. Paste it into email, Slack, or the review form.", false);
       })
       .catch(function () {
-        setVersionStatus("Clipboard copy failed. Use Download submission instead.", true);
+        setSubmissionStatus("Clipboard copy failed. Use Download submission instead.", true);
       });
   }
 
   function emailSubmission() {
     var payload = buildSubmissionPayload();
     var text = JSON.stringify(payload, null, 2);
+
+    if (!ensureSubmissionHasContact(payload)) {
+      return;
+    }
 
     if (!ensureSubmissionHasChanges(payload)) {
       return;
@@ -1067,13 +1160,13 @@
     copyTextToClipboard(text)
       .then(function () {
         var included = openSubmissionEmailDraft(payload, true, text);
-        setVersionStatus(included
+        setSubmissionStatus(included
           ? "Email draft opened with the submission JSON included. It was also copied to your clipboard."
           : "Email draft opened. Paste the copied submission JSON into the message before sending.", false);
       })
       .catch(function () {
         var included = openSubmissionEmailDraft(payload, false, text);
-        setVersionStatus(included
+        setSubmissionStatus(included
           ? "Email draft opened with the submission JSON included. Clipboard copy failed, but the draft contains the JSON."
           : "Email draft opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", !included);
       });
@@ -1082,6 +1175,10 @@
   function formSubmission() {
     var payload = buildSubmissionPayload();
     var text = JSON.stringify(payload, null, 2);
+
+    if (!ensureSubmissionHasContact(payload)) {
+      return;
+    }
 
     if (!ensureSubmissionHasChanges(payload)) {
       return;
@@ -1092,25 +1189,25 @@
     }
 
     if (reviewFormUrl() && !safeReviewFormUrl()) {
-      setVersionStatus("Unsafe review form URL ignored. Use email, copy, or download instead.", true);
+      setSubmissionStatus("Unsafe review form URL ignored. Use email, copy, or download instead.", true);
       return;
     }
 
     if (!safeReviewFormUrl()) {
-      setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
+      setSubmissionStatus("No review form URL is set. Use email, copy, or download instead.", true);
       return;
     }
 
     copyTextToClipboard(text)
       .then(function () {
         var included = openSubmissionReviewForm(payload, text);
-        setVersionStatus(included
+        setSubmissionStatus(included
           ? "Review form opened. Submission JSON is prefilled in the review form and copied to your clipboard as a backup."
           : "Review form opened. Paste the copied submission JSON into the form before sending.", false);
       })
       .catch(function () {
         var included = openSubmissionReviewForm(payload, text);
-        setVersionStatus(included
+        setSubmissionStatus(included
           ? "Review form opened. Submission JSON is prefilled in the review form."
           : "Review form opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", !included);
       });
