@@ -50,7 +50,7 @@ Recommended path:
 Other options:
 
 - Use **Copy submission** if you want to paste into Slack, Teams, or a review form.
-- Use **Open review form** if your reviewer gave you a form link. The builder copies the submission JSON first; paste it into the form before sending.
+- Use **Open review form** if your reviewer gave you a form link. The builder copies the submission JSON first. Many small submissions are also filled into the form automatically; if the JSON field is blank, paste the copied JSON before sending.
 - Use **Download submission** if attaching a file is easier.
 - If you are unsure, download the submission file and send that file to your reviewer.
 

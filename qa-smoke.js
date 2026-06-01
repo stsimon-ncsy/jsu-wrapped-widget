@@ -885,6 +885,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("function formSubmission"), "builder should copy JSON and open an optional review form");
   assert(builderJs.includes("review_url"), "builder should support a review_url query parameter for form-based submissions");
   assert(builderJs.includes("data-review-url"), "builder should support a data-review-url fallback for form-based submissions");
+  assert(builderJs.includes("MAX_REVIEW_FORM_URL_LENGTH"), "builder should avoid overlong review form prefill links");
+  assert(builderJs.includes("wrapped_submission"), "builder should prefill small staff submission JSON packets into review form links");
+  assert(builderJs.includes("Submission JSON is prefilled in the review form"), "builder should tell staff when the review form already includes the JSON");
   assert(builderJs.includes("function renderReviewEmailStatus"), "builder should render the configured review email status");
   assert(builderJs.includes("mailto:"), "builder email handoff should not require a backend");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
@@ -903,9 +906,11 @@ function runBuilderSubmissionSmoke() {
 
   assert(readme.includes("review_email"), "README should document pre-addressed staff review links");
   assert(readme.includes("review_url"), "README should document optional staff review form links");
+  assert(readme.includes("wrapped_submission"), "README should document the review form JSON prefill parameter");
   assert(readme.includes("usually includes the submission JSON automatically"), "README should document the low-friction email handoff");
   assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
   assert(playbook.includes("review_url"), "staff playbook should document optional staff review form links");
+  assert(playbook.includes("wrapped_submission"), "staff playbook should document the review form JSON prefill parameter");
   assert(playbook.includes("usually includes the submission JSON automatically"), "staff playbook should document the low-friction email handoff");
 }
 

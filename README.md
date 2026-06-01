@@ -82,7 +82,7 @@ To send staff to a separate intake form after copying the submission JSON, set `
 https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrapped-review@example.org&review_url=https%3A%2F%2Fncsy.org%2Fwrapped-review%2F
 ```
 
-The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. Staff still need to paste the copied submission JSON into the review form.
+The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. For small edit packets, it also adds `wrapped_submission` so a Gravity Forms textarea can be dynamically populated with the submission JSON. Keep the builder's clipboard copy and download options as fallbacks for larger submissions or locked-down browsers.
 
 For final-card CTAs, use `cta_target` when the button should open an embedded form panel such as `#jsuw-wrapped-interest`, or `cta_href` when it should navigate to a safe direct URL such as `https://ncsy.org/ncsy-wrapped/` or `/ncsy-wrapped/`.
 

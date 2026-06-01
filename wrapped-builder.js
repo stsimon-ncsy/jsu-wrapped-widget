@@ -4,6 +4,8 @@
   var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260601h";
   var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260601h";
   var MAX_MAILTO_URL_LENGTH = 7000;
+  var MAX_REVIEW_FORM_URL_LENGTH = 7000;
+  var REVIEW_FORM_SUBMISSION_PARAM = "wrapped_submission";
   var CARD_IDS = [
     "cover",
     "events",
@@ -770,13 +772,17 @@
     return root ? String(root.getAttribute("data-review-url") || "").trim() : "";
   }
 
-  function reviewFormUrlWithContext(payload) {
+  function reviewFormUrlWithContext(payload, submissionText) {
     var url = reviewFormUrl();
     var scopedUrl;
     var params;
+    var withSubmission;
 
     if (!url) {
-      return "";
+      return {
+        url: "",
+        includedSubmission: false
+      };
     }
 
     try {
@@ -794,9 +800,29 @@
         }
       });
 
-      return scopedUrl.toString();
+      if (hasValue(submissionText)) {
+        scopedUrl.searchParams.set(REVIEW_FORM_SUBMISSION_PARAM, submissionText);
+        withSubmission = scopedUrl.toString();
+
+        if (withSubmission.length <= MAX_REVIEW_FORM_URL_LENGTH) {
+          return {
+            url: withSubmission,
+            includedSubmission: true
+          };
+        }
+
+        scopedUrl.searchParams.delete(REVIEW_FORM_SUBMISSION_PARAM);
+      }
+
+      return {
+        url: scopedUrl.toString(),
+        includedSubmission: false
+      };
     } catch (error) {
-      return url;
+      return {
+        url: url,
+        includedSubmission: false
+      };
     }
   }
 
@@ -871,20 +897,22 @@
     return included;
   }
 
-  function openSubmissionReviewForm(payload) {
-    var url = reviewFormUrlWithContext(payload);
+  function openSubmissionReviewForm(payload, submissionText) {
+    var formUrl = reviewFormUrlWithContext(payload, submissionText);
     var opened;
 
-    if (!url) {
+    if (!formUrl.url) {
       setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
-      return;
+      return false;
     }
 
-    opened = window.open(url, "_blank", "noopener");
+    opened = window.open(formUrl.url, "_blank", "noopener");
 
     if (!opened) {
-      window.location.href = url;
+      window.location.href = formUrl.url;
     }
+
+    return formUrl.includedSubmission;
   }
 
   function submissionHasChanges(payload) {
@@ -1055,12 +1083,16 @@
 
     copyTextToClipboard(text)
       .then(function () {
-        openSubmissionReviewForm(payload);
-        setVersionStatus("Review form opened. Paste the copied submission JSON into the form before sending.", false);
+        var included = openSubmissionReviewForm(payload, text);
+        setVersionStatus(included
+          ? "Review form opened. Submission JSON is prefilled in the review form and copied to your clipboard as a backup."
+          : "Review form opened. Paste the copied submission JSON into the form before sending.", false);
       })
       .catch(function () {
-        openSubmissionReviewForm(payload);
-        setVersionStatus("Review form opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", true);
+        var included = openSubmissionReviewForm(payload, text);
+        setVersionStatus(included
+          ? "Review form opened. Submission JSON is prefilled in the review form."
+          : "Review form opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", !included);
       });
   }
 
