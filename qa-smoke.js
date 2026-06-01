@@ -97,9 +97,15 @@ function runPickerSmoke(records, config) {
         scope_type: "region",
         scope_slug: "atlantic-seaboard",
         scope_name: "Atlantic Seaboard",
-        chapter_slug: "atlantic-seaboard-summary",
-        chapter_name: "Atlantic Seaboard Regional Summary",
         region_name: "Atlantic Seaboard",
+        year_label: "2025-2026"
+      },
+      {
+        scope_type: "program",
+        scope_slug: "shabbat",
+        scope_name: "Shabbat Across JSU",
+        program_slug: "shabbat",
+        program_name: "Shabbat Across JSU",
         year_label: "2025-2026"
       }
     ],
@@ -110,7 +116,11 @@ function runPickerSmoke(records, config) {
   assert(html.includes("variant=donor-recap"), "sample picker variant link missing");
   assert(html.includes("Donor recap"), "sample picker variant label missing");
   assert((html.match(/jsuw-picker-item /g) || []).length === 1, "picker duplicated chapter rows");
-  assert(!html.includes("Regional Summary"), "picker should not show non-chapter story records");
+  assert(html.includes("jsuw-picker-scope-stories"), "picker should include scoped story discovery when region/program records exist");
+  assert(html.includes("Atlantic Seaboard"), "picker should surface region story records");
+  assert(html.includes("?scope=region&amp;region=atlantic-seaboard"), "picker region story link mismatch");
+  assert(html.includes("Shabbat Across JSU"), "picker should surface program story records");
+  assert(html.includes("?scope=program&amp;program=shabbat"), "picker program story link mismatch");
 }
 
 function runHiddenVariantSmoke() {

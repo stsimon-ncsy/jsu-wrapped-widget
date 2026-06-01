@@ -1073,6 +1073,56 @@
     }
   }
 
+  function buildScopedStoryUrl(record, url, variant) {
+    var scope = getStoryScope(record);
+    var href = url || (root && root.location && root.location.href) || "";
+    var base = root && root.location && root.location.href || "https://example.org/";
+    var hasVariantArgument = arguments.length >= 3;
+
+    if (scope.type === "chapter") {
+      return buildChapterUrl(record, url, variant);
+    }
+
+    if (!hasValue(scope.slug) || ["region", "program"].indexOf(scope.type) === -1) {
+      return href || "#";
+    }
+
+    try {
+      var parsed = new root.URL(href || base, base);
+      parsed.searchParams.set("scope", scope.type);
+      parsed.searchParams.delete("chapter");
+      parsed.searchParams.delete("card");
+      parsed.searchParams.delete("region");
+      parsed.searchParams.delete("program");
+      parsed.searchParams.delete("campaign");
+
+      if (scope.type === "region") {
+        parsed.searchParams.set("region", String(scope.slug).trim());
+      } else {
+        parsed.searchParams.set("program", String(scope.slug).trim());
+      }
+
+      if (hasVariantArgument) {
+        if (hasValue(variant)) {
+          parsed.searchParams.set("variant", String(variant).trim());
+        } else {
+          parsed.searchParams.delete("variant");
+        }
+      }
+
+      return parsed.href;
+    } catch (error) {
+      var bare = String(href || "").split("#")[0].split("?")[0] || "";
+      var query = "?scope=" + encodeURIComponent(scope.type) + (scope.type === "region" ? "&region=" : "&program=") + encodeURIComponent(String(scope.slug).trim());
+
+      if (hasVariantArgument && hasValue(variant)) {
+        query += "&variant=" + encodeURIComponent(String(variant).trim());
+      }
+
+      return bare + query;
+    }
+  }
+
   function buildTeenUrl(record, url) {
     var slug = record && (record.teen_slug || record.student_slug || record.slug) || "maya-test";
     var href = url || (root && root.location && root.location.href) || "";
@@ -1094,9 +1144,15 @@
 
   function renderChapterPickerMarkup(context) {
     var settings = context || {};
-    var records = Array.isArray(settings.records) ? settings.records.filter(function (record) {
+    var allRecords = Array.isArray(settings.records) ? settings.records.slice() : [];
+    var records = allRecords.filter(function (record) {
       return record && hasValue(record.chapter_slug) && getStoryScope(record).type === "chapter";
-    }).slice() : [];
+    });
+    var scopedRecords = allRecords.filter(function (record) {
+      var scope = getStoryScope(record);
+
+      return record && scope.type !== "chapter" && hasValue(scope.slug);
+    });
     var assetBase = settings.assetBase || "";
     var config = settings.config || {};
     var url = settings.url || (root && root.location && root.location.href) || "";
@@ -1139,6 +1195,48 @@
         stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
         "</span>",
         '<span class="jsuw-picker-arrow" aria-hidden="true">Next</span>',
+        "</a>",
+        variantLinks,
+        "</article>"
+      ].join("");
+    }
+
+    function scopedStatLine(record) {
+      return [
+        hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " programs" : "",
+        hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
+        hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : "",
+        hasValue(record.region_unique_teens) ? formatNumber(record.region_unique_teens) + " region teens" : "",
+        hasValue(record.national_engagement_moments) ? formatNumber(record.national_engagement_moments) + " national moments" : ""
+      ].filter(Boolean).slice(0, 3).join(" | ");
+    }
+
+    function renderScopedStoryItem(record) {
+      var scope = getStoryScope(record);
+      var brand = getBrandChoice(record);
+      var logoUrl = getLogoAsset(brand, assetBase);
+      var stats = scopedStatLine(record);
+      var label = scope.type === "region" ? "Region story" : "Program story";
+      var variants = collectVariantEntries(config, record, { program: scope.type === "program" ? scope.slug : program });
+      var variantLinks = variants.length ? [
+        '<div class="jsuw-picker-variants" aria-label="' + escapeHtml(scope.name) + ' versions">',
+        '<a href="' + escapeHtml(buildScopedStoryUrl(record, url, "")) + '">Default</a>',
+        variants.map(function (variant) {
+          return '<a href="' + escapeHtml(buildScopedStoryUrl(record, url, variant.slug)) + '">' + escapeHtml(variant.label) + "</a>";
+        }).join(""),
+        "</div>"
+      ].join("") : "";
+
+      return [
+        '<article class="jsuw-picker-entry jsuw-picker-entry--scope">',
+        '<a class="jsuw-picker-scope-card jsuw-picker-brand--' + escapeHtml(brand) + '" href="' + escapeHtml(buildScopedStoryUrl(record, url, "")) + '">',
+        '<span class="jsuw-picker-logo"><img src="' + escapeHtml(logoUrl) + '" alt=""></span>',
+        '<span class="jsuw-picker-copy">',
+        '<em>' + escapeHtml(label) + "</em>",
+        '<strong>' + escapeHtml(scope.name) + "</strong>",
+        stats ? '<span>' + escapeHtml(stats) + "</span>" : "",
+        "</span>",
+        '<span class="jsuw-picker-arrow" aria-hidden="true">Open</span>',
         "</a>",
         variantLinks,
         "</article>"
@@ -1199,6 +1297,23 @@
       chapterHtml = '<div class="jsuw-picker-empty">No chapter records are available yet.</div>';
     }
 
+    scopedRecords.sort(function (a, b) {
+      var scopeA = getStoryScope(a);
+      var scopeB = getStoryScope(b);
+      var typeCompare = scopeA.type.localeCompare(scopeB.type);
+
+      return typeCompare || scopeA.name.localeCompare(scopeB.name);
+    });
+
+    var scopedStoriesHtml = scopedRecords.length ? [
+      '<section class="jsuw-picker-scope-stories" aria-label="Region and program Wrapped stories">',
+      '<h2>Bigger stories</h2>',
+      '<div class="jsuw-picker-scope-list">',
+      scopedRecords.map(renderScopedStoryItem).join(""),
+      "</div>",
+      "</section>"
+    ].join("") : "";
+
     var teenTestLink = buildTeenUrl({ teen_slug: "maya-test" }, url);
 
     return [
@@ -1208,6 +1323,7 @@
       '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
       '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
       regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
+      scopedStoriesHtml,
       '<div class="jsuw-picker-list">',
       chapterHtml,
       "</div>",
@@ -4168,6 +4284,7 @@
     trackCardView: trackCardView,
     trackStoryView: trackStoryView,
     buildChapterUrl: buildChapterUrl,
+    buildScopedStoryUrl: buildScopedStoryUrl,
     buildRegionUrl: buildRegionUrl,
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,

@@ -66,6 +66,8 @@ Future region or cross-region program stories should use explicit story scope UR
 
 Those URLs expect first-class story records in the JSON with fields such as `scope_type`, `scope_slug`, and `scope_name`. Do not fake a region/program as a chapter record; use the scope fields and let the renderer normalize it as the story subject.
 
+When region or program story records exist, the no-parameter landing page surfaces them in a separate **Bigger stories** section. They do not enter the chapter list, and plain `?region=` remains a chapter-picker filter.
+
 Example region story record:
 
 ```json
