@@ -24,6 +24,36 @@
     return value !== null && value !== undefined && String(value).trim() !== "";
   }
 
+  function isSafeStaticUrl(value) {
+    var text;
+    var parsed;
+
+    if (!hasValue(value)) {
+      return true;
+    }
+
+    text = String(value).trim();
+
+    if (/[\u0000-\u001F\u007F\s]/.test(text)) {
+      return false;
+    }
+
+    if (/^https?:\/\//i.test(text)) {
+      try {
+        parsed = new URL(text);
+        return parsed.protocol === "https:" || parsed.protocol === "http:";
+      } catch (error) {
+        return false;
+      }
+    }
+
+    if (text.indexOf("//") === 0 || /^[a-z][a-z0-9+.-]*:/i.test(text)) {
+      return false;
+    }
+
+    return text.indexOf("/") === 0 || text.indexOf("./") === 0 || text.indexOf("../") === 0 || text.indexOf("#") === 0 || text.indexOf("?") === 0;
+  }
+
   function asText(value, fallback) {
     if (hasValue(value)) {
       return String(value);
@@ -1885,11 +1915,12 @@
 
   function getEffectiveCtaOptions(base, storyConfig) {
     var config = storyConfig || {};
+    var rawHref = config.cta_href || config.ctaHref || base && base.href;
 
     return {
       label: asText(config.cta_label || config.ctaLabel || base && base.label, ""),
       target: asText(config.cta_target || config.ctaTarget || base && base.target, ""),
-      href: asText(config.cta_href || config.ctaHref || base && base.href, "")
+      href: isSafeStaticUrl(rawHref) ? asText(rawHref, "") : ""
     };
   }
 
@@ -3577,12 +3608,13 @@
     var label = asText(trigger && trigger.getAttribute("data-jsuw-cta-label") || cta.label, "Wrapped interest");
     var targetSelector = asText(trigger && trigger.getAttribute("data-jsuw-cta-target") || cta.target, "");
     var href = asText(trigger && trigger.getAttribute("data-jsuw-cta-href") || cta.href, "");
+    var safeHref = isSafeStaticUrl(href) ? href : "";
     var panel = null;
 
     trackAnalyticsEvent(state, "jsu_wrapped_cta_click", {
       cta_label: label,
       cta_target: targetSelector,
-      cta_href: href
+      cta_href: safeHref
     });
 
     if (hasValue(targetSelector) && root.document && typeof root.document.querySelector === "function") {
@@ -3627,8 +3659,13 @@
       return;
     }
 
-    if (hasValue(href) && root.location) {
-      root.location.href = href;
+    if (hasValue(safeHref) && root.location) {
+      root.location.href = safeHref;
+      return;
+    }
+
+    if (hasValue(href)) {
+      setStatus(container, "CTA link is not available.");
       return;
     }
 
@@ -4421,6 +4458,7 @@
     getTeenDataUrl: getTeenDataUrl,
     getConfigUrl: getConfigUrl,
     getBrandChoice: getBrandChoice,
+    isSafeStaticUrl: isSafeStaticUrl,
     getSoundProfileForCard: getSoundProfileForCard,
     getAutoplayPreference: getAutoplayPreference,
     getAutoplayDelay: getAutoplayDelay,

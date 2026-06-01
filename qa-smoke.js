@@ -530,6 +530,21 @@ function runFormPrefillSmoke() {
   assert(context.wrapped_url.includes("variant=donor-recap"), "form prefill wrapped URL missing variant context");
 }
 
+function runRuntimeUrlSafetySmoke() {
+  const source = loadText("jsu-wrapped.js");
+
+  assert(typeof api.isSafeStaticUrl === "function", "runtime should expose the shared static URL safety helper for smoke tests");
+  assert(api.isSafeStaticUrl("https://ncsy.org/ncsy-wrapped/"), "runtime should allow https CTA URLs");
+  assert(api.isSafeStaticUrl("/ncsy-wrapped/#interest"), "runtime should allow root-relative CTA URLs");
+  assert(api.isSafeStaticUrl("./share/baltimore/"), "runtime should allow dot-relative CTA URLs");
+  assert(!api.isSafeStaticUrl("javascript:alert(1)"), "runtime should reject javascript CTA URLs");
+  assert(!api.isSafeStaticUrl("data:text/html,<script>alert(1)</script>"), "runtime should reject data CTA URLs");
+  assert(!api.isSafeStaticUrl("//evil.example/wrapped"), "runtime should reject protocol-relative CTA URLs");
+  assert(source.includes("isSafeStaticUrl(rawHref)"), "runtime should sanitize configured CTA href values before rendering");
+  assert(source.includes("isSafeStaticUrl(href) ? href : \"\""), "runtime should guard CTA navigation at click time");
+  assert(source.includes("CTA link is not available."), "runtime should report blocked unsafe CTA navigation without leaving the page");
+}
+
 function runAnalyticsDocsSmoke() {
   const docs = loadText("analytics-gtm-setup.md");
   const payload = api.createAnalyticsPayload({
@@ -1912,6 +1927,7 @@ function main() {
   runShareGeneratorCleanupSmoke();
   runAnalyticsSmoke();
   runFormPrefillSmoke();
+  runRuntimeUrlSafetySmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
   runScopedStoryValidationSmoke();
