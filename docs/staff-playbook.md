@@ -86,7 +86,9 @@ Choose the smallest scope that fits the audience:
 - Region scope when every chapter in a region should inherit the same CTA, logo choice, or custom screen.
 - Program scope when a cross-region effort, Shabbaton series, donor campaign, or program category needs shared framing across chapters.
 
-For pilot staff who should not edit GitHub directly, ask them to fill in the builder's submission info fields, then use **Download submission**. That file is intentionally smaller than the full config export: it includes the submitter name/email/note, the active chapter, region, or program scope, the variant if one is selected, a change summary, and the exact `merge_path` where the reviewed patch belongs in `wrapped-config-2026.json`.
+For pilot staff who should not edit GitHub directly, ask them to fill in the builder's submission info fields, then use **Copy submission** or **Download submission**. That review payload is intentionally smaller than the full config export: it includes the submitter name/email/note, the active chapter, region, or program scope, the variant if one is selected, a change summary, and the exact `merge_path` where the reviewed patch belongs in `wrapped-config-2026.json`.
+
+Use **Copy submission** when staff will paste the JSON into email, Slack, or a Gravity Form review field. Use **Download submission** when attaching a file is easier.
 
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 

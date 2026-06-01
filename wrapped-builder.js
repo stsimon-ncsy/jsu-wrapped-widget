@@ -658,11 +658,60 @@
     }, 0);
   }
 
+  function fallbackCopyText(text) {
+    return new Promise(function (resolve, reject) {
+      var textarea = document.createElement("textarea");
+
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      try {
+        if (document.execCommand && document.execCommand("copy")) {
+          resolve();
+        } else {
+          reject(new Error("Clipboard copy was not available."));
+        }
+      } catch (error) {
+        reject(error);
+      } finally {
+        textarea.remove();
+      }
+    });
+  }
+
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () {
+        return fallbackCopyText(text);
+      });
+    }
+
+    return fallbackCopyText(text);
+  }
+
   function downloadSubmission() {
     var payload = buildSubmissionPayload();
 
     downloadJson(submissionFileName(payload), payload);
     setVersionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
+  }
+
+  function copySubmission() {
+    var payload = buildSubmissionPayload();
+
+    copyTextToClipboard(JSON.stringify(payload, null, 2))
+      .then(function () {
+        setVersionStatus("Submission JSON copied. Paste it into email, Slack, or the review form.", false);
+      })
+      .catch(function () {
+        setVersionStatus("Clipboard copy failed. Use Download submission instead.", true);
+      });
   }
 
   function ensureCardOverride(section, cardId) {
@@ -1472,8 +1521,10 @@
         renderPreview();
       } else if (action === "download-submission") {
         downloadSubmission();
+      } else if (action === "copy-submission") {
+        copySubmission();
       } else if (action === "copy-export") {
-        navigator.clipboard.writeText(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
+        copyTextToClipboard(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }
     });
   }

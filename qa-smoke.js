@@ -704,6 +704,7 @@ function runBuilderSubmissionSmoke() {
   const builderJs = loadText("wrapped-builder.js");
 
   assert(builderHtml.includes('data-builder-action="download-submission"'), "builder should expose a staff submission download button");
+  assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
   assert(builderHtml.includes("data-builder-submitter-name"), "builder should collect submitter name for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-email"), "builder should collect submitter email for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-note"), "builder should collect reviewer notes for staff submissions");
@@ -717,6 +718,8 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("submitter_note"), "submission payload should include reviewer note");
   assert(builderJs.includes("jsu-wrapped-builder-submission"), "submission payload should identify its schema");
   assert(builderJs.includes("downloadSubmission"), "builder should download staff submissions as files");
+  assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
+  assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
 }
 
 function runBuilderIndexingSmoke() {
@@ -886,7 +889,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
-  const releaseToken = "jsuw-prod-20260601c";
+  const releaseToken = "jsuw-prod-20260601d";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
@@ -1110,6 +1113,7 @@ function runStaffPlaybookSmoke() {
     "Gravity Form",
     "Variants",
     "Download submission",
+    "Copy submission",
     "merge-builder-submission.js",
     "Do not commit downloaded staff submission JSON"
   ];

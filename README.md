@@ -37,16 +37,16 @@ For a normal HTML block that loads assets from GitHub Pages:
 <div
   id="jsu-wrapped"
   data-year="2026"
-  data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601c"
-  data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601c"
-  data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260601c"
+  data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601d"
+  data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601d"
+  data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260601d"
   data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
   data-cta-label="Get involved next year"
   data-cta-target="#jsuw-wrapped-interest"
 ></div>
 
-<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260601c">
-<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260601c"></script>
+<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260601d">
+<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260601d"></script>
 ```
 
 Use `wordpress-inline-embed.html` when the page template works better with a self-contained inline block.
@@ -62,8 +62,8 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
 3. Fill in the submission info fields.
-4. Click **Download submission**.
-5. Send the downloaded JSON to the repo maintainer for review.
+4. Click **Copy submission** to paste the smaller JSON into email, Slack, or a review form, or click **Download submission** to attach it as a file.
+5. Send that submission JSON to the repo maintainer for review.
 
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 
