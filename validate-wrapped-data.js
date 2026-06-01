@@ -142,6 +142,20 @@ const CONFIG_SECTION_KEYS = new Set([
   "variants"
 ]);
 
+const CARD_OVERRIDE_KEYS = new Set([
+  "eyebrow",
+  "displayEyebrow",
+  "headline",
+  "displayHeadline",
+  "subtext",
+  "badge",
+  "markerText",
+  "persona",
+  "chapterName",
+  "schoolName",
+  "yearLabel"
+]);
+
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
@@ -490,7 +504,10 @@ function validateCardOverrides(report, section, label) {
 
     if (override && (typeof override !== "object" || Array.isArray(override))) {
       addError(report, `${label}.card_overrides.${cardId} must be an object`);
+      return;
     }
+
+    validateKnownKeys(report, override || {}, CARD_OVERRIDE_KEYS, `${label}.card_overrides.${cardId}`);
   });
 }
 

@@ -1287,6 +1287,19 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const typoCardOverrideReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    chapters: {
+      baltimore: {
+        card_overrides: {
+          events: {
+            headlne: "Typo should not be ignored"
+          }
+        }
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -1297,6 +1310,7 @@ function runDataValidationSmoke(records, config) {
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.chaptrers")), "unknown top-level config keys should fail validation");
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.defaults.ctaa_label")), "unknown config section keys should fail validation");
   assert(!typoRecordOverrideReport.ok && typoRecordOverrideReport.errors.some((error) => error.includes("record_overrides.unique_teeens")), "unknown record override keys should fail validation");
+  assert(!typoCardOverrideReport.ok && typoCardOverrideReport.errors.some((error) => error.includes("card_overrides.events.headlne")), "unknown card override keys should fail validation");
 }
 
 function main() {
