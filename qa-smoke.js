@@ -1460,6 +1460,26 @@ function runBuilderSubmissionBatchReviewSmoke() {
 function runFallbackSvgSmoke(records, config) {
   const slugs = ["philadelphia", "baltimore", "greater-washington"];
 
+  function svgYPositions(svg, pattern) {
+    return Array.from(svg.matchAll(pattern)).map((match) => Number(match[1]));
+  }
+
+  function assertFallbackPosterSpacing(svg, label) {
+    const copyYs = svgYPositions(svg, /class="poster-copy" x="92" y="([0-9.]+)"/g);
+    const statYs = svgYPositions(svg, /<g transform="translate\(92 ([0-9.]+)\)">/g);
+    const ctaYs = svgYPositions(svg, /class="poster-cta" transform="translate\(92 ([0-9.]+)\)"/g);
+    const footerYs = svgYPositions(svg, /<rect x="92" y="([0-9.]+)" width="896" height="72"/g);
+    const lastCopyBottom = copyYs.length ? Math.max(...copyYs) + 48 : 0;
+    const lastStatBottom = statYs.length ? Math.max(...statYs) + 88 : 0;
+    const firstStatTop = statYs.length ? Math.min(...statYs) : Infinity;
+    const firstCtaTop = ctaYs.length ? Math.min(...ctaYs) : Infinity;
+    const firstFooterTop = footerYs.length ? Math.min(...footerYs) : Infinity;
+
+    assert(firstStatTop >= lastCopyBottom + 24, `${label} fallback SVG stats overlap summary copy`);
+    assert(firstCtaTop === Infinity || firstCtaTop >= lastStatBottom + 24, `${label} fallback SVG CTA overlaps stat rows`);
+    assert(firstFooterTop >= (firstCtaTop === Infinity ? lastStatBottom + 24 : firstCtaTop + 98), `${label} fallback SVG footer overlaps prior content`);
+  }
+
   slugs.forEach((slug) => {
     const record = records.find((item) => item.chapter_slug === slug);
 
@@ -1477,6 +1497,7 @@ function runFallbackSvgSmoke(records, config) {
     assert(!/letter-spacing\s*:\s*-\s*[^;}]+/.test(svg), `${slug} fallback SVG should not use negative letter spacing`);
     assert((svg.match(/poster-stat-value/g) || []).length <= 5, `${slug} fallback SVG rendered too many stat rows`);
     assert(svg.includes("poster-footer"), `${slug} fallback SVG missing footer`);
+    assertFallbackPosterSpacing(svg, slug);
   });
 
   const longRecord = {
@@ -1507,6 +1528,7 @@ function runFallbackSvgSmoke(records, config) {
   assert(svg.includes('class="poster-logo-image"'), "long fallback SVG should include the brand logo image when available");
   assert(svg.includes("Build next year&apos;s story"), "long fallback SVG should include the final CTA label");
   assert(svg.includes("poster-cta"), "long fallback SVG should render the CTA as a distinct poster element");
+  assertFallbackPosterSpacing(svg, "long");
 }
 
 function runInlineEmbedSmoke() {

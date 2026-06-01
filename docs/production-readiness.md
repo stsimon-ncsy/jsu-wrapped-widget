@@ -158,6 +158,8 @@ The event, moment, new-teen, and custom metric cards use oversized animated numb
 
 The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.
 
+The smoke suite also checks the fallback SVG's vertical geometry for the public sample chapters and a long-copy stress case. Keep the persona pill, summary copy, stat rows, CTA, and footer in separate vertical zones so the downloaded SVG does not look more crowded than the live final card.
+
 The runtime page metadata uses the combined social title format:
 
 ```text
