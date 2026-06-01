@@ -44,7 +44,8 @@ Recommended path:
 
 1. Click **Open email draft**.
 2. The builder copies the submission JSON to your clipboard.
-3. Paste the copied JSON into the email before sending.
+3. Check the email draft. Most small submissions are included automatically.
+4. If the JSON is not already in the draft, paste the copied JSON into the email before sending.
 
 Other options:
 

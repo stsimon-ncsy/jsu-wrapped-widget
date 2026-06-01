@@ -67,7 +67,7 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
 3. Fill in the submission info fields.
-4. Click **Open email draft** to copy the smaller JSON and start a review email, click **Open review form** if a form link was provided, click **Copy submission** to paste it into email, Slack, Teams, or a review form, or click **Download submission** to attach it as a file.
+4. Click **Open email draft** to copy the smaller JSON and start a review email. The draft usually includes the submission JSON automatically; if the edit packet is too large, paste the copied JSON before sending. Staff can also click **Open review form** if a form link was provided, **Copy submission** to paste into email, Slack, Teams, or a review form, or **Download submission** to attach it as a file.
 5. Send that submission JSON to the repo maintainer for review.
 
 To prefill the email recipient for pilot staff, set `data-review-email` on the `#wrapped-builder` element in `builder.html`, or send staff a pre-addressed builder link with `review_email`:

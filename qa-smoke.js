@@ -806,6 +806,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
   assert(builderJs.includes("function emailSubmission"), "builder should open a review email draft for staff submissions");
   assert(builderJs.includes("function buildSubmissionEmail"), "builder should build a staff submission email note");
+  assert(builderJs.includes("MAX_MAILTO_URL_LENGTH"), "builder should avoid overlong mailto links for submission JSON");
+  assert(builderJs.includes("Email draft opened with the submission JSON included"), "builder should include small submission JSON packets in email drafts");
+  assert(builderJs.includes("submission JSON included"), "builder should report when the email handoff already includes the JSON");
   assert(builderJs.includes("function reviewFormUrl"), "builder should read an optional staff review form URL");
   assert(builderJs.includes("function formSubmission"), "builder should copy JSON and open an optional review form");
   assert(builderJs.includes("review_url"), "builder should support a review_url query parameter for form-based submissions");
@@ -823,8 +826,10 @@ function runBuilderSubmissionSmoke() {
 
   assert(readme.includes("review_email"), "README should document pre-addressed staff review links");
   assert(readme.includes("review_url"), "README should document optional staff review form links");
+  assert(readme.includes("usually includes the submission JSON automatically"), "README should document the low-friction email handoff");
   assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
   assert(playbook.includes("review_url"), "staff playbook should document optional staff review form links");
+  assert(playbook.includes("usually includes the submission JSON automatically"), "staff playbook should document the low-friction email handoff");
 }
 
 function runBuilderIndexingSmoke() {

@@ -3,6 +3,7 @@
 
   var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260601h";
   var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260601h";
+  var MAX_MAILTO_URL_LENGTH = 7000;
   var CARD_IDS = [
     "cover",
     "events",
@@ -769,10 +770,25 @@
     }
   }
 
-  function buildSubmissionEmail(payload, copied) {
+  function buildSubmissionEmail(payload, options) {
+    options = options || {};
+
     var scopeLabel = payload.scope_label || payload.scope_slug || "Wrapped";
     var variantLabel = payload.variant_label || payload.variant_slug || "";
     var subjectParts = ["JSU/NCSY Wrapped submission", scopeLabel, variantLabel].filter(hasValue);
+    var includeSubmission = !!(options.includeSubmission && hasValue(options.submissionText));
+    var handoffLine;
+
+    if (includeSubmission) {
+      handoffLine = options.copied
+        ? "The submission JSON is included below. I also copied it to my clipboard as a backup."
+        : "The submission JSON is included below.";
+    } else {
+      handoffLine = options.copied
+        ? "The submission JSON has been copied to my clipboard. I will paste it below before sending."
+        : "The submission JSON was not copied automatically. I will use Copy submission or Download submission and include it with this email.";
+    }
+
     var lines = [
       "Hi,",
       "",
@@ -783,12 +799,15 @@
       "Version: " + (variantLabel || "Default"),
       "Preview URL: " + (payload.preview_url || ""),
       "",
-      copied
-        ? "The submission JSON has been copied to my clipboard. I will paste it below before sending."
-        : "The submission JSON was not copied automatically. I will use Copy submission or Download submission and include it with this email.",
+      handoffLine,
       "",
       "Submission JSON:"
     ];
+
+    if (includeSubmission) {
+      lines.push("");
+      lines.push(options.submissionText);
+    }
 
     return {
       to: reviewEmailAddress(),
@@ -801,8 +820,25 @@
     return "mailto:" + encodeURIComponent(email.to || "") + "?subject=" + encodeURIComponent(email.subject || "") + "&body=" + encodeURIComponent(email.body || "");
   }
 
-  function openSubmissionEmailDraft(payload, copied) {
-    window.location.href = submissionMailtoUrl(buildSubmissionEmail(payload, copied));
+  function openSubmissionEmailDraft(payload, copied, submissionText) {
+    var email = buildSubmissionEmail(payload, {
+      copied: copied,
+      includeSubmission: true,
+      submissionText: submissionText
+    });
+    var url = submissionMailtoUrl(email);
+    var included = hasValue(submissionText) && url.length <= MAX_MAILTO_URL_LENGTH;
+
+    if (!included) {
+      email = buildSubmissionEmail(payload, {
+        copied: copied,
+        includeSubmission: false
+      });
+      url = submissionMailtoUrl(email);
+    }
+
+    window.location.href = url;
+    return included;
   }
 
   function openSubmissionReviewForm(payload) {
@@ -908,12 +944,16 @@
 
     copyTextToClipboard(text)
       .then(function () {
-        openSubmissionEmailDraft(payload, true);
-        setVersionStatus("Email draft opened. Paste the copied submission JSON into the message before sending.", false);
+        var included = openSubmissionEmailDraft(payload, true, text);
+        setVersionStatus(included
+          ? "Email draft opened with the submission JSON included. It was also copied to your clipboard."
+          : "Email draft opened. Paste the copied submission JSON into the message before sending.", false);
       })
       .catch(function () {
-        openSubmissionEmailDraft(payload, false);
-        setVersionStatus("Email draft opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", true);
+        var included = openSubmissionEmailDraft(payload, false, text);
+        setVersionStatus(included
+          ? "Email draft opened with the submission JSON included. Clipboard copy failed, but the draft contains the JSON."
+          : "Email draft opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", !included);
       });
   }
 
