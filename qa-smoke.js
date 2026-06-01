@@ -857,13 +857,20 @@ function runFallbackSvgSmoke(records, config) {
   };
   const storyConfig = api.resolveStoryConfig({}, longRecord);
   const effective = api.createEffectiveRecord(longRecord, storyConfig);
-  const cards = api.createCards(effective, { storyConfig });
-  const svg = api.createFallbackSvg({ record: effective, cards, storyConfig, experienceMode: "chapter" }, "");
+  const cards = api.createCards(effective, {
+    storyConfig,
+    ctaLabel: "Build next year's story",
+    ctaTarget: "#jsuw-wrapped-interest"
+  });
+  const svg = api.createFallbackSvg({ record: effective, cards, storyConfig, experienceMode: "chapter" }, "data:image/png;base64,logo-test");
 
   assert(!/\b(undefined|null|NaN)\b/i.test(svg), "long fallback SVG has broken text");
   assert(!/letter-spacing\s*:\s*-\s*[^;}]+/.test(svg), "long fallback SVG should not use negative letter spacing");
   assert((svg.match(/poster-persona/g) || []).length >= 1, "long fallback SVG did not render persona text");
   assert((svg.match(/poster-stat-label/g) || []).length >= 3, "long fallback SVG did not render stat labels");
+  assert(svg.includes('class="poster-logo-image"'), "long fallback SVG should include the brand logo image when available");
+  assert(svg.includes("Build next year&apos;s story"), "long fallback SVG should include the final CTA label");
+  assert(svg.includes("poster-cta"), "long fallback SVG should render the CTA as a distinct poster element");
 }
 
 function runInlineEmbedSmoke() {
@@ -889,7 +896,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
-  const releaseToken = "jsuw-prod-20260601d";
+  const releaseToken = "jsuw-prod-20260601e";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;

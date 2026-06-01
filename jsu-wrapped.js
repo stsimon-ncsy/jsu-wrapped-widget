@@ -3911,14 +3911,14 @@
 
     if (hasValue(logoDataUrl)) {
       return [
-        '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
-        '<image href="' + escapeXml(logoDataUrl) + '" x="100" y="114" width="124" height="124" preserveAspectRatio="xMidYMid meet"/>'
+        '<rect class="poster-logo-frame" x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+        '<image class="poster-logo-image" href="' + escapeXml(logoDataUrl) + '" x="100" y="114" width="124" height="124" preserveAspectRatio="xMidYMid meet"/>'
       ].join("");
     }
 
     return [
-      '<rect x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
-      svgLine(brandText, 112, 192, brand === "ncsy" ? 40 : 56, 900, "#ffffff")
+      '<rect class="poster-logo-frame" x="78" y="92" width="168" height="168" rx="34" fill="#071464" stroke="#ffffff" stroke-width="5" opacity="0.98"/>',
+      '<text class="poster-logo-text" x="112" y="192" font-size="' + (brand === "ncsy" ? 40 : 56) + '" font-weight="900" fill="#ffffff" font-family="Arial, Helvetica, sans-serif">' + escapeXml(brandText) + "</text>"
     ].join("");
   }
 
@@ -3958,6 +3958,22 @@
         "</g>"
       ].join("");
     }).join("");
+  }
+
+  function fallbackCtaMarkup(label, y) {
+    var ctaLabel = asText(label, "").trim();
+
+    if (!ctaLabel) {
+      return "";
+    }
+
+    return [
+      '<g class="poster-cta" transform="translate(92 ' + y + ')">',
+      '<rect width="896" height="74" rx="37" fill="#fff4b7" opacity="0.98"/>',
+      svgFittedLine(ctaLabel, 126, 49, 644, 32, 24, 900, "#16032f", "poster-cta-label"),
+      svgFittedLine("Tap the link to connect", 710, 49, 232, 24, 18, 800, "#16032f", "poster-cta-action"),
+      "</g>"
+    ].join("");
   }
 
   function blobToDataUrl(blob) {
@@ -4021,6 +4037,11 @@
     var summaryY = personaY + personaPillHeight + 62;
     var summaryLineHeight = 48;
     var summaryLines = splitSvgLinesByWidth(fallbackSummaryText(record, card, persona, isTeen), 872, 40, 3);
+    var ctaLabel = card.cta && hasValue(card.cta.label) ? card.cta.label : "";
+    var hasCta = hasValue(ctaLabel);
+    var ctaY = 1660;
+    var footerY = hasCta ? 1774 : 1718;
+    var footerTextY = hasCta ? 1822 : 1766;
     var stats = card.summaryStats || [
       hasValue(record.events_hosted || record.events_attended) ? { value: formatNumber(record.events_hosted || record.events_attended), label: isTeen ? "events showed up to" : "programs together" } : null,
       hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one " + storyNoun } : null,
@@ -4029,7 +4050,8 @@
     var statCount = Math.min(5, stats.length || 3);
     var rowGap = statCount > 4 ? 98 : 108;
     var statsStartY = Math.max(1054, summaryY + summaryLines.length * summaryLineHeight + 46);
-    statsStartY = Math.min(statsStartY, 1688 - statCount * rowGap);
+    var statsBottomLimit = (hasCta ? ctaY - 24 : 1688) - ((statCount - 1) * rowGap + 88);
+    statsStartY = Math.min(statsStartY, statsBottomLimit);
 
     return [
       '<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">',
@@ -4056,8 +4078,9 @@
       svgTextLines(personaLines, 126, personaY + (personaLines.length > 1 ? 45 : 56), personaFontSize, 900, "#16032f", personaLineHeight, "poster-persona", 820, 24),
       svgTextLines(summaryLines, 92, summaryY, 40, 800, "#ffffff", summaryLineHeight, "poster-copy", 896, 28),
       fallbackStatRows(stats, statsStartY, rowGap),
-      '<rect x="92" y="1718" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
-      svgFittedLine(asText(record.region_name, "One movement") + " - One " + storyNoun + ". One movement.", 126, 1766, 828, 31, 22, 800, "#ffffff", "poster-footer"),
+      fallbackCtaMarkup(ctaLabel, ctaY),
+      '<rect x="92" y="' + footerY + '" width="896" height="72" rx="36" fill="#ffffff" opacity="0.16"/>',
+      svgFittedLine(asText(record.region_name, "One movement") + " - One " + storyNoun + ". One movement.", 126, footerTextY, 828, 31, 22, 800, "#ffffff", "poster-footer"),
       "</svg>"
     ].join("");
   }
