@@ -101,6 +101,7 @@ That command syncs the inline WordPress handoff, regenerates static share pages,
 ## Documentation
 
 - `docs/production-readiness.md` - technical production notes, URL patterns, QA expectations, CSS isolation, social sharing, WordPress embed details
+- `docs/data-contract.md` - JSON and config contract for story data, overrides, custom screens, and privacy boundaries
 - `docs/staff-playbook.md` - rollout strategy, CTA guidance, variant usage, staff follow-up, analytics review
 - `docs/pilot-staff-builder-guide.md` - short sendable guide for pilot staff returning builder submission JSON
 - `analytics-gtm-setup.md` - GA4/GTM event setup notes

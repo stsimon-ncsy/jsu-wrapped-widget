@@ -1367,6 +1367,42 @@ function runStaffPlaybookSmoke() {
   });
 }
 
+function runDataContractDocSmoke() {
+  const path = "docs/data-contract.md";
+
+  assert(fs.existsSync(path), "data contract doc is missing");
+
+  const doc = loadText(path);
+  const readme = loadText("README.md");
+  const productionDocs = loadText("docs/production-readiness.md");
+  const requiredPhrases = [
+    "JSU/NCSY Wrapped Data Contract",
+    "sample-wrapped-2026.json",
+    "wrapped-config-2026.json",
+    "chapter_slug",
+    "scope_type",
+    "chapter",
+    "region",
+    "program",
+    "record_overrides",
+    "card_overrides",
+    "custom_cards",
+    "brand_logo",
+    "palette",
+    "repeat_attendee_rate_label",
+    "largest_event_name",
+    "Do not include teen IDs",
+    "node validate-wrapped-data.js"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(doc.includes(phrase), `data contract doc missing ${phrase}`);
+  });
+
+  assert(readme.includes("docs/data-contract.md"), "README should link the data contract doc");
+  assert(productionDocs.includes("docs/data-contract.md"), "production docs should link the data contract doc");
+}
+
 function runPilotStaffGuideSmoke() {
   const path = "docs/pilot-staff-builder-guide.md";
 
@@ -1603,6 +1639,7 @@ function main() {
   runProductionCheckSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
+  runDataContractDocSmoke();
   runPilotStaffGuideSmoke();
   runStaffSubmissionPrivacySmoke();
 
