@@ -156,6 +156,32 @@ const CARD_OVERRIDE_KEYS = new Set([
   "yearLabel"
 ]);
 
+const CUSTOM_CARD_KEYS = new Set([
+  "id",
+  "type",
+  "placement",
+  "after",
+  "before",
+  "hidden",
+  "eyebrow",
+  "displayEyebrow",
+  "headline",
+  "displayHeadline",
+  "value",
+  "label",
+  "statLabel",
+  "subtext",
+  "copy",
+  "badge",
+  "image_url",
+  "imageUrl",
+  "src",
+  "image_alt",
+  "imageAlt",
+  "alt",
+  "caption"
+]);
+
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
@@ -528,6 +554,8 @@ function validateCustomCards(report, section, label) {
       addError(report, `${cardLabel} must be an object`);
       return;
     }
+
+    validateKnownKeys(report, card, CUSTOM_CARD_KEYS, cardLabel);
 
     const type = String(card.type || "text").trim().toLowerCase();
 
