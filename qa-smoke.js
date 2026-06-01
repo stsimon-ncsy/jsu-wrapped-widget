@@ -750,6 +750,8 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("downloadSubmission"), "builder should download staff submissions as files");
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
+  assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
+  assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
 }
 
 function runBuilderIndexingSmoke() {
@@ -886,6 +888,39 @@ function runBuilderSubmissionMergeSmoke() {
   const deepPathConfig = JSON.parse(fs.readFileSync(deepPathConfigPath, "utf8"));
   assert(deepPathOutput.includes("builder-generated scope or variant path"), "deep staff submission merge paths should fail clearly");
   assert(!deepPathConfig.chapters.baltimore.card_overrides, "deep staff submission path should not be written");
+
+  const emptyPatchConfigPath = path.join(tempDir, "empty-patch-config.json");
+  const emptyPatchSubmissionPath = path.join(tempDir, "empty-patch-submission.json");
+
+  fs.writeFileSync(emptyPatchConfigPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {}
+    }
+  }, null, 2));
+  fs.writeFileSync(emptyPatchSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    merge_path: ["chapters", "baltimore"],
+    config_patch: {}
+  }, null, 2));
+
+  let emptyPatchOutput = "";
+  try {
+    childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", emptyPatchSubmissionPath, emptyPatchConfigPath], {
+      cwd: __dirname,
+      encoding: "utf8",
+      stdio: "pipe"
+    });
+  } catch (error) {
+    emptyPatchOutput = String(error.stderr || error.stdout || error.message || "");
+  }
+
+  assert(emptyPatchOutput.includes("no changes"), "empty staff submissions should fail clearly");
 }
 
 function runFallbackSvgSmoke(records, config) {

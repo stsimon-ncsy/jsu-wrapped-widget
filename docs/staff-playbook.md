@@ -90,6 +90,8 @@ For pilot staff who should not edit GitHub directly, ask them to fill in the bui
 
 Use **Copy submission** when staff will paste the JSON into email, Slack, or a Gravity Form review field. Use **Download submission** when attaching a file is easier.
 
+The builder blocks no-change review packets. Staff should make at least one copy, metric, CTA, logo, palette, hide/show, or custom-screen change before sending a submission back.
+
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 
 After review, merge a submitted file locally with:

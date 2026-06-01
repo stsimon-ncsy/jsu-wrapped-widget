@@ -695,8 +695,27 @@
     return fallbackCopyText(text);
   }
 
+  function submissionHasChanges(payload) {
+    var patch = payload && payload.config_patch;
+
+    return !!(patch && typeof patch === "object" && !Array.isArray(patch) && Object.keys(patch).length);
+  }
+
+  function ensureSubmissionHasChanges(payload) {
+    if (submissionHasChanges(payload)) {
+      return true;
+    }
+
+    setVersionStatus("Add at least one change before sending this for review.", true);
+    return false;
+  }
+
   function downloadSubmission() {
     var payload = buildSubmissionPayload();
+
+    if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
 
     downloadJson(submissionFileName(payload), payload);
     setVersionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
@@ -704,6 +723,10 @@
 
   function copySubmission() {
     var payload = buildSubmissionPayload();
+
+    if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
 
     copyTextToClipboard(JSON.stringify(payload, null, 2))
       .then(function () {

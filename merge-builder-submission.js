@@ -70,6 +70,12 @@ function assertSafePatch(value, trail) {
   });
 }
 
+function assertPatchHasChanges(value) {
+  if (!isPlainObject(value) || !Object.keys(value).length) {
+    throw new Error("Submission config_patch has no changes.");
+  }
+}
+
 function cloneValue(value) {
   if (Array.isArray(value)) {
     return value.map(cloneValue);
@@ -126,6 +132,7 @@ function validateSubmission(submission) {
 
   assertSafeMergePath(submission.merge_path);
   assertSafePatch(submission.config_patch, ["config_patch"]);
+  assertPatchHasChanges(submission.config_patch);
 }
 
 function mergeSubmission(config, submission) {
