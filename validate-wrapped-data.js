@@ -47,6 +47,31 @@ const TEEN_NUMERIC_FIELDS = [
   "national_engagement_moments"
 ];
 
+const STORY_CARD_IDS = new Set([
+  "cover",
+  "events",
+  "reach",
+  "moments",
+  "new",
+  "repeat",
+  "biggest",
+  "persona",
+  "movement",
+  "final"
+]);
+
+const CUSTOM_CARD_TYPES = new Set([
+  "text",
+  "metric",
+  "stat",
+  "number",
+  "media",
+  "photo",
+  "image"
+]);
+
+const CUSTOM_CARD_TYPE_LABEL = Array.from(CUSTOM_CARD_TYPES).join(", ");
+
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
@@ -56,6 +81,37 @@ function slugify(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeCardId(value) {
+  const id = slugify(value);
+  const aliases = {
+    event: "events",
+    "events-hosted": "events",
+    teens: "reach",
+    "teen-reach": "reach",
+    "unique-teens": "reach",
+    engagement: "moments",
+    "engagement-moments": "moments",
+    "new-teens": "new",
+    "new-faces": "new",
+    "repeat-engagement": "repeat",
+    "repeat-attendee-rate": "repeat",
+    "biggest-event": "biggest",
+    "chapter-persona": "persona",
+    "bigger-movement": "movement",
+    share: "final",
+    "final-share": "final"
+  };
+
+  return aliases[id] || id;
+}
+
+function normalizePlacement(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function readJson(path) {
@@ -276,6 +332,125 @@ function validateTeenRecords(records) {
   return report;
 }
 
+function isKnownPlacement(value) {
+  const placement = normalizePlacement(value || "before_final");
+
+  if (["start", "end", "before_final", "after_final"].includes(placement)) {
+    return true;
+  }
+
+  const match = placement.match(/^(after|before)_(.+)$/);
+  const target = match ? normalizeCardId(match[2]) : normalizeCardId(placement);
+
+  return STORY_CARD_IDS.has(target);
+}
+
+function validateHiddenCards(report, section, label) {
+  if (section.hidden_cards === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(section.hidden_cards)) {
+    addError(report, `${label}.hidden_cards must be an array`);
+    return;
+  }
+
+  section.hidden_cards.forEach((cardId, index) => {
+    const normalized = normalizeCardId(cardId);
+
+    if (!STORY_CARD_IDS.has(normalized)) {
+      addError(report, `${label}.hidden_cards[${index}] references unknown card "${cardId}"`);
+    }
+  });
+}
+
+function validateCardOverrides(report, section, label) {
+  if (section.card_overrides === undefined) {
+    return;
+  }
+
+  if (!section.card_overrides || typeof section.card_overrides !== "object" || Array.isArray(section.card_overrides)) {
+    addError(report, `${label}.card_overrides must be an object`);
+    return;
+  }
+
+  Object.keys(section.card_overrides).forEach((cardId) => {
+    const normalized = normalizeCardId(cardId);
+
+    if (!STORY_CARD_IDS.has(normalized)) {
+      addError(report, `${label}.card_overrides.${cardId} references unknown card`);
+    }
+
+    const override = section.card_overrides[cardId];
+
+    if (override && (typeof override !== "object" || Array.isArray(override))) {
+      addError(report, `${label}.card_overrides.${cardId} must be an object`);
+    }
+  });
+}
+
+function validateCustomCards(report, section, label) {
+  if (section.custom_cards === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(section.custom_cards)) {
+    addError(report, `${label}.custom_cards must be an array`);
+    return;
+  }
+
+  section.custom_cards.forEach((card, index) => {
+    const cardLabel = `${label}.custom_cards[${index}]`;
+
+    if (!card || typeof card !== "object" || Array.isArray(card)) {
+      addError(report, `${cardLabel} must be an object`);
+      return;
+    }
+
+    const type = String(card.type || "text").trim().toLowerCase();
+
+    if (!CUSTOM_CARD_TYPES.has(type)) {
+      addError(report, `${cardLabel}.type must be one of: ${CUSTOM_CARD_TYPE_LABEL}`);
+    }
+
+    [
+      ["placement", card.placement],
+      ["after", card.after],
+      ["before", card.before]
+    ].forEach(([field, value]) => {
+      if (value !== undefined && !isKnownPlacement(value)) {
+        addError(report, `${cardLabel}.${field} references unknown card "${value}"`);
+      }
+    });
+  });
+}
+
+function validateConfigSection(report, section, label) {
+  if (section === undefined) {
+    return;
+  }
+
+  if (!section || typeof section !== "object" || Array.isArray(section)) {
+    addError(report, `${label} must be an object`);
+    return;
+  }
+
+  validateHiddenCards(report, section, label);
+  validateCardOverrides(report, section, label);
+  validateCustomCards(report, section, label);
+
+  if (section.variants !== undefined) {
+    if (!section.variants || typeof section.variants !== "object" || Array.isArray(section.variants)) {
+      addError(report, `${label}.variants must be an object`);
+      return;
+    }
+
+    Object.keys(section.variants).forEach((slug) => {
+      validateConfigSection(report, section.variants[slug], `${label}.variants.${slug}`);
+    });
+  }
+}
+
 function validateConfig(config, chapterRecords) {
   const report = createReport();
   const chapterSlugs = new Set();
@@ -286,6 +461,8 @@ function validateConfig(config, chapterRecords) {
     addError(report, "wrapped config must be an object");
     return report;
   }
+
+  validateConfigSection(report, config.defaults || {}, "config.defaults");
 
   (chapterRecords || []).forEach((record) => {
     if (!record || typeof record !== "object" || Array.isArray(record)) {
@@ -345,24 +522,32 @@ function validateConfig(config, chapterRecords) {
     if (!chapterSlugs.has(slugify(slug))) {
       addError(report, `config chapter "${slug}" does not match a chapter_slug in data`);
     }
+
+    validateConfigSection(report, config.chapters[slug], `config chapter "${slug}"`);
   });
 
   Object.keys(config.regions || {}).forEach((slug) => {
     if (!regionSlugs.has(slugify(slug))) {
       addError(report, `config region "${slug}" does not match a region_name in data`);
     }
+
+    validateConfigSection(report, config.regions[slug], `config region "${slug}"`);
   });
 
   Object.keys(config.programs || {}).forEach((slug) => {
     if (!programSlugs.has(slugify(slug))) {
       addError(report, `config program "${slug}" does not match a program_slug, program_name, or top_program_type in data`);
     }
+
+    validateConfigSection(report, config.programs[slug], `config program "${slug}"`);
   });
 
   Object.keys(config.campaigns || {}).forEach((slug) => {
     if (!programSlugs.has(slugify(slug))) {
       addError(report, `config campaign "${slug}" does not match a program_slug, program_name, campaign_slug, campaign_name, or top_program_type in data`);
     }
+
+    validateConfigSection(report, config.campaigns[slug], `config campaign "${slug}"`);
   });
 
   return report;

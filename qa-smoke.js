@@ -528,11 +528,33 @@ function runScopedStoryValidationSmoke() {
       "missing-campaign": {}
     }
   }, storyRecords);
+  const badCardConfigReport = dataValidator.validateConfig({
+    chapters: {
+      baltimore: {
+        hidden_cards: ["evnts"],
+        card_overrides: {
+          perssona: { headline: "Typo should fail" }
+        },
+        custom_cards: [
+          {
+            id: "bad-custom",
+            type: "metrik",
+            placement: "after_perssona",
+            headline: "Typo should fail"
+          }
+        ]
+      }
+    }
+  }, storyRecords);
 
   assert(report.ok, `mixed story scope validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateScopeReport.ok && duplicateScopeReport.errors.some((error) => error.includes("Duplicate")), "duplicate region scope slugs should fail validation");
   assert(!badProgramConfigReport.ok && badProgramConfigReport.errors.some((error) => error.includes("config program")), "unknown program config should fail validation");
   assert(!badCampaignConfigReport.ok && badCampaignConfigReport.errors.some((error) => error.includes("config campaign")), "unknown campaign config should fail validation");
+  assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("hidden_cards")), "unknown hidden card ids should fail validation");
+  assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("card_overrides")), "unknown card override ids should fail validation");
+  assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("custom_cards[0].type")), "unknown custom card types should fail validation");
+  assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("custom_cards[0].placement")), "unknown custom card placements should fail validation");
 }
 
 function runBuilderFutureScopeSmoke() {
