@@ -54,6 +54,10 @@ Other options:
 - Use **Download submission** if attaching a file is easier.
 - If you are unsure, download the submission file and send that file to your reviewer.
 
+## Unsafe URLs
+
+If the builder warns about an unsafe direct CTA URL or custom media image URL, fix it before sending. Use `https://`, `http://`, a site path that starts with `/`, or a relative path that starts with `./` or `../`.
+
 ## What Not To Send
 
 Do not use Copy JSON unless your reviewer specifically asks for the full config export. For pilot review, the smaller submission JSON is the right file.

@@ -818,6 +818,11 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
   assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
   assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
+  assert(builderJs.includes("function isSafeStaticUrl"), "builder should validate staff-entered static URLs before review submission");
+  assert(builderJs.includes("function customMediaImageValue"), "builder should read media image URLs from every supported config field");
+  assert(builderJs.includes("Custom media screen \" + (index + 1) + \" has an unsafe image URL"), "builder should warn about unsafe custom media image URLs");
+  assert(builderJs.includes("Direct CTA URL is unsafe"), "builder should warn about unsafe direct CTA URLs");
+  assert(builderJs.includes("Fix unsafe URLs before sending this for review."), "builder should block staff submissions with unsafe URLs");
   assert(builderCss.includes(".builder-actions--review button"), "builder review action buttons should have mobile-specific sizing");
   assert(builderCss.includes(".builder-actions button:disabled"), "builder should visually distinguish disabled review actions");
 
@@ -1634,6 +1639,7 @@ function runPilotStaffGuideSmoke() {
     "Open review form",
     "Copy submission",
     "Download submission",
+    "Unsafe URLs",
     "Do not use Copy JSON",
     "Do not edit the submission JSON by hand",
     "If you are unsure, download the submission file"

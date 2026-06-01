@@ -106,6 +106,36 @@
     return value !== null && value !== undefined && String(value).trim() !== "";
   }
 
+  function isSafeStaticUrl(value) {
+    var text;
+    var parsed;
+
+    if (!hasValue(value)) {
+      return true;
+    }
+
+    text = String(value).trim();
+
+    if (/[\u0000-\u001F\u007F\s]/.test(text)) {
+      return false;
+    }
+
+    if (/^https?:\/\//i.test(text)) {
+      try {
+        parsed = new URL(text);
+        return parsed.protocol === "https:" || parsed.protocol === "http:";
+      } catch (error) {
+        return false;
+      }
+    }
+
+    if (text.indexOf("//") === 0 || /^[a-z][a-z0-9+.-]*:/i.test(text)) {
+      return false;
+    }
+
+    return text.indexOf("/") === 0 || text.indexOf("./") === 0 || text.indexOf("../") === 0 || text.indexOf("#") === 0 || text.indexOf("?") === 0;
+  }
+
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -863,12 +893,49 @@
     return !!(patch && typeof patch === "object" && !Array.isArray(patch) && Object.keys(patch).length);
   }
 
+  function submissionHasUnsafeUrls(payload) {
+    var patch = payload && payload.config_patch;
+    var customCards = patch && Array.isArray(patch.custom_cards) ? patch.custom_cards : [];
+
+    if (patch && !isSafeStaticUrl(patch.cta_href || patch.ctaHref)) {
+      return true;
+    }
+
+    return customCards.some(function (card) {
+      var urls;
+
+      if (!card || card.type !== "media") {
+        return false;
+      }
+
+      urls = [
+        card.image_url,
+        card.imageUrl,
+        card.src
+      ].filter(hasValue);
+
+      return urls.some(function (value) {
+        return !isSafeStaticUrl(value);
+      });
+    });
+  }
+
   function ensureSubmissionHasChanges(payload) {
     if (submissionHasChanges(payload)) {
       return true;
     }
 
     setVersionStatus("Add at least one change before sending this for review.", true);
+    return false;
+  }
+
+  function ensureSubmissionIsSafe(payload) {
+    if (!submissionHasUnsafeUrls(payload)) {
+      return true;
+    }
+
+    setVersionStatus("Fix unsafe URLs before sending this for review.", true);
+    renderWarnings();
     return false;
   }
 
@@ -914,6 +981,10 @@
       return;
     }
 
+    if (!ensureSubmissionIsSafe(payload)) {
+      return;
+    }
+
     downloadJson(submissionFileName(payload), payload);
     setVersionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
   }
@@ -922,6 +993,10 @@
     var payload = buildSubmissionPayload();
 
     if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
+
+    if (!ensureSubmissionIsSafe(payload)) {
       return;
     }
 
@@ -939,6 +1014,10 @@
     var text = JSON.stringify(payload, null, 2);
 
     if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
+
+    if (!ensureSubmissionIsSafe(payload)) {
       return;
     }
 
@@ -962,6 +1041,10 @@
     var text = JSON.stringify(payload, null, 2);
 
     if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
+
+    if (!ensureSubmissionIsSafe(payload)) {
       return;
     }
 
@@ -1301,6 +1384,10 @@
     return section.custom_cards;
   }
 
+  function customMediaImageValue(card) {
+    return card && (card.image_url || card.imageUrl || card.src) || "";
+  }
+
   function renderCustomCards() {
     var section = getActiveSection();
     var cards = ensureCustomCards(section);
@@ -1331,7 +1418,7 @@
         '<label>Headline<input data-custom-index="' + index + '" data-custom-field="headline" value="' + escapeHtml(card.headline || "") + '"></label>',
         '<label>Value<input data-custom-index="' + index + '" data-custom-field="value" value="' + escapeHtml(card.value || "") + '"></label>',
         '<label>Label<input data-custom-index="' + index + '" data-custom-field="label" value="' + escapeHtml(card.label || "") + '"></label>',
-        '<label>Image URL<input data-custom-index="' + index + '" data-custom-field="image_url" value="' + escapeHtml(card.image_url || "") + '"></label>',
+        '<label>Image URL<input data-custom-index="' + index + '" data-custom-field="image_url" value="' + escapeHtml(customMediaImageValue(card)) + '"></label>',
         '<label>Copy<textarea data-custom-index="' + index + '" data-custom-field="subtext">' + escapeHtml(card.subtext || "") + "</textarea></label>",
         "</div>",
         "</article>"
@@ -1417,7 +1504,13 @@
       warnings.push("CTA label is set, but no form selector or direct URL is configured.");
     }
 
+    if (!isSafeStaticUrl(effective.cta_href || effective.ctaHref)) {
+      warnings.push("Direct CTA URL is unsafe. Use an https://, http://, root-relative, dot-relative, query, or fragment URL.");
+    }
+
     customCards.forEach(function (card, index) {
+      var mediaUrls;
+
       if (String(card.headline || "").length > 68) {
         warnings.push("Custom screen " + (index + 1) + " has a long headline that may wrap tightly on phones.");
       }
@@ -1426,8 +1519,22 @@
         warnings.push("Custom metric screen " + (index + 1) + " needs a value.");
       }
 
-      if (card.type === "media" && !hasValue(card.image_url)) {
+      if (card.type === "media" && !hasValue(customMediaImageValue(card))) {
         warnings.push("Custom media screen " + (index + 1) + " needs an image URL.");
+      }
+
+      if (card.type === "media") {
+        mediaUrls = [
+          card.image_url,
+          card.imageUrl,
+          card.src
+        ].filter(hasValue);
+
+        if (mediaUrls.some(function (value) {
+          return !isSafeStaticUrl(value);
+        })) {
+          warnings.push("Custom media screen " + (index + 1) + " has an unsafe image URL. Use an https://, http://, root-relative, dot-relative, query, or fragment URL.");
+        }
       }
     });
 
@@ -1693,6 +1800,11 @@
         card[customKey] = field.value;
       } else {
         delete card[customKey];
+      }
+
+      if (customKey === "image_url") {
+        delete card.imageUrl;
+        delete card.src;
       }
 
       if (customKey === "headline") {
