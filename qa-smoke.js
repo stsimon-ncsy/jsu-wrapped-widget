@@ -1331,6 +1331,19 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const invalidBrandPaletteReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    defaults: {
+      brand_logo: "ncsyy",
+      palette: "midnight"
+    },
+    chapters: {
+      baltimore: {
+        accent_palette: "purplegold"
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -1344,6 +1357,9 @@ function runDataValidationSmoke(records, config) {
   assert(!typoCardOverrideReport.ok && typoCardOverrideReport.errors.some((error) => error.includes("card_overrides.events.headlne")), "unknown card override keys should fail validation");
   assert(!typoCustomCardReport.ok && typoCustomCardReport.errors.some((error) => error.includes("custom_cards[0].image_urll")), "unknown custom card keys should fail validation");
   assert(!missingMediaImageReport.ok && missingMediaImageReport.errors.some((error) => error.includes("custom_cards[0].image_url")), "media custom cards without an image URL should fail validation");
+  assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.brand_logo")), "invalid config brand logos should fail validation");
+  assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config.defaults.palette")), "invalid config palettes should fail validation");
+  assert(!invalidBrandPaletteReport.ok && invalidBrandPaletteReport.errors.some((error) => error.includes("config chapter \"baltimore\".accent_palette")), "invalid config accent palettes should fail validation");
 }
 
 function main() {

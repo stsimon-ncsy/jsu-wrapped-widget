@@ -79,6 +79,17 @@ const TEEN_BLOCKED_FIELD_PARTS = [
 const EMAIL_VALUE_PATTERN = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
 const PHONE_VALUE_PATTERN = /\b(?:\+?1[\s.-]?)?(?:\(?[2-9]\d{2}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/;
 
+const BRAND_LOGO_VALUES = new Set([
+  "jsu",
+  "ncsy"
+]);
+
+const PALETTE_VALUES = new Set([
+  "electric",
+  "purple-gold",
+  "sunset"
+]);
+
 const STORY_CARD_IDS = new Set([
   "cover",
   "events",
@@ -442,7 +453,7 @@ function validateChapterRecords(records) {
 
     validateNumericFields(report, record, CHAPTER_NUMERIC_FIELDS, "story records", index);
 
-    if (hasValue(record.brand_logo) && !["jsu", "ncsy"].includes(String(record.brand_logo).trim().toLowerCase())) {
+    if (hasValue(record.brand_logo) && !BRAND_LOGO_VALUES.has(String(record.brand_logo).trim().toLowerCase())) {
       addError(report, `story records[${index}].brand_logo must be jsu or ncsy`);
     }
   });
@@ -631,6 +642,21 @@ function validateRecordOverrides(report, section, label, storyRecordFields) {
   });
 }
 
+function validateSectionDisplayValues(report, section, label) {
+  if (hasValue(section.brand_logo) && !BRAND_LOGO_VALUES.has(String(section.brand_logo).trim().toLowerCase())) {
+    addError(report, `${label}.brand_logo must be jsu or ncsy`);
+  }
+
+  [
+    ["palette", section.palette],
+    ["accent_palette", section.accent_palette]
+  ].forEach(([field, value]) => {
+    if (hasValue(value) && !PALETTE_VALUES.has(String(value).trim().toLowerCase())) {
+      addError(report, `${label}.${field} must be one of: ${Array.from(PALETTE_VALUES).join(", ")}`);
+    }
+  });
+}
+
 function validateConfigSection(report, section, label, storyRecordFields) {
   if (section === undefined) {
     return;
@@ -642,6 +668,7 @@ function validateConfigSection(report, section, label, storyRecordFields) {
   }
 
   validateKnownKeys(report, section, CONFIG_SECTION_KEYS, label);
+  validateSectionDisplayValues(report, section, label);
   validateHiddenCards(report, section, label);
   validateCardOverrides(report, section, label);
   validateCustomCards(report, section, label);
