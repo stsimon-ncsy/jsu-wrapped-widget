@@ -2324,6 +2324,16 @@
   text-align: right;
 }
 
+#jsu-wrapped .jsuw-reference-biggest .jsuw-headline {
+  font-size: clamp(1.62rem, 7.4vw, 1.96rem);
+  line-height: 0.96;
+  max-width: 9.8ch;
+}
+
+#jsu-wrapped .jsuw-reference-biggest .jsuw-ticket {
+  top: 58%;
+}
+
 #jsu-wrapped .jsuw-persona-card {
   background: #150428;
   border: 4px solid #150428;
@@ -3987,6 +3997,25 @@
     width: calc(100% - 48px);
   }
 
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-headline {
+    font-size: clamp(1.42rem, 7.2vw, 1.74rem);
+    max-width: 9.4ch;
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket {
+    padding: 16px 18px 18px;
+    top: 60%;
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-title {
+    font-size: clamp(1.78rem, 8.7vw, 2.15rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-number,
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-stats strong {
+    font-size: 2.4rem;
+  }
+
   #jsu-wrapped .jsuw-mini-stat-row,
   #jsu-wrapped .jsuw-tag-cloud,
   #jsu-wrapped .jsuw-movement-list--reference {
@@ -4083,6 +4112,25 @@
 
   #jsu-wrapped .jsuw-ticket {
     top: 53%;
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-headline {
+    font-size: clamp(1.18rem, 6.6vw, 1.42rem);
+    max-width: 10.2ch;
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket {
+    padding: 14px 16px 16px;
+    top: 54%;
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-title {
+    font-size: clamp(1.55rem, 8vw, 1.9rem);
+  }
+
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-number,
+  #jsu-wrapped .jsuw-reference-biggest .jsuw-ticket-stats strong {
+    font-size: 2.1rem;
   }
 
   #jsu-wrapped .jsuw-persona-card {

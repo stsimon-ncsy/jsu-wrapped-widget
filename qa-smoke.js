@@ -721,6 +721,23 @@ function runInlineEmbedSmoke() {
   assert((inline.match(/<script>/g) || []).length === 1, "WordPress embed should have one inline script block");
 }
 
+function runAssetVersionSmoke() {
+  const files = ["index.html", "embed-example.html", "builder.html"];
+  const releaseToken = "jsuw-prod-20260601";
+  const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
+
+  files.forEach((file) => {
+    const html = loadText(file);
+    const references = html.match(assetPattern) || [];
+
+    assert(references.length, `${file} has no versioned local asset references`);
+    references.forEach((reference) => {
+      assert(reference.includes(`?v=${releaseToken}`), `${file} has stale or missing asset version: ${reference}`);
+    });
+    assert(!/[?&]v=(?:builder|palette)\d+/i.test(html), `${file} still uses builder/palette cache tokens`);
+  });
+}
+
 function findMatchingBrace(css, openIndex) {
   let depth = 0;
 
@@ -805,6 +822,13 @@ function runCssPolishSmoke() {
   const negativeLetterSpacing = css.match(/letter-spacing\s*:\s*-\s*[^;]+/g) || [];
 
   assert(!negativeLetterSpacing.length, `Negative letter-spacing declarations: ${negativeLetterSpacing.join(", ")}`);
+}
+
+function runBiggestCardMobileLayoutSmoke() {
+  const css = loadText("jsu-wrapped.css");
+
+  assert(css.includes("#jsu-wrapped .jsuw-reference-biggest .jsuw-ticket"), "biggest-event card needs a card-specific ticket position");
+  assert(css.includes("#jsu-wrapped .jsuw-reference-biggest .jsuw-headline"), "biggest-event card needs a card-specific mobile headline scale");
 }
 
 function runCiWorkflowSmoke() {
@@ -920,8 +944,10 @@ function main() {
   runBuilderFutureScopeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
+  runAssetVersionSmoke();
   runCssIsolationSmoke();
   runCssPolishSmoke();
+  runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
   runStaffPlaybookSmoke();
 
