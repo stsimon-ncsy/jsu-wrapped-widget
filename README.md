@@ -96,10 +96,11 @@ To merge a reviewed staff submission locally:
 node review-builder-submissions.js staff-submissions wrapped-config-2026.json
 node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json --dry-run
 node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json
+node merge-builder-submission.js path/to/export.json wrapped-config-2026.json --entry 2 --dry-run
 node check-production.js
 ```
 
-Use `review-builder-submissions.js` when a pilot wave sends multiple JSON files back. It scans a local ignored folder such as `staff-submissions/`, validates every packet without writing config, prints submitter details and change summaries, and exits nonzero if any file is invalid. The review and merge helpers accept direct builder submission JSON, a Gravity Forms-style entry JSON object containing the builder packet in `wrapped_submission`, or a single exported JSON array of entries. Then use the merge helper dry run on the specific submission you want to accept. It validates the submission and prints the submitter, reviewer note, preview URL, and change summary without writing to `wrapped-config-2026.json`. The merge helper only accepts builder-generated scope or variant paths and validates the resulting config against the current JSON data before writing. Invalid submissions are rejected without changing `wrapped-config-2026.json`.
+Use `review-builder-submissions.js` when a pilot wave sends multiple JSON files back. It scans a local ignored folder such as `staff-submissions/`, validates every packet without writing config, prints submitter details and change summaries, and exits nonzero if any file is invalid. The review and merge helpers accept direct builder submission JSON, a Gravity Forms-style entry JSON object containing the builder packet in `wrapped_submission`, or a single exported JSON array of entries. Then use the merge helper dry run on the specific submission you want to accept. If the review label is an array entry such as `export.json[2]`, pass the same file with `--entry 2`. The dry run validates the submission and prints the submitter, reviewer note, preview URL, and change summary without writing to `wrapped-config-2026.json`. The merge helper only accepts builder-generated scope or variant paths and validates the resulting config against the current JSON data before writing. Invalid submissions are rejected without changing `wrapped-config-2026.json`.
 
 ## Production Check
 

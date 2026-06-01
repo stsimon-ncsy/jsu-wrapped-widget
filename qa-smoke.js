@@ -933,6 +933,7 @@ function runBuilderSubmissionMergeSmoke() {
   const configPath = path.join(tempDir, "wrapped-config-2026.json");
   const submissionPath = path.join(tempDir, "baltimore-submission.json");
   const formWrappedSubmissionPath = path.join(tempDir, "gravity-form-entry.json");
+  const formExportPath = path.join(tempDir, "gravity-export.json");
 
   fs.writeFileSync(configPath, JSON.stringify({
     version: 1,
@@ -992,11 +993,41 @@ function runBuilderSubmissionMergeSmoke() {
     wrapped_slug: "baltimore",
     wrapped_submission: fs.readFileSync(submissionPath, "utf8")
   }, null, 2));
+  fs.writeFileSync(formExportPath, JSON.stringify([
+    {
+      entry_id: "41",
+      wrapped_submission: fs.readFileSync(submissionPath, "utf8")
+    },
+    {
+      entry_id: "42",
+      wrapped_submission: JSON.stringify({
+        schema: "jsu-wrapped-builder-submission",
+        version: 1,
+        scope_type: "chapter",
+        scope_slug: "baltimore",
+        scope_label: "Baltimore",
+        submitter_name: "Miriam Katz",
+        submitter_email: "miriam@example.org",
+        change_summary: [
+          {
+            type: "setting",
+            label: "palette",
+            value: "sunset"
+          }
+        ],
+        merge_path: ["chapters", "baltimore"],
+        config_patch: {
+          palette: "sunset"
+        }
+      }, null, 2)
+    }
+  ], null, 2));
 
   assert(script.includes("jsu-wrapped-builder-submission"), "merge script should validate the submission schema");
   assert(script.includes("merge_path"), "merge script should apply patches at the submitted merge path");
   assert(script.includes("function normalizeSubmission"), "merge script should normalize direct and form-wrapped staff submissions");
   assert(script.includes("wrapped_submission"), "merge script should accept Gravity Forms entries with wrapped_submission JSON");
+  assert(script.includes("--entry"), "merge script should let operators select one entry from a JSON array export");
 
   const dryRunOutput = childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", submissionPath, configPath, "--dry-run"], {
     cwd: __dirname,
@@ -1018,6 +1049,15 @@ function runBuilderSubmissionMergeSmoke() {
   });
 
   assert(formWrappedDryRunOutput.includes("Submission is valid for chapter / baltimore / donor"), "merge dry run should accept Gravity Forms entries with wrapped_submission JSON");
+
+  const formExportDryRunOutput = childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", formExportPath, configPath, "--entry", "2", "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+
+  assert(formExportDryRunOutput.includes("Submission is valid for chapter / baltimore."), "merge dry run should accept a selected JSON array export entry");
+  assert(formExportDryRunOutput.includes("Submitter: Miriam Katz <miriam@example.org>"), "selected JSON array entry should drive the dry-run review output");
 
   childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", submissionPath, configPath], {
     cwd: __dirname,
@@ -1247,9 +1287,12 @@ function runBuilderSubmissionBatchReviewSmoke() {
   const productionDocs = loadText("docs/production-readiness.md");
 
   assert(readme.includes("Gravity Forms-style entry JSON object containing the builder packet in `wrapped_submission`"), "README should document Gravity Forms entry review support");
+  assert(readme.includes("--entry 2"), "README should document merging a specific JSON array export entry");
   assert(playbook.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "staff playbook should document Gravity Forms entry review support");
+  assert(playbook.includes("--entry 2"), "staff playbook should document merging a specific JSON array export entry");
   assert(productionDocs.includes("Gravity Forms entry JSON with the builder packet stored in `wrapped_submission`"), "production docs should document Gravity Forms entry review support");
   assert(productionDocs.includes("single exported JSON array of entries"), "production docs should document array export review support");
+  assert(productionDocs.includes("--entry 2"), "production docs should document merging a specific JSON array export entry");
 }
 
 function runFallbackSvgSmoke(records, config) {

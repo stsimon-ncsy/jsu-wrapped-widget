@@ -118,6 +118,30 @@ function normalizeSubmission(submission) {
   return submission;
 }
 
+function submissionAtEntry(rawSubmission, entryNumber) {
+  let index;
+
+  if (entryNumber === undefined || entryNumber === null || entryNumber === "") {
+    if (Array.isArray(rawSubmission)) {
+      throw new Error("Submission file contains multiple entries. Re-run with --entry N.");
+    }
+
+    return rawSubmission;
+  }
+
+  if (!Array.isArray(rawSubmission)) {
+    throw new Error("--entry can only be used with a JSON array export.");
+  }
+
+  index = Number(entryNumber);
+
+  if (!Number.isInteger(index) || index < 1 || index > rawSubmission.length) {
+    throw new Error("--entry must be a number from 1 to " + rawSubmission.length + ".");
+  }
+
+  return rawSubmission[index - 1];
+}
+
 function cloneValue(value) {
   if (Array.isArray(value)) {
     return value.map(cloneValue);
@@ -285,26 +309,50 @@ function printSubmissionReview(submission) {
 function usage() {
   return [
     "Usage:",
-    "  node merge-builder-submission.js path/to/submission.json [wrapped-config-2026.json] [--dry-run]",
+    "  node merge-builder-submission.js path/to/submission.json [wrapped-config-2026.json] [--dry-run] [--entry N]",
     "",
-    "The submission JSON should come from the builder's Copy submission or Download submission button."
+    "The submission JSON should come from the builder's Copy submission or Download submission button.",
+    "Use --entry N to select one entry from a Gravity Forms JSON array export."
   ].join("\n");
 }
 
-function main() {
-  const args = process.argv.slice(2);
-  const dryRun = args.indexOf("--dry-run") !== -1;
-  const positional = args.filter((arg) => arg !== "--dry-run");
-  const submissionPath = positional[0];
-  const configPath = positional[1] || "wrapped-config-2026.json";
+function parseArgs(args) {
+  const options = {
+    dryRun: false,
+    entry: ""
+  };
+  const positional = [];
 
-  if (!submissionPath) {
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+
+    if (arg === "--dry-run") {
+      options.dryRun = true;
+    } else if (arg === "--entry") {
+      options.entry = args[i + 1] || "";
+      i += 1;
+    } else if (arg.indexOf("--entry=") === 0) {
+      options.entry = arg.slice("--entry=".length);
+    } else {
+      positional.push(arg);
+    }
+  }
+
+  options.submissionPath = positional[0];
+  options.configPath = positional[1] || "wrapped-config-2026.json";
+  return options;
+}
+
+function main() {
+  const options = parseArgs(process.argv.slice(2));
+
+  if (!options.submissionPath) {
     console.error(usage());
     process.exit(1);
   }
 
-  const config = readJson(configPath);
-  const submission = validateSubmission(readJson(submissionPath));
+  const config = readJson(options.configPath);
+  const submission = validateSubmission(submissionAtEntry(readJson(options.submissionPath), options.entry));
   const merged = mergeSubmission(cloneValue(config), submission);
   const validation = validateMergedConfig(merged);
   const label = [
@@ -321,14 +369,14 @@ function main() {
     process.exit(1);
   }
 
-  if (dryRun) {
+  if (options.dryRun) {
     console.log("Submission is valid for " + label + (validation.skipped ? " (package validation skipped)." : "."));
     printSubmissionReview(submission);
     return;
   }
 
-  writeJson(configPath, merged);
-  console.log("Merged submission into " + path.basename(configPath) + " at " + submission.merge_path.join(".") + ".");
+  writeJson(options.configPath, merged);
+  console.log("Merged submission into " + path.basename(options.configPath) + " at " + submission.merge_path.join(".") + ".");
 }
 
 if (require.main === module) {
@@ -338,6 +386,8 @@ if (require.main === module) {
 module.exports = {
   mergeSubmission,
   normalizeSubmission,
+  parseArgs,
+  submissionAtEntry,
   validateSubmission,
   validateMergedConfig
 };
