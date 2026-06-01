@@ -40,4 +40,4 @@ jobs:
           exit 1
 
       - name: Run enforced render smoke
-        run: node render-smoke.js --browser "${{ steps.chrome.outputs.chrome-path }}" --timeout-ms 30000
+        run: node render-smoke.js --browser "${{ steps.chrome.outputs.chrome-path }}" --timeout-ms 60000

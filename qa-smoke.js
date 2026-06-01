@@ -1799,7 +1799,7 @@ function runCiWorkflowSmoke() {
   assert(workflow.includes('command -v "$candidate"'), "GitHub Actions render smoke should resolve the selected runner browser path");
   assert(workflow.includes("steps.chrome.outputs.chrome-path"), "GitHub Actions QA workflow should pass the resolved Chrome path to render smoke");
   assert(!workflow.includes("browser-actions/setup-chrome"), "GitHub Actions render smoke should not use setup-chrome Chrome for Testing");
-  assert(workflow.includes("--timeout-ms 30000"), "GitHub Actions render smoke should allow enough time for DOM rendering");
+  assert(workflow.includes("--timeout-ms 60000"), "GitHub Actions render smoke should allow enough time for DOM rendering");
   assert(workflow.includes("JSUW_SKIP_OPTIONAL_RENDER_SMOKE"), "GitHub Actions should skip the optional pre-Chrome render smoke inside check-production");
   assert(!workflow.includes("node render-smoke.js --skip-if-missing"), "GitHub Actions render smoke should fail instead of skipping when Chrome cannot render");
   assert(docs.includes("GitHub Actions"), "production docs missing GitHub Actions QA note");
@@ -1985,6 +1985,7 @@ function runRenderSmokeScriptSmoke() {
   });
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
+  const workflow = loadText(".github/workflows/qa.yml");
   const renderSmokeSource = loadText(scriptPath);
 
   assert(goodReport.ok, `render smoke validator rejected good DOM: ${goodReport.errors.join("; ")}`);
@@ -1994,6 +1995,7 @@ function runRenderSmokeScriptSmoke() {
   assert(dryRunOutput.includes("/builder.html"), "render smoke dry run should list the builder URL");
   assert(listed.includes("node --check render-smoke.js"), "production QA should syntax-check the render smoke helper");
   assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
+  assert(workflow.includes("node render-smoke.js --browser \"${{ steps.chrome.outputs.chrome-path }}\" --timeout-ms 60000"), "CI enforced render smoke should allow enough time for cold headless Chrome startup");
   assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
   assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
   assert(docs.includes("picker, Baltimore story, and builder"), "production docs should describe all render-smoke page types");
