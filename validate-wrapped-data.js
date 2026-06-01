@@ -109,6 +109,12 @@ const CUSTOM_CARD_TYPES = new Set([
 
 const CUSTOM_CARD_TYPE_LABEL = Array.from(CUSTOM_CARD_TYPES).join(", ");
 
+const MEDIA_CUSTOM_CARD_TYPES = new Set([
+  "media",
+  "photo",
+  "image"
+]);
+
 const CONFIG_TOP_LEVEL_KEYS = new Set([
   "version",
   "year",
@@ -561,6 +567,10 @@ function validateCustomCards(report, section, label) {
 
     if (!CUSTOM_CARD_TYPES.has(type)) {
       addError(report, `${cardLabel}.type must be one of: ${CUSTOM_CARD_TYPE_LABEL}`);
+    }
+
+    if (MEDIA_CUSTOM_CARD_TYPES.has(type) && !hasValue(card.image_url) && !hasValue(card.imageUrl) && !hasValue(card.src)) {
+      addError(report, `${cardLabel}.image_url is required for media custom cards`);
     }
 
     [
