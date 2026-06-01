@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260601f";
-  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260601f";
+  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260601g";
+  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260601g";
   var CARD_IDS = [
     "cover",
     "events",

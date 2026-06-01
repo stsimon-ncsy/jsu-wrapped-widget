@@ -1017,7 +1017,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
-  const releaseToken = "jsuw-prod-20260601f";
+  const releaseToken = "jsuw-prod-20260601g";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const builderJs = loadText("wrapped-builder.js");
