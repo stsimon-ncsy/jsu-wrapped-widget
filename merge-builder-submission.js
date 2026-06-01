@@ -7,6 +7,14 @@ const ALLOWED_ROOTS = ["defaults", "regions", "programs", "campaigns", "chapters
 const BLOCKED_KEYS = ["__proto__", "constructor", "prototype"];
 const DEFAULT_STORY_DATA_PATH = "sample-wrapped-2026.json";
 const DEFAULT_TEEN_DATA_PATH = "sample-teen-wrapped-2026.json";
+const WRAPPED_SUBMISSION_KEYS = [
+  "wrapped_submission",
+  "wrappedSubmission",
+  "submission_json",
+  "submissionJson",
+  "builder_submission",
+  "builderSubmission"
+];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -76,6 +84,40 @@ function assertPatchHasChanges(value) {
   }
 }
 
+function parseWrappedSubmissionJson(value, key) {
+  const text = textValue(value);
+
+  if (!text) {
+    throw new Error("Submission " + key + " is empty.");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error("Submission " + key + " must contain valid JSON.");
+  }
+}
+
+function normalizeSubmission(submission) {
+  if (isPlainObject(submission) && submission.schema === SUBMISSION_SCHEMA) {
+    return submission;
+  }
+
+  if (typeof submission === "string") {
+    return normalizeSubmission(parseWrappedSubmissionJson(submission, "JSON string"));
+  }
+
+  if (isPlainObject(submission)) {
+    for (const key of WRAPPED_SUBMISSION_KEYS) {
+      if (submission[key] !== undefined && submission[key] !== null && textValue(submission[key])) {
+        return normalizeSubmission(parseWrappedSubmissionJson(submission[key], key));
+      }
+    }
+  }
+
+  return submission;
+}
+
 function cloneValue(value) {
   if (Array.isArray(value)) {
     return value.map(cloneValue);
@@ -122,6 +164,8 @@ function targetForMergePath(config, mergePath) {
 }
 
 function validateSubmission(submission) {
+  submission = normalizeSubmission(submission);
+
   if (!isPlainObject(submission)) {
     throw new Error("Submission file must contain a JSON object.");
   }
@@ -133,10 +177,11 @@ function validateSubmission(submission) {
   assertSafeMergePath(submission.merge_path);
   assertSafePatch(submission.config_patch, ["config_patch"]);
   assertPatchHasChanges(submission.config_patch);
+  return submission;
 }
 
 function mergeSubmission(config, submission) {
-  validateSubmission(submission);
+  submission = validateSubmission(submission);
   deepMerge(targetForMergePath(config, submission.merge_path), submission.config_patch);
   return config;
 }
@@ -259,7 +304,7 @@ function main() {
   }
 
   const config = readJson(configPath);
-  const submission = readJson(submissionPath);
+  const submission = validateSubmission(readJson(submissionPath));
   const merged = mergeSubmission(cloneValue(config), submission);
   const validation = validateMergedConfig(merged);
   const label = [
@@ -292,6 +337,7 @@ if (require.main === module) {
 
 module.exports = {
   mergeSubmission,
+  normalizeSubmission,
   validateSubmission,
   validateMergedConfig
 };

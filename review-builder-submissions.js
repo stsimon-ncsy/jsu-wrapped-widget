@@ -73,7 +73,7 @@ function formatChangeSummaryItem(item) {
 }
 
 function reviewSubmissionFile(filePath, config) {
-  const submission = readJson(filePath);
+  const submission = merger.normalizeSubmission(readJson(filePath));
   const merged = merger.mergeSubmission(cloneValue(config), submission);
   const validation = merger.validateMergedConfig(merged);
 
