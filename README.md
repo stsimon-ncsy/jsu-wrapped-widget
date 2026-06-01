@@ -74,7 +74,7 @@ node merge-builder-submission.js path/to/submission.json wrapped-config-2026.jso
 node check-production.js
 ```
 
-The merge helper validates the resulting config against the current JSON data before writing. Invalid submissions are rejected without changing `wrapped-config-2026.json`.
+The merge helper only accepts builder-generated scope or variant paths and validates the resulting config against the current JSON data before writing. Invalid submissions are rejected without changing `wrapped-config-2026.json`.
 
 ## Production Check
 

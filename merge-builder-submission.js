@@ -38,6 +38,20 @@ function assertSafeMergePath(mergePath) {
       throw new Error("Submission merge_path contains a blocked segment.");
     }
   });
+
+  if (!isBuilderGeneratedMergePath(mergePath)) {
+    throw new Error("Submission merge_path must be a builder-generated scope or variant path.");
+  }
+}
+
+function isBuilderGeneratedMergePath(mergePath) {
+  const root = mergePath[0];
+
+  if (root === "defaults") {
+    return mergePath.length === 1 || (mergePath.length === 3 && mergePath[1] === "variants");
+  }
+
+  return mergePath.length === 2 || (mergePath.length === 4 && mergePath[2] === "variants");
 }
 
 function assertSafePatch(value, trail) {
@@ -145,7 +159,7 @@ function usage() {
     "Usage:",
     "  node merge-builder-submission.js path/to/submission.json [wrapped-config-2026.json] [--dry-run]",
     "",
-    "The submission file should come from the builder's Download submission button."
+    "The submission JSON should come from the builder's Copy submission or Download submission button."
   ].join("\n");
 }
 

@@ -849,6 +849,43 @@ function runBuilderSubmissionMergeSmoke() {
   assert(script.includes("validateMergedConfig"), "merge script should validate merged config before writing");
   assert(invalidOutput.includes("Merged config validation failed"), "invalid staff submission should fail package validation");
   assert(!invalidConfig.chapters.baltimore.hidden_cards, "invalid staff submission should not be written");
+
+  const deepPathConfigPath = path.join(tempDir, "deep-path-config.json");
+  const deepPathSubmissionPath = path.join(tempDir, "deep-path-submission.json");
+
+  fs.writeFileSync(deepPathConfigPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {}
+    }
+  }, null, 2));
+  fs.writeFileSync(deepPathSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    merge_path: ["chapters", "baltimore", "card_overrides", "events"],
+    config_patch: {
+      headline: "Deep path should not merge"
+    }
+  }, null, 2));
+
+  let deepPathOutput = "";
+  try {
+    childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", deepPathSubmissionPath, deepPathConfigPath], {
+      cwd: __dirname,
+      encoding: "utf8",
+      stdio: "pipe"
+    });
+  } catch (error) {
+    deepPathOutput = String(error.stderr || error.stdout || error.message || "");
+  }
+
+  const deepPathConfig = JSON.parse(fs.readFileSync(deepPathConfigPath, "utf8"));
+  assert(deepPathOutput.includes("builder-generated scope or variant path"), "deep staff submission merge paths should fail clearly");
+  assert(!deepPathConfig.chapters.baltimore.card_overrides, "deep staff submission path should not be written");
 }
 
 function runFallbackSvgSmoke(records, config) {
