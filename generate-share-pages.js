@@ -6,6 +6,7 @@ const DATA_PATH = "sample-wrapped-2026.json";
 const OUTPUT_ROOT = "share";
 const SITE_BASE = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
+const GENERATED_MARKER = "jsu-wrapped-static-share-page";
 
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -134,6 +135,7 @@ function sharePageHtml(record) {
     '    <meta name="viewport" content="width=device-width, initial-scale=1">',
     "    <title>" + escapeHtml(title) + "</title>",
     '    <meta name="description" content="' + escapeHtml(description) + '">',
+    '    <meta name="generator" content="' + GENERATED_MARKER + '">',
     '    <meta property="og:type" content="website">',
     '    <meta property="og:title" content="' + escapeHtml(title) + '">',
     '    <meta property="og:description" content="' + escapeHtml(description) + '">',
@@ -158,13 +160,88 @@ function sharePageHtml(record) {
   ].join("\n");
 }
 
-function generateSharePages(records) {
+function isGeneratedShareIndex(filePath) {
+  try {
+    var content = fs.readFileSync(filePath, "utf8");
+
+    return content.indexOf(GENERATED_MARKER) !== -1 || content.indexOf("JSU/NCSY Wrapped - ") !== -1;
+  } catch (error) {
+    return false;
+  }
+}
+
+function isInside(parent, child) {
+  var relative = path.relative(parent, child);
+
+  return relative && relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative);
+}
+
+function pruneEmptyParents(outputRoot, startDir) {
+  var root = path.resolve(outputRoot);
+  var current = path.resolve(startDir);
+
+  while (isInside(root, current)) {
+    try {
+      if (fs.readdirSync(current).length) {
+        return;
+      }
+
+      fs.rmdirSync(current);
+      current = path.dirname(current);
+    } catch (error) {
+      return;
+    }
+  }
+}
+
+function cleanupStaleSharePages(outputRoot, expectedDirs) {
+  var root = path.resolve(outputRoot);
+
+  if (!fs.existsSync(root)) {
+    return 0;
+  }
+
+  var expected = expectedDirs.reduce(function (lookup, dir) {
+    lookup[path.resolve(dir)] = true;
+    return lookup;
+  }, {});
+  var removed = 0;
+
+  function visit(dir) {
+    fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+      var fullPath = path.join(dir, entry.name);
+
+      if (!entry.isDirectory()) {
+        return;
+      }
+
+      var indexPath = path.join(fullPath, "index.html");
+
+      if (fs.existsSync(indexPath) && isGeneratedShareIndex(indexPath) && !expected[path.resolve(fullPath)]) {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+        removed += 1;
+        pruneEmptyParents(root, path.dirname(fullPath));
+        return;
+      }
+
+      visit(fullPath);
+    });
+  }
+
+  visit(root);
+  return removed;
+}
+
+function generateSharePages(records, options) {
+  var outputRoot = options && options.outputRoot || OUTPUT_ROOT;
   var stories = (records || []).filter(isShareableStoryRecord);
+  var expectedDirs = stories.map((record) => path.join.apply(path, [outputRoot].concat(sharePathSegments(record))));
 
-  fs.mkdirSync(OUTPUT_ROOT, { recursive: true });
+  fs.mkdirSync(outputRoot, { recursive: true });
+  cleanupStaleSharePages(outputRoot, expectedDirs);
 
-  stories.forEach((record) => {
-    var dir = path.join.apply(path, [OUTPUT_ROOT].concat(sharePathSegments(record)));
+  stories.forEach((record, index) => {
+    var dir = expectedDirs[index];
 
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, "index.html"), sharePageHtml(record));
@@ -190,6 +267,7 @@ module.exports = {
   isChapterRecord,
   isShareableStoryRecord,
   redirectScript,
+  cleanupStaleSharePages,
   sharePagePath,
   sharePageHtml
 };

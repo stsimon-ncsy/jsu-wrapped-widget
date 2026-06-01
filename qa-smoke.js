@@ -1,4 +1,6 @@
 const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const api = require("./jsu-wrapped.js");
 const dataValidator = require("./validate-wrapped-data.js");
 const shareGenerator = require("./generate-share-pages.js");
@@ -273,6 +275,38 @@ function runStaticShareSmoke() {
   assert(programHtml.includes("<title>JSU/NCSY Wrapped - Shabbat Across JSU</title>"), "program share page title mismatch");
   assert(programHtml.includes("/share/program/shabbat/"), "program share page URL path mismatch");
   assert(programHtml.includes("?scope=program&amp;program=shabbat"), "program share page story redirect mismatch");
+}
+
+function runShareGeneratorCleanupSmoke() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-"));
+
+  try {
+    fs.mkdirSync(path.join(root, "stale-chapter"), { recursive: true });
+    fs.writeFileSync(path.join(root, "stale-chapter", "index.html"), "<!doctype html><title>JSU/NCSY Wrapped - Stale</title>");
+
+    const count = shareGenerator.generateSharePages([
+      {
+        chapter_slug: "active-chapter",
+        chapter_name: "Active Chapter",
+        region_name: "Atlantic Seaboard",
+        year_label: "2025-2026"
+      },
+      {
+        scope_type: "region",
+        scope_slug: "atlantic-seaboard",
+        scope_name: "Atlantic Seaboard",
+        region_name: "Atlantic Seaboard",
+        year_label: "2025-2026"
+      }
+    ], { outputRoot: root });
+
+    assert(count === 2, `share generator count mismatch: ${count}`);
+    assert(fs.existsSync(path.join(root, "active-chapter", "index.html")), "active chapter share page missing in custom output root");
+    assert(fs.existsSync(path.join(root, "region", "atlantic-seaboard", "index.html")), "region share page missing in custom output root");
+    assert(!fs.existsSync(path.join(root, "stale-chapter")), "stale generated share directory should be removed");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 }
 
 function runAnalyticsSmoke() {
@@ -726,6 +760,7 @@ function main() {
   runSampleVariantSmoke(records, config);
   runPageMetadataSmoke();
   runStaticShareSmoke();
+  runShareGeneratorCleanupSmoke();
   runAnalyticsSmoke();
   runAnalyticsDocsSmoke();
   runStoryScopeSmoke();
