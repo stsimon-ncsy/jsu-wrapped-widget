@@ -88,6 +88,8 @@ Choose the smallest scope that fits the audience:
 
 For pilot staff who should not edit GitHub directly, ask them to fill in the builder's submission info fields, then use **Download submission**. That file is intentionally smaller than the full config export: it includes the submitter name/email/note, the active chapter, region, or program scope, the variant if one is selected, a change summary, and the exact `merge_path` where the reviewed patch belongs in `wrapped-config-2026.json`.
 
+Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
+
 After review, merge a submitted file locally with:
 
 ```bash

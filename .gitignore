@@ -1,1 +1,5 @@
 qa-artifacts/
+staff-submissions/
+submissions/
+*-builder-submission.json
+jsu-wrapped-builder-submission*.json

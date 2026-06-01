@@ -65,6 +65,8 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 4. Click **Download submission**.
 5. Send the downloaded JSON to the repo maintainer for review.
 
+Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
+
 To merge a reviewed staff submission locally:
 
 ```bash

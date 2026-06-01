@@ -1110,12 +1110,32 @@ function runStaffPlaybookSmoke() {
     "Gravity Form",
     "Variants",
     "Download submission",
-    "merge-builder-submission.js"
+    "merge-builder-submission.js",
+    "Do not commit downloaded staff submission JSON"
   ];
 
   requiredPhrases.forEach((phrase) => {
     assert(playbook.includes(phrase), `staff playbook missing ${phrase}`);
   });
+}
+
+function runStaffSubmissionPrivacySmoke() {
+  const gitignore = loadText(".gitignore");
+  const readme = loadText("README.md");
+  const playbook = loadText("docs/staff-playbook.md");
+  const requiredIgnorePatterns = [
+    "staff-submissions/",
+    "submissions/",
+    "*-builder-submission.json",
+    "jsu-wrapped-builder-submission*.json"
+  ];
+
+  requiredIgnorePatterns.forEach((pattern) => {
+    assert(gitignore.includes(pattern), `.gitignore missing staff submission pattern ${pattern}`);
+  });
+
+  assert(readme.includes("Do not commit downloaded staff submission JSON"), "README should warn against committing staff submission JSON");
+  assert(playbook.includes("Do not commit downloaded staff submission JSON"), "staff playbook should warn against committing staff submission JSON");
 }
 
 function runDataValidationSmoke(records, config) {
@@ -1188,6 +1208,7 @@ function main() {
   runProductionCheckSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
+  runStaffSubmissionPrivacySmoke();
 
   console.log("qa smoke ok");
 }
