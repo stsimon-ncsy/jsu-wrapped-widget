@@ -10,6 +10,12 @@ const DEFAULT_VIEWPORTS = [
 ];
 const PAGE_CHECKS = [
   {
+    label: "chapter picker",
+    path: "/?qa=render-smoke",
+    requiredSelectors: ['id="jsu-wrapped"', "jsuw-picker"],
+    requiredText: ["Choose your chapter", "Choose a region", "Baltimore"]
+  },
+  {
     label: "Baltimore story",
     path: "/?chapter=baltimore&qa=render-smoke",
     requiredSelectors: ['id="jsu-wrapped"', "jsuw-story"],
@@ -498,7 +504,7 @@ function usage() {
     "Usage:",
     "  node render-smoke.js [--skip-if-missing] [--browser path/to/chrome] [--timeout-ms 20000] [--dry-run]",
     "",
-    "Serves the static widget locally and uses Chrome/Edge headless to confirm the story and builder render real DOM."
+    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, and builder render real DOM."
   ].join("\n");
 }
 
@@ -518,7 +524,7 @@ async function main() {
     return;
   }
 
-  console.log("render smoke checking local story and builder");
+  console.log("render smoke checking local picker, story, and builder");
   const report = await runRenderSmoke(settings);
 
   if (!report.ok) {
