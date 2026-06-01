@@ -144,6 +144,10 @@ Allowed global CSS constructs are limited to animation/support wrappers such as 
 
 On mobile, the widget should feel like a story surface rather than a small embedded card. Keep `#jsu-wrapped` full-width and horizontally clipped inside its own scoped container, then let `.jsuw-shell` and `.jsuw-story` fill the available mobile viewport under the small-screen media queries. The production smoke test checks for the scoped overflow guard, full-width mobile shell, `100svh` story sizing, and the mobile aspect-ratio override.
 
+## Big Stat Glyph Safety
+
+The event, moment, new-teen, and custom metric cards use oversized animated numbers. Keep their shared `.jsuw-reference-stat` line-height loose enough that digits such as 3, 8, and 9 do not look cut off while the count-up animation is running or after it settles. The production smoke test enforces a minimum line-height for that shared stat rule because cramped glyph boxes were a visible polish issue on mobile.
+
 ## Share/Download Fallback
 
 The download button prefers `html2canvas` when available. If it is not available, the widget generates a static SVG poster locally in the browser.

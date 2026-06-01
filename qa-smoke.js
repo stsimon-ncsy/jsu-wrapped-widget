@@ -1337,6 +1337,36 @@ function runCssPolishSmoke() {
   assert(!negativeLetterSpacing.length, `Negative letter-spacing declarations: ${negativeLetterSpacing.join(", ")}`);
 }
 
+function cssRuleBody(css, selector) {
+  const start = css.indexOf(`${selector} {`);
+
+  if (start === -1) {
+    return "";
+  }
+
+  const open = css.indexOf("{", start);
+  const close = findMatchingBrace(css, open);
+
+  return close === -1 ? "" : css.slice(open + 1, close);
+}
+
+function cssNumericDeclaration(body, property) {
+  const match = body.match(new RegExp(`${property}\\s*:\\s*([0-9.]+)`));
+
+  return match ? Number(match[1]) : NaN;
+}
+
+function runBigStatGlyphSafetySmoke() {
+  const css = loadText("jsu-wrapped.css");
+  const docs = loadText("docs/production-readiness.md");
+  const statBody = cssRuleBody(css, "#jsu-wrapped .jsuw-reference-stat");
+  const lineHeight = cssNumericDeclaration(statBody, "line-height");
+
+  assert(statBody, "big stat CSS rule is missing");
+  assert(lineHeight >= 0.9, `big stat line-height is too tight and can clip digits: ${lineHeight}`);
+  assert(docs.includes("Big Stat Glyph Safety"), "production docs missing big stat glyph safety note");
+}
+
 function runMobileFullscreenLayoutSmoke() {
   const css = loadText("jsu-wrapped.css");
   const docs = loadText("docs/production-readiness.md");
@@ -1809,6 +1839,7 @@ function main() {
   runCacheTokenBumpSmoke();
   runCssIsolationSmoke();
   runCssPolishSmoke();
+  runBigStatGlyphSafetySmoke();
   runMobileFullscreenLayoutSmoke();
   runBiggestCardMobileLayoutSmoke();
   runCiWorkflowSmoke();
