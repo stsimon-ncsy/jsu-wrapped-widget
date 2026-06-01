@@ -60,6 +60,11 @@ const STORY_CARD_IDS = new Set([
   "final"
 ]);
 
+const PROTECTED_STORY_CARD_IDS = new Set([
+  "cover",
+  "final"
+]);
+
 const CUSTOM_CARD_TYPES = new Set([
   "text",
   "metric",
@@ -360,6 +365,11 @@ function validateHiddenCards(report, section, label) {
 
     if (!STORY_CARD_IDS.has(normalized)) {
       addError(report, `${label}.hidden_cards[${index}] references unknown card "${cardId}"`);
+      return;
+    }
+
+    if (PROTECTED_STORY_CARD_IDS.has(normalized)) {
+      addError(report, `${label}.hidden_cards[${index}] cannot hide protected card "${normalized}"`);
     }
   });
 }

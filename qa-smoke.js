@@ -633,6 +633,22 @@ function runScopedStoryValidationSmoke() {
       }
     }
   }, storyRecords);
+  const badProtectedHiddenReport = dataValidator.validateConfig({
+    chapters: {
+      baltimore: {
+        hidden_cards: ["cover", "final"]
+      }
+    }
+  }, storyRecords);
+  const protectedHiddenConfig = {
+    chapters: {
+      baltimore: {
+        hidden_cards: ["cover", "final", "events"]
+      }
+    }
+  };
+  const protectedHiddenStoryConfig = api.resolveStoryConfig(protectedHiddenConfig, storyRecords[0]);
+  const protectedHiddenCards = api.createCards(api.createEffectiveRecord(storyRecords[0], protectedHiddenStoryConfig), { storyConfig: protectedHiddenStoryConfig });
 
   assert(report.ok, `mixed story scope validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateScopeReport.ok && duplicateScopeReport.errors.some((error) => error.includes("Duplicate")), "duplicate region scope slugs should fail validation");
@@ -642,6 +658,10 @@ function runScopedStoryValidationSmoke() {
   assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("card_overrides")), "unknown card override ids should fail validation");
   assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("custom_cards[0].type")), "unknown custom card types should fail validation");
   assert(!badCardConfigReport.ok && badCardConfigReport.errors.some((error) => error.includes("custom_cards[0].placement")), "unknown custom card placements should fail validation");
+  assert(!badProtectedHiddenReport.ok && badProtectedHiddenReport.errors.some((error) => error.includes("cannot hide protected card")), "hiding cover/final should fail validation");
+  assert(protectedHiddenCards.some((card) => card.id === "cover"), "runtime should preserve protected cover card");
+  assert(protectedHiddenCards.some((card) => card.id === "final"), "runtime should preserve protected final card");
+  assert(!protectedHiddenCards.some((card) => card.id === "events"), "runtime should still hide non-protected cards");
 }
 
 function runBuilderFutureScopeSmoke() {

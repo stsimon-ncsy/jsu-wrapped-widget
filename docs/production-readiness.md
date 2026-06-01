@@ -108,6 +108,8 @@ Hidden variants can be linked directly but will not appear in the picker:
 }
 ```
 
+Generated screens can be hidden at a config scope, but the cover and final share/CTA screens are protected. Rewrite those screens with `card_overrides` when needed instead of hiding them.
+
 ## Data Consistency
 
 Metric corrections belong in `record_overrides`. They are applied before cards are generated, so corrected stats flow into:

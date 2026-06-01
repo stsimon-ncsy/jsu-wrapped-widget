@@ -1957,7 +1957,13 @@
     var overrides = config.card_overrides || {};
     var palette = asText(config.palette || config.accent_palette, "");
     var filtered = (cards || []).filter(function (card) {
-      return hidden.indexOf(normalizeCardId(card.id || card.theme)) === -1;
+      var id = normalizeCardId(card.id || card.theme);
+
+      if (id === "cover" || id === "final") {
+        return true;
+      }
+
+      return hidden.indexOf(id) === -1;
     }).map(function (card) {
       var id = normalizeCardId(card.id || card.theme);
       var next = Object.assign({}, card);
