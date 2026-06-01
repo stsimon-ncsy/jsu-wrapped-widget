@@ -735,6 +735,8 @@ function runBuilderSubmissionSmoke() {
 
   assert(builderHtml.includes('data-builder-action="download-submission"'), "builder should expose a staff submission download button");
   assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
+  assert(builderHtml.includes('data-builder-action="email-submission"'), "builder should expose a staff submission email draft button");
+  assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
   assert(builderHtml.includes("data-builder-submitter-name"), "builder should collect submitter name for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-email"), "builder should collect submitter email for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-note"), "builder should collect reviewer notes for staff submissions");
@@ -749,6 +751,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("jsu-wrapped-builder-submission"), "submission payload should identify its schema");
   assert(builderJs.includes("downloadSubmission"), "builder should download staff submissions as files");
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
+  assert(builderJs.includes("function emailSubmission"), "builder should open a review email draft for staff submissions");
+  assert(builderJs.includes("function buildSubmissionEmail"), "builder should build a staff submission email note");
+  assert(builderJs.includes("mailto:"), "builder email handoff should not require a backend");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
   assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
   assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
@@ -1199,6 +1204,7 @@ function runReadmeSmoke() {
     "jsu-wrapped.css",
     "sample-wrapped-2026.json",
     "wrapped-config-2026.json",
+    "Open email draft",
     "Download submission",
     "merge-builder-submission.js",
     "docs/production-readiness.md",
@@ -1226,6 +1232,7 @@ function runStaffPlaybookSmoke() {
     "Measurement",
     "Gravity Form",
     "Variants",
+    "Open email draft",
     "Download submission",
     "Copy submission",
     "merge-builder-submission.js",

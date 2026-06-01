@@ -695,6 +695,48 @@
     return fallbackCopyText(text);
   }
 
+  function reviewEmailAddress() {
+    var root = $("#wrapped-builder");
+
+    return root ? String(root.getAttribute("data-review-email") || "").trim() : "";
+  }
+
+  function buildSubmissionEmail(payload, copied) {
+    var scopeLabel = payload.scope_label || payload.scope_slug || "Wrapped";
+    var variantLabel = payload.variant_label || payload.variant_slug || "";
+    var subjectParts = ["JSU/NCSY Wrapped submission", scopeLabel, variantLabel].filter(hasValue);
+    var lines = [
+      "Hi,",
+      "",
+      "I am sending a JSU/NCSY Wrapped builder submission for review.",
+      "",
+      "Scope: " + (payload.scope_type || "") + " / " + scopeLabel,
+      "Preview chapter: " + (payload.preview_chapter_name || payload.preview_chapter_slug || ""),
+      "Version: " + (variantLabel || "Default"),
+      "Preview URL: " + (payload.preview_url || ""),
+      "",
+      copied
+        ? "The submission JSON has been copied to my clipboard. I will paste it below before sending."
+        : "The submission JSON was not copied automatically. I will use Copy submission or Download submission and include it with this email.",
+      "",
+      "Submission JSON:"
+    ];
+
+    return {
+      to: reviewEmailAddress(),
+      subject: subjectParts.join(" - "),
+      body: lines.join("\n")
+    };
+  }
+
+  function submissionMailtoUrl(email) {
+    return "mailto:" + encodeURIComponent(email.to || "") + "?subject=" + encodeURIComponent(email.subject || "") + "&body=" + encodeURIComponent(email.body || "");
+  }
+
+  function openSubmissionEmailDraft(payload, copied) {
+    window.location.href = submissionMailtoUrl(buildSubmissionEmail(payload, copied));
+  }
+
   function submissionHasChanges(payload) {
     var patch = payload && payload.config_patch;
 
@@ -734,6 +776,25 @@
       })
       .catch(function () {
         setVersionStatus("Clipboard copy failed. Use Download submission instead.", true);
+      });
+  }
+
+  function emailSubmission() {
+    var payload = buildSubmissionPayload();
+    var text = JSON.stringify(payload, null, 2);
+
+    if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
+
+    copyTextToClipboard(text)
+      .then(function () {
+        openSubmissionEmailDraft(payload, true);
+        setVersionStatus("Email draft opened. Paste the copied submission JSON into the message before sending.", false);
+      })
+      .catch(function () {
+        openSubmissionEmailDraft(payload, false);
+        setVersionStatus("Email draft opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", true);
       });
   }
 
@@ -1546,6 +1607,8 @@
         downloadSubmission();
       } else if (action === "copy-submission") {
         copySubmission();
+      } else if (action === "email-submission") {
+        emailSubmission();
       } else if (action === "copy-export") {
         copyTextToClipboard(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }
