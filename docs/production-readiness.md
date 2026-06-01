@@ -162,7 +162,7 @@ Because many social scrapers do not execute JavaScript, share links can use gene
 /share/program/[program-slug]/
 ```
 
-Those pages include crawler-readable Open Graph/Twitter tags, site name, image dimensions, and social image alt text, then immediately redirect human visitors back to the interactive `?chapter=`, `?scope=region&region=`, or `?scope=program&program=` story. The JavaScript redirect preserves supported query params such as `variant`, `program`, `campaign`, `autoplay`, and `duration`, so donor/custom share links still land on the intended experience. Use `data-share-base="./share/"` for same-site hosting, or point WordPress embeds at the GitHub Pages share folder:
+The hosted entry pages and generated share pages include crawler-readable Open Graph/Twitter tags, site name, image dimensions, and social image alt text. Generated share pages immediately redirect human visitors back to the interactive `?chapter=`, `?scope=region&region=`, or `?scope=program&program=` story. The JavaScript redirect preserves supported query params such as `variant`, `program`, `campaign`, `autoplay`, and `duration`, so donor/custom share links still land on the intended experience. Use `data-share-base="./share/"` for same-site hosting, or point WordPress embeds at the GitHub Pages share folder:
 
 ```html
 data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"

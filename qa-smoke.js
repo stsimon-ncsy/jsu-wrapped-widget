@@ -408,6 +408,16 @@ function runStaticShareSmoke() {
   assert(programHtml.includes("?scope=program&amp;program=shabbat"), "program share page story redirect mismatch");
 }
 
+function runEntryPageSocialMetadataSmoke() {
+  ["index.html", "embed-example.html"].forEach((file) => {
+    const html = loadText(file);
+
+    assert(html.includes('property="og:site_name" content="JSU/NCSY Wrapped"'), `${file} missing OG site name`);
+    assert(html.includes('property="og:image:alt" content="JSU/NCSY Wrapped social preview"'), `${file} missing OG image alt text`);
+    assert(html.includes('name="twitter:image:alt" content="JSU/NCSY Wrapped social preview"'), `${file} missing Twitter image alt text`);
+  });
+}
+
 function runShareGeneratorCleanupSmoke() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-"));
   const unsafeRoot = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-unsafe-"));
@@ -1619,6 +1629,7 @@ function main() {
   runSampleConfigConsistencySmoke(records, config);
   runPageMetadataSmoke();
   runStaticShareSmoke();
+  runEntryPageSocialMetadataSmoke();
   runShareGeneratorCleanupSmoke();
   runAnalyticsSmoke();
   runFormPrefillSmoke();
