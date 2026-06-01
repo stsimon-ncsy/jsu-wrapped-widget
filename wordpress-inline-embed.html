@@ -3925,9 +3925,29 @@
   }
 
   #jsu-wrapped .jsuw-story-header {
+    gap: 6px;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
     left: 20px;
     right: 20px;
     top: 28px;
+  }
+
+  #jsu-wrapped .jsuw-card-count {
+    display: none;
+  }
+
+  #jsu-wrapped .jsuw-story-tools {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-sound-toggle,
+  #jsu-wrapped .jsuw-autoplay-toggle {
+    max-width: 68px;
+    overflow: hidden;
+    padding-left: 7px;
+    padding-right: 7px;
+    text-overflow: ellipsis;
   }
 
   #jsu-wrapped .jsuw-reference-top {
@@ -4096,8 +4116,19 @@
 
   #jsu-wrapped .jsuw-controls {
     bottom: 14px;
+    gap: 8px;
     left: 14px;
     right: 14px;
+  }
+
+  #jsu-wrapped .jsuw-nav-button {
+    min-width: 74px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  #jsu-wrapped .jsuw-nav-button--next {
+    min-width: 88px;
   }
 }
 

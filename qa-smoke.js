@@ -1701,6 +1701,19 @@ function cssRuleBody(css, selector) {
   return close === -1 ? "" : css.slice(open + 1, close);
 }
 
+function cssAtRuleBody(css, atRule) {
+  const start = css.indexOf(atRule);
+
+  if (start === -1) {
+    return "";
+  }
+
+  const open = css.indexOf("{", start);
+  const close = findMatchingBrace(css, open);
+
+  return close === -1 ? "" : css.slice(open + 1, close);
+}
+
 function cssNumericDeclaration(body, property) {
   const match = body.match(new RegExp(`${property}\\s*:\\s*([0-9.]+)`));
 
@@ -1721,6 +1734,7 @@ function runBigStatGlyphSafetySmoke() {
 function runMobileFullscreenLayoutSmoke() {
   const css = loadText("jsu-wrapped.css");
   const docs = loadText("docs/production-readiness.md");
+  const mobileBody = cssAtRuleBody(css, "@media (max-width: 600px)");
 
   assert(/#jsu-wrapped\s*\{/.test(css), "widget root CSS block is missing");
   assert(css.includes("overflow-x: hidden;"), "widget root should clip horizontal overflow inside the scoped container");
@@ -1728,6 +1742,8 @@ function runMobileFullscreenLayoutSmoke() {
   assert(/#jsu-wrapped \.jsuw-shell\s*\{[^}]*max-width:\s*100%;/.test(css), "mobile shell should fill the available embed width");
   assert(/#jsu-wrapped \.jsuw-story\s*\{[^}]*aspect-ratio:\s*auto;/.test(css), "mobile story should not be constrained to desktop aspect sizing");
   assert(css.includes("height: calc(100svh - 16px);"), "mobile story should use small-viewport height for fullscreen feel");
+  assert(/#jsu-wrapped \.jsuw-card-count\s*\{[^}]*display:\s*none;/.test(mobileBody), "mobile story chrome should hide the count to avoid clipped sound/autoplay controls");
+  assert(/#jsu-wrapped \.jsuw-nav-button--next\s*\{[^}]*min-width:\s*88px;/.test(mobileBody), "mobile story chrome should shrink the Next button to avoid clipped controls");
   assert(docs.includes("Mobile Fullscreen Contract"), "production docs missing mobile fullscreen contract");
 }
 
