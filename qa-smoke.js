@@ -738,8 +738,11 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
   assert(builderHtml.includes('data-builder-action="email-submission"'), "builder should expose a staff submission email draft button");
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
+  assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
   assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
+  assert(builderJs.includes("review_email"), "builder should allow review email to be set from a staff distribution URL");
+  assert(builderJs.includes("reviewEmail"), "builder should allow camelCase review email links");
   assert(builderHtml.includes("data-builder-submitter-name"), "builder should collect submitter name for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-email"), "builder should collect submitter email for staff submissions");
   assert(builderHtml.includes("data-builder-submitter-note"), "builder should collect reviewer notes for staff submissions");
@@ -756,11 +759,18 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
   assert(builderJs.includes("function emailSubmission"), "builder should open a review email draft for staff submissions");
   assert(builderJs.includes("function buildSubmissionEmail"), "builder should build a staff submission email note");
+  assert(builderJs.includes("function renderReviewEmailStatus"), "builder should render the configured review email status");
   assert(builderJs.includes("mailto:"), "builder email handoff should not require a backend");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
   assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
   assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
   assert(builderCss.includes(".builder-actions--review button"), "builder review action buttons should have mobile-specific sizing");
+
+  const readme = loadText("README.md");
+  const playbook = loadText("docs/staff-playbook.md");
+
+  assert(readme.includes("review_email"), "README should document pre-addressed staff review links");
+  assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
 }
 
 function runBuilderIndexingSmoke() {

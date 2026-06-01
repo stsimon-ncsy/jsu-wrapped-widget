@@ -265,6 +265,23 @@ textarea {
   margin: 3px 0 0;
 }
 
+.builder-review-email-status {
+  border-radius: 10px;
+  display: inline-flex;
+  max-width: 100%;
+  padding: 7px 10px;
+}
+
+.builder-review-actions .builder-review-email-status--ok {
+  background: rgba(20, 184, 166, 0.14);
+  color: #0f766e;
+}
+
+.builder-review-actions .builder-review-email-status--warning {
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400e;
+}
+
 .builder-actions--review {
   flex-wrap: wrap;
   justify-content: flex-end;

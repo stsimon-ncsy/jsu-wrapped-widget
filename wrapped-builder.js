@@ -695,8 +695,35 @@
     return fallbackCopyText(text);
   }
 
+  function searchParamValue(names) {
+    var params;
+    var i;
+    var value;
+
+    try {
+      params = new URL(window.location.href).searchParams;
+    } catch (error) {
+      return "";
+    }
+
+    for (i = 0; i < names.length; i += 1) {
+      value = params.get(names[i]);
+
+      if (hasValue(value)) {
+        return value.trim();
+      }
+    }
+
+    return "";
+  }
+
   function reviewEmailAddress() {
     var root = $("#wrapped-builder");
+    var urlEmail = searchParamValue(["review_email", "reviewEmail"]);
+
+    if (urlEmail) {
+      return urlEmail;
+    }
 
     return root ? String(root.getAttribute("data-review-email") || "").trim() : "";
   }
@@ -750,6 +777,25 @@
 
     setVersionStatus("Add at least one change before sending this for review.", true);
     return false;
+  }
+
+  function renderReviewEmailStatus() {
+    var status = $("[data-builder-review-email-status]");
+    var email = reviewEmailAddress();
+
+    if (!status) {
+      return;
+    }
+
+    status.classList.remove("builder-review-email-status--ok", "builder-review-email-status--warning");
+
+    if (email) {
+      status.textContent = "Email drafts will be addressed to " + email + ".";
+      status.classList.add("builder-review-email-status--ok");
+    } else {
+      status.textContent = "No review email is set yet. Email drafts will open without a recipient.";
+      status.classList.add("builder-review-email-status--warning");
+    }
   }
 
   function downloadSubmission() {
@@ -1335,6 +1381,7 @@
     renderChangeSummary();
     renderCustomCards();
     renderWarnings();
+    renderReviewEmailStatus();
     renderExport();
     schedulePreview();
   }
