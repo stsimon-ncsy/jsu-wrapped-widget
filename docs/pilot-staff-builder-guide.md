@@ -12,13 +12,15 @@ https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrap
 
 The `review_email` part pre-addresses the email draft so your submission goes back to the right reviewer.
 
+Some links may also include `review_url`. If they do, the builder will show an **Open review form** option after it copies your submission JSON.
+
 ## What To Do
 
 1. Pick your region and chapter.
 2. Pick the edit scope. Use **This chapter** unless your reviewer specifically asks you to test a region or program default.
 3. Make only the changes you want reviewed.
 4. Fill in Submission info with your name, email, and a short reviewer note.
-5. Use **Open email draft**, **Copy submission**, or **Download submission**.
+5. Use **Open email draft**, **Open review form** if it is available, **Copy submission**, or **Download submission**.
 
 The preview updates as you work. Click a screen in the editor to jump the preview to that screen.
 
@@ -47,6 +49,7 @@ Recommended path:
 Other options:
 
 - Use **Copy submission** if you want to paste into Slack, Teams, or a review form.
+- Use **Open review form** if your reviewer gave you a form link. The builder copies the submission JSON first; paste it into the form before sending.
 - Use **Download submission** if attaching a file is easier.
 - If you are unsure, download the submission file and send that file to your reviewer.
 

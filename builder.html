@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="./wrapped-builder.css?v=jsuw-prod-20260601h">
   </head>
   <body>
-    <div id="wrapped-builder" class="wrapped-builder" data-review-email="">
+    <div id="wrapped-builder" class="wrapped-builder" data-review-email="" data-review-url="">
       <header class="builder-header">
         <div>
           <p>Internal builder</p>
@@ -79,11 +79,12 @@
               <div>
                 <strong>Send for review</strong>
                 <p>Recommended: Open email draft after making at least one change, then paste the copied JSON into the email before sending.</p>
-                <p>Download submission if email paste is awkward, or copy the submission JSON for Slack or a review form.</p>
+                <p>Download submission if email paste is awkward, or copy the submission JSON for Slack, Teams, or a review form.</p>
                 <p class="builder-review-email-status" data-builder-review-email-status></p>
               </div>
               <div class="builder-actions builder-actions--review">
                 <button type="button" data-builder-action="email-submission">Open email draft</button>
+                <button type="button" data-builder-action="form-submission">Open review form</button>
                 <button type="button" data-builder-action="copy-submission">Copy submission</button>
                 <button type="button" data-builder-action="download-submission">Download submission</button>
               </div>

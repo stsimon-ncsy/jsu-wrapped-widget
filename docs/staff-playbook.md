@@ -90,7 +90,7 @@ For pilot staff who should not edit GitHub directly, ask them to fill in the bui
 
 Send pilot users `docs/pilot-staff-builder-guide.md` with their builder link. It is the short staff-facing version of this workflow.
 
-Use **Open email draft** when staff are sending the JSON straight back to the maintainer; it copies the submission JSON first, then opens a short email note. To make that easy for a pilot group, distribute a pre-addressed builder link with `review_email`, for example `builder.html?review_email=wrapped-review@example.org`. Use **Copy submission** when staff will paste the JSON into Slack or a Gravity Form review field. Use **Download submission** when attaching a file is easier.
+Use **Open email draft** when staff are sending the JSON straight back to the maintainer; it copies the submission JSON first, then opens a short email note. To make that easy for a pilot group, distribute a pre-addressed builder link with `review_email`, for example `builder.html?review_email=wrapped-review@example.org`. If you create a separate intake form, add `review_url` to the builder link; **Open review form** copies the same submission JSON, opens that form, and appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview`. Staff still need to paste the copied JSON into the form. Use **Copy submission** when staff will paste the JSON into Slack, Teams, or a Gravity Form review field. Use **Download submission** when attaching a file is easier.
 
 The builder blocks no-change review packets. Staff should make at least one copy, metric, CTA, logo, palette, hide/show, or custom-screen change before sending a submission back.
 

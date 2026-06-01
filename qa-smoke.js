@@ -777,6 +777,7 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes('data-builder-action="download-submission"'), "builder should expose a staff submission download button");
   assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
   assert(builderHtml.includes('data-builder-action="email-submission"'), "builder should expose a staff submission email draft button");
+  assert(builderHtml.includes('data-builder-action="form-submission"'), "builder should expose an optional review form button");
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
   assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
@@ -802,18 +803,25 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
   assert(builderJs.includes("function emailSubmission"), "builder should open a review email draft for staff submissions");
   assert(builderJs.includes("function buildSubmissionEmail"), "builder should build a staff submission email note");
+  assert(builderJs.includes("function reviewFormUrl"), "builder should read an optional staff review form URL");
+  assert(builderJs.includes("function formSubmission"), "builder should copy JSON and open an optional review form");
+  assert(builderJs.includes("review_url"), "builder should support a review_url query parameter for form-based submissions");
+  assert(builderJs.includes("data-review-url"), "builder should support a data-review-url fallback for form-based submissions");
   assert(builderJs.includes("function renderReviewEmailStatus"), "builder should render the configured review email status");
   assert(builderJs.includes("mailto:"), "builder email handoff should not require a backend");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
   assert(builderJs.includes("function submissionHasChanges"), "builder should detect no-change staff submissions before sending");
   assert(builderJs.includes("Add at least one change before sending this for review."), "builder should tell staff when a submission has no changes");
   assert(builderCss.includes(".builder-actions--review button"), "builder review action buttons should have mobile-specific sizing");
+  assert(builderCss.includes(".builder-actions button:disabled"), "builder should visually distinguish disabled review actions");
 
   const readme = loadText("README.md");
   const playbook = loadText("docs/staff-playbook.md");
 
   assert(readme.includes("review_email"), "README should document pre-addressed staff review links");
+  assert(readme.includes("review_url"), "README should document optional staff review form links");
   assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
+  assert(playbook.includes("review_url"), "staff playbook should document optional staff review form links");
 }
 
 function runBuilderIndexingSmoke() {
@@ -1341,6 +1349,7 @@ function runReadmeSmoke() {
     "sample-wrapped-2026.json",
     "wrapped-config-2026.json",
     "Open email draft",
+    "Open review form",
     "Download submission",
     "merge-builder-submission.js",
     "docs/production-readiness.md",
@@ -1369,6 +1378,7 @@ function runStaffPlaybookSmoke() {
     "Gravity Form",
     "Variants",
     "Open email draft",
+    "Open review form",
     "Download submission",
     "Copy submission",
     "merge-builder-submission.js",
@@ -1427,10 +1437,12 @@ function runPilotStaffGuideSmoke() {
   const requiredPhrases = [
     "Pilot Staff Builder Guide",
     "review_email",
+    "review_url",
     "Pick your region and chapter",
     "Make only the changes you want reviewed",
     "Fill in Submission info",
     "Open email draft",
+    "Open review form",
     "Copy submission",
     "Download submission",
     "Do not use Copy JSON",

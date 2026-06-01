@@ -728,6 +728,47 @@
     return root ? String(root.getAttribute("data-review-email") || "").trim() : "";
   }
 
+  function reviewFormUrl() {
+    var root = $("#wrapped-builder");
+    var url = searchParamValue(["review_url", "reviewUrl", "review_form", "reviewForm"]);
+
+    if (url) {
+      return url;
+    }
+
+    return root ? String(root.getAttribute("data-review-url") || "").trim() : "";
+  }
+
+  function reviewFormUrlWithContext(payload) {
+    var url = reviewFormUrl();
+    var scopedUrl;
+    var params;
+
+    if (!url) {
+      return "";
+    }
+
+    try {
+      scopedUrl = new URL(url, window.location.href);
+      params = {
+        wrapped_scope: payload.scope_type,
+        wrapped_slug: payload.scope_slug,
+        wrapped_variant: payload.variant_slug,
+        wrapped_preview: payload.preview_url
+      };
+
+      Object.keys(params).forEach(function (key) {
+        if (hasValue(params[key])) {
+          scopedUrl.searchParams.set(key, params[key]);
+        }
+      });
+
+      return scopedUrl.toString();
+    } catch (error) {
+      return url;
+    }
+  }
+
   function buildSubmissionEmail(payload, copied) {
     var scopeLabel = payload.scope_label || payload.scope_slug || "Wrapped";
     var variantLabel = payload.variant_label || payload.variant_slug || "";
@@ -764,6 +805,22 @@
     window.location.href = submissionMailtoUrl(buildSubmissionEmail(payload, copied));
   }
 
+  function openSubmissionReviewForm(payload) {
+    var url = reviewFormUrlWithContext(payload);
+    var opened;
+
+    if (!url) {
+      setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
+      return;
+    }
+
+    opened = window.open(url, "_blank", "noopener");
+
+    if (!opened) {
+      window.location.href = url;
+    }
+  }
+
   function submissionHasChanges(payload) {
     var patch = payload && payload.config_patch;
 
@@ -782,6 +839,9 @@
   function renderReviewEmailStatus() {
     var status = $("[data-builder-review-email-status]");
     var email = reviewEmailAddress();
+    var formUrl = reviewFormUrl();
+    var formButton = $("[data-builder-action=\"form-submission\"]");
+    var messages = [];
 
     if (!status) {
       return;
@@ -789,11 +849,24 @@
 
     status.classList.remove("builder-review-email-status--ok", "builder-review-email-status--warning");
 
+    if (formButton) {
+      formButton.disabled = !formUrl;
+      formButton.setAttribute("aria-disabled", formUrl ? "false" : "true");
+    }
+
     if (email) {
-      status.textContent = "Email drafts will be addressed to " + email + ".";
+      messages.push("Email drafts will be addressed to " + email + ".");
+    }
+
+    if (formUrl) {
+      messages.push("Review form is available.");
+    }
+
+    if (messages.length) {
+      status.textContent = messages.join(" ");
       status.classList.add("builder-review-email-status--ok");
     } else {
-      status.textContent = "No review email is set yet. Email drafts will open without a recipient.";
+      status.textContent = "No review email or review form is set yet. Email drafts will open without a recipient.";
       status.classList.add("builder-review-email-status--warning");
     }
   }
@@ -841,6 +914,30 @@
       .catch(function () {
         openSubmissionEmailDraft(payload, false);
         setVersionStatus("Email draft opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", true);
+      });
+  }
+
+  function formSubmission() {
+    var payload = buildSubmissionPayload();
+    var text = JSON.stringify(payload, null, 2);
+
+    if (!ensureSubmissionHasChanges(payload)) {
+      return;
+    }
+
+    if (!reviewFormUrl()) {
+      setVersionStatus("No review form URL is set. Use email, copy, or download instead.", true);
+      return;
+    }
+
+    copyTextToClipboard(text)
+      .then(function () {
+        openSubmissionReviewForm(payload);
+        setVersionStatus("Review form opened. Paste the copied submission JSON into the form before sending.", false);
+      })
+      .catch(function () {
+        openSubmissionReviewForm(payload);
+        setVersionStatus("Review form opened. Clipboard copy failed, so use Copy submission or Download submission before sending.", true);
       });
   }
 
@@ -1656,6 +1753,8 @@
         copySubmission();
       } else if (action === "email-submission") {
         emailSubmission();
+      } else if (action === "form-submission") {
+        formSubmission();
       } else if (action === "copy-export") {
         copyTextToClipboard(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }

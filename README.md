@@ -67,7 +67,7 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
 3. Fill in the submission info fields.
-4. Click **Open email draft** to copy the smaller JSON and start a review email, click **Copy submission** to paste it into email, Slack, or a review form, or click **Download submission** to attach it as a file.
+4. Click **Open email draft** to copy the smaller JSON and start a review email, click **Open review form** if a form link was provided, click **Copy submission** to paste it into email, Slack, Teams, or a review form, or click **Download submission** to attach it as a file.
 5. Send that submission JSON to the repo maintainer for review.
 
 To prefill the email recipient for pilot staff, set `data-review-email` on the `#wrapped-builder` element in `builder.html`, or send staff a pre-addressed builder link with `review_email`:
@@ -75,6 +75,14 @@ To prefill the email recipient for pilot staff, set `data-review-email` on the `
 ```text
 https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrapped-review@example.org
 ```
+
+To send staff to a separate intake form after copying the submission JSON, set `data-review-url` on `#wrapped-builder` or add `review_url` to the builder link:
+
+```text
+https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrapped-review@example.org&review_url=https%3A%2F%2Fncsy.org%2Fwrapped-review%2F
+```
+
+The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. Staff still need to paste the copied submission JSON into the review form.
 
 Do not commit downloaded staff submission JSON. These files can include submitter name, email, and reviewer notes; keep them local, in email/Slack, or in an ignored `staff-submissions/` folder while reviewing.
 
