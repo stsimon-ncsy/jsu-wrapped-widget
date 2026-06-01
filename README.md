@@ -51,7 +51,12 @@ For a normal HTML block that loads assets from GitHub Pages:
 
 Use `wordpress-inline-embed.html` when the page template works better with a self-contained inline block.
 
-Bump the shared cache token in this pasteable snippet whenever the hosted JS, CSS, data, or config URLs need to force-refresh for staff or public reviewers.
+Bump the shared cache token whenever the hosted JS, CSS, data, or config URLs need to force-refresh for staff or public reviewers:
+
+```bash
+node bump-cache-token.js jsuw-prod-YYYYMMDDx
+node check-production.js
+```
 
 ## Builder Workflow
 

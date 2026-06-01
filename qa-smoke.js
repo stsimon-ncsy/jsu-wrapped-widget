@@ -1123,6 +1123,35 @@ function runAssetVersionSmoke() {
   assert(docs.includes("README.md"), "production docs should include README in the shared cache token bump list");
 }
 
+function runCacheTokenBumpSmoke() {
+  const scriptPath = "bump-cache-token.js";
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
+
+  assert(fs.existsSync(scriptPath), "cache-token bump helper is missing");
+
+  const bump = require("./bump-cache-token.js");
+  const sample = "one?v=jsuw-prod-20250101a two?v=jsuw-prod-20250101a placeholder=jsuw-prod-YYYYMMDDx";
+  const result = bump.replaceCacheTokenInText(sample, "jsuw-prod-20260602a");
+
+  assert(result.count === 2, `cache-token helper replaced ${result.count} tokens instead of 2`);
+  assert(result.text === "one?v=jsuw-prod-20260602a two?v=jsuw-prod-20260602a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
+  assert(bump.validateToken("jsuw-prod-20260601h") === "jsuw-prod-20260601h", "cache-token helper should accept production token format");
+
+  let invalidMessage = "";
+  try {
+    bump.validateToken("bad token");
+  } catch (error) {
+    invalidMessage = String(error.message || "");
+  }
+
+  assert(invalidMessage.includes("jsuw-prod-"), "cache-token helper should reject invalid token formats clearly");
+  assert(listed.includes("node --check bump-cache-token.js"), "production QA should syntax-check the cache-token bump helper");
+  assert(readme.includes("node bump-cache-token.js"), "README should document the cache-token bump helper");
+  assert(docs.includes("node bump-cache-token.js"), "production docs should document the cache-token bump helper");
+}
+
 function findMatchingBrace(css, openIndex) {
   let depth = 0;
 
@@ -1265,6 +1294,7 @@ function runProductionCheckSmoke() {
     "node --check sync-wordpress-inline.js",
     "node --check generate-share-pages.js",
     "node --check merge-builder-submission.js",
+    "node --check bump-cache-token.js",
     "node --check qa-smoke.js",
     "node validate-wrapped-data.js",
     "node qa-smoke.js",
@@ -1564,6 +1594,7 @@ function main() {
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runAssetVersionSmoke();
+  runCacheTokenBumpSmoke();
   runCssIsolationSmoke();
   runCssPolishSmoke();
   runMobileFullscreenLayoutSmoke();
