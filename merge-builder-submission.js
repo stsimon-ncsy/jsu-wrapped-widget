@@ -1,9 +1,12 @@
 const fs = require("fs");
 const path = require("path");
+const dataValidator = require("./validate-wrapped-data.js");
 
 const SUBMISSION_SCHEMA = "jsu-wrapped-builder-submission";
 const ALLOWED_ROOTS = ["defaults", "regions", "programs", "campaigns", "chapters"];
 const BLOCKED_KEYS = ["__proto__", "constructor", "prototype"];
+const DEFAULT_STORY_DATA_PATH = "sample-wrapped-2026.json";
+const DEFAULT_TEEN_DATA_PATH = "sample-teen-wrapped-2026.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -117,6 +120,26 @@ function mergeSubmission(config, submission) {
   return config;
 }
 
+function validateMergedConfig(config, options) {
+  const settings = options || {};
+  const storyDataPath = settings.storyDataPath || DEFAULT_STORY_DATA_PATH;
+  const teenDataPath = settings.teenDataPath || DEFAULT_TEEN_DATA_PATH;
+
+  if (!fs.existsSync(storyDataPath) || !fs.existsSync(teenDataPath)) {
+    return {
+      ok: true,
+      skipped: true,
+      errors: []
+    };
+  }
+
+  return dataValidator.validateWrappedPackage({
+    chapterRecords: readJson(storyDataPath),
+    teenRecords: readJson(teenDataPath),
+    config
+  });
+}
+
 function usage() {
   return [
     "Usage:",
@@ -140,15 +163,24 @@ function main() {
 
   const config = readJson(configPath);
   const submission = readJson(submissionPath);
-  const merged = mergeSubmission(config, submission);
+  const merged = mergeSubmission(cloneValue(config), submission);
+  const validation = validateMergedConfig(merged);
   const label = [
     submission.scope_type,
     submission.scope_slug,
     submission.variant_slug
   ].filter(Boolean).join(" / ") || submission.merge_path.join(".");
 
+  if (!validation.ok) {
+    console.error("Merged config validation failed");
+    validation.errors.forEach((error) => {
+      console.error("- " + error);
+    });
+    process.exit(1);
+  }
+
   if (dryRun) {
-    console.log("Submission is valid for " + label + ".");
+    console.log("Submission is valid for " + label + (validation.skipped ? " (package validation skipped)." : "."));
     return;
   }
 
@@ -162,5 +194,6 @@ if (require.main === module) {
 
 module.exports = {
   mergeSubmission,
-  validateSubmission
+  validateSubmission,
+  validateMergedConfig
 };

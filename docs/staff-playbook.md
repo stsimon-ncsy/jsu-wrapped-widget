@@ -96,6 +96,8 @@ node merge-builder-submission.js path/to/staff-submission.json wrapped-config-20
 
 Then run the normal QA gate and commit/push the updated config.
 
+The merge helper validates the resulting config against the current Wrapped data before writing. If it reports validation errors, do not hand-edit around them; fix the submission in the builder or adjust the source data/config intentionally, then rerun the merge.
+
 ## Measurement
 
 Review the analytics after launch in three layers:

@@ -31,6 +31,8 @@ Hosted preview pages and the WordPress inline embed use a shared static asset ca
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 
+Staff builder submissions should be merged with `node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json`. The helper validates the merged config against the current story and teen JSON before writing, so malformed staff patches are rejected before they can enter the deployable config.
+
 Then smoke these URLs:
 
 ```text

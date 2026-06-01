@@ -768,6 +768,44 @@ function runBuilderSubmissionMergeSmoke() {
   assert(merged.chapters.baltimore.variants.donor.palette === "electric", "merge should preserve existing variant fields");
   assert(merged.chapters.baltimore.variants.donor.cta_label === "Support next year's story", "merge should apply submitted variant fields");
   assert(merged.chapters.baltimore.variants.donor.card_overrides.final.headline === "Baltimore donor recap", "merge should apply nested submitted fields");
+
+  const invalidConfigPath = path.join(tempDir, "invalid-config.json");
+  const invalidSubmissionPath = path.join(tempDir, "invalid-submission.json");
+
+  fs.writeFileSync(invalidConfigPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {}
+    }
+  }, null, 2));
+  fs.writeFileSync(invalidSubmissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    merge_path: ["chapters", "baltimore"],
+    config_patch: {
+      hidden_cards: ["evnts"]
+    }
+  }, null, 2));
+
+  let invalidOutput = "";
+  try {
+    childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", invalidSubmissionPath, invalidConfigPath], {
+      cwd: __dirname,
+      encoding: "utf8",
+      stdio: "pipe"
+    });
+  } catch (error) {
+    invalidOutput = String(error.stderr || error.stdout || error.message || "");
+  }
+
+  const invalidConfig = JSON.parse(fs.readFileSync(invalidConfigPath, "utf8"));
+  assert(script.includes("validateMergedConfig"), "merge script should validate merged config before writing");
+  assert(invalidOutput.includes("Merged config validation failed"), "invalid staff submission should fail package validation");
+  assert(!invalidConfig.chapters.baltimore.hidden_cards, "invalid staff submission should not be written");
 }
 
 function runFallbackSvgSmoke(records, config) {
