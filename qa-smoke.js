@@ -1264,6 +1264,18 @@ function runDataValidationSmoke(records, config) {
       events_attended: 5
     }
   ]);
+  const typoConfigReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    defaults: {
+      ctaa_label: "Typo should not be ignored"
+    },
+    chaptrers: {
+      baltimore: {
+        cta_label: "Wrong root should not be ignored"
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -1271,6 +1283,8 @@ function runDataValidationSmoke(records, config) {
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("teen_id")), "teen ids should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("email")), "teen emails should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("emergency_phone")), "teen phone fields should fail validation");
+  assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.chaptrers")), "unknown top-level config keys should fail validation");
+  assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.defaults.ctaa_label")), "unknown config section keys should fail validation");
 }
 
 function main() {

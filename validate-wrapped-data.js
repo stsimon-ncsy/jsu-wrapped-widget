@@ -109,6 +109,39 @@ const CUSTOM_CARD_TYPES = new Set([
 
 const CUSTOM_CARD_TYPE_LABEL = Array.from(CUSTOM_CARD_TYPES).join(", ");
 
+const CONFIG_TOP_LEVEL_KEYS = new Set([
+  "version",
+  "year",
+  "defaults",
+  "regions",
+  "programs",
+  "campaigns",
+  "chapters"
+]);
+
+const CONFIG_SECTION_KEYS = new Set([
+  "label",
+  "name",
+  "title",
+  "description",
+  "hidden_from_picker",
+  "hiddenFromPicker",
+  "brand_logo",
+  "palette",
+  "accent_palette",
+  "cta_label",
+  "ctaLabel",
+  "cta_target",
+  "ctaTarget",
+  "cta_href",
+  "ctaHref",
+  "hidden_cards",
+  "card_overrides",
+  "record_overrides",
+  "custom_cards",
+  "variants"
+]);
+
 function hasValue(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
 }
@@ -497,6 +530,14 @@ function validateCustomCards(report, section, label) {
   });
 }
 
+function validateKnownKeys(report, object, allowedKeys, label) {
+  Object.keys(object || {}).forEach((key) => {
+    if (!allowedKeys.has(key)) {
+      addError(report, `${label}.${key} is not a supported config key`);
+    }
+  });
+}
+
 function validateConfigSection(report, section, label) {
   if (section === undefined) {
     return;
@@ -507,6 +548,7 @@ function validateConfigSection(report, section, label) {
     return;
   }
 
+  validateKnownKeys(report, section, CONFIG_SECTION_KEYS, label);
   validateHiddenCards(report, section, label);
   validateCardOverrides(report, section, label);
   validateCustomCards(report, section, label);
@@ -534,6 +576,7 @@ function validateConfig(config, chapterRecords) {
     return report;
   }
 
+  validateKnownKeys(report, config, CONFIG_TOP_LEVEL_KEYS, "config");
   validateConfigSection(report, config.defaults || {}, "config.defaults");
 
   (chapterRecords || []).forEach((record) => {
