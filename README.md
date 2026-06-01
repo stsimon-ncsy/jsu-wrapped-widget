@@ -55,6 +55,8 @@ Use `wordpress-inline-embed.html` when the page template works better with a sel
 
 Pilot staff can use `builder.html` to preview chapter, region, program, and variant changes without editing GitHub directly.
 
+Builder is an internal staff tool. It is public only because GitHub Pages is static hosting, so `builder.html` is marked `noindex,nofollow` and should not be promoted as a public landing page.
+
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
 3. Fill in the submission info fields.

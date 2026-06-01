@@ -719,6 +719,16 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("downloadSubmission"), "builder should download staff submissions as files");
 }
 
+function runBuilderIndexingSmoke() {
+  const builderHtml = loadText("builder.html");
+  const docs = loadText("docs/production-readiness.md");
+  const readme = loadText("README.md");
+
+  assert(builderHtml.includes('<meta name="robots" content="noindex,nofollow">'), "builder should be marked noindex,nofollow");
+  assert(docs.includes("builder.html is an internal staff tool"), "production docs should explain builder indexing guard");
+  assert(readme.includes("Builder is an internal staff tool"), "README should explain builder indexing guard");
+}
+
 function runBuilderSubmissionMergeSmoke() {
   const script = loadText("merge-builder-submission.js");
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-merge-"));
@@ -1154,6 +1164,7 @@ function main() {
   runBuilderFutureScopeSmoke();
   runBuilderProtectedCardsSmoke();
   runBuilderSubmissionSmoke();
+  runBuilderIndexingSmoke();
   runBuilderSubmissionMergeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();

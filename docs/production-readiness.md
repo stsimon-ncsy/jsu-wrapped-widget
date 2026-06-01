@@ -22,6 +22,8 @@ Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequ
 
 Staff builder submissions should be merged with `node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json`. The helper validates the merged config against the current story and teen JSON before writing, so malformed staff patches are rejected before they can enter the deployable config.
 
+builder.html is an internal staff tool. It is hosted publicly only because GitHub Pages serves static files, so it must keep a `noindex,nofollow` robots tag and should not be used as the public campaign URL.
+
 Then smoke these URLs:
 
 ```text
