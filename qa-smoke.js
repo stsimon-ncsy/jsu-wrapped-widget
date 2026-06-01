@@ -839,6 +839,27 @@ function runBuilderSubmissionMergeSmoke() {
   fs.writeFileSync(submissionPath, JSON.stringify({
     schema: "jsu-wrapped-builder-submission",
     version: 1,
+    scope_type: "chapter",
+    scope_slug: "baltimore",
+    scope_label: "Baltimore",
+    variant_slug: "donor",
+    variant_label: "Donor recap",
+    submitter_name: "Leah Rosen",
+    submitter_email: "leah@example.org",
+    submitter_note: "Please use this for the donor preview first.",
+    preview_url: "https://example.org/wrapped/?chapter=baltimore&variant=donor",
+    change_summary: [
+      {
+        type: "setting",
+        label: "cta label",
+        value: "Support next year's story"
+      },
+      {
+        type: "screen_rewrite",
+        label: "Final share card",
+        fields: ["headline"]
+      }
+    ],
     merge_path: ["chapters", "baltimore", "variants", "donor"],
     config_patch: {
       cta_label: "Support next year's story",
@@ -852,6 +873,20 @@ function runBuilderSubmissionMergeSmoke() {
 
   assert(script.includes("jsu-wrapped-builder-submission"), "merge script should validate the submission schema");
   assert(script.includes("merge_path"), "merge script should apply patches at the submitted merge path");
+
+  const dryRunOutput = childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", submissionPath, configPath, "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+
+  assert(dryRunOutput.includes("Submission is valid for chapter / baltimore / donor"), "dry run should identify the submitted scope and variant");
+  assert(dryRunOutput.includes("Submitter: Leah Rosen <leah@example.org>"), "dry run should show who sent the staff submission");
+  assert(dryRunOutput.includes("Reviewer note: Please use this for the donor preview first."), "dry run should show the staff reviewer note");
+  assert(dryRunOutput.includes("Preview URL: https://example.org/wrapped/?chapter=baltimore&variant=donor"), "dry run should show the preview URL");
+  assert(dryRunOutput.includes("- cta label: Support next year's story"), "dry run should summarize setting changes");
+  assert(dryRunOutput.includes("- Final share card: updated headline"), "dry run should summarize screen rewrites");
+
   childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", submissionPath, configPath], {
     cwd: __dirname,
     stdio: "pipe"

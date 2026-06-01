@@ -161,6 +161,82 @@ function validateMergedConfig(config, options) {
   });
 }
 
+function textValue(value) {
+  return value === null || value === undefined ? "" : String(value).trim();
+}
+
+function formatSubmitter(submission) {
+  const name = textValue(submission.submitter_name);
+  const email = textValue(submission.submitter_email);
+
+  if (name && email) {
+    return name + " <" + email + ">";
+  }
+
+  return name || email;
+}
+
+function formatChangeSummaryItem(item) {
+  if (!isPlainObject(item)) {
+    return "";
+  }
+
+  const label = textValue(item.label || item.field || item.card_id || item.type || "Change");
+
+  if (item.type === "setting") {
+    return label + ": " + textValue(item.value);
+  }
+
+  if (item.type === "metric_correction") {
+    return label + ": " + textValue(item.official_value) + " -> " + textValue(item.corrected_value);
+  }
+
+  if (item.type === "hidden_screen") {
+    return "Hide " + label;
+  }
+
+  if (item.type === "screen_rewrite") {
+    const fields = Array.isArray(item.fields) ? item.fields.map(textValue).filter(Boolean).join(", ") : "";
+    return label + (fields ? ": updated " + fields : ": updated copy");
+  }
+
+  if (item.type === "custom_screens") {
+    const count = textValue(item.count || "");
+    const headlines = Array.isArray(item.headlines) ? item.headlines.map(textValue).filter(Boolean).join("; ") : "";
+    return (count ? count + " " : "") + "custom screen" + (count === "1" ? "" : "s") + (headlines ? ": " + headlines : "");
+  }
+
+  return label;
+}
+
+function printSubmissionReview(submission) {
+  const submitter = formatSubmitter(submission);
+  const note = textValue(submission.submitter_note);
+  const previewUrl = textValue(submission.preview_url);
+  const changes = Array.isArray(submission.change_summary)
+    ? submission.change_summary.map(formatChangeSummaryItem).filter(Boolean)
+    : [];
+
+  if (submitter) {
+    console.log("Submitter: " + submitter);
+  }
+
+  if (note) {
+    console.log("Reviewer note: " + note);
+  }
+
+  if (previewUrl) {
+    console.log("Preview URL: " + previewUrl);
+  }
+
+  if (changes.length) {
+    console.log("Changes:");
+    changes.forEach((change) => {
+      console.log("- " + change);
+    });
+  }
+}
+
 function usage() {
   return [
     "Usage:",
@@ -202,6 +278,7 @@ function main() {
 
   if (dryRun) {
     console.log("Submission is valid for " + label + (validation.skipped ? " (package validation skipped)." : "."));
+    printSubmissionReview(submission);
     return;
   }
 

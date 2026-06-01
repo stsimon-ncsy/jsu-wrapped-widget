@@ -20,7 +20,7 @@ Hosted preview pages, the WordPress inline embed, the builder JSON fetches, and 
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 
-Staff builder submissions should be merged with `node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json`. The helper only accepts builder-generated scope or variant merge paths, then validates the merged config against the current story and teen JSON before writing, so malformed staff patches are rejected before they can enter the deployable config.
+Staff builder submissions should be reviewed first with `node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json --dry-run`, then merged with `node merge-builder-submission.js path/to/submission.json wrapped-config-2026.json`. The dry run validates the packet and prints the submitter, reviewer note, preview URL, and change summary without writing. The helper only accepts builder-generated scope or variant merge paths, then validates the merged config against the current story and teen JSON before writing, so malformed staff patches are rejected before they can enter the deployable config.
 
 builder.html is an internal staff tool. It is hosted publicly only because GitHub Pages serves static files, so it must keep a `noindex,nofollow` robots tag and should not be used as the public campaign URL.
 
