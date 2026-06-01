@@ -78,7 +78,7 @@ Good variant reasons:
 - parent/community support
 - regional campaign or Shabbaton follow-up
 
-Keep shared metrics consistent across variants. If a metric correction is needed, use the builder's stat correction flow so generated copy, final card, analytics, and downloads stay aligned.
+Keep shared metrics and persona labels consistent across variants. If a metric or persona correction is needed, use the builder's correction flow so generated copy, final card, analytics, and downloads stay aligned.
 
 Choose the smallest scope that fits the audience:
 

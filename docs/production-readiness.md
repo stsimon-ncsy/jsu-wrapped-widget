@@ -112,7 +112,7 @@ Generated screens can be hidden at a config scope, but the cover and final share
 
 ## Data Consistency
 
-Metric corrections belong in `record_overrides`. They are applied before cards are generated, so corrected stats flow into:
+Metric and persona corrections belong in `record_overrides`. They are applied before cards are generated, so corrected stats and story labels flow into:
 
 - generated card numbers
 - generated headlines/subtext

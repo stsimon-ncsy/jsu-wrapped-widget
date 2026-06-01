@@ -38,18 +38,13 @@
       "brand_logo": "ncsy",
       "palette": "sunset",
       "hidden_cards": [],
+      "record_overrides": {
+        "chapter_persona": "The Shabbat Powerhouse",
+        "chapter_line": "You turned consistency, learning, and Shabbat energy into belonging."
+      },
       "card_overrides": {
         "cover": {
           "markerText": "Baltimore brought the year to life."
-        },
-        "persona": {
-          "headline": "Your chapter type: The Shabbat Powerhouse",
-          "displayHeadline": "Your chapter type: The Shabbat Powerhouse",
-          "persona": "The Shabbat Powerhouse",
-          "subtext": "You turned consistency, learning, and Shabbat energy into belonging."
-        },
-        "final": {
-          "persona": "The Shabbat Powerhouse"
         }
       },
       "custom_cards": [

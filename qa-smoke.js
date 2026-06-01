@@ -168,6 +168,20 @@ function runSampleVariantSmoke(records, config) {
   assertNoBrokenText(cards);
 }
 
+function runSampleConfigConsistencySmoke(records, config) {
+  const record = records.find((item) => item.chapter_slug === "baltimore");
+  const storyConfig = api.resolveStoryConfig(config, record);
+  const effective = api.createEffectiveRecord(record, storyConfig);
+  const cards = api.createCards(effective, { storyConfig });
+  const persona = cards.find((card) => card.id === "persona");
+  const final = cards.find((card) => card.id === "final");
+
+  assert(persona && final, "sample config should render persona and final cards for Baltimore");
+  assert(effective.chapter_persona === persona.persona, `Baltimore effective persona mismatch: ${effective.chapter_persona} vs ${persona.persona}`);
+  assert(final.persona === persona.persona, `Baltimore final persona mismatch: ${final.persona} vs ${persona.persona}`);
+  assert(final.subtext.includes(persona.persona), `Baltimore final summary should use the configured persona: ${final.subtext}`);
+}
+
 function runPageMetadataSmoke() {
   const previousDocument = global.document;
   const fakeDocument = {
@@ -962,6 +976,7 @@ function main() {
   runPickerSmoke(records, config);
   runHiddenVariantSmoke();
   runSampleVariantSmoke(records, config);
+  runSampleConfigConsistencySmoke(records, config);
   runPageMetadataSmoke();
   runStaticShareSmoke();
   runShareGeneratorCleanupSmoke();
