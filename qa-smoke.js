@@ -200,6 +200,25 @@ function runStaticShareSmoke() {
     variantSlug: "donor-recap",
     shareBase: "https://example.org/wrapped/share/"
   }, "https://example.org/wrapped/?chapter=baltimore&variant=donor-recap");
+  const programContextShareUrl = api.createShareUrl({
+    record: {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore"
+    },
+    experienceMode: "chapter",
+    variantSlug: "donor-recap",
+    programSlug: "shabbat",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?chapter=baltimore&program=shabbat&variant=donor-recap&autoplay=1&duration=1500");
+  const campaignContextShareUrl = api.createShareUrl({
+    record: {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore"
+    },
+    experienceMode: "chapter",
+    variantSlug: "spring-board",
+    shareBase: "https://example.org/wrapped/share/"
+  }, "https://example.org/wrapped/?chapter=baltimore&campaign=spring-board&variant=spring-board");
   const doubleHyphenChapterShareUrl = api.createShareUrl({
     record: {
       chapter_slug: "la--city",
@@ -276,6 +295,8 @@ function runStaticShareSmoke() {
     assert(fs.existsSync(path), `static share page missing for ${record.chapter_slug}`);
   });
   assert(shareUrl === "https://example.org/wrapped/share/baltimore/?variant=donor-recap", `static share URL mismatch: ${shareUrl}`);
+  assert(programContextShareUrl === "https://example.org/wrapped/share/baltimore/?variant=donor-recap&program=shabbat&autoplay=1&duration=1500", `program context static share URL mismatch: ${programContextShareUrl}`);
+  assert(campaignContextShareUrl === "https://example.org/wrapped/share/baltimore/?variant=spring-board&campaign=spring-board", `campaign context static share URL mismatch: ${campaignContextShareUrl}`);
   assert(doubleHyphenChapterShareUrl === "https://example.org/wrapped/share/la--city/", `chapter share URL should preserve existing slug: ${doubleHyphenChapterShareUrl}`);
   assert(regionShareUrl === "https://example.org/wrapped/share/region/atlantic-seaboard/?variant=donor-recap", `region static share URL mismatch: ${regionShareUrl}`);
   assert(programShareUrl === "https://example.org/wrapped/share/program/shabbat/", `program static share URL mismatch: ${programShareUrl}`);

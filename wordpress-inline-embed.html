@@ -7687,6 +7687,30 @@
         shareUrl.searchParams.set("variant", variant);
       }
 
+      try {
+        var sourceParams = new URL(fallback || root.location && root.location.href || "https://example.org/").searchParams;
+
+        ["program", "campaign", "autoplay", "duration"].forEach(function (key) {
+          if ((key === "program" || key === "campaign") && scope.type === "program") {
+            return;
+          }
+
+          var value = sourceParams.get(key);
+
+          if (hasValue(value)) {
+            shareUrl.searchParams.set(key, value);
+          }
+        });
+      } catch (sourceError) {
+        if (scope.type !== "program" && hasValue(state && state.programSlug)) {
+          shareUrl.searchParams.set("program", String(state.programSlug).trim());
+        }
+      }
+
+      if (scope.type !== "program" && !shareUrl.searchParams.has("program") && !shareUrl.searchParams.has("campaign") && hasValue(state && state.programSlug)) {
+        shareUrl.searchParams.set("program", String(state.programSlug).trim());
+      }
+
       return shareUrl.href;
     } catch (error) {
       return fallback;
@@ -8211,6 +8235,7 @@
         config: wrappedConfig,
         storyConfig: storyConfig,
         variantSlug: variantSlug,
+        programSlug: programSlug,
         experienceMode: storyScope.type,
         analyticsEnabled: getAnalyticsPreference(target, settings),
         analyticsYear: getAnalyticsYear(target, settings, effectiveRecord),
