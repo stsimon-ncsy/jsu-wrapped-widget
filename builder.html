@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSU/NCSY Wrapped Builder</title>
-    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601">
-    <link rel="stylesheet" href="./wrapped-builder.css?v=jsuw-prod-20260601">
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601b">
+    <link rel="stylesheet" href="./wrapped-builder.css?v=jsuw-prod-20260601b">
   </head>
   <body>
     <div id="wrapped-builder" class="wrapped-builder">
@@ -16,6 +16,7 @@
         </div>
         <nav>
           <a href="./?chapter=baltimore">Public preview</a>
+          <button type="button" data-builder-action="download-submission">Download submission</button>
           <button type="button" data-builder-action="copy-export">Copy JSON</button>
         </nav>
       </header>
@@ -127,6 +128,7 @@
               <h2>Export</h2>
               <span>Save as wrapped-config-2026.json</span>
             </div>
+            <p class="builder-help">For pilot staff, use Download submission and send that smaller file for review. Use the full export only when updating the source config directly.</p>
             <textarea data-builder-export spellcheck="false"></textarea>
           </div>
         </section>
@@ -146,7 +148,7 @@
       </main>
     </div>
 
-    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601" data-manual="true"></script>
-    <script src="./wrapped-builder.js?v=jsuw-prod-20260601"></script>
+    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601b" data-manual="true"></script>
+    <script src="./wrapped-builder.js?v=jsuw-prod-20260601b"></script>
   </body>
 </html>

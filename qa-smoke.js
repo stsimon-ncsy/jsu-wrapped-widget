@@ -1,6 +1,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const childProcess = require("child_process");
 const api = require("./jsu-wrapped.js");
 const dataValidator = require("./validate-wrapped-data.js");
 const shareGenerator = require("./generate-share-pages.js");
@@ -698,6 +699,70 @@ function runBuilderProtectedCardsSmoke() {
   assert(builderJs.includes("Cannot hide required cover or final share screens"), "builder should warn staff that cover/final cannot be hidden");
 }
 
+function runBuilderSubmissionSmoke() {
+  const builderHtml = loadText("builder.html");
+  const builderJs = loadText("wrapped-builder.js");
+
+  assert(builderHtml.includes('data-builder-action="download-submission"'), "builder should expose a staff submission download button");
+  assert(builderJs.includes("function buildSubmissionPayload"), "builder should build a scoped staff submission payload");
+  assert(builderJs.includes("merge_path"), "submission payload should include where the patch belongs in wrapped-config");
+  assert(builderJs.includes("change_summary"), "submission payload should include a human-readable change summary");
+  assert(builderJs.includes("config_patch"), "submission payload should include only the active scope/variant config patch");
+  assert(builderJs.includes("jsu-wrapped-builder-submission"), "submission payload should identify its schema");
+  assert(builderJs.includes("downloadSubmission"), "builder should download staff submissions as files");
+}
+
+function runBuilderSubmissionMergeSmoke() {
+  const script = loadText("merge-builder-submission.js");
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-merge-"));
+  const configPath = path.join(tempDir, "wrapped-config-2026.json");
+  const submissionPath = path.join(tempDir, "baltimore-submission.json");
+
+  fs.writeFileSync(configPath, JSON.stringify({
+    version: 1,
+    year: "2026",
+    defaults: {},
+    regions: {},
+    programs: {},
+    chapters: {
+      baltimore: {
+        cta_label: "Old CTA",
+        variants: {
+          donor: {
+            palette: "electric"
+          }
+        }
+      }
+    }
+  }, null, 2));
+  fs.writeFileSync(submissionPath, JSON.stringify({
+    schema: "jsu-wrapped-builder-submission",
+    version: 1,
+    merge_path: ["chapters", "baltimore", "variants", "donor"],
+    config_patch: {
+      cta_label: "Support next year's story",
+      card_overrides: {
+        final: {
+          headline: "Baltimore donor recap"
+        }
+      }
+    }
+  }, null, 2));
+
+  assert(script.includes("jsu-wrapped-builder-submission"), "merge script should validate the submission schema");
+  assert(script.includes("merge_path"), "merge script should apply patches at the submitted merge path");
+  childProcess.execFileSync(process.execPath, ["merge-builder-submission.js", submissionPath, configPath], {
+    cwd: __dirname,
+    stdio: "pipe"
+  });
+
+  const merged = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  assert(merged.chapters.baltimore.cta_label === "Old CTA", "variant submission should not overwrite base chapter config");
+  assert(merged.chapters.baltimore.variants.donor.palette === "electric", "merge should preserve existing variant fields");
+  assert(merged.chapters.baltimore.variants.donor.cta_label === "Support next year's story", "merge should apply submitted variant fields");
+  assert(merged.chapters.baltimore.variants.donor.card_overrides.final.headline === "Baltimore donor recap", "merge should apply nested submitted fields");
+}
+
 function runFallbackSvgSmoke(records, config) {
   const slugs = ["philadelphia", "baltimore", "greater-washington"];
 
@@ -766,7 +831,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
-  const releaseToken = "jsuw-prod-20260601";
+  const releaseToken = "jsuw-prod-20260601b";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
@@ -931,7 +996,9 @@ function runStaffPlaybookSmoke() {
     "Outreach",
     "Measurement",
     "Gravity Form",
-    "Variants"
+    "Variants",
+    "Download submission",
+    "merge-builder-submission.js"
   ];
 
   requiredPhrases.forEach((phrase) => {
@@ -996,6 +1063,8 @@ function main() {
   runScopedStoryValidationSmoke();
   runBuilderFutureScopeSmoke();
   runBuilderProtectedCardsSmoke();
+  runBuilderSubmissionSmoke();
+  runBuilderSubmissionMergeSmoke();
   runFallbackSvgSmoke(records, config);
   runInlineEmbedSmoke();
   runAssetVersionSmoke();

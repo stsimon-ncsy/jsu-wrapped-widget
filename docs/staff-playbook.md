@@ -86,6 +86,16 @@ Choose the smallest scope that fits the audience:
 - Region scope when every chapter in a region should inherit the same CTA, logo choice, or custom screen.
 - Program scope when a cross-region effort, Shabbaton series, donor campaign, or program category needs shared framing across chapters.
 
+For pilot staff who should not edit GitHub directly, ask them to use **Download submission** in the builder. That file is intentionally smaller than the full config export: it includes the active chapter, region, or program scope, the variant if one is selected, a change summary, and the exact `merge_path` where the reviewed patch belongs in `wrapped-config-2026.json`.
+
+After review, merge a submitted file locally with:
+
+```bash
+node merge-builder-submission.js path/to/staff-submission.json wrapped-config-2026.json
+```
+
+Then run the normal QA gate and commit/push the updated config.
+
 ## Measurement
 
 Review the analytics after launch in three layers:

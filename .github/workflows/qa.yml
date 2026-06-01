@@ -50,6 +50,9 @@ jobs:
       - name: Syntax check share page generator
         run: node --check generate-share-pages.js
 
+      - name: Syntax check submission merger
+        run: node --check merge-builder-submission.js
+
       - name: Syntax check smoke script
         run: node --check qa-smoke.js
 

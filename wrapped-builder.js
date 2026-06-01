@@ -447,6 +447,208 @@
     return config;
   }
 
+  function activeScopeTarget(record) {
+    var activeRecord = record || getActiveRecord() || {};
+
+    if (state.scope === "region") {
+      var region = getActiveRegion();
+
+      return {
+        type: "region",
+        collection: "regions",
+        slug: region ? region.slug : state.regionSlug,
+        label: region ? region.name : state.regionSlug,
+        mergePath: ["regions", region ? region.slug : state.regionSlug],
+        previewChapterSlug: activeRecord.chapter_slug || "",
+        previewChapterName: activeRecord.chapter_name || ""
+      };
+    }
+
+    if (state.scope === "program") {
+      var programSlug = getActiveProgramSlug();
+      var programLabel = activeRecord.program_name || activeRecord.campaign_name || activeRecord.top_program_type || programSlug;
+
+      return {
+        type: "program",
+        collection: "programs",
+        slug: programSlug,
+        label: programLabel,
+        mergePath: ["programs", programSlug],
+        previewChapterSlug: activeRecord.chapter_slug || "",
+        previewChapterName: activeRecord.chapter_name || ""
+      };
+    }
+
+    return {
+      type: "chapter",
+      collection: "chapters",
+      slug: activeRecord.chapter_slug || state.chapterSlug,
+      label: activeRecord.chapter_name || activeRecord.chapter_slug || state.chapterSlug,
+      mergePath: ["chapters", activeRecord.chapter_slug || state.chapterSlug],
+      previewChapterSlug: activeRecord.chapter_slug || "",
+      previewChapterName: activeRecord.chapter_name || ""
+    };
+  }
+
+  function configPatchForSubmission(section) {
+    var patch = cloneConfigForExport(section || {});
+
+    sanitizeConfigSectionForExport(patch);
+
+    if (!state.variantSlug && patch && typeof patch === "object" && !Array.isArray(patch)) {
+      delete patch.variants;
+    }
+
+    return patch;
+  }
+
+  function buildChangeSummary(section, record) {
+    var source = section || {};
+    var activeRecord = record || getActiveRecord() || {};
+    var changes = [];
+    var overrides = source.record_overrides && typeof source.record_overrides === "object" ? source.record_overrides : {};
+    var hidden = hiddenCards(source);
+    var cardOverrides = source.card_overrides && typeof source.card_overrides === "object" ? source.card_overrides : {};
+    var customCards = Array.isArray(source.custom_cards) ? source.custom_cards : [];
+
+    ["brand_logo", "palette", "cta_label", "cta_target"].forEach(function (key) {
+      if (hasValue(source[key])) {
+        changes.push({
+          type: "setting",
+          field: key,
+          label: key.replace(/_/g, " "),
+          value: source[key]
+        });
+      }
+    });
+
+    Object.keys(overrides).filter(function (key) {
+      return hasValue(overrides[key]);
+    }).forEach(function (key) {
+      changes.push({
+        type: "metric_correction",
+        field: key,
+        label: METRIC_FIELD_LABELS[key] || key,
+        official_value: metricDisplayValue(activeRecord, key) || "",
+        corrected_value: metricDisplayValue(overrides, key) || String(overrides[key])
+      });
+    });
+
+    hidden.forEach(function (cardId) {
+      changes.push({
+        type: "hidden_screen",
+        card_id: cardId,
+        label: CARD_LABELS[cardId] || cardId
+      });
+    });
+
+    Object.keys(cardOverrides).forEach(function (cardId) {
+      var fields = Object.keys(cardOverrides[cardId] || {}).filter(function (key) {
+        return hasValue(cardOverrides[cardId][key]);
+      });
+
+      if (fields.length) {
+        changes.push({
+          type: "screen_rewrite",
+          card_id: cardId,
+          label: CARD_LABELS[cardId] || cardId,
+          fields: fields
+        });
+      }
+    });
+
+    if (customCards.length) {
+      changes.push({
+        type: "custom_screens",
+        count: customCards.length,
+        headlines: customCards.map(function (card) {
+          return card.headline || card.id || "Custom screen";
+        }).filter(hasValue)
+      });
+    }
+
+    if (!changes.length) {
+      changes.push({
+        type: "no_changes",
+        label: "No changes are active in this scope yet."
+      });
+    }
+
+    return changes;
+  }
+
+  function buildSubmissionPayload() {
+    var record = getActiveRecord() || {};
+    var section = getActiveSection();
+    var target = activeScopeTarget(record);
+    var mergePath = target.mergePath.slice();
+    var variantLabel = "";
+
+    if (state.variantSlug) {
+      var base = ensureBaseSection();
+      var variantEntry = base.variants && base.variants[state.variantSlug];
+
+      mergePath = mergePath.concat(["variants", state.variantSlug]);
+      variantLabel = variantDisplayName(state.variantSlug, variantEntry);
+    }
+
+    return {
+      schema: "jsu-wrapped-builder-submission",
+      version: 1,
+      created_at: new Date().toISOString(),
+      year: state.config && state.config.year || "2026",
+      scope_type: target.type,
+      scope_slug: target.slug,
+      scope_label: target.label,
+      variant_slug: state.variantSlug || "",
+      variant_label: variantLabel,
+      merge_path: mergePath,
+      preview_chapter_slug: target.previewChapterSlug,
+      preview_chapter_name: target.previewChapterName,
+      region_slug: state.regionSlug || "",
+      region_name: getActiveRegion() ? getActiveRegion().name : "",
+      preview_url: buildPreviewUrl(record),
+      change_summary: buildChangeSummary(section, record),
+      config_patch: configPatchForSubmission(section),
+      reviewer_note: "Merge config_patch into wrapped-config-2026.json at merge_path after review."
+    };
+  }
+
+  function submissionFileName(payload) {
+    var parts = [
+      "jsu-wrapped",
+      payload && payload.scope_type,
+      payload && payload.scope_slug,
+      payload && payload.variant_slug || "default",
+      "submission"
+    ].filter(hasValue);
+
+    return parts.join("-").replace(/[^a-z0-9._-]+/gi, "-").toLowerCase() + ".json";
+  }
+
+  function downloadJson(filename, payload) {
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    window.setTimeout(function () {
+      URL.revokeObjectURL(url);
+      link.remove();
+    }, 0);
+  }
+
+  function downloadSubmission() {
+    var payload = buildSubmissionPayload();
+
+    downloadJson(submissionFileName(payload), payload);
+    setVersionStatus("Submission JSON downloaded. Send that file back for review and merge.", false);
+  }
+
   function ensureCardOverride(section, cardId) {
     section.card_overrides = section.card_overrides || {};
     section.card_overrides[cardId] = section.card_overrides[cardId] || {};
@@ -1252,6 +1454,8 @@
         renderAll();
       } else if (action === "refresh-preview") {
         renderPreview();
+      } else if (action === "download-submission") {
+        downloadSubmission();
       } else if (action === "copy-export") {
         navigator.clipboard.writeText(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }

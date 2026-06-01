@@ -63,6 +63,11 @@ textarea {
   gap: 10px;
 }
 
+.builder-header nav {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .builder-header a,
 .builder-header button,
 .builder-actions a,
