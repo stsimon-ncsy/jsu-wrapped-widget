@@ -1769,9 +1769,15 @@ function runProductionCheckSmoke() {
   const scriptPath = "check-production.js";
   const workflow = loadText(".github/workflows/qa.yml");
   const docs = loadText("docs/production-readiness.md");
+  const defaultListEnv = Object.assign({}, process.env);
+
+  delete defaultListEnv.JSUW_SKIP_OPTIONAL_RENDER_SMOKE;
 
   assert(fs.existsSync(scriptPath), "single production QA command is missing");
-  const listed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], { encoding: "utf8" });
+  const listed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], {
+    encoding: "utf8",
+    env: defaultListEnv
+  });
   const ciListed = childProcess.execFileSync(process.execPath, [scriptPath, "--list"], {
     encoding: "utf8",
     env: Object.assign({}, process.env, { JSUW_SKIP_OPTIONAL_RENDER_SMOKE: "1" })
@@ -1899,7 +1905,14 @@ function runRenderSmokeScriptSmoke() {
     encoding: "utf8",
     stdio: "pipe"
   });
-  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
+  const defaultListEnv = Object.assign({}, process.env);
+
+  delete defaultListEnv.JSUW_SKIP_OPTIONAL_RENDER_SMOKE;
+
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], {
+    encoding: "utf8",
+    env: defaultListEnv
+  });
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
 
