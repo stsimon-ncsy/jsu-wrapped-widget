@@ -725,6 +725,8 @@ function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html"];
   const releaseToken = "jsuw-prod-20260601";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
+  const inline = loadText("wordpress-inline-embed.html");
+  const inlinePattern = /data-(?:source|config-source|teen-source)="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/(?:sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
 
   files.forEach((file) => {
     const html = loadText(file);
@@ -735,6 +737,13 @@ function runAssetVersionSmoke() {
       assert(reference.includes(`?v=${releaseToken}`), `${file} has stale or missing asset version: ${reference}`);
     });
     assert(!/[?&]v=(?:builder|palette)\d+/i.test(html), `${file} still uses builder/palette cache tokens`);
+  });
+
+  const inlineReferences = inline.match(inlinePattern) || [];
+
+  assert(inlineReferences.length === 3, "WordPress embed should version chapter, config, and teen data URLs");
+  inlineReferences.forEach((reference) => {
+    assert(reference.includes(`?v=${releaseToken}`), `WordPress embed has stale or missing remote data version: ${reference}`);
   });
 }
 
