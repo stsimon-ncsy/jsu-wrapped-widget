@@ -754,6 +754,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
   assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
+  assert(builderHtml.includes("Recommended: Open email draft"), "builder should make the recommended staff review path explicit");
+  assert(builderHtml.includes("paste the copied JSON into the email"), "builder should tell staff exactly how to return the submission JSON");
+  assert(builderHtml.includes("Download submission if email paste is awkward"), "builder should give staff a clear file-attachment fallback");
   assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
   assert(builderJs.includes("review_email"), "builder should allow review email to be set from a staff distribution URL");
   assert(builderJs.includes("reviewEmail"), "builder should allow camelCase review email links");
