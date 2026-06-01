@@ -2125,6 +2125,37 @@ function runPilotStaffGuideSmoke() {
   assert(playbook.includes("docs/pilot-staff-builder-guide.md"), "staff playbook should link the pilot staff guide");
 }
 
+function runStaffSubmissionIntakeDocSmoke() {
+  const path = "docs/staff-submission-intake.md";
+
+  assert(fs.existsSync(path), "staff submission intake setup doc is missing");
+
+  const intakeDoc = loadText(path);
+  const readme = loadText("README.md");
+  const playbook = loadText("docs/staff-playbook.md");
+  const productionDocs = loadText("docs/production-readiness.md");
+  const requiredPhrases = [
+    "Staff Submission Intake Setup",
+    "Recommended Pilot Flow",
+    "Gravity Forms Fields",
+    "wrapped_submission",
+    "Staff Builder Link",
+    "Message To Staff",
+    "Reviewing Returned Submissions",
+    "node review-builder-submissions.js",
+    "node merge-builder-submission.js",
+    "Review Rules"
+  ];
+
+  requiredPhrases.forEach((phrase) => {
+    assert(intakeDoc.includes(phrase), `staff submission intake doc missing ${phrase}`);
+  });
+
+  assert(readme.includes(path), "README should link the staff submission intake setup doc");
+  assert(playbook.includes(path), "staff playbook should link the staff submission intake setup doc");
+  assert(productionDocs.includes(path), "production readiness docs should link the staff submission intake setup doc");
+}
+
 function runStaffSubmissionPrivacySmoke() {
   const gitignore = loadText(".gitignore");
   const readme = loadText("README.md");
@@ -2445,6 +2476,7 @@ function main() {
   runStaffPlaybookSmoke();
   runDataContractDocSmoke();
   runPilotStaffGuideSmoke();
+  runStaffSubmissionIntakeDocSmoke();
   runStaffSubmissionPrivacySmoke();
 
   console.log("qa smoke ok");
