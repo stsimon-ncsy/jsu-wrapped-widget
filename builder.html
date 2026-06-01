@@ -75,6 +75,24 @@
                 <textarea data-builder-submitter-note placeholder="Anything the reviewer should know before merging this JSON?"></textarea>
               </label>
             </div>
+            <details class="builder-review-setup" data-builder-review-setup>
+              <summary>Reviewer setup</summary>
+              <p class="builder-help">Create a staff link that already knows where review submissions should go.</p>
+              <div class="builder-grid builder-grid--review-setup">
+                <label>
+                  Review email
+                  <input data-builder-review-email-input placeholder="wrapped-review@example.org">
+                </label>
+                <label>
+                  Review form URL
+                  <input data-builder-review-url-input placeholder="https://ncsy.org/wrapped-review/">
+                </label>
+              </div>
+              <div class="builder-actions builder-actions--review-setup">
+                <button type="button" data-builder-action="copy-pilot-link">Copy staff link</button>
+              </div>
+              <p class="builder-pilot-link-status" data-builder-pilot-link-status aria-live="polite"></p>
+            </details>
             <div class="builder-review-actions" data-builder-review-actions>
               <div>
                 <strong>Send for review</strong>

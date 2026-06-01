@@ -763,9 +763,20 @@
     return "";
   }
 
+  function inputValue(selector) {
+    var field = $(selector);
+
+    return field ? String(field.value || "").trim() : "";
+  }
+
   function reviewEmailAddress() {
     var root = $("#wrapped-builder");
+    var inputEmail = inputValue("[data-builder-review-email-input]");
     var urlEmail = searchParamValue(["review_email", "reviewEmail"]);
+
+    if (inputEmail) {
+      return inputEmail;
+    }
 
     if (urlEmail) {
       return urlEmail;
@@ -776,13 +787,78 @@
 
   function reviewFormUrl() {
     var root = $("#wrapped-builder");
+    var inputUrl = inputValue("[data-builder-review-url-input]");
     var url = searchParamValue(["review_url", "reviewUrl", "review_form", "reviewForm"]);
+
+    if (inputUrl) {
+      return inputUrl;
+    }
 
     if (url) {
       return url;
     }
 
     return root ? String(root.getAttribute("data-review-url") || "").trim() : "";
+  }
+
+  function populateReviewSetupFields() {
+    var root = $("#wrapped-builder");
+    var emailField = $("[data-builder-review-email-input]");
+    var urlField = $("[data-builder-review-url-input]");
+    var email = searchParamValue(["review_email", "reviewEmail"]) || (root ? String(root.getAttribute("data-review-email") || "").trim() : "");
+    var formUrl = searchParamValue(["review_url", "reviewUrl", "review_form", "reviewForm"]) || (root ? String(root.getAttribute("data-review-url") || "").trim() : "");
+
+    if (emailField && !emailField.value) {
+      emailField.value = email;
+    }
+
+    if (urlField && !urlField.value) {
+      urlField.value = formUrl;
+    }
+  }
+
+  function recordByChapterSlug(slug) {
+    return state.records.filter(function (record) {
+      return record.chapter_slug === slug;
+    })[0] || null;
+  }
+
+  function regionForRecord(record) {
+    return getRegions().filter(function (region) {
+      return region.records.some(function (item) {
+        return item.chapter_slug === record.chapter_slug;
+      });
+    })[0] || null;
+  }
+
+  function applyInitialSelectionFromUrl() {
+    var regionSlug = searchParamValue(["region", "region_slug", "regionSlug"]);
+    var chapterSlug = searchParamValue(["chapter", "chapter_slug", "chapterSlug"]);
+    var scope = searchParamValue(["scope", "edit_scope", "editScope"]);
+    var variantSlug = searchParamValue(["variant", "version", "variant_slug", "variantSlug"]);
+    var record = chapterSlug ? recordByChapterSlug(chapterSlug) : null;
+    var region = record ? regionForRecord(record) : null;
+    var knownRegion = regionSlug ? getRegions().filter(function (item) {
+      return item.slug === regionSlug;
+    })[0] : null;
+
+    if (knownRegion) {
+      state.regionSlug = knownRegion.slug;
+      state.chapterSlug = knownRegion.records[0] ? knownRegion.records[0].chapter_slug : "";
+    }
+
+    if (record) {
+      state.chapterSlug = record.chapter_slug;
+      state.regionSlug = region ? region.slug : state.regionSlug;
+    }
+
+    if (["chapter", "region", "program"].indexOf(scope) !== -1) {
+      state.scope = scope;
+    }
+
+    if (variantSlug) {
+      state.variantSlug = variantSlug;
+    }
   }
 
   function safeReviewFormUrl() {
@@ -1096,6 +1172,94 @@
       status.textContent = "No review email or review form is set yet. Email drafts will open without a recipient.";
       status.classList.add("builder-review-email-status--warning");
     }
+  }
+
+  function setPilotLinkStatus(message, isError) {
+    var status = $("[data-builder-pilot-link-status]");
+
+    if (!status) {
+      return;
+    }
+
+    status.textContent = message || "";
+    status.classList.toggle("builder-pilot-link-status--ok", !!message && !isError);
+    status.classList.toggle("builder-pilot-link-status--error", !!message && !!isError);
+  }
+
+  function buildPilotBuilderUrl() {
+    var url = new URL(window.location.href);
+    var email = reviewEmailAddress();
+    var formUrl = reviewFormUrl();
+
+    ["deploy", "retry", "qa"].forEach(function (key) {
+      url.searchParams.delete(key);
+    });
+
+    if (state.regionSlug) {
+      url.searchParams.set("region", state.regionSlug);
+    } else {
+      url.searchParams.delete("region");
+    }
+
+    if (state.chapterSlug) {
+      url.searchParams.set("chapter", state.chapterSlug);
+    } else {
+      url.searchParams.delete("chapter");
+    }
+
+    if (state.scope && state.scope !== "chapter") {
+      url.searchParams.set("scope", state.scope);
+    } else {
+      url.searchParams.delete("scope");
+    }
+
+    if (state.variantSlug) {
+      url.searchParams.set("variant", state.variantSlug);
+    } else {
+      url.searchParams.delete("variant");
+    }
+
+    if (email) {
+      url.searchParams.set("review_email", email);
+    } else {
+      url.searchParams.delete("review_email");
+      url.searchParams.delete("reviewEmail");
+    }
+
+    if (formUrl && isSafeStaticUrl(formUrl)) {
+      url.searchParams.set("review_url", formUrl);
+    } else {
+      url.searchParams.delete("review_url");
+      url.searchParams.delete("reviewUrl");
+      url.searchParams.delete("review_form");
+      url.searchParams.delete("reviewForm");
+    }
+
+    return url.href;
+  }
+
+  function copyPilotBuilderLink() {
+    var formUrl = reviewFormUrl();
+    var email = reviewEmailAddress();
+    var url;
+
+    if (formUrl && !isSafeStaticUrl(formUrl)) {
+      setPilotLinkStatus("Fix the review form URL before copying a staff link.", true);
+      renderReviewEmailStatus();
+      return;
+    }
+
+    url = buildPilotBuilderUrl();
+
+    copyTextToClipboard(url)
+      .then(function () {
+        setPilotLinkStatus(email || formUrl
+          ? "Staff builder link copied. Send it with the pilot guide."
+          : "Staff builder link copied, but no review email or form is included yet.", !(email || formUrl));
+      })
+      .catch(function () {
+        setPilotLinkStatus("Clipboard copy failed. Copy the current builder URL and add review_email manually.", true);
+      });
   }
 
   function downloadSubmission() {
@@ -1845,7 +2009,15 @@
 
   function updateField(event) {
     var field = event.target;
-    var section = getActiveSection();
+    var section;
+
+    if (field.matches("[data-builder-review-email-input], [data-builder-review-url-input]")) {
+      renderReviewEmailStatus();
+      setPilotLinkStatus("", false);
+      return;
+    }
+
+    section = getActiveSection();
 
     if (field.matches("[data-builder-field]")) {
       var key = field.getAttribute("data-builder-field");
@@ -2058,6 +2230,8 @@
         emailSubmission();
       } else if (action === "form-submission") {
         formSubmission();
+      } else if (action === "copy-pilot-link") {
+        copyPilotBuilderLink();
       } else if (action === "copy-export") {
         copyTextToClipboard(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
       }
@@ -2073,6 +2247,8 @@
       state.records = rawRecords.filter(isChapterRecord);
       state.config = ensureConfigShape(await fetchJson(CONFIG_URL));
       bindEvents();
+      populateReviewSetupFields();
+      applyInitialSelectionFromUrl();
       renderAll();
     } catch (error) {
       root.innerHTML = '<div class="builder-error">Could not load the builder data. Serve this folder from a local web server, then open <strong>builder.html</strong>. Browser file URLs usually block JSON fetches.</div>';

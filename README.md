@@ -76,6 +76,8 @@ To prefill the email recipient for pilot staff, set `data-review-email` on the `
 https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrapped-review@example.org
 ```
 
+The builder also has a collapsed **Reviewer setup** helper in Submission info. Enter the review email and optional review form URL there, then click **Copy staff link**. The copied link preserves the current region, chapter, scope, and version so pilot staff can land on the right starting point and send the smaller submission JSON back to the right place.
+
 To send staff to a separate intake form after copying the submission JSON, set `data-review-url` on `#wrapped-builder` or add `review_url` to the builder link:
 
 ```text

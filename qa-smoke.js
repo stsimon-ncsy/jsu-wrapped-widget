@@ -850,6 +850,10 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes('data-builder-action="copy-submission"'), "builder should expose a staff submission copy button");
   assert(builderHtml.includes('data-builder-action="email-submission"'), "builder should expose a staff submission email draft button");
   assert(builderHtml.includes('data-builder-action="form-submission"'), "builder should expose an optional review form button");
+  assert(builderHtml.includes('data-builder-action="copy-pilot-link"'), "builder should let reviewers copy a pre-addressed staff pilot link");
+  assert(builderHtml.includes("data-builder-review-email-input"), "builder should expose a review email field for pilot link generation");
+  assert(builderHtml.includes("data-builder-review-url-input"), "builder should expose a review form field for pilot link generation");
+  assert(builderHtml.includes("data-builder-pilot-link-status"), "builder should show pilot link copy feedback");
   assert(builderHtml.includes("data-builder-review-actions"), "builder should group staff submission actions near submission info");
   assert(builderHtml.includes("data-builder-review-email-status"), "builder should show whether submission emails are pre-addressed");
   assert(builderHtml.includes("data-builder-submission-status"), "builder should show submission validation feedback near review actions");
@@ -884,6 +888,10 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("copySubmission"), "builder should copy staff submissions for paste-based review");
   assert(builderJs.includes("function emailSubmission"), "builder should open a review email draft for staff submissions");
   assert(builderJs.includes("function buildSubmissionEmail"), "builder should build a staff submission email note");
+  assert(builderJs.includes("function buildPilotBuilderUrl"), "builder should build a shareable pilot staff builder link");
+  assert(builderJs.includes("function copyPilotBuilderLink"), "builder should copy the shareable pilot staff builder link");
+  assert(builderJs.includes("copy-pilot-link"), "builder should wire the pilot staff link copy action");
+  assert(builderJs.includes("searchParamValue([\"chapter\", \"chapter_slug\", \"chapterSlug\"])"), "builder should preserve the selected chapter in pilot staff links");
   assert(builderJs.includes("MAX_MAILTO_URL_LENGTH"), "builder should avoid overlong mailto links for submission JSON");
   assert(builderJs.includes("Email draft opened with the submission JSON included"), "builder should include small submission JSON packets in email drafts");
   assert(builderJs.includes("submission JSON included"), "builder should report when the email handoff already includes the JSON");
@@ -917,10 +925,12 @@ function runBuilderSubmissionSmoke() {
   assert(readme.includes("Review form URLs must use"), "README should document safe review form URL requirements");
   assert(readme.includes("wrapped_submission"), "README should document the review form JSON prefill parameter");
   assert(readme.includes("usually includes the submission JSON automatically"), "README should document the low-friction email handoff");
+  assert(readme.includes("Copy staff link"), "README should document the pilot staff link helper");
   assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
   assert(playbook.includes("review_url"), "staff playbook should document optional staff review form links");
   assert(playbook.includes("wrapped_submission"), "staff playbook should document the review form JSON prefill parameter");
   assert(playbook.includes("usually includes the submission JSON automatically"), "staff playbook should document the low-friction email handoff");
+  assert(playbook.includes("Copy staff link"), "staff playbook should document the pilot staff link helper");
 }
 
 function runBuilderIndexingSmoke() {

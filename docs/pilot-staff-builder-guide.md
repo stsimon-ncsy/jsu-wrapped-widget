@@ -14,6 +14,8 @@ The `review_email` part pre-addresses the email draft so your submission goes ba
 
 Some links may also include `review_url`. If they do, the builder will show an **Open review form** option after it copies your submission JSON.
 
+Reviewers can create this link from the builder by opening **Reviewer setup**, entering the review email and optional form URL, and clicking **Copy staff link**.
+
 ## What To Do
 
 1. Pick your region and chapter.
