@@ -22,6 +22,18 @@ const PAGE_CHECKS = [
     requiredText: ["Baltimore", "your year is wrapped"]
   },
   {
+    label: "CTA form prefill",
+    path: "/cta-prefill-smoke.html?chapter=baltimore&qa=render-smoke",
+    requiredSelectors: [
+      'data-cta-prefill-smoke="opened"',
+      "jsuw-form-panel--open",
+      'data-jsuw-chapter-slug="baltimore"',
+      'value="Baltimore"',
+      'value="Atlantic Seaboard"'
+    ],
+    requiredText: ["CTA prefill smoke", "Gravity Forms style fields"]
+  },
+  {
     label: "builder",
     path: "/builder.html?qa=render-smoke",
     requiredSelectors: ['id="wrapped-builder"', "builder-panel--preview"],
@@ -504,7 +516,7 @@ function usage() {
     "Usage:",
     "  node render-smoke.js [--skip-if-missing] [--browser path/to/chrome] [--timeout-ms 20000] [--dry-run]",
     "",
-    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, and builder render real DOM."
+    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, CTA form prefill, and builder render real DOM."
   ].join("\n");
 }
 
@@ -524,7 +536,7 @@ async function main() {
     return;
   }
 
-  console.log("render smoke checking local picker, story, and builder");
+  console.log("render smoke checking local picker, story, CTA form prefill, and builder");
   const report = await runRenderSmoke(settings);
 
   if (!report.ok) {

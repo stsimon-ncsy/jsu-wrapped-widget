@@ -1967,6 +1967,7 @@ function runHostedSmokeScriptSmoke() {
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
+  assert(docs.includes("builder script"), "production docs should mention hosted builder script checks");
   assert(docs.includes("social preview image"), "production docs should mention hosted social preview image checks");
 }
 
@@ -2010,6 +2011,7 @@ function runRenderSmokeScriptSmoke() {
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("chapter story")), "render smoke validator should reject blank story DOM");
   assert(dryRunOutput.includes("/?qa=render-smoke"), "render smoke dry run should list the no-parameter picker URL");
   assert(dryRunOutput.includes("/?chapter=baltimore"), "render smoke dry run should list the Baltimore story URL");
+  assert(dryRunOutput.includes("/cta-prefill-smoke.html?chapter=baltimore"), "render smoke dry run should list the CTA prefill smoke page");
   assert(dryRunOutput.includes("/builder.html"), "render smoke dry run should list the builder URL");
   assert(listed.includes("node --check render-smoke.js"), "production QA should syntax-check the render smoke helper");
   assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
@@ -2017,6 +2019,7 @@ function runRenderSmokeScriptSmoke() {
   assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
   assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
   assert(docs.includes("picker, Baltimore story, and builder"), "production docs should describe all render-smoke page types");
+  assert(docs.includes("CTA form prefill"), "production docs should document CTA form prefill render coverage");
   assert(!renderSmokeSource.includes("spawnSync"), "render smoke should launch browsers asynchronously so the local static server can answer requests");
   assert(typeof renderSmoke.findBrowserCandidates === "function", "render smoke should expose browser candidate resolution for smoke coverage");
   assert(typeof renderSmoke.browserDumpDomArgs === "function", "render smoke should expose Chrome dump-DOM args for smoke coverage");

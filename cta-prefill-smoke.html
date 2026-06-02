@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>CTA prefill smoke</title>
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601h">
+    <style>
+      body {
+        background: #f4f7fb;
+        margin: 0;
+      }
+
+      .qa-page {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .qa-form-panel {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 18px 44px rgba(23, 7, 36, 0.18);
+        box-sizing: border-box;
+        color: #1b1230;
+        font-family: Arial, Helvetica, sans-serif;
+        max-width: 430px;
+        padding: 22px;
+        width: min(100%, 430px);
+      }
+
+      .qa-form-panel[hidden] {
+        display: none;
+      }
+
+      .qa-form-panel label {
+        display: block;
+        font-weight: 700;
+        margin-top: 12px;
+      }
+
+      .qa-form-panel input {
+        border: 1px solid #d7dbe8;
+        border-radius: 12px;
+        box-sizing: border-box;
+        display: block;
+        font: inherit;
+        margin-top: 6px;
+        padding: 10px 12px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="qa-page">
+      <div
+        id="jsu-wrapped"
+        data-year="2026"
+        data-source="./sample-wrapped-2026.json?v=jsuw-prod-20260601h"
+        data-config-source="./wrapped-config-2026.json?v=jsuw-prod-20260601h"
+        data-share-base="./share/"
+        data-cta-label="Get involved next year"
+        data-cta-target="#jsuw-wrapped-interest"
+      ></div>
+
+      <section id="jsuw-wrapped-interest" class="qa-form-panel" hidden>
+        <h1>CTA prefill smoke</h1>
+        <p>Gravity Forms style fields</p>
+        <label class="gfield">Chapter name <input name="input_1" aria-label="Chapter name"></label>
+        <label class="gfield">Region <input name="wrapped_region"></label>
+        <label class="gfield">Scope slug <input data-jsuw-prefill="scope_slug"></label>
+        <label class="gfield">Wrapped URL <input data-jsuw-prefill="wrapped_url"></label>
+      </section>
+    </main>
+    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601h"></script>
+    <script>
+      (function () {
+        var root = document.getElementById("jsu-wrapped");
+        var attempts = 0;
+
+        function step() {
+          attempts += 1;
+
+          var cta = root && root.querySelector('[data-jsuw-action="cta"]');
+          if (cta) {
+            cta.click();
+            document.documentElement.setAttribute("data-cta-prefill-smoke", "opened");
+            return;
+          }
+
+          var next = root && root.querySelector('[data-jsuw-action="next"]');
+          if (next) {
+            next.click();
+          }
+
+          if (attempts < 40) {
+            window.setTimeout(step, 175);
+          } else {
+            document.documentElement.setAttribute("data-cta-prefill-smoke", "timeout");
+          }
+        }
+
+        function start() {
+          window.setTimeout(step, 350);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", start, { once: true });
+        } else {
+          start();
+        }
+      })();
+    </script>
+  </body>
+</html>
