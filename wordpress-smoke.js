@@ -454,6 +454,7 @@ function validateWordPressPage(page, options) {
   const ogSiteName = metaContentValue(html, "og:site_name");
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
+  const metaDescription = metaContentValue(html, "description");
   const ogDescription = metaContentValue(html, "og:description");
   const twitterDescription = metaContentValue(html, "twitter:description");
   const canonicalUrl = linkHrefValue(html, "canonical");
@@ -605,6 +606,11 @@ function validateWordPressPage(page, options) {
     fixes.push("Set og:site_name to JSU/NCSY Wrapped.");
   }
 
+  if (!hasExpectedSocialDescription(metaDescription, socialDescription, socialSubject)) {
+    errors.push("WordPress page meta description should use chapter-specific JSU/NCSY Wrapped copy");
+    fixes.push(`Set the meta description to "${socialDescription}".`);
+  }
+
   if (!/og:description|twitter:description/i.test(html)) {
     errors.push("WordPress page missing social description metadata");
     fixes.push(`Add og:description and twitter:description metadata using "${socialDescription}".`);
@@ -741,6 +747,7 @@ function formatFixPacket(page, report, options) {
     "og:site_name: JSU/NCSY Wrapped",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
+    `description: ${socialDescription}`,
     `og:description: ${socialDescription}`,
     `twitter:description: ${socialDescription}`,
     `canonical: ${socialUrl}`,

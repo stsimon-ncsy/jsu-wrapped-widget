@@ -48,6 +48,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 
 - Confirm the main social title format is `JSU/NCSY Wrapped - [Chapter or Scope Name]`.
 - Confirm WordPress exposes `og:type=website` and `og:site_name=JSU/NCSY Wrapped`.
+- Confirm the plain meta description uses chapter, region, or program Wrapped copy.
 - Confirm `og:description` and `twitter:description` use chapter, region, or program Wrapped copy rather than footer/privacy/cookie fallback text.
 - Confirm canonical, `og:url`, and `twitter:url` metadata use the chapter, region, or program URL rather than the generic Wrapped landing page.
 - Open at least one generated share page, such as `/share/baltimore/`, and confirm Open Graph and Twitter metadata are present.

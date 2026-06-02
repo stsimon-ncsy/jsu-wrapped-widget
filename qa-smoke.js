@@ -2161,6 +2161,7 @@ function runWordPressSmokeScriptSmoke() {
   const ogImageAltTag = '<meta property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore">';
   const twitterImageAltTag = '<meta name="twitter:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore">';
   const socialDescription = "See the JSU/NCSY Wrapped recap for Baltimore: events, teens, engagement moments, and community story.";
+  const metaDescriptionTag = '<meta name="description" content="' + socialDescription + '">';
   const ogDescriptionTag = '<meta property="og:description" content="' + socialDescription + '">';
   const twitterDescriptionTag = '<meta name="twitter:description" content="' + socialDescription + '">';
   const socialUrl = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
@@ -2193,6 +2194,7 @@ function runWordPressSmokeScriptSmoke() {
     ogTypeTag,
     ogSiteNameTag,
     '<meta property="og:title" content="JSU/NCSY Wrapped - Baltimore">',
+    metaDescriptionTag,
     ogDescriptionTag,
     twitterDescriptionTag,
     ogImageTag,
@@ -2341,8 +2343,14 @@ function runWordPressSmokeScriptSmoke() {
   const missingSocialDescriptionReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
+      .replace(metaDescriptionTag, "")
       .replace(ogDescriptionTag, "")
       .replace(twitterDescriptionTag, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingMetaDescriptionReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace(metaDescriptionTag, ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const wrongSocialDescriptionReport = wordpressSmoke.validateWordPressPage({
@@ -2500,6 +2508,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingSocialUrlReport.fixes.some((fix) => fix.includes("og:url") && fix.includes("?chapter=baltimore")), "WordPress smoke should suggest chapter-specific social URL metadata");
   assert(!missingSocialDescriptionReport.ok && missingSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject pages without social description metadata");
   assert(missingSocialDescriptionReport.fixes.some((fix) => fix.includes("og:description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific social description metadata");
+  assert(!missingMetaDescriptionReport.ok && missingMetaDescriptionReport.errors.some((error) => error.includes("meta description")), "WordPress smoke should reject pages without plain meta description metadata");
+  assert(missingMetaDescriptionReport.fixes.some((fix) => fix.includes("meta description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific plain meta description metadata");
   assert(!wrongSocialDescriptionReport.ok && wrongSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject privacy/cookie fallback social descriptions");
   assert(!wrongSocialUrlReport.ok && wrongSocialUrlReport.errors.some((error) => error.includes("chapter URL")), "WordPress smoke should reject generic URL metadata that drops the chapter parameter");
   assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("og:type")), "WordPress smoke should reject pages without OG type metadata");
@@ -2540,6 +2550,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("canonical: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter canonical URL");
   assert(fixPacket.includes("og:url: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter og:url");
   assert(fixPacket.includes("twitter:url: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter twitter:url");
+  assert(fixPacket.includes("description: " + socialDescription), "WordPress fix packet should include the exact plain meta description");
   assert(fixPacket.includes("og:description: " + socialDescription), "WordPress fix packet should include the exact og:description");
   assert(fixPacket.includes("twitter:description: " + socialDescription), "WordPress fix packet should include the exact twitter:description");
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
@@ -2578,6 +2589,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(readme.includes("og:description"), "README should document social description metadata");
   assert(docs.includes("og:description"), "production docs should document social description metadata");
   assert(checklist.includes("og:description"), "launch checklist should document social description metadata");
+  assert(readme.includes("meta description"), "README should document plain meta description metadata");
+  assert(docs.includes("meta description"), "production docs should document plain meta description metadata");
+  assert(checklist.includes("meta description"), "launch checklist should document plain meta description metadata");
   assert(readme.includes("twitter:image:alt"), "README should document Twitter image alt metadata");
   assert(docs.includes("twitter:image:alt"), "production docs should document Twitter image alt metadata");
   assert(checklist.includes("twitter:image:alt"), "launch checklist should document Twitter image alt metadata");
