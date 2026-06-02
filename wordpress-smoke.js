@@ -70,6 +70,14 @@ function metaContentValue(html, name) {
   return tagMatch ? attrValue(tagMatch[0], "content").replace(/\s+/g, " ").trim() : "";
 }
 
+function linkHrefValue(html, relName) {
+  const tags = String(html || "").match(/<link\b[^>]*>/gi) || [];
+  const target = String(relName || "").trim().toLowerCase();
+  const tag = tags.find((item) => attrValue(item, "rel").toLowerCase().split(/\s+/).includes(target));
+
+  return tag ? attrValue(tag, "href").replace(/\s+/g, " ").trim() : "";
+}
+
 function hasExpectedWrappedTitle(value) {
   return /^JSU\/NCSY Wrapped\s+-\s+\S/.test(String(value || "").trim());
 }
@@ -201,6 +209,25 @@ function suggestedSocialImageAlt(page, html) {
   return subject ? `JSU/NCSY Wrapped social preview for ${subject}` : "JSU/NCSY Wrapped social preview";
 }
 
+function normalizedUrl(value, base) {
+  try {
+    const parsed = new URL(String(value || ""), String(base || DEFAULT_URL));
+    parsed.hash = "";
+
+    return parsed.href;
+  } catch (error) {
+    return "";
+  }
+}
+
+function suggestedSocialUrl(page) {
+  return normalizedUrl(page && page.url || DEFAULT_URL, DEFAULT_URL) || DEFAULT_URL;
+}
+
+function matchesSocialUrl(value, expected) {
+  return normalizedUrl(value, expected) === normalizedUrl(expected, DEFAULT_URL);
+}
+
 function hasReleaseToken(url) {
   const text = String(url || "");
   return text.includes("?v=" + RELEASE_TOKEN) || text.includes("&v=" + RELEASE_TOKEN) || text.includes("&amp;v=" + RELEASE_TOKEN);
@@ -289,6 +316,9 @@ function validateWordPressPage(page, options) {
   const pageTitle = titleValue(html);
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
+  const canonicalUrl = linkHrefValue(html, "canonical");
+  const ogUrl = metaContentValue(html, "og:url");
+  const twitterUrl = metaContentValue(html, "twitter:url");
   const ogImage = metaContentValue(html, "og:image");
   const twitterImage = metaContentValue(html, "twitter:image");
   const twitterCard = metaContentValue(html, "twitter:card");
@@ -296,6 +326,7 @@ function validateWordPressPage(page, options) {
   const ogImageHeight = metaContentValue(html, "og:image:height");
   const ogImageAlt = metaContentValue(html, "og:image:alt");
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialUrl = suggestedSocialUrl(page);
   const socialImageAlt = suggestedSocialImageAlt(page, html);
 
   if (status < 200 || status >= 300) {
@@ -412,6 +443,22 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
+  if (!canonicalUrl) {
+    errors.push("WordPress page missing canonical URL metadata");
+    fixes.push(`Set the canonical URL to ${socialUrl}.`);
+  } else if (!matchesSocialUrl(canonicalUrl, socialUrl)) {
+    errors.push("WordPress page canonical URL should use the chapter URL");
+    fixes.push(`Set the canonical URL to ${socialUrl}.`);
+  }
+
+  if (!/og:url|twitter:url/i.test(html)) {
+    errors.push("WordPress page missing social URL metadata");
+    fixes.push(`Set og:url and twitter:url to ${socialUrl}.`);
+  } else if (!matchesSocialUrl(ogUrl, socialUrl) && !matchesSocialUrl(twitterUrl, socialUrl)) {
+    errors.push("WordPress page social URL metadata should use the chapter URL");
+    fixes.push(`Set og:url and twitter:url to ${socialUrl}.`);
+  }
+
   if (!/og:image|twitter:image/i.test(html)) {
     errors.push("WordPress page missing social image metadata");
     fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
@@ -459,6 +506,7 @@ function formatFixPacket(page, report) {
   const url = String(page && page.url || DEFAULT_URL);
   const validationReport = report || validateWordPressPage(page);
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialUrl = suggestedSocialUrl(page);
   const socialImageAlt = suggestedSocialImageAlt(page, html);
   const ctaTarget = attrValue(html, "data-cta-target");
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
@@ -487,6 +535,9 @@ function formatFixPacket(page, report) {
     "Set these metadata fields if your SEO/social plugin exposes them:",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
+    `canonical: ${socialUrl}`,
+    `og:url: ${socialUrl}`,
+    `twitter:url: ${socialUrl}`,
     `og:image: ${SOCIAL_IMAGE_URL}`,
     `twitter:image: ${SOCIAL_IMAGE_URL}`,
     "twitter:card: summary_large_image",
@@ -630,7 +681,10 @@ module.exports = {
   headerValue,
   hasExpectedSocialImage,
   isSafeCtaHref,
+  linkHrefValue,
+  matchesSocialUrl,
   suggestedSocialImageAlt,
+  suggestedSocialUrl,
   titleFromSlug,
   titleSubjectFromValue,
   titleValue,

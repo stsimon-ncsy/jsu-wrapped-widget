@@ -42,6 +42,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 ## Social Preview
 
 - Confirm the main social title format is `JSU/NCSY Wrapped - [Chapter or Scope Name]`.
+- Confirm canonical, `og:url`, and `twitter:url` metadata use the chapter, region, or program URL rather than the generic Wrapped landing page.
 - Open at least one generated share page, such as `/share/baltimore/`, and confirm Open Graph and Twitter metadata are present.
 - Confirm the share preview image uses the intended `assets/wrapped-social-preview.png` or updated campaign image.
 - Confirm WordPress exposes `og:image` or `twitter:image` using the campaign social preview image.

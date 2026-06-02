@@ -2117,6 +2117,10 @@ function runWordPressSmokeScriptSmoke() {
   const ogImageWidthTag = '<meta property="og:image:width" content="1200">';
   const ogImageHeightTag = '<meta property="og:image:height" content="630">';
   const ogImageAltTag = '<meta property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore">';
+  const socialUrl = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
+  const canonicalUrlTag = '<link rel="canonical" href="' + socialUrl + '">';
+  const ogUrlTag = '<meta property="og:url" content="' + socialUrl + '">';
+  const twitterUrlTag = '<meta name="twitter:url" content="' + socialUrl + '">';
   const minimalCtaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
   const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_chapter_slug"><input name="wrapped_region"><input name="wrapped_scope"><input name="wrapped_slug"><input name="wrapped_name"><input name="wrapped_variant"><input name="wrapped_year"><input name="wrapped_url"></form></section>';
   const goodHtml = [
@@ -2129,6 +2133,9 @@ function runWordPressSmokeScriptSmoke() {
     ogImageWidthTag,
     ogImageHeightTag,
     ogImageAltTag,
+    canonicalUrlTag,
+    ogUrlTag,
+    twitterUrlTag,
     hostedCssTag,
     hostedJsTag,
     "</head><body>",
@@ -2232,6 +2239,19 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replaceAll(socialImageUrl, "https://ncsy.org/wp-content/uploads/logo.png"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const missingSocialUrlReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(canonicalUrlTag, "")
+      .replace(ogUrlTag, "")
+      .replace(twitterUrlTag, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const wrongSocialUrlReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replaceAll(socialUrl, "https://ncsy.org/ncsy-wrapped/"),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const missingSocialCardDetailsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
@@ -2322,6 +2342,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingSocialImageReport.ok && missingSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject pages without social image metadata");
   assert(missingSocialImageReport.fixes.some((fix) => fix.includes("og:image") && fix.includes("wrapped-social-preview.png")), "WordPress smoke should suggest the campaign social image");
   assert(!wrongSocialImageReport.ok && wrongSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject generic social image metadata");
+  assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("canonical URL")), "WordPress smoke should reject pages without canonical URL metadata");
+  assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("social URL")), "WordPress smoke should reject pages without social URL metadata");
+  assert(missingSocialUrlReport.fixes.some((fix) => fix.includes("og:url") && fix.includes("?chapter=baltimore")), "WordPress smoke should suggest chapter-specific social URL metadata");
+  assert(!wrongSocialUrlReport.ok && wrongSocialUrlReport.errors.some((error) => error.includes("chapter URL")), "WordPress smoke should reject generic URL metadata that drops the chapter parameter");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("twitter:card")), "WordPress smoke should reject pages without summary_large_image Twitter card metadata");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image dimensions")), "WordPress smoke should reject pages without social image dimensions");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
@@ -2336,6 +2360,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("og:image:width: 1200"), "WordPress fix packet should include the social image width");
   assert(fixPacket.includes("og:image:height: 630"), "WordPress fix packet should include the social image height");
   assert(fixPacket.includes("og:image:alt: JSU/NCSY Wrapped social preview for Baltimore"), "WordPress fix packet should include chapter-specific social image alt text");
+  assert(fixPacket.includes("canonical: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter canonical URL");
+  assert(fixPacket.includes("og:url: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter og:url");
+  assert(fixPacket.includes("twitter:url: https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress fix packet should include the chapter twitter:url");
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
   assert(missingContextFixPacket.includes("Gravity Forms hidden/context fields:"), "WordPress fix packet should call out missing Gravity Forms context fields");
