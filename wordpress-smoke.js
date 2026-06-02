@@ -55,6 +55,51 @@ function hasExpectedWrappedTitle(value) {
   return /^JSU\/NCSY Wrapped\s+-\s+\S/.test(String(value || "").trim());
 }
 
+function titleSubjectFromValue(value) {
+  const match = String(value || "").trim().match(/^(?:JSU\/NCSY|NCSY|JSU)\s+Wrapped\s+-\s+(.+)$/i);
+
+  return match ? match[1].trim() : "";
+}
+
+function titleFromSlug(slug) {
+  return String(slug || "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => {
+      const lower = part.toLowerCase();
+
+      if (lower === "jsu" || lower === "ncsy") {
+        return lower.toUpperCase();
+      }
+
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join(" ");
+}
+
+function titleSubjectFromUrl(url) {
+  try {
+    const parsed = new URL(String(url || ""), "https://example.test/");
+    const value = parsed.searchParams.get("chapter") || parsed.searchParams.get("region") || parsed.searchParams.get("program") || parsed.searchParams.get("teen") || "";
+
+    return titleFromSlug(value);
+  } catch (error) {
+    return "";
+  }
+}
+
+function suggestedSocialTitle(page, html) {
+  const title = titleValue(html);
+  const ogTitle = metaContentValue(html, "og:title");
+  const twitterTitle = metaContentValue(html, "twitter:title");
+  const subject = titleSubjectFromValue(title) || titleSubjectFromValue(ogTitle) || titleSubjectFromValue(twitterTitle) || titleSubjectFromUrl(page && page.url);
+
+  return subject ? `JSU/NCSY Wrapped - ${subject}` : "JSU/NCSY Wrapped - [Chapter or Scope Name]";
+}
+
 function hasReleaseToken(url) {
   return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
 }
@@ -120,6 +165,7 @@ function validateWordPressPage(page, options) {
   const pageTitle = titleValue(html);
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
+  const socialTitle = suggestedSocialTitle(page, html);
 
   if (status < 200 || status >= 300) {
     errors.push(`WordPress page returned HTTP ${status || "unknown"}`);
@@ -192,15 +238,15 @@ function validateWordPressPage(page, options) {
 
   if (!hasExpectedWrappedTitle(pageTitle)) {
     errors.push("WordPress page title should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
-    fixes.push('Set the page title to "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
+    fixes.push(`Set the page title to "${socialTitle}".`);
   }
 
   if (!/og:title|twitter:title/i.test(html)) {
     errors.push("WordPress page missing social title metadata");
-    fixes.push('Add og:title or twitter:title metadata using "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
+    fixes.push(`Add og:title or twitter:title metadata using "${socialTitle}".`);
   } else if (!hasExpectedWrappedTitle(ogTitle) && !hasExpectedWrappedTitle(twitterTitle)) {
     errors.push("WordPress page social title metadata should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
-    fixes.push('Set og:title and twitter:title to "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
+    fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
   if (!/privacy/i.test(text) || !/(cookie|osano)/i.test(html)) {
@@ -323,9 +369,12 @@ if (require.main === module) {
 module.exports = {
   attrValue,
   metaContentValue,
+  suggestedSocialTitle,
   suggestedWidgetTag,
   hasId,
   headerValue,
+  titleFromSlug,
+  titleSubjectFromValue,
   titleValue,
   validateWordPressPage,
   visibleText

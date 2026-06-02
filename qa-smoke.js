@@ -2199,6 +2199,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(directCtaHrefAttrsReport.fixes[0].includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress smoke replacement tag should preserve direct Gravity Forms CTA URLs");
   assert(!directCtaHrefAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should not add an embedded CTA target when preserving a direct CTA URL");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
+  assert(wrongSocialTitleReport.fixes.some((fix) => fix.includes('"JSU/NCSY Wrapped - Baltimore"')), "WordPress smoke should suggest the exact corrected chapter title when it can infer one");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.errors.some((error) => error.includes("cache token")), "WordPress smoke should reject hosted data URLs without the shared cache token");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.fixes.some((fix) => fix.includes("data-source")), "WordPress smoke should suggest the fixed data-source attribute for stale data URLs");
   assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");
