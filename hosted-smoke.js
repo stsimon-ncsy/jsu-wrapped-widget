@@ -20,6 +20,15 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "CTA form prefill page",
+    path: "cta-prefill-smoke.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "CTA form prefill page missing noindex guard", errors);
+      mustInclude(text, "CTA prefill smoke", "CTA form prefill page missing smoke title", errors);
+      mustInclude(text, "Gravity Forms style fields", "CTA form prefill page missing Gravity Forms field text", errors);
+    }
+  },
+  {
     label: "widget stylesheet",
     path: "jsu-wrapped.css",
     validate(text, errors) {

@@ -1880,6 +1880,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: '<meta name="robots" content="noindex,nofollow"><div id="wrapped-builder"></div>'
     },
+    "cta-prefill-smoke.html": {
+      status: 200,
+      text: '<meta name="robots" content="noindex,nofollow"><title>CTA prefill smoke</title><p>Gravity Forms style fields</p>'
+    },
     "jsu-wrapped.css": {
       status: 200,
       text: "#jsu-wrapped { color: #fff; }"
@@ -1936,6 +1940,12 @@ function runHostedSmokeScriptSmoke() {
       status: 200
     }
   });
+  const publicCtaPrefillSmokeAssets = Object.assign({}, goodAssets, {
+    "cta-prefill-smoke.html": {
+      status: 200,
+      text: "<title>CTA prefill smoke</title><p>Gravity Forms style fields</p>"
+    }
+  });
   const staleBuilderScriptAssets = Object.assign({}, goodAssets, {
     "wrapped-builder.js": {
       status: 200,
@@ -1945,6 +1955,7 @@ function runHostedSmokeScriptSmoke() {
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
+  const publicCtaPrefillSmokeReport = hostedSmoke.validateHostedAssets(publicCtaPrefillSmokeAssets);
   const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
@@ -1959,8 +1970,10 @@ function runHostedSmokeScriptSmoke() {
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
   assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
   assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
+  assert(!publicCtaPrefillSmokeReport.ok && publicCtaPrefillSmokeReport.errors.some((error) => error.includes("CTA form prefill page")), "hosted smoke validator should reject a CTA form prefill smoke page without noindex");
   assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
+  assert(dryRunOutput.includes("https://example.org/wrapped/cta-prefill-smoke.html"), "hosted smoke dry run should list CTA form prefill smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
