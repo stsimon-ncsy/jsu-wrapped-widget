@@ -122,7 +122,7 @@ After pushing to GitHub Pages, run the hosted smoke check to confirm the live st
 node hosted-smoke.js
 ```
 
-Use `--base` when testing a fork, preview host, or WordPress-hosted copy.
+Use `--base` when testing a fork, preview host, or WordPress-hosted copy. The default GitHub Pages check also confirms the hosted JSON files send `Access-Control-Allow-Origin` for an `https://ncsy.org` WordPress embed, because browser `fetch()` needs CORS when the public page shell lives on NCSY.org and JSON stays on GitHub Pages. Use `--require-cors --origin https://ncsy.org` for another cross-origin static asset host, or `--skip-cors` for a same-origin WordPress-hosted copy.
 
 For a local render check on machines with Chrome or Edge installed, run:
 

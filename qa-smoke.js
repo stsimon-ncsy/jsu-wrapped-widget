@@ -1952,14 +1952,23 @@ function runHostedSmokeScriptSmoke() {
       text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601h"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
     },
     "sample-wrapped-2026.json": {
+      headers: {
+        "access-control-allow-origin": "*"
+      },
       status: 200,
       text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
     },
     "sample-teen-wrapped-2026.json": {
+      headers: {
+        "access-control-allow-origin": "*"
+      },
       status: 200,
       text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya" }])
     },
     "wrapped-config-2026.json": {
+      headers: {
+        "access-control-allow-origin": "*"
+      },
       status: 200,
       text: JSON.stringify({ version: 1, year: "2026" })
     },
@@ -1981,7 +1990,7 @@ function runHostedSmokeScriptSmoke() {
       ].join("")
     }
   };
-  const goodReport = hostedSmoke.validateHostedAssets(goodAssets);
+  const goodReport = hostedSmoke.validateHostedAssets(goodAssets, { requireCors: true, corsOrigin: "https://ncsy.org" });
   const badAssets = Object.assign({}, goodAssets, {
     "share/baltimore/": {
       status: 200,
@@ -2035,6 +2044,12 @@ function runHostedSmokeScriptSmoke() {
       text: "MAX_REVIEW_FORM_URL_LENGTH Submission JSON is prefilled in the review form"
     }
   });
+  const missingCorsAssets = Object.assign({}, goodAssets, {
+    "sample-wrapped-2026.json": {
+      status: 200,
+      text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
+    }
+  });
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
@@ -2044,6 +2059,7 @@ function runHostedSmokeScriptSmoke() {
   const privateTeenJsonReport = hostedSmoke.validateHostedAssets(privateTeenJsonAssets);
   const externalWordPressInlineReport = hostedSmoke.validateHostedAssets(externalWordPressInlineAssets);
   const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
+  const missingCorsReport = hostedSmoke.validateHostedAssets(missingCorsAssets, { requireCors: true, corsOrigin: "https://ncsy.org" });
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
@@ -2063,6 +2079,7 @@ function runHostedSmokeScriptSmoke() {
   assert(!privateTeenJsonReport.ok && privateTeenJsonReport.errors.some((error) => error.includes("teen data JSON")), "hosted smoke validator should reject teen JSON with private contact fields");
   assert(!externalWordPressInlineReport.ok && externalWordPressInlineReport.errors.some((error) => error.includes("WordPress inline embed")), "hosted smoke validator should reject WordPress inline handoff with external widget scripts");
   assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
+  assert(!missingCorsReport.ok && missingCorsReport.errors.some((error) => error.includes("Access-Control-Allow-Origin")), "hosted smoke validator should reject cross-origin JSON without CORS headers");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-prefill-smoke.html"), "hosted smoke dry run should list CTA form prefill smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-link-smoke.html"), "hosted smoke dry run should list CTA link smoke page");
@@ -2076,6 +2093,8 @@ function runHostedSmokeScriptSmoke() {
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
+  assert(readme.includes("Access-Control-Allow-Origin"), "README should document hosted JSON CORS checks");
+  assert(docs.includes("Access-Control-Allow-Origin"), "production docs should document hosted JSON CORS checks");
   assert(docs.includes("builder script"), "production docs should mention hosted builder script checks");
   assert(docs.includes("WordPress inline embed"), "production docs should mention hosted WordPress inline embed checks");
   assert(docs.includes("CTA link prefill"), "production docs should mention hosted CTA link prefill checks");

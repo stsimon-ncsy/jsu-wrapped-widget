@@ -1,5 +1,6 @@
 const DEFAULT_BASE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const DEFAULT_TIMEOUT_MS = 15000;
+const DEFAULT_CORS_ORIGIN = "https://ncsy.org";
 const TEEN_PRIVATE_FIELD_RE = /(^|_)(teen|student|crm|contact)?_?(id|email|phone|address|birth|dob|first_name|last_name|legal_name)($|_)/i;
 const EMAIL_VALUE_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const PHONE_VALUE_RE = /\b(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}\b/;
@@ -96,6 +97,7 @@ const ASSET_CHECKS = [
     }
   },
   {
+    cors: true,
     label: "chapter data JSON",
     path: "sample-wrapped-2026.json",
     validate(text, errors) {
@@ -112,6 +114,7 @@ const ASSET_CHECKS = [
     }
   },
   {
+    cors: true,
     label: "teen data JSON",
     path: "sample-teen-wrapped-2026.json",
     validate(text, errors) {
@@ -130,6 +133,7 @@ const ASSET_CHECKS = [
     }
   },
   {
+    cors: true,
     label: "config JSON",
     path: "wrapped-config-2026.json",
     validate(text, errors) {
@@ -272,7 +276,22 @@ function validateContentType(headers, expectedType, label, errors) {
   }
 }
 
-function validateHostedAssets(assets) {
+function validateCors(headers, label, origin, errors) {
+  const allowOrigin = headerValue(headers, "access-control-allow-origin").trim();
+  const expectedOrigin = String(origin || DEFAULT_CORS_ORIGIN).trim();
+
+  if (!allowOrigin) {
+    errors.push(`${label} is missing Access-Control-Allow-Origin for WordPress cross-origin fetches`);
+    return;
+  }
+
+  if (allowOrigin !== "*" && allowOrigin !== expectedOrigin) {
+    errors.push(`${label} Access-Control-Allow-Origin is ${allowOrigin}, expected * or ${expectedOrigin}`);
+  }
+}
+
+function validateHostedAssets(assets, options) {
+  const settings = options || {};
   const errors = [];
 
   ASSET_CHECKS.forEach((check) => {
@@ -289,6 +308,10 @@ function validateHostedAssets(assets) {
       return;
     }
 
+    if (settings.requireCors && check.cors) {
+      validateCors(asset.headers, check.label, settings.corsOrigin, errors);
+    }
+
     check.validate(check.binary ? asset : String(asset.text || ""), errors);
   });
 
@@ -302,10 +325,12 @@ async function fetchWithTimeout(url, timeoutMs, options) {
   const settings = options || {};
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const headers = settings.origin ? { Origin: settings.origin } : undefined;
 
   try {
     const response = await fetch(url, {
       cache: "no-store",
+      headers,
       signal: controller.signal
     });
 
@@ -329,7 +354,10 @@ async function fetchHostedAssets(baseUrl, options) {
     const url = assetUrl(baseUrl, check.path);
 
     try {
-      assets[check.path] = await fetchWithTimeout(url, timeoutMs, { binary: check.binary });
+      assets[check.path] = await fetchWithTimeout(url, timeoutMs, {
+        binary: check.binary,
+        origin: settings.requireCors && check.cors ? settings.corsOrigin : ""
+      });
     } catch (error) {
       assets[check.path] = {
         buffer: Buffer.alloc(0),
@@ -344,9 +372,19 @@ async function fetchHostedAssets(baseUrl, options) {
   return assets;
 }
 
+function isGithubPagesUrl(baseUrl) {
+  try {
+    return new URL(baseUrl).hostname.toLowerCase().endsWith(".github.io");
+  } catch (error) {
+    return false;
+  }
+}
+
 function parseArgs(args) {
   const settings = {
     baseUrl: DEFAULT_BASE_URL,
+    corsMode: "auto",
+    corsOrigin: DEFAULT_CORS_ORIGIN,
     dryRun: false,
     timeoutMs: DEFAULT_TIMEOUT_MS
   };
@@ -360,6 +398,13 @@ function parseArgs(args) {
     } else if (arg === "--timeout-ms") {
       settings.timeoutMs = Number(args[index + 1]) || DEFAULT_TIMEOUT_MS;
       index += 1;
+    } else if (arg === "--origin") {
+      settings.corsOrigin = args[index + 1] || DEFAULT_CORS_ORIGIN;
+      index += 1;
+    } else if (arg === "--require-cors") {
+      settings.corsMode = "require";
+    } else if (arg === "--skip-cors") {
+      settings.corsMode = "skip";
     } else if (arg === "--dry-run") {
       settings.dryRun = true;
     } else if (arg === "--help" || arg === "-h") {
@@ -368,15 +413,17 @@ function parseArgs(args) {
   }
 
   settings.baseUrl = normalizeBaseUrl(settings.baseUrl);
+  settings.requireCors = settings.corsMode === "require" || (settings.corsMode === "auto" && isGithubPagesUrl(settings.baseUrl));
   return settings;
 }
 
 function usage() {
   return [
     "Usage:",
-    "  node hosted-smoke.js [--base https://stsimon-ncsy.github.io/jsu-wrapped-widget/] [--timeout-ms 15000] [--dry-run]",
+    "  node hosted-smoke.js [--base https://stsimon-ncsy.github.io/jsu-wrapped-widget/] [--timeout-ms 15000] [--origin https://ncsy.org] [--require-cors|--skip-cors] [--dry-run]",
     "",
-    "Fetches the hosted GitHub Pages widget, JSON, and Baltimore share page to confirm deployment basics."
+    "Fetches the hosted GitHub Pages widget, JSON, and Baltimore share page to confirm deployment basics.",
+    "For GitHub Pages asset hosts, also confirms JSON files send Access-Control-Allow-Origin for WordPress embeds."
   ].join("\n");
 }
 
@@ -398,7 +445,10 @@ async function main() {
 
   console.log(`Hosted smoke checking ${settings.baseUrl}`);
   const assets = await fetchHostedAssets(settings.baseUrl, settings);
-  const report = validateHostedAssets(assets);
+  const report = validateHostedAssets(assets, {
+    corsOrigin: settings.corsOrigin,
+    requireCors: settings.requireCors
+  });
 
   if (!report.ok) {
     console.error("Hosted smoke failed:");
@@ -423,6 +473,7 @@ module.exports = {
   fetchPlan,
   headerValue,
   normalizeBaseUrl,
+  validateCors,
   validateContentType,
   validatePngDimensions,
   validateHostedAssets
