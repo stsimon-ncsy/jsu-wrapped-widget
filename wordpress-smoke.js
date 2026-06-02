@@ -732,6 +732,8 @@ function formatFixPacket(page, report, options) {
   const socialImageAlt = suggestedSocialImageAlt(page, html);
   const ctaTarget = attrValue(html, "data-cta-target");
   const directCtaHref = settings.ctaHref && isSafeCtaHref(settings.ctaHref) && !hasCtaUrlPayload(settings.ctaHref) ? settings.ctaHref : "";
+  const suggestedTag = suggestedWidgetTag(html, settings);
+  const copyReadyHtmlBlock = [WIDGET_CSS_TAG, suggestedTag, WIDGET_JS_TAG].join("\n");
   const recommendedContextFields = "wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url";
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
   const followUpCommand = directCtaHref
@@ -766,13 +768,16 @@ function formatFixPacket(page, report, options) {
     "",
     `URL: ${url}`,
     "",
+    "Copy-ready WordPress HTML block:",
+    copyReadyHtmlBlock,
+    "",
     "Replace #jsu-wrapped with:",
-    suggestedWidgetTag(html, settings),
+    suggestedTag,
     "",
     "Hosted CSS/JS assets:",
     WIDGET_CSS_TAG,
     WIDGET_JS_TAG,
-    "Skip these only if you paste the full self-contained wordpress-inline-embed.html block.",
+    "Do not paste these a second time if you use the copy-ready WordPress HTML block above. Skip hosted assets entirely only if you paste the full self-contained wordpress-inline-embed.html block.",
     "",
     `Page/social title: ${socialTitle}`,
     "",

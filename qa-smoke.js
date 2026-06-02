@@ -2543,6 +2543,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
   assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
+  assert(fixPacket.includes("Copy-ready WordPress HTML block:"), "WordPress fix packet should include one paste-ready HTML block");
+  assert(fixPacket.includes(hostedCssTag + "\n" + '<div id="jsu-wrapped"'), "WordPress fix packet should put the stylesheet and widget tag together in the paste-ready HTML block");
+  assert(fixPacket.includes("</div>\n" + hostedJsTag), "WordPress fix packet should put the widget script after the widget tag in the paste-ready HTML block");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
   assert(directCtaFixPacket.includes("Direct Gravity Forms CTA URL: https://ncsy.org/wrapped-interest/"), "WordPress fix packet should label the direct Gravity Forms CTA URL");

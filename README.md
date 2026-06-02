@@ -158,7 +158,7 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 
 That destination check fetches the Gravity Forms page and confirms it is HTML with the hidden/context fields the widget pre-populates.
 
-The packet includes the current replacement `#jsu-wrapped` tag, exact page/social title, suggested canonical/social URLs, meta description, `og:type`, `og:site_name`, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `og:image:secure_url`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
+The packet includes a single paste-ready WordPress HTML block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together. It also includes the exact page/social title, suggested canonical/social URLs, meta description, `og:type`, `og:site_name`, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `og:image:secure_url`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
 
 For a local render check on machines with Chrome or Edge installed, run:
 
