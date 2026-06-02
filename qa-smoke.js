@@ -1659,6 +1659,7 @@ function runCacheTokenBumpSmoke() {
   assert(bump.FILES.includes("analytics-smoke.html"), "cache-token helper should update the analytics smoke page");
   assert(bump.FILES.includes("layout-smoke.html"), "cache-token helper should update the layout smoke page");
   assert(bump.FILES.includes("wordpress-smoke.js"), "cache-token helper should update the WordPress smoke validator");
+  assert(bump.FILES.includes("docs/wordpress-launch-packet.md"), "cache-token helper should update the checked-in WordPress launch packet");
 
   let invalidMessage = "";
   try {
@@ -2487,6 +2488,8 @@ function runWordPressSmokeScriptSmoke() {
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
   const checklist = loadText("docs/launch-checklist.md");
+  const launchPacketPath = "docs/wordpress-launch-packet.md";
+  const launchPacket = fs.existsSync(launchPacketPath) ? loadText(launchPacketPath) : "";
   const source = loadText(scriptPath);
 
   assert(goodReport.ok, `WordPress smoke validator rejected good page: ${goodReport.errors.join("; ")}`);
@@ -2587,6 +2590,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("twitter:description: " + socialDescription), "WordPress fix packet should include the exact twitter:description");
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
+  assert(launchPacket.includes("WordPress Wrapped Launch Packet"), "repo should include a checked-in WordPress launch packet");
+  assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"'), "checked-in WordPress launch packet should include the current config source");
+  assert(launchPacket.includes("JSU/NCSY Wrapped - Baltimore"), "checked-in WordPress launch packet should include the exact Baltimore title");
+  assert(launchPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "checked-in WordPress launch packet should include the follow-up verification command");
   assert(missingContextFixPacket.includes("Gravity Forms hidden/context fields:"), "WordPress fix packet should call out missing Gravity Forms context fields");
   assert(missingContextFixPacket.includes("wrapped_url"), "WordPress fix packet should include missing Wrapped URL field names");
   assert(missingAssetsFixPacket.includes("Hosted CSS/JS assets:"), "WordPress fix packet should call out missing hosted widget assets");
@@ -2608,6 +2615,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(source.includes("--check-cta-destination"), "WordPress smoke should support an explicit direct Gravity Forms destination check option");
   assert(readme.includes("node wordpress-smoke.js"), "README should document WordPress smoke checks");
   assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
+  assert(docs.includes("docs/wordpress-launch-packet.md"), "production docs should link the checked-in WordPress launch packet");
   assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
   assert(readme.includes("--fix-packet"), "README should document the WordPress fix-packet helper");
   assert(docs.includes("--fix-packet"), "production docs should document the WordPress fix-packet helper");

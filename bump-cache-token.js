@@ -15,6 +15,7 @@ const FILES = [
   "wordpress-smoke.js",
   "README.md",
   "docs/production-readiness.md",
+  "docs/wordpress-launch-packet.md",
   "qa-smoke.js"
 ];
 
