@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-cta-link-smoke="arrived">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>CTA link target smoke</title>
+    <style>
+      body {
+        background: #f4f7fb;
+        color: #170724;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+      }
+
+      main {
+        box-sizing: border-box;
+        margin: 0 auto;
+        max-width: 680px;
+        min-height: 100vh;
+        padding: 32px 20px;
+      }
+
+      pre {
+        background: #ffffff;
+        border: 1px solid #d9def0;
+        border-radius: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        padding: 16px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>CTA link target smoke</h1>
+      <p>Gravity Forms link params</p>
+      <pre id="received-params">pending</pre>
+    </main>
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var keys = [
+          "existing",
+          "wrapped_scope",
+          "wrapped_slug",
+          "wrapped_name",
+          "wrapped_chapter_slug",
+          "wrapped_chapter",
+          "wrapped_region",
+          "wrapped_variant",
+          "wrapped_year",
+          "wrapped_url"
+        ];
+        var output = keys.map(function (key) {
+          return key + "=" + (params.get(key) || "");
+        }).join("\n");
+        document.getElementById("received-params").textContent = output;
+      })();
+    </script>
+  </body>
+</html>

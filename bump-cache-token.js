@@ -7,6 +7,7 @@ const FILES = [
   "embed-example.html",
   "builder.html",
   "cta-prefill-smoke.html",
+  "cta-link-smoke.html",
   "wrapped-builder.js",
   "wordpress-inline-embed.html",
   "README.md",

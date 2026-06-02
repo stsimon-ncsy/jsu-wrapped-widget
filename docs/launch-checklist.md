@@ -8,7 +8,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm GitHub Actions QA is green for the latest pushed commit.
 - Confirm GitHub Pages deployment is green for the same commit.
 - Run `node hosted-smoke.js` after Pages finishes deploying.
-- Confirm the shared cache token is current across README snippets, `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, and hosted JSON/CSS/JS URLs.
+- Confirm the shared cache token is current across README snippets, `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `cta-link-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, and hosted JSON/CSS/JS URLs.
 - If you changed JS, CSS, data, config, or share pages for reviewers, run `node bump-cache-token.js jsuw-prod-YYYYMMDDx`, then rerun `node check-production.js`.
 
 ## WordPress

@@ -32,6 +32,24 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "CTA link prefill page",
+    path: "cta-link-smoke.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "CTA link prefill page missing noindex guard", errors);
+      mustInclude(text, "CTA link smoke", "CTA link prefill page missing smoke title", errors);
+      mustInclude(text, "cta-link-target-smoke.html", "CTA link prefill page missing target form URL", errors);
+    }
+  },
+  {
+    label: "CTA link target page",
+    path: "cta-link-target-smoke.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "CTA link target page missing noindex guard", errors);
+      mustInclude(text, "CTA link target smoke", "CTA link target page missing smoke title", errors);
+      mustInclude(text, "Gravity Forms link params", "CTA link target page missing Gravity Forms link text", errors);
+    }
+  },
+  {
     label: "widget stylesheet",
     path: "jsu-wrapped.css",
     validate(text, errors) {
