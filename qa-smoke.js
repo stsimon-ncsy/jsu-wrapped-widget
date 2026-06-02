@@ -2102,6 +2102,78 @@ function runHostedSmokeScriptSmoke() {
   assert(docs.includes("social preview image"), "production docs should mention hosted social preview image checks");
 }
 
+function runWordPressSmokeScriptSmoke() {
+  const scriptPath = "wordpress-smoke.js";
+
+  assert(fs.existsSync(scriptPath), "WordPress smoke script is missing");
+
+  const wordpressSmoke = require("./wordpress-smoke.js");
+  const goodHtml = [
+    "<html><head>",
+    "<title>JSU/NCSY Wrapped - Baltimore</title>",
+    '<meta property="og:title" content="JSU/NCSY Wrapped - Baltimore">',
+    "</head><body>",
+    '<div id="jsu-wrapped"',
+    ' data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601h"',
+    ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"',
+    ' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"',
+    ' data-cta-label="Get involved next year"',
+    ' data-cta-target="#jsuw-wrapped-interest"></div>',
+    '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>',
+    '<a href="/privacy-policy/">Privacy Policy</a>',
+    '<button onclick="window.Osano && window.Osano.cm.showDrawer()">Cookie Policy</button>',
+    "</body></html>"
+  ].join("");
+  const goodReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml,
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingWidgetReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: "<html><title>NCSY Wrapped</title><body></body></html>",
+    url: "https://ncsy.org/ncsy-wrapped/"
+  });
+  const missingPanelReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace('<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingPrivacyReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace('<a href="/privacy-policy/">Privacy Policy</a>', "").replace('<button onclick="window.Osano && window.Osano.cm.showDrawer()">Cookie Policy</button>', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const brokenTextReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace("JSU/NCSY Wrapped - Baltimore", "undefined Wrapped"),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--url", "https://ncsy.org/ncsy-wrapped/?chapter=baltimore", "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+  const checklist = loadText("docs/launch-checklist.md");
+  const source = loadText(scriptPath);
+
+  assert(goodReport.ok, `WordPress smoke validator rejected good page: ${goodReport.errors.join("; ")}`);
+  assert(!missingWidgetReport.ok && missingWidgetReport.errors.some((error) => error.includes("widget container")), "WordPress smoke should reject pages without the widget container");
+  assert(!missingPanelReport.ok && missingPanelReport.errors.some((error) => error.includes("CTA target")), "WordPress smoke should reject missing CTA target panels");
+  assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");
+  assert(!brokenTextReport.ok && brokenTextReport.errors.some((error) => error.includes("broken placeholder text")), "WordPress smoke should reject visible broken placeholder text");
+  assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress smoke dry run should show the target URL");
+  assert(listed.includes("node --check wordpress-smoke.js"), "production QA should syntax-check the WordPress smoke helper");
+  assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
+  assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");
+  assert(readme.includes("node wordpress-smoke.js"), "README should document WordPress smoke checks");
+  assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
+  assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
+}
+
 function runRenderSmokeScriptSmoke() {
   const scriptPath = "render-smoke.js";
 
@@ -2707,6 +2779,7 @@ function main() {
   runCiWorkflowSmoke();
   runProductionCheckSmoke();
   runHostedSmokeScriptSmoke();
+  runWordPressSmokeScriptSmoke();
   runRenderSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();

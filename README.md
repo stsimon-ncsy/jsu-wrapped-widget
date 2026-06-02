@@ -124,6 +124,14 @@ node hosted-smoke.js
 
 Use `--base` when testing a fork, preview host, or WordPress-hosted copy. The default GitHub Pages check also confirms the hosted JSON files send `Access-Control-Allow-Origin` for an `https://ncsy.org` WordPress embed, because browser `fetch()` needs CORS when the public page shell lives on NCSY.org and JSON stays on GitHub Pages. Use `--require-cors --origin https://ncsy.org` for another cross-origin static asset host, or `--skip-cors` for a same-origin WordPress-hosted copy.
 
+After the WordPress page is pasted and published, run the live WordPress shell smoke:
+
+```bash
+node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+```
+
+That check verifies the WordPress page has the widget container, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title markup.
+
 For a local render check on machines with Chrome or Edge installed, run:
 
 ```bash
