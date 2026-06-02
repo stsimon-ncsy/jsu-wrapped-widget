@@ -1898,6 +1898,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: "Review form opened with chapter context. Submission JSON copied; paste it into the form before sending."
     },
+    "wordpress-inline-embed.html": {
+      status: 200,
+      text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601h"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
+    },
     "sample-wrapped-2026.json": {
       status: 200,
       text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
@@ -1958,6 +1962,12 @@ function runHostedSmokeScriptSmoke() {
       text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya", teen_id: "123", email: "maya@example.org" }])
     }
   });
+  const externalWordPressInlineAssets = Object.assign({}, goodAssets, {
+    "wordpress-inline-embed.html": {
+      status: 200,
+      text: '<div id="jsu-wrapped"></div><link rel="stylesheet" href="./jsu-wrapped.css"><script src="./jsu-wrapped.js"></script>'
+    }
+  });
   const staleBuilderScriptAssets = Object.assign({}, goodAssets, {
     "wrapped-builder.js": {
       status: 200,
@@ -1969,6 +1979,7 @@ function runHostedSmokeScriptSmoke() {
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
   const publicCtaPrefillSmokeReport = hostedSmoke.validateHostedAssets(publicCtaPrefillSmokeAssets);
   const privateTeenJsonReport = hostedSmoke.validateHostedAssets(privateTeenJsonAssets);
+  const externalWordPressInlineReport = hostedSmoke.validateHostedAssets(externalWordPressInlineAssets);
   const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
@@ -1985,10 +1996,12 @@ function runHostedSmokeScriptSmoke() {
   assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
   assert(!publicCtaPrefillSmokeReport.ok && publicCtaPrefillSmokeReport.errors.some((error) => error.includes("CTA form prefill page")), "hosted smoke validator should reject a CTA form prefill smoke page without noindex");
   assert(!privateTeenJsonReport.ok && privateTeenJsonReport.errors.some((error) => error.includes("teen data JSON")), "hosted smoke validator should reject teen JSON with private contact fields");
+  assert(!externalWordPressInlineReport.ok && externalWordPressInlineReport.errors.some((error) => error.includes("WordPress inline embed")), "hosted smoke validator should reject WordPress inline handoff with external widget scripts");
   assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-prefill-smoke.html"), "hosted smoke dry run should list CTA form prefill smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/sample-teen-wrapped-2026.json"), "hosted smoke dry run should list teen data JSON");
+  assert(dryRunOutput.includes("https://example.org/wrapped/wordpress-inline-embed.html"), "hosted smoke dry run should list WordPress inline handoff");
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
@@ -1996,6 +2009,7 @@ function runHostedSmokeScriptSmoke() {
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
   assert(docs.includes("builder script"), "production docs should mention hosted builder script checks");
+  assert(docs.includes("WordPress inline embed"), "production docs should mention hosted WordPress inline embed checks");
   assert(docs.includes("social preview image"), "production docs should mention hosted social preview image checks");
 }
 

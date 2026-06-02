@@ -56,6 +56,18 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "WordPress inline embed",
+    path: "wordpress-inline-embed.html",
+    validate(text, errors) {
+      mustInclude(text, 'id="jsu-wrapped"', "WordPress inline embed missing widget container", errors);
+      mustInclude(text, "<style>", "WordPress inline embed missing inline styles", errors);
+      mustInclude(text, "(function (root, factory)", "WordPress inline embed missing inline renderer", errors);
+      mustInclude(text, "https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json", "WordPress inline embed missing remote chapter data URL", errors);
+      mustNotInclude(text, 'src="./jsu-wrapped.js"', "WordPress inline embed still loads external widget script", errors);
+      mustNotInclude(text, "src=\"https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js", "WordPress inline embed still loads hosted widget script", errors);
+    }
+  },
+  {
     label: "chapter data JSON",
     path: "sample-wrapped-2026.json",
     validate(text, errors) {
