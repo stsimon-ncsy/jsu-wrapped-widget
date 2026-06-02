@@ -136,7 +136,7 @@ Every form submission should get a human response. Suggested routing:
 - Donor/sponsor interest: development staff.
 - School contact: regional director or school-facing staff.
 
-Use the widget prefill to avoid asking the person to repeat context they already came from. The form can receive chapter, region, story scope, program/campaign, variant/version, year, and Wrapped URL fields when those hidden fields exist in Gravity Forms.
+Use the widget prefill to avoid asking the person to repeat context they already came from. The form can receive `wrapped_chapter`, `wrapped_chapter_slug`, `wrapped_region`, `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_variant`, `wrapped_year`, and `wrapped_url` when those hidden fields exist in Gravity Forms.
 
 ## Review Before Sharing
 

@@ -32,15 +32,19 @@ For the context fields, enable dynamic population where available and use parame
 wrapped_scope
 wrapped_slug
 wrapped_name
+wrapped_chapter_slug
+wrapped_chapter
 wrapped_region
 wrapped_variant
+wrapped_year
+wrapped_url
 wrapped_preview
 wrapped_submission
 ```
 
 Make **Submission JSON** a paragraph/textarea field with the parameter name `wrapped_submission`. Do not depend on URL prefill for the full JSON packet; it can be too long for reliable browser/server handling. Staff should paste the copied JSON into this field when it is blank. This is the only required field for automated merging, but name/email and preview URL make review much easier.
 
-The public final-card CTA can use the same pattern for a simpler interest form. Set `cta_href` to the Gravity Forms page URL; the widget will append short context params like `wrapped_chapter_slug`, `wrapped_chapter`, `wrapped_region`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`. Keep any actual submission JSON in a textarea or upload flow, not in the URL.
+The public final-card CTA can use the same pattern for a simpler interest form. Set `cta_href` to the Gravity Forms page URL, or use an embedded panel with matching hidden fields. The widget will append or fill short context params like `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_chapter_slug`, `wrapped_chapter`, `wrapped_region`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`. Keep any actual submission JSON in a textarea or upload flow, not in the URL.
 
 Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string. GitHub Pages can host the public static JSON/config files, while `ncsy.org` hosts the Gravity Forms page or panel and receives only short `wrapped_*` context fields.
 

@@ -2117,7 +2117,8 @@ function runWordPressSmokeScriptSmoke() {
   const ogImageWidthTag = '<meta property="og:image:width" content="1200">';
   const ogImageHeightTag = '<meta property="og:image:height" content="630">';
   const ogImageAltTag = '<meta property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore">';
-  const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
+  const minimalCtaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
+  const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_chapter_slug"><input name="wrapped_region"><input name="wrapped_scope"><input name="wrapped_slug"><input name="wrapped_name"><input name="wrapped_variant"><input name="wrapped_year"><input name="wrapped_url"></form></section>';
   const goodHtml = [
     "<html><head>",
     "<title>JSU/NCSY Wrapped - Baltimore</title>",
@@ -2174,6 +2175,11 @@ function runWordPressSmokeScriptSmoke() {
   const missingCtaContextReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace('<input name="wrapped_url">', '<input name="input_3">'),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const minimalCtaContextReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace(ctaPanelHtml, minimalCtaPanelHtml),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingHostedAttrsReport = wordpressSmoke.validateWordPressPage({
@@ -2293,6 +2299,12 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingPanelReport.ok && missingPanelReport.errors.some((error) => error.includes("CTA target")), "WordPress smoke should reject missing CTA target panels");
   assert(!missingCtaContextReport.ok && missingCtaContextReport.errors.some((error) => error.includes("Wrapped URL")), "WordPress smoke should reject embedded CTA forms without a Wrapped URL context field");
   assert(missingCtaContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest the missing Wrapped URL field name");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("scope type")), "WordPress smoke should require a scope type context field");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("scope slug")), "WordPress smoke should require a scope slug context field");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("scope name")), "WordPress smoke should require a scope name context field");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("chapter slug")), "WordPress smoke should require a chapter slug context field");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("variant")), "WordPress smoke should require a variant context field");
+  assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("year")), "WordPress smoke should require a year context field");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-config-source")), "WordPress smoke should suggest the missing config-source attribute");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-share-base")), "WordPress smoke should suggest the missing share-base attribute");
   assert(missingHostedAttrsReport.fixes[0].includes('Replace the #jsu-wrapped opening tag with: <div id="jsu-wrapped"'), "WordPress smoke should lead with the full replacement widget tag");

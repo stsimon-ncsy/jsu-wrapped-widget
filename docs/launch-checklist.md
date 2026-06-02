@@ -26,7 +26,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 ## Gravity Forms
 
 - Confirm the final-card CTA opens the intended Gravity Forms panel or direct destination.
-- Confirm hidden/context fields exist for chapter name, region, scope type, scope slug, scope name, program, variant, year label, and Wrapped URL where useful.
+- Confirm hidden/context fields exist for `wrapped_chapter`, `wrapped_chapter_slug`, `wrapped_region`, `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`.
 - Confirm the widget pre-populates those fields when the CTA opens the form.
 - Submit one test entry from a chapter link and confirm the receiving staff can see the chapter/region/source context.
 - If using the staff builder pilot form, confirm the `wrapped_submission` textarea is present and accepts pasted JSON from the builder clipboard flow.

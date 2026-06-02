@@ -105,9 +105,39 @@ function missingCtaContextFields(panelHtml) {
       patterns: [/\bwrapped\s+chapter\b/, /\bchapter\s+name\b/, /\bschool\s+or\s+chapter\b/]
     },
     {
+      label: "chapter slug",
+      suggestedName: "wrapped_chapter_slug",
+      patterns: [/\bwrapped\s+chapter\s+slug\b/, /\bchapter\s+slug\b/]
+    },
+    {
       label: "region",
       suggestedName: "wrapped_region",
       patterns: [/\bwrapped\s+region\b/, /\bregion\b/]
+    },
+    {
+      label: "scope type",
+      suggestedName: "wrapped_scope",
+      patterns: [/\bwrapped\s+scope\b/, /\bscope\s+type\b/, /\bstory\s+scope\b/]
+    },
+    {
+      label: "scope slug",
+      suggestedName: "wrapped_slug",
+      patterns: [/\bwrapped\s+slug\b/, /\bscope\s+slug\b/, /\bstory\s+slug\b/]
+    },
+    {
+      label: "scope name",
+      suggestedName: "wrapped_name",
+      patterns: [/\bwrapped\s+name\b/, /\bscope\s+name\b/, /\bstory\s+name\b/]
+    },
+    {
+      label: "variant",
+      suggestedName: "wrapped_variant",
+      patterns: [/\bwrapped\s+variant\b/, /\bvariant\b/, /\bversion\b/]
+    },
+    {
+      label: "year",
+      suggestedName: "wrapped_year",
+      patterns: [/\bwrapped\s+year\b/, /\byear\s+label\b/, /\bschool\s+year\b/]
     },
     {
       label: "Wrapped URL",
@@ -356,7 +386,7 @@ function validateWordPressPage(page, options) {
       errors.push(`WordPress page CTA target ${ctaTarget} is missing its panel`);
     }
 
-    if (!/(gform_|gform_wrapper|wrapped_chapter|wrapped_region|wrapped_url)/i.test(html)) {
+    if (!/(gform_|gform_wrapper|wrapped_chapter|wrapped_region|wrapped_url|wrapped_scope|wrapped_slug|wrapped_name)/i.test(html)) {
       errors.push("WordPress page CTA target panel should include Gravity Forms/context fields");
     }
 
@@ -436,7 +466,7 @@ function formatFixPacket(page, report) {
     "",
     "Gravity Forms hidden/context fields:",
     `Add fields named: ${missingContextFields.map((field) => field.suggestedName).join(", ")}`,
-    "Recommended full set: wrapped_chapter, wrapped_region, wrapped_url, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year"
+    "Recommended full set: wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url"
   ] : [];
 
   return [
