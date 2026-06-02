@@ -2161,6 +2161,22 @@ function runWordPressSmokeScriptSmoke() {
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const unsafeCtaHrefReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="javascript:alert(1)"')
+      .replace('<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const unsafeCtaHrefStaleAttrsReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"', "")
+      .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', "")
+      .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="javascript:alert(1)"')
+      .replace('<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const wrongSocialTitleReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore"),
@@ -2219,6 +2235,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes('data-analytics="true"')), "WordPress smoke replacement tag should keep analytics enabled");
   assert(directCtaHrefAttrsReport.fixes[0].includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress smoke replacement tag should preserve direct Gravity Forms CTA URLs");
   assert(!directCtaHrefAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should not add an embedded CTA target when preserving a direct CTA URL");
+  assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("data-cta-href")), "WordPress smoke should reject unsafe CTA href attributes");
+  assert(unsafeCtaHrefReport.fixes.some((fix) => fix.includes("safe")), "WordPress smoke should suggest a safe CTA destination");
+  assert(!unsafeCtaHrefStaleAttrsReport.fixes[0].includes("javascript:"), "WordPress smoke replacement tag should not preserve unsafe CTA href values");
+  assert(unsafeCtaHrefStaleAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should fall back to the embedded CTA target for unsafe direct URLs");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
   assert(wrongSocialTitleReport.fixes.some((fix) => fix.includes('"JSU/NCSY Wrapped - Baltimore"')), "WordPress smoke should suggest the exact corrected chapter title when it can infer one");
   assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");

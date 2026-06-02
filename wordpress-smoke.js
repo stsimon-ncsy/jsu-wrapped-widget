@@ -145,6 +145,12 @@ function hasReleaseToken(url) {
   return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
 }
 
+function isSafeCtaHref(value) {
+  const text = String(value || "").trim();
+
+  return !text || /^(https?:\/\/|\/(?!\/)|\.\/|\.\.\/|\?|#)/i.test(text);
+}
+
 function escapeAttr(value) {
   return String(value || "")
     .replace(/&/g, "&amp;")
@@ -157,9 +163,10 @@ function suggestedWidgetTag(html) {
   const ctaLabel = attrValue(html, "data-cta-label") || "Get involved next year";
   const ctaTarget = attrValue(html, "data-cta-target") || "#jsuw-wrapped-interest";
   const ctaHref = attrValue(html, "data-cta-href");
+  const safeCtaHref = isSafeCtaHref(ctaHref) ? ctaHref : "";
   const year = attrValue(html, "data-year") || "2026";
-  const ctaAttribute = ctaHref
-    ? `data-cta-href="${escapeAttr(ctaHref)}"`
+  const ctaAttribute = safeCtaHref
+    ? `data-cta-href="${escapeAttr(safeCtaHref)}"`
     : `data-cta-target="${escapeAttr(ctaTarget)}"`;
 
   return [
@@ -263,6 +270,11 @@ function validateWordPressPage(page, options) {
 
   if (!ctaTarget && !ctaHref) {
     errors.push("WordPress page missing final-card CTA target or href");
+  }
+
+  if (ctaHref && !isSafeCtaHref(ctaHref)) {
+    errors.push("WordPress page data-cta-href must be a safe URL");
+    fixes.push('Set data-cta-href to a safe https://, root-relative, dot-relative, query-string, or fragment URL, or use data-cta-target="#jsuw-wrapped-interest".');
   }
 
   if (ctaTarget) {
@@ -475,6 +487,7 @@ module.exports = {
   suggestedWidgetTag,
   hasId,
   headerValue,
+  isSafeCtaHref,
   titleFromSlug,
   titleSubjectFromValue,
   titleValue,
