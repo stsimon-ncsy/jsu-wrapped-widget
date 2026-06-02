@@ -2113,6 +2113,10 @@ function runWordPressSmokeScriptSmoke() {
   const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
   const ogImageTag = '<meta property="og:image" content="' + socialImageUrl + '">';
   const twitterImageTag = '<meta name="twitter:image" content="' + socialImageUrl + '">';
+  const twitterCardTag = '<meta name="twitter:card" content="summary_large_image">';
+  const ogImageWidthTag = '<meta property="og:image:width" content="1200">';
+  const ogImageHeightTag = '<meta property="og:image:height" content="630">';
+  const ogImageAltTag = '<meta property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore">';
   const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
   const goodHtml = [
     "<html><head>",
@@ -2120,6 +2124,10 @@ function runWordPressSmokeScriptSmoke() {
     '<meta property="og:title" content="JSU/NCSY Wrapped - Baltimore">',
     ogImageTag,
     twitterImageTag,
+    twitterCardTag,
+    ogImageWidthTag,
+    ogImageHeightTag,
+    ogImageAltTag,
     hostedCssTag,
     hostedJsTag,
     "</head><body>",
@@ -2218,6 +2226,15 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replaceAll(socialImageUrl, "https://ncsy.org/wp-content/uploads/logo.png"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const missingSocialCardDetailsReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(twitterCardTag, "")
+      .replace(ogImageWidthTag, "")
+      .replace(ogImageHeightTag, "")
+      .replace(ogImageAltTag, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   assert(typeof wordpressSmoke.formatFixPacket === "function", "WordPress smoke should expose a fix-packet formatter");
   const fixPacket = wordpressSmoke.formatFixPacket({
     status: 200,
@@ -2293,6 +2310,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingSocialImageReport.ok && missingSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject pages without social image metadata");
   assert(missingSocialImageReport.fixes.some((fix) => fix.includes("og:image") && fix.includes("wrapped-social-preview.png")), "WordPress smoke should suggest the campaign social image");
   assert(!wrongSocialImageReport.ok && wrongSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject generic social image metadata");
+  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("twitter:card")), "WordPress smoke should reject pages without summary_large_image Twitter card metadata");
+  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image dimensions")), "WordPress smoke should reject pages without social image dimensions");
+  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
   assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
   assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"'), "WordPress fix packet should include the config source");
@@ -2300,6 +2320,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260601h"), "WordPress fix packet should include the hosted widget script");
   assert(fixPacket.includes("og:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image URL");
   assert(fixPacket.includes("twitter:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign twitter:image URL");
+  assert(fixPacket.includes("twitter:card: summary_large_image"), "WordPress fix packet should include the large-card Twitter metadata");
+  assert(fixPacket.includes("og:image:width: 1200"), "WordPress fix packet should include the social image width");
+  assert(fixPacket.includes("og:image:height: 630"), "WordPress fix packet should include the social image height");
+  assert(fixPacket.includes("og:image:alt: JSU/NCSY Wrapped social preview for Baltimore"), "WordPress fix packet should include chapter-specific social image alt text");
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
   assert(missingContextFixPacket.includes("Gravity Forms hidden/context fields:"), "WordPress fix packet should call out missing Gravity Forms context fields");

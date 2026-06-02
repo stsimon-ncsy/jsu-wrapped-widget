@@ -10,6 +10,8 @@ const ASSETS_BASE_ATTR = 'data-assets-base="https://stsimon-ncsy.github.io/jsu-w
 const WIDGET_CSS_TAG = '<link rel="stylesheet" href="' + HOSTED_ASSET_BASE + 'jsu-wrapped.css?v=' + RELEASE_TOKEN + '">';
 const WIDGET_JS_TAG = '<script src="' + HOSTED_ASSET_BASE + 'jsu-wrapped.js?v=' + RELEASE_TOKEN + '"></script>';
 const SOCIAL_IMAGE_URL = HOSTED_ASSET_BASE + "assets/wrapped-social-preview.png";
+const SOCIAL_IMAGE_WIDTH = "1200";
+const SOCIAL_IMAGE_HEIGHT = "630";
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -162,6 +164,13 @@ function suggestedSocialTitle(page, html) {
   return subject ? `JSU/NCSY Wrapped - ${subject}` : "JSU/NCSY Wrapped - [Chapter or Scope Name]";
 }
 
+function suggestedSocialImageAlt(page, html) {
+  const socialTitle = suggestedSocialTitle(page, html);
+  const subject = titleSubjectFromValue(socialTitle);
+
+  return subject ? `JSU/NCSY Wrapped social preview for ${subject}` : "JSU/NCSY Wrapped social preview";
+}
+
 function hasReleaseToken(url) {
   const text = String(url || "");
   return text.includes("?v=" + RELEASE_TOKEN) || text.includes("&v=" + RELEASE_TOKEN) || text.includes("&amp;v=" + RELEASE_TOKEN);
@@ -252,7 +261,12 @@ function validateWordPressPage(page, options) {
   const twitterTitle = metaContentValue(html, "twitter:title");
   const ogImage = metaContentValue(html, "og:image");
   const twitterImage = metaContentValue(html, "twitter:image");
+  const twitterCard = metaContentValue(html, "twitter:card");
+  const ogImageWidth = metaContentValue(html, "og:image:width");
+  const ogImageHeight = metaContentValue(html, "og:image:height");
+  const ogImageAlt = metaContentValue(html, "og:image:alt");
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialImageAlt = suggestedSocialImageAlt(page, html);
 
   if (status < 200 || status >= 300) {
     errors.push(`WordPress page returned HTTP ${status || "unknown"}`);
@@ -376,6 +390,21 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
   }
 
+  if (String(twitterCard || "").trim().toLowerCase() !== "summary_large_image") {
+    errors.push("WordPress page twitter:card should be summary_large_image");
+    fixes.push("Set twitter:card to summary_large_image.");
+  }
+
+  if (String(ogImageWidth || "").trim() !== SOCIAL_IMAGE_WIDTH || String(ogImageHeight || "").trim() !== SOCIAL_IMAGE_HEIGHT) {
+    errors.push(`WordPress page social image dimensions should be ${SOCIAL_IMAGE_WIDTH}x${SOCIAL_IMAGE_HEIGHT}`);
+    fixes.push(`Set og:image:width to ${SOCIAL_IMAGE_WIDTH} and og:image:height to ${SOCIAL_IMAGE_HEIGHT}.`);
+  }
+
+  if (String(ogImageAlt || "").trim() !== socialImageAlt) {
+    errors.push("WordPress page social image alt metadata should describe the Wrapped preview");
+    fixes.push(`Set og:image:alt to "${socialImageAlt}".`);
+  }
+
   if (!/privacy/i.test(text) || !/(cookie|osano)/i.test(html)) {
     errors.push("WordPress page missing privacy/cookie affordance");
   }
@@ -400,6 +429,7 @@ function formatFixPacket(page, report) {
   const url = String(page && page.url || DEFAULT_URL);
   const validationReport = report || validateWordPressPage(page);
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialImageAlt = suggestedSocialImageAlt(page, html);
   const ctaTarget = attrValue(html, "data-cta-target");
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
   const contextFieldLines = missingContextFields.length ? [
@@ -429,6 +459,10 @@ function formatFixPacket(page, report) {
     `twitter:title: ${socialTitle}`,
     `og:image: ${SOCIAL_IMAGE_URL}`,
     `twitter:image: ${SOCIAL_IMAGE_URL}`,
+    "twitter:card: summary_large_image",
+    `og:image:width: ${SOCIAL_IMAGE_WIDTH}`,
+    `og:image:height: ${SOCIAL_IMAGE_HEIGHT}`,
+    `og:image:alt: ${socialImageAlt}`,
     ...contextFieldLines,
     "",
     "Follow-up verification:",
@@ -566,6 +600,7 @@ module.exports = {
   headerValue,
   hasExpectedSocialImage,
   isSafeCtaHref,
+  suggestedSocialImageAlt,
   titleFromSlug,
   titleSubjectFromValue,
   titleValue,
