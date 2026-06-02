@@ -2094,6 +2094,11 @@ function runHostedSmokeScriptSmoke() {
     encoding: "utf8",
     stdio: "pipe"
   });
+  const helpOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--help"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
   const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], { encoding: "utf8" });
   const readme = loadText("README.md");
   const docs = loadText("docs/production-readiness.md");
@@ -2122,6 +2127,8 @@ function runHostedSmokeScriptSmoke() {
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
+  assert(helpOutput.includes("crawler metadata"), "hosted smoke help should describe crawler metadata checks");
+  assert(helpOutput.includes("social preview image"), "hosted smoke help should describe social preview image checks");
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
   assert(readme.includes("node hosted-smoke.js"), "README should document hosted smoke checks");
   assert(docs.includes("node hosted-smoke.js"), "production docs should document hosted smoke checks");
@@ -2417,6 +2424,11 @@ function runWordPressSmokeScriptSmoke() {
     encoding: "utf8",
     stdio: "pipe"
   });
+  const helpOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--help"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
   const destinationDryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--url", "https://ncsy.org/ncsy-wrapped/?chapter=baltimore", "--cta-href", "https://ncsy.org/wrapped-interest/", "--check-cta-destination", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
@@ -2522,6 +2534,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(!brokenTextReport.ok && brokenTextReport.errors.some((error) => error.includes("broken placeholder text")), "WordPress smoke should reject visible broken placeholder text");
   assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress smoke dry run should show the target URL");
   assert(destinationDryRunOutput.includes("would also check CTA destination https://ncsy.org/wrapped-interest/"), "WordPress smoke dry run should show the direct CTA destination when requested");
+  assert(helpOutput.includes("social descriptions"), "WordPress smoke help should describe social description checks");
+  assert(helpOutput.includes("image alt"), "WordPress smoke help should describe social image alt checks");
   assert(listed.includes("node --check wordpress-smoke.js"), "production QA should syntax-check the WordPress smoke helper");
   assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
   assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");

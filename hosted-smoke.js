@@ -432,7 +432,7 @@ function usage() {
     "Usage:",
     "  node hosted-smoke.js [--base https://stsimon-ncsy.github.io/jsu-wrapped-widget/] [--timeout-ms 15000] [--origin https://ncsy.org] [--require-cors|--skip-cors] [--dry-run]",
     "",
-    "Fetches the hosted GitHub Pages widget, JSON, and Baltimore share page to confirm deployment basics.",
+    "Fetches the hosted GitHub Pages widget, JSON, Baltimore crawler metadata, noindex QA pages, and social preview image.",
     "For GitHub Pages asset hosts, also confirms JSON files send Access-Control-Allow-Origin for WordPress embeds."
   ].join("\n");
 }

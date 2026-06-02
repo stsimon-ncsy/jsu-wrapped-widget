@@ -805,7 +805,7 @@ function usage() {
     "Usage:",
     "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--cta-href https://ncsy.org/wrapped-interest/] [--check-cta-destination] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
     "",
-    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, and social title basics.",
+    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, social titles, social descriptions, canonical/social URLs, campaign image metadata, and image alt text.",
     "",
     "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale.",
     "Use --cta-href when the final CTA should link to a separate Gravity Forms page instead of opening an embedded same-page panel.",
