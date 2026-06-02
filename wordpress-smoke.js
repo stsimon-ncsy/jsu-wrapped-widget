@@ -239,6 +239,54 @@ function isSafeCtaHref(value) {
   return !text || /^(https?:\/\/|\/(?!\/)|\.\/|\.\.\/|\?|#)/i.test(text);
 }
 
+function decodedText(value) {
+  const text = String(value || "").replace(/\+/g, " ");
+
+  try {
+    return decodeURIComponent(text);
+  } catch (error) {
+    return text;
+  }
+}
+
+function isCtaPayloadParam(name) {
+  return /^(wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)$/i.test(String(name || ""));
+}
+
+function looksLikeJsonPayload(value) {
+  const raw = String(value || "");
+  const text = decodedText(raw).trim();
+
+  return /%7b|%5b|%22(?:cards|metrics|record_overrides|custom_cards|chapters)%22/i.test(raw) || /^[\[{]/.test(text) || text.length > 320 && /["']?[a-z0-9_ -]+["']?\s*:/.test(text);
+}
+
+function hasCtaUrlPayload(value) {
+  if (!value) {
+    return false;
+  }
+
+  const text = String(value).trim();
+
+  if (text.length > 1800 || /%7b|%5b/i.test(text)) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(text, DEFAULT_URL);
+    let foundPayload = false;
+
+    parsed.searchParams.forEach((paramValue, paramName) => {
+      if (isCtaPayloadParam(paramName) || looksLikeJsonPayload(paramValue)) {
+        foundPayload = true;
+      }
+    });
+
+    return foundPayload;
+  } catch (error) {
+    return /[?&](wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)=/i.test(text);
+  }
+}
+
 function hostedAssetUrls(html, fileName, attrName) {
   const escapedFile = String(fileName || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp("(^|/)" + escapedFile + "(?:[?#].*)?$", "i");
@@ -266,7 +314,7 @@ function suggestedWidgetTag(html) {
   const ctaLabel = attrValue(html, "data-cta-label") || "Get involved next year";
   const ctaTarget = attrValue(html, "data-cta-target") || "#jsuw-wrapped-interest";
   const ctaHref = attrValue(html, "data-cta-href");
-  const safeCtaHref = isSafeCtaHref(ctaHref) ? ctaHref : "";
+  const safeCtaHref = isSafeCtaHref(ctaHref) && !hasCtaUrlPayload(ctaHref) ? ctaHref : "";
   const year = attrValue(html, "data-year") || "2026";
   const ctaAttribute = safeCtaHref
     ? `data-cta-href="${escapeAttr(safeCtaHref)}"`
@@ -408,6 +456,9 @@ function validateWordPressPage(page, options) {
   if (ctaHref && !isSafeCtaHref(ctaHref)) {
     errors.push("WordPress page data-cta-href must be a safe URL");
     fixes.push('Set data-cta-href to a safe https://, root-relative, dot-relative, query-string, or fragment URL, or use data-cta-target="#jsuw-wrapped-interest".');
+  } else if (ctaHref && hasCtaUrlPayload(ctaHref)) {
+    errors.push("WordPress page data-cta-href should use only short wrapped_* context params");
+    fixes.push('Set data-cta-href to the clean Gravity Forms page URL only; the widget appends short wrapped_* context params automatically. Do not include JSON, builder payloads, or wrapped_submission in the URL.');
   }
 
   if (ctaTarget) {

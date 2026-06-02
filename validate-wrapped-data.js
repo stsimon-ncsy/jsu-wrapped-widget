@@ -748,6 +748,54 @@ function isSafeStaticUrl(value) {
   return text.startsWith("/") || text.startsWith("./") || text.startsWith("../") || text.startsWith("#") || text.startsWith("?");
 }
 
+function decodedText(value) {
+  const text = String(value || "").replace(/\+/g, " ");
+
+  try {
+    return decodeURIComponent(text);
+  } catch (error) {
+    return text;
+  }
+}
+
+function isCtaPayloadParam(name) {
+  return /^(wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)$/i.test(String(name || ""));
+}
+
+function looksLikeJsonPayload(value) {
+  const raw = String(value || "");
+  const text = decodedText(raw).trim();
+
+  return /%7b|%5b|%22(?:cards|metrics|record_overrides|custom_cards|chapters)%22/i.test(raw) || /^[\[{]/.test(text) || text.length > 320 && /["']?[a-z0-9_ -]+["']?\s*:/.test(text);
+}
+
+function hasCtaUrlPayload(value) {
+  if (!hasValue(value)) {
+    return false;
+  }
+
+  const text = String(value).trim();
+
+  if (text.length > 1800 || /%7b|%5b/i.test(text)) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(text, "https://jsu-wrapped.local/");
+    let foundPayload = false;
+
+    parsed.searchParams.forEach((paramValue, paramName) => {
+      if (isCtaPayloadParam(paramName) || looksLikeJsonPayload(paramValue)) {
+        foundPayload = true;
+      }
+    });
+
+    return foundPayload;
+  } catch (error) {
+    return /[?&](wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)=/i.test(text);
+  }
+}
+
 function validateSectionCtaValues(report, section, label) {
   [
     ["cta_href", section.cta_href],
@@ -755,6 +803,8 @@ function validateSectionCtaValues(report, section, label) {
   ].forEach(([field, value]) => {
     if (!isSafeStaticUrl(value)) {
       addError(report, `${label}.${field} must be an http(s), root-relative, dot-relative, query, or fragment URL`);
+    } else if (hasCtaUrlPayload(value)) {
+      addError(report, `${label}.${field} must link to a form using only short wrapped_* context params, not JSON or builder payloads`);
     }
   });
 }

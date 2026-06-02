@@ -4347,6 +4347,62 @@
     return text.indexOf("/") === 0 || text.indexOf("./") === 0 || text.indexOf("../") === 0 || text.indexOf("#") === 0 || text.indexOf("?") === 0;
   }
 
+  function decodedText(value) {
+    var text = String(value || "").replace(/\+/g, " ");
+
+    try {
+      return decodeURIComponent(text);
+    } catch (error) {
+      return text;
+    }
+  }
+
+  function isCtaPayloadParam(name) {
+    return /^(wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)$/i.test(String(name || ""));
+  }
+
+  function looksLikeJsonPayload(value) {
+    var raw = String(value || "");
+    var text = decodedText(raw).trim();
+
+    return /%7b|%5b|%22(?:cards|metrics|record_overrides|custom_cards|chapters)%22/i.test(raw) || /^[\[{]/.test(text) || text.length > 320 && /["']?[a-z0-9_ -]+["']?\s*:/.test(text);
+  }
+
+  function hasCtaUrlPayload(value) {
+    var text;
+    var parsed;
+
+    if (!hasValue(value)) {
+      return false;
+    }
+
+    text = String(value).trim();
+
+    if (text.length > 1800 || /%7b|%5b/i.test(text)) {
+      return true;
+    }
+
+    try {
+      parsed = new URL(text, "https://jsu-wrapped.local/");
+
+      var foundPayload = false;
+
+      parsed.searchParams.forEach(function (paramValue, paramName) {
+        if (isCtaPayloadParam(paramName) || looksLikeJsonPayload(paramValue)) {
+          foundPayload = true;
+        }
+      });
+
+      return foundPayload;
+    } catch (error) {
+      return /[?&](wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)=/i.test(text);
+    }
+  }
+
+  function isUsableCtaHref(value) {
+    return isSafeStaticUrl(value) && !hasCtaUrlPayload(value);
+  }
+
   function asText(value, fallback) {
     if (hasValue(value)) {
       return String(value);
@@ -4766,7 +4822,7 @@
     var baseUrl = wrappedUrl || "https://jsu-wrapped.local/";
     var parsed = null;
 
-    if (!isSafeStaticUrl(rawHref)) {
+    if (!isUsableCtaHref(rawHref)) {
       return "";
     }
 
@@ -6271,7 +6327,7 @@
     return {
       label: asText(config.cta_label || config.ctaLabel || base && base.label, ""),
       target: asText(config.cta_target || config.ctaTarget || base && base.target, ""),
-      href: isSafeStaticUrl(rawHref) ? asText(rawHref, "") : ""
+      href: isUsableCtaHref(rawHref) ? asText(rawHref, "") : ""
     };
   }
 
@@ -7984,7 +8040,7 @@
     var label = asText(trigger && trigger.getAttribute("data-jsuw-cta-label") || cta.label, "Wrapped interest");
     var targetSelector = asText(trigger && trigger.getAttribute("data-jsuw-cta-target") || cta.target, "");
     var href = asText(trigger && trigger.getAttribute("data-jsuw-cta-href") || cta.href, "");
-    var safeHref = isSafeStaticUrl(href) ? href : "";
+    var safeHref = isUsableCtaHref(href) ? href : "";
     var prefilledHref = safeHref ? createCtaPrefillUrl(safeHref, state.record, root && root.location && root.location.href) : "";
     var panel = null;
 

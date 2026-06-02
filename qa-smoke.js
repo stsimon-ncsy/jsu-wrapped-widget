@@ -605,6 +605,7 @@ function runFormPrefillSmoke() {
   assert(!ctaUrl.includes("events_hosted"), "CTA prefill should not include full story JSON or metrics");
   assert(api.createCtaPrefillUrl("#interest", { chapter_slug: "baltimore" }, "https://example.org/wrapped/?chapter=baltimore") === "#interest", "CTA prefill should leave local fragments alone");
   assert(api.createCtaPrefillUrl("javascript:alert(1)", { chapter_slug: "baltimore" }, "https://example.org/wrapped/?chapter=baltimore") === "", "CTA prefill should reject unsafe URLs");
+  assert(api.createCtaPrefillUrl("https://ncsy.org/wrapped-interest/?wrapped_submission=%7B%22cards%22%3A%5B%5D%7D", { chapter_slug: "baltimore" }, "https://example.org/wrapped/?chapter=baltimore") === "", "CTA prefill should reject URLs that already carry JSON submission payloads");
 }
 
 function runRuntimeUrlSafetySmoke() {
@@ -669,8 +670,8 @@ function runRuntimeUrlSafetySmoke() {
   assert(!api.isSafeStaticUrl("javascript:alert(1)"), "runtime should reject javascript CTA URLs");
   assert(!api.isSafeStaticUrl("data:text/html,<script>alert(1)</script>"), "runtime should reject data CTA URLs");
   assert(!api.isSafeStaticUrl("//evil.example/wrapped"), "runtime should reject protocol-relative CTA URLs");
-  assert(source.includes("isSafeStaticUrl(rawHref)"), "runtime should sanitize configured CTA href values before rendering");
-  assert(source.includes("isSafeStaticUrl(href) ? href : \"\""), "runtime should guard CTA navigation at click time");
+  assert(source.includes("isUsableCtaHref(rawHref)"), "runtime should sanitize configured CTA href values before rendering");
+  assert(source.includes("isUsableCtaHref(href) ? href : \"\""), "runtime should guard CTA navigation at click time");
   assert(source.includes("CTA link is not available."), "runtime should report blocked unsafe CTA navigation without leaving the page");
   assert(safeMediaCard && safeMediaCard.imageUrl === "https://res.cloudinary.com/demo/image/upload/sample.jpg", "runtime should keep safe custom media image URLs");
   assert(unsafeMediaCard && unsafeMediaCard.imageUrl === "", "runtime should strip unsafe custom media image URLs before rendering");
@@ -2213,6 +2214,13 @@ function runWordPressSmokeScriptSmoke() {
       .replace(ctaPanelHtml, ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const oversizedCtaHrefReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="https://ncsy.org/wrapped-interest/?wrapped_submission=%7B%22cards%22%3A%5B%7B%22headline%22%3A%22Too%20much%20JSON%22%7D%5D%7D"')
+      .replace(ctaPanelHtml, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const unsafeCtaHrefStaleAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
@@ -2335,6 +2343,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(!directCtaHrefAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should not add an embedded CTA target when preserving a direct CTA URL");
   assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("data-cta-href")), "WordPress smoke should reject unsafe CTA href attributes");
   assert(unsafeCtaHrefReport.fixes.some((fix) => fix.includes("safe")), "WordPress smoke should suggest a safe CTA destination");
+  assert(!oversizedCtaHrefReport.ok && oversizedCtaHrefReport.errors.some((error) => error.includes("short wrapped_* context params")), "WordPress smoke should reject CTA hrefs that carry JSON submission params");
+  assert(oversizedCtaHrefReport.fixes.some((fix) => fix.includes("short wrapped_* context params")), "WordPress smoke should explain that CTA URLs should only carry short context params");
   assert(!unsafeCtaHrefStaleAttrsReport.fixes[0].includes("javascript:"), "WordPress smoke replacement tag should not preserve unsafe CTA href values");
   assert(unsafeCtaHrefStaleAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should fall back to the embedded CTA target for unsafe direct URLs");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
@@ -2925,6 +2935,18 @@ function runDataValidationSmoke(records, config) {
       }
     }
   }, records);
+  const oversizedCtaPayloadReport = dataValidator.validateConfig({
+    version: 1,
+    year: "2026",
+    defaults: {
+      cta_href: "https://ncsy.org/wrapped-interest/?wrapped_submission=%7B%22cards%22%3A%5B%7B%22headline%22%3A%22Too%20much%20JSON%22%7D%5D%7D"
+    },
+    chapters: {
+      baltimore: {
+        ctaHref: "https://ncsy.org/wrapped-interest/?wrapped_config=%7B%22events_hosted%22%3A338%7D"
+      }
+    }
+  }, records);
 
   assert(report.ok, `sample data validation failed: ${report.errors.join("; ")}`);
   assert(!duplicateReport.ok && duplicateReport.errors.some((error) => error.includes("Duplicate chapter_slug")), "duplicate chapter slugs should fail validation");
@@ -2951,6 +2973,8 @@ function runDataValidationSmoke(records, config) {
   assert(validCtaHrefReport.ok, `safe CTA href config should pass validation: ${validCtaHrefReport.errors.join("; ")}`);
   assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("config.defaults.cta_href")), "unsafe default CTA href should fail validation");
   assert(!unsafeCtaHrefReport.ok && unsafeCtaHrefReport.errors.some((error) => error.includes("variants.unsafe.ctaHref")), "unsafe variant CTA href should fail validation");
+  assert(!oversizedCtaPayloadReport.ok && oversizedCtaPayloadReport.errors.some((error) => error.includes("config.defaults.cta_href") && error.includes("short wrapped_* context params")), "default CTA href should reject JSON submission params");
+  assert(!oversizedCtaPayloadReport.ok && oversizedCtaPayloadReport.errors.some((error) => error.includes("config chapter \"baltimore\".ctaHref") && error.includes("short wrapped_* context params")), "chapter CTA href should reject JSON config params");
 }
 
 function main() {
