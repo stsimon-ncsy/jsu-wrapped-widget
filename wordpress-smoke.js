@@ -1,5 +1,9 @@
 const DEFAULT_URL = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
 const DEFAULT_TIMEOUT_MS = 15000;
+const RELEASE_TOKEN = "jsuw-prod-20260601h";
+const CHAPTER_DATA_ATTR = 'data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
+const CONFIG_DATA_ATTR = 'data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=' + RELEASE_TOKEN + '"';
+const SHARE_BASE_ATTR = 'data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"';
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -30,6 +34,10 @@ function attrValue(html, attrName) {
   return match ? match[2] : "";
 }
 
+function hasReleaseToken(url) {
+  return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
+}
+
 function mustInclude(text, expected, message, errors) {
   if (!String(text || "").includes(expected)) {
     errors.push(message);
@@ -39,16 +47,20 @@ function mustInclude(text, expected, message, errors) {
 function validateWordPressPage(page, options) {
   const settings = options || {};
   const errors = [];
+  const fixes = [];
   const status = Number(page && page.status);
   const html = String(page && page.text || "");
   const text = visibleText(html);
+  const dataSource = attrValue(html, "data-source");
+  const configSource = attrValue(html, "data-config-source");
+  const teenSource = attrValue(html, "data-teen-source");
   const ctaTarget = attrValue(html, "data-cta-target");
   const ctaHref = attrValue(html, "data-cta-href");
   const contentType = headerValue(page && page.headers, "content-type").toLowerCase();
 
   if (status < 200 || status >= 300) {
     errors.push(`WordPress page returned HTTP ${status || "unknown"}`);
-    return { errors, ok: false };
+    return { errors, fixes, ok: false };
   }
 
   if (contentType && !contentType.includes("text/html")) {
@@ -59,20 +71,36 @@ function validateWordPressPage(page, options) {
     errors.push("WordPress page missing widget container #jsu-wrapped");
   }
 
-  if (!/data-source\s*=/.test(html)) {
+  if (!dataSource) {
     errors.push("WordPress page missing widget data-source");
-  } else if (!/sample-wrapped-2026\.json/.test(html)) {
+    fixes.push(`Add ${CHAPTER_DATA_ATTR} to the #jsu-wrapped container.`);
+  } else if (!/sample-wrapped-2026\.json/.test(dataSource)) {
     errors.push("WordPress page data-source should point at the chapter JSON");
+    fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
+  } else if (!hasReleaseToken(dataSource)) {
+    errors.push("WordPress page data-source is missing the shared cache token");
+    fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
   }
 
-  if (!/data-config-source\s*=/.test(html)) {
+  if (!configSource) {
     errors.push("WordPress page missing widget data-config-source");
-  } else if (!/wrapped-config-2026\.json/.test(html)) {
+    fixes.push(`Add ${CONFIG_DATA_ATTR} to the #jsu-wrapped container.`);
+  } else if (!/wrapped-config-2026\.json/.test(configSource)) {
     errors.push("WordPress page data-config-source should point at the config JSON");
+    fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
+  } else if (!hasReleaseToken(configSource)) {
+    errors.push("WordPress page data-config-source is missing the shared cache token");
+    fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
+  }
+
+  if (teenSource && /sample-teen-wrapped-2026\.json/.test(teenSource) && !hasReleaseToken(teenSource)) {
+    errors.push("WordPress page data-teen-source is missing the shared cache token");
+    fixes.push('Set data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=' + RELEASE_TOKEN + '" on the #jsu-wrapped container.');
   }
 
   if (!/data-share-base\s*=/.test(html) || !/\/share\//.test(html)) {
     errors.push("WordPress page missing generated share-page base");
+    fixes.push(`Add ${SHARE_BASE_ATTR} to the #jsu-wrapped container.`);
   }
 
   if (!ctaTarget && !ctaHref) {
@@ -113,6 +141,7 @@ function validateWordPressPage(page, options) {
 
   return {
     errors,
+    fixes,
     ok: errors.length === 0
   };
 }
@@ -195,6 +224,12 @@ async function main() {
     report.errors.forEach((error) => {
       console.error(`- ${error}`);
     });
+    if (report.fixes.length) {
+      console.error("Suggested fixes:");
+      report.fixes.forEach((fix) => {
+        console.error(`- ${fix}`);
+      });
+    }
     process.exitCode = 1;
     return;
   }
