@@ -150,6 +150,11 @@ cta_target
 sound_enabled
 ```
 
+`cta_href` is still forwarded as an event parameter for GTM Preview, DebugView,
+and BigQuery/export troubleshooting. Do not register `cta_href` as a GA4 custom
+dimension by default because form-prefill query params can make it long and
+high-cardinality; use `cta_label` and `cta_target` for routine CTA reporting.
+
 Register these as custom metrics:
 
 ```text

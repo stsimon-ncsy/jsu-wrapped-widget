@@ -681,6 +681,8 @@ function runRuntimeUrlSafetySmoke() {
 
 function runAnalyticsDocsSmoke() {
   const docs = loadText("analytics-gtm-setup.md");
+  const dataLayerVariablesSection = docs.match(/4\. Create Data Layer Variables:[\s\S]*?5\. Create one GA4 Event tag:/);
+  const customDimensionsSection = docs.match(/Register these as event-scoped custom dimensions:\s*```text\n([\s\S]*?)\n```/);
   const payload = api.createAnalyticsPayload({
     record: {
       scope_type: "region",
@@ -708,6 +710,10 @@ function runAnalyticsDocsSmoke() {
     assert(Object.prototype.hasOwnProperty.call(payload, key), `analytics payload missing ${key}`);
     assert(docs.includes(key), `analytics GTM docs missing ${key}`);
   });
+
+  assert(dataLayerVariablesSection && dataLayerVariablesSection[0].includes("cta_href"), "analytics GTM docs should include cta_href as a Data Layer Variable");
+  assert(customDimensionsSection && !customDimensionsSection[1].includes("cta_href"), "analytics GTM docs should not register cta_href as a default custom dimension");
+  assert(/Do not register `cta_href` as a GA4 custom\s+dimension by default/.test(docs), "analytics GTM docs should explain why cta_href is excluded from custom dimensions");
 }
 
 function runStoryScopeSmoke() {
