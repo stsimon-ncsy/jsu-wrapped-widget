@@ -36,6 +36,25 @@ function attrValue(html, attrName) {
   return match ? match[2] : "";
 }
 
+function titleValue(html) {
+  const match = String(html || "").match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+
+  return match ? match[1].replace(/\s+/g, " ").trim() : "";
+}
+
+function metaContentValue(html, name) {
+  const source = String(html || "");
+  const escaped = String(name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const tagPattern = new RegExp("<meta\\b(?=[^>]*(?:property|name)\\s*=\\s*(['\"])" + escaped + "\\1)[^>]*>", "i");
+  const tagMatch = source.match(tagPattern);
+
+  return tagMatch ? attrValue(tagMatch[0], "content").replace(/\s+/g, " ").trim() : "";
+}
+
+function hasExpectedWrappedTitle(value) {
+  return /^JSU\/NCSY Wrapped\s+-\s+\S/.test(String(value || "").trim());
+}
+
 function hasReleaseToken(url) {
   return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
 }
@@ -98,6 +117,9 @@ function validateWordPressPage(page, options) {
   const ctaTarget = attrValue(html, "data-cta-target");
   const ctaHref = attrValue(html, "data-cta-href");
   const contentType = headerValue(page && page.headers, "content-type").toLowerCase();
+  const pageTitle = titleValue(html);
+  const ogTitle = metaContentValue(html, "og:title");
+  const twitterTitle = metaContentValue(html, "twitter:title");
 
   if (status < 200 || status >= 300) {
     errors.push(`WordPress page returned HTTP ${status || "unknown"}`);
@@ -168,12 +190,17 @@ function validateWordPressPage(page, options) {
     }
   }
 
-  if (!/JSU\/NCSY Wrapped/i.test(html)) {
-    errors.push("WordPress page missing JSU/NCSY Wrapped title or social metadata");
+  if (!hasExpectedWrappedTitle(pageTitle)) {
+    errors.push("WordPress page title should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
+    fixes.push('Set the page title to "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
   }
 
   if (!/og:title|twitter:title/i.test(html)) {
     errors.push("WordPress page missing social title metadata");
+    fixes.push('Add og:title or twitter:title metadata using "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
+  } else if (!hasExpectedWrappedTitle(ogTitle) && !hasExpectedWrappedTitle(twitterTitle)) {
+    errors.push("WordPress page social title metadata should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
+    fixes.push('Set og:title and twitter:title to "JSU/NCSY Wrapped - [Chapter or Scope Name]".');
   }
 
   if (!/privacy/i.test(text) || !/(cookie|osano)/i.test(html)) {
@@ -295,9 +322,11 @@ if (require.main === module) {
 
 module.exports = {
   attrValue,
+  metaContentValue,
   suggestedWidgetTag,
   hasId,
   headerValue,
+  titleValue,
   validateWordPressPage,
   visibleText
 };
