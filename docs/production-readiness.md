@@ -2,6 +2,12 @@
 
 This widget is static-hosting friendly: the public experience is driven by `jsu-wrapped.js`, `jsu-wrapped.css`, `sample-wrapped-2026.json`, and `wrapped-config-2026.json`.
 
+## Production Hosting Map
+
+- NCSY.org is the canonical public Wrapped page.
+- GitHub Pages is the static asset/data host for widget files, JSON/config, generated share pages, and images unless those files move to NCSY.org.
+- Gravity Forms handles only the final CTA/contact capture, either as an embedded same-page panel or a separate NCSY.org form page.
+
 ## Pre-Publish Checks
 
 Run these before copying files to WordPress or relying on GitHub Pages:

@@ -4,6 +4,12 @@ Static, embeddable Wrapped-style stories for JSU/NCSY chapters, regions, program
 
 The production path is intentionally lightweight: no backend, no build step, and no login required for the public widget. GitHub Pages can host the static assets, while WordPress can embed the same widget on `ncsy.org`.
 
+## Production Hosting Map
+
+- NCSY.org is the canonical public Wrapped page.
+- GitHub Pages is the static asset/data host for widget files, JSON/config, generated share pages, and images unless those files move to NCSY.org.
+- Gravity Forms handles only the final CTA/contact capture, either as an embedded same-page panel or a separate NCSY.org form page.
+
 ## Public URLs
 
 - GitHub Pages preview: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/`

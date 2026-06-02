@@ -2416,6 +2416,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingDestinationContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest wrapped_url for direct Gravity Forms destinations");
   assert(!nonHtmlDestinationReport.ok && nonHtmlDestinationReport.errors.some((error) => error.includes("content type")), "WordPress smoke should reject non-HTML direct CTA destinations");
   assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");
+  assert(fixPacket.includes("NCSY.org is the canonical public Wrapped page"), "WordPress fix packet should identify NCSY.org as the production page host");
+  assert(fixPacket.includes("GitHub Pages is the static asset/data host"), "WordPress fix packet should identify GitHub Pages as the static asset/data host");
+  assert(fixPacket.includes("Gravity Forms handles only the final CTA/contact capture"), "WordPress fix packet should explain the Gravity Forms scope");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
@@ -2464,6 +2467,12 @@ function runWordPressSmokeScriptSmoke() {
   assert(readme.includes("--check-cta-destination"), "README should document direct Gravity Forms destination checks");
   assert(docs.includes("--check-cta-destination"), "production docs should document direct Gravity Forms destination checks");
   assert(checklist.includes("--check-cta-destination"), "launch checklist should document direct Gravity Forms destination checks");
+  assert(readme.includes("NCSY.org is the canonical public Wrapped page"), "README should document the canonical NCSY.org hosting role");
+  assert(readme.includes("GitHub Pages is the static asset/data host"), "README should document the GitHub Pages asset/data role");
+  assert(readme.includes("Gravity Forms handles only the final CTA/contact capture"), "README should document the limited Gravity Forms role");
+  assert(docs.includes("NCSY.org is the canonical public Wrapped page"), "production docs should document the canonical NCSY.org hosting role");
+  assert(docs.includes("GitHub Pages is the static asset/data host"), "production docs should document the GitHub Pages asset/data role");
+  assert(checklist.includes("NCSY.org is the canonical public Wrapped page"), "launch checklist should include the canonical hosting role");
 }
 
 function runRenderSmokeScriptSmoke() {

@@ -4,6 +4,9 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 
 ## Preflight
 
+- Confirm NCSY.org is the canonical public Wrapped page.
+- Confirm GitHub Pages is the static asset/data host unless the JSON/config/assets have intentionally moved to NCSY.org.
+- Confirm Gravity Forms handles only the final CTA/contact capture, not the main Wrapped data payload.
 - Run `node check-production.js` locally from the repo root.
 - Confirm GitHub Actions QA is green for the latest pushed commit.
 - Confirm GitHub Pages deployment is green for the same commit.

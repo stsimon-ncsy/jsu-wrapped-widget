@@ -635,6 +635,11 @@ function formatFixPacket(page, report, options) {
   return [
     "WordPress Wrapped launch packet",
     "",
+    "Production hosting map:",
+    "- NCSY.org is the canonical public Wrapped page.",
+    "- GitHub Pages is the static asset/data host for widget files, JSON/config, share pages, and images unless those move to NCSY.org.",
+    "- Gravity Forms handles only the final CTA/contact capture.",
+    "",
     `URL: ${url}`,
     "",
     "Replace #jsu-wrapped with:",
