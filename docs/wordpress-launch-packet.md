@@ -7,6 +7,8 @@ Production hosting map:
 - NCSY.org is the canonical public Wrapped page.
 - GitHub Pages is the static asset/data host for widget files, JSON/config, share pages, and images unless those move to NCSY.org.
 - Gravity Forms handles only the final CTA/contact capture.
+- The public CTA form is not the staff-builder submission intake flow; builder submissions use a separate review form or email handoff.
+- A failed live smoke after generating this packet means the public page still needs this packet applied, not that this packet is invalid.
 
 ## Copy-Ready WordPress HTML Block
 
@@ -79,3 +81,5 @@ For the copy-ready packet generated from the current live page, run:
 ```bash
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet
 ```
+
+A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the follow-up verification command above.

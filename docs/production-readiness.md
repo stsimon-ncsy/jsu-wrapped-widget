@@ -24,6 +24,8 @@ After the WordPress page is pasted and published, run `node wordpress-smoke.js -
 
 If that live check reports stale WordPress markup, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet`. The fix packet prints one compact copy-ready block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together, plus the exact page/social title, suggested canonical/social URLs, meta description, `og:type`, `og:site_name`, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `og:image:secure_url`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
 
+A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the live WordPress shell smoke.
+
 The same current Baltimore launch values are checked in at `docs/wordpress-launch-packet.md` for a stable copy/paste handoff.
 
 When the final-card CTA should open a separate Gravity Forms page instead of a same-page embedded panel, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"`. The replacement widget tag will use `data-cta-href`, and the runtime will append only short `wrapped_*` context parameters.

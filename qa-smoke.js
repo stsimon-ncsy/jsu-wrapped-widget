@@ -2559,6 +2559,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("NCSY.org is the canonical public Wrapped page"), "WordPress fix packet should identify NCSY.org as the production page host");
   assert(fixPacket.includes("GitHub Pages is the static asset/data host"), "WordPress fix packet should identify GitHub Pages as the static asset/data host");
   assert(fixPacket.includes("Gravity Forms handles only the final CTA/contact capture"), "WordPress fix packet should explain the Gravity Forms scope");
+  assert(fixPacket.includes("not the staff-builder submission intake flow"), "WordPress fix packet should distinguish the public CTA form from the staff builder intake form");
+  assert(fixPacket.includes("A nonzero exit in fix-packet mode means the live page is still stale"), "WordPress fix packet should explain why fix-packet mode can exit nonzero");
   assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
   assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
@@ -2593,6 +2595,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(launchPacket.includes("WordPress Wrapped Launch Packet"), "repo should include a checked-in WordPress launch packet");
   assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"'), "checked-in WordPress launch packet should include the current config source");
   assert(launchPacket.includes("JSU/NCSY Wrapped - Baltimore"), "checked-in WordPress launch packet should include the exact Baltimore title");
+  assert(launchPacket.includes("A failed live smoke after generating this packet means the public page still needs this packet applied"), "checked-in WordPress launch packet should explain that stale live-page failure is expected before application");
   assert(launchPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "checked-in WordPress launch packet should include the follow-up verification command");
   assert(missingContextFixPacket.includes("Gravity Forms hidden/context fields:"), "WordPress fix packet should call out missing Gravity Forms context fields");
   assert(missingContextFixPacket.includes("wrapped_url"), "WordPress fix packet should include missing Wrapped URL field names");
@@ -2620,6 +2623,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(readme.includes("--fix-packet"), "README should document the WordPress fix-packet helper");
   assert(docs.includes("--fix-packet"), "production docs should document the WordPress fix-packet helper");
   assert(checklist.includes("--fix-packet"), "launch checklist should document the WordPress fix-packet helper");
+  assert(readme.includes("A nonzero `--fix-packet` exit means the live page is still stale"), "README should explain fix-packet nonzero exits");
+  assert(docs.includes("A nonzero `--fix-packet` exit means the live page is still stale"), "production docs should explain fix-packet nonzero exits");
   assert(readme.includes("--cta-href"), "README should document the direct Gravity Forms CTA href fix-packet option");
   assert(docs.includes("--cta-href"), "production docs should document the direct Gravity Forms CTA href fix-packet option");
   assert(checklist.includes("--cta-href"), "launch checklist should document the direct Gravity Forms CTA href fix-packet option");

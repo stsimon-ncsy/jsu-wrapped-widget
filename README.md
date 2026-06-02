@@ -144,6 +144,8 @@ If the live WordPress page is stale, print one compact copy-ready update packet:
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet
 ```
 
+A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the live WordPress shell smoke.
+
 If the final CTA should link to a separate Gravity Forms page instead of an embedded same-page panel, include the clean form URL:
 
 ```bash

@@ -765,6 +765,8 @@ function formatFixPacket(page, report, options) {
     "- NCSY.org is the canonical public Wrapped page.",
     "- GitHub Pages is the static asset/data host for widget files, JSON/config, share pages, and images unless those move to NCSY.org.",
     "- Gravity Forms handles only the final CTA/contact capture.",
+    "- This CTA form is not the staff-builder submission intake flow; builder submissions use a separate review form or email handoff.",
+    "- A nonzero exit in fix-packet mode means the live page is still stale after the packet was generated. Apply the packet, then rerun the follow-up verification command.",
     "",
     `URL: ${url}`,
     "",
