@@ -2150,7 +2150,10 @@ function runWordPressSmokeScriptSmoke() {
   const hostedCssTag = '<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260602a">';
   const hostedJsTag = '<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260602a"></script>';
   const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
+  const ogTypeTag = '<meta property="og:type" content="website">';
+  const ogSiteNameTag = '<meta property="og:site_name" content="JSU/NCSY Wrapped">';
   const ogImageTag = '<meta property="og:image" content="' + socialImageUrl + '">';
+  const ogImageSecureTag = '<meta property="og:image:secure_url" content="' + socialImageUrl + '">';
   const twitterImageTag = '<meta name="twitter:image" content="' + socialImageUrl + '">';
   const twitterCardTag = '<meta name="twitter:card" content="summary_large_image">';
   const ogImageWidthTag = '<meta property="og:image:width" content="1200">';
@@ -2187,10 +2190,13 @@ function runWordPressSmokeScriptSmoke() {
   const goodHtml = [
     "<html><head>",
     "<title>JSU/NCSY Wrapped - Baltimore</title>",
+    ogTypeTag,
+    ogSiteNameTag,
     '<meta property="og:title" content="JSU/NCSY Wrapped - Baltimore">',
     ogDescriptionTag,
     twitterDescriptionTag,
     ogImageTag,
+    ogImageSecureTag,
     twitterImageTag,
     twitterCardTag,
     ogImageWidthTag,
@@ -2307,7 +2313,16 @@ function runWordPressSmokeScriptSmoke() {
     status: 200,
     text: goodHtml
       .replace(ogImageTag, "")
+      .replace(ogImageSecureTag, "")
       .replace(twitterImageTag, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingOpenGraphIdentityReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(ogTypeTag, "")
+      .replace(ogSiteNameTag, "")
+      .replace(ogImageSecureTag, ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const wrongSocialImageReport = wordpressSmoke.validateWordPressPage({
@@ -2487,6 +2502,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingSocialDescriptionReport.fixes.some((fix) => fix.includes("og:description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific social description metadata");
   assert(!wrongSocialDescriptionReport.ok && wrongSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject privacy/cookie fallback social descriptions");
   assert(!wrongSocialUrlReport.ok && wrongSocialUrlReport.errors.some((error) => error.includes("chapter URL")), "WordPress smoke should reject generic URL metadata that drops the chapter parameter");
+  assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("og:type")), "WordPress smoke should reject pages without OG type metadata");
+  assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("site name")), "WordPress smoke should reject pages without OG site name metadata");
+  assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("secure image")), "WordPress smoke should reject pages without OG secure image metadata");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("twitter:card")), "WordPress smoke should reject pages without summary_large_image Twitter card metadata");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image dimensions")), "WordPress smoke should reject pages without social image dimensions");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
@@ -2510,8 +2528,11 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget stylesheet");
   assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget script");
   assert(fixPacket.includes("og:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image URL");
+  assert(fixPacket.includes("og:image:secure_url: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image secure URL");
   assert(fixPacket.includes("twitter:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign twitter:image URL");
   assert(fixPacket.includes("twitter:card: summary_large_image"), "WordPress fix packet should include the large-card Twitter metadata");
+  assert(fixPacket.includes("og:type: website"), "WordPress fix packet should include the OG type");
+  assert(fixPacket.includes("og:site_name: JSU/NCSY Wrapped"), "WordPress fix packet should include the OG site name");
   assert(fixPacket.includes("og:image:width: 1200"), "WordPress fix packet should include the social image width");
   assert(fixPacket.includes("og:image:height: 630"), "WordPress fix packet should include the social image height");
   assert(fixPacket.includes("og:image:alt: JSU/NCSY Wrapped social preview for Baltimore"), "WordPress fix packet should include chapter-specific social image alt text");
@@ -2560,6 +2581,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(readme.includes("twitter:image:alt"), "README should document Twitter image alt metadata");
   assert(docs.includes("twitter:image:alt"), "production docs should document Twitter image alt metadata");
   assert(checklist.includes("twitter:image:alt"), "launch checklist should document Twitter image alt metadata");
+  assert(readme.includes("og:site_name"), "README should document OG site name metadata");
+  assert(docs.includes("og:site_name"), "production docs should document OG site name metadata");
+  assert(checklist.includes("og:site_name"), "launch checklist should document OG site name metadata");
   assert(readme.includes("NCSY.org is the canonical public Wrapped page"), "README should document the canonical NCSY.org hosting role");
   assert(readme.includes("GitHub Pages is the static asset/data host"), "README should document the GitHub Pages asset/data role");
   assert(readme.includes("Gravity Forms handles only the final CTA/contact capture"), "README should document the limited Gravity Forms role");

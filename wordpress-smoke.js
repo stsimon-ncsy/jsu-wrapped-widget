@@ -450,6 +450,8 @@ function validateWordPressPage(page, options) {
   const ctaHref = attrValue(html, "data-cta-href");
   const contentType = headerValue(page && page.headers, "content-type").toLowerCase();
   const pageTitle = titleValue(html);
+  const ogType = metaContentValue(html, "og:type");
+  const ogSiteName = metaContentValue(html, "og:site_name");
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
   const ogDescription = metaContentValue(html, "og:description");
@@ -458,6 +460,7 @@ function validateWordPressPage(page, options) {
   const ogUrl = metaContentValue(html, "og:url");
   const twitterUrl = metaContentValue(html, "twitter:url");
   const ogImage = metaContentValue(html, "og:image");
+  const ogImageSecure = metaContentValue(html, "og:image:secure_url");
   const twitterImage = metaContentValue(html, "twitter:image");
   const twitterCard = metaContentValue(html, "twitter:card");
   const ogImageWidth = metaContentValue(html, "og:image:width");
@@ -592,6 +595,16 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
+  if (String(ogType || "").trim().toLowerCase() !== "website") {
+    errors.push("WordPress page og:type should be website");
+    fixes.push("Set og:type to website.");
+  }
+
+  if (String(ogSiteName || "").trim() !== "JSU/NCSY Wrapped") {
+    errors.push("WordPress page social site name metadata should be JSU/NCSY Wrapped");
+    fixes.push("Set og:site_name to JSU/NCSY Wrapped.");
+  }
+
   if (!/og:description|twitter:description/i.test(html)) {
     errors.push("WordPress page missing social description metadata");
     fixes.push(`Add og:description and twitter:description metadata using "${socialDescription}".`);
@@ -622,6 +635,11 @@ function validateWordPressPage(page, options) {
   } else if (!hasExpectedSocialImage(ogImage) && !hasExpectedSocialImage(twitterImage)) {
     errors.push("WordPress page social image metadata should use the JSU/NCSY Wrapped campaign image");
     fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
+  }
+
+  if (!hasExpectedSocialImage(ogImageSecure)) {
+    errors.push("WordPress page secure image metadata should use the JSU/NCSY Wrapped campaign image");
+    fixes.push(`Set og:image:secure_url to ${SOCIAL_IMAGE_URL}.`);
   }
 
   if (String(twitterCard || "").trim().toLowerCase() !== "summary_large_image") {
@@ -719,6 +737,8 @@ function formatFixPacket(page, report, options) {
     `Page/social title: ${socialTitle}`,
     "",
     "Set these metadata fields if your SEO/social plugin exposes them:",
+    "og:type: website",
+    "og:site_name: JSU/NCSY Wrapped",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
     `og:description: ${socialDescription}`,
@@ -727,6 +747,7 @@ function formatFixPacket(page, report, options) {
     `og:url: ${socialUrl}`,
     `twitter:url: ${socialUrl}`,
     `og:image: ${SOCIAL_IMAGE_URL}`,
+    `og:image:secure_url: ${SOCIAL_IMAGE_URL}`,
     `twitter:image: ${SOCIAL_IMAGE_URL}`,
     "twitter:card: summary_large_image",
     `og:image:width: ${SOCIAL_IMAGE_WIDTH}`,

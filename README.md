@@ -136,7 +136,7 @@ After the WordPress page is pasted and published, run the live WordPress shell s
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 ```
 
-That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title, `og:description`, `twitter:description`, image markup, and `twitter:image:alt`.
+That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title, `og:type`, `og:site_name`, `og:description`, `twitter:description`, image markup, `og:image:secure_url`, and `twitter:image:alt`.
 
 If the live WordPress page is stale, print one compact copy-ready update packet:
 
@@ -158,7 +158,7 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 
 That destination check fetches the Gravity Forms page and confirms it is HTML with the hidden/context fields the widget pre-populates.
 
-The packet includes the current replacement `#jsu-wrapped` tag, exact page/social title, suggested canonical/social URLs, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
+The packet includes the current replacement `#jsu-wrapped` tag, exact page/social title, suggested canonical/social URLs, `og:type`, `og:site_name`, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `og:image:secure_url`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
 
 For a local render check on machines with Chrome or Edge installed, run:
 
