@@ -9,6 +9,7 @@ const TEEN_DATA_ATTR = 'data-teen-source="https://stsimon-ncsy.github.io/jsu-wra
 const ASSETS_BASE_ATTR = 'data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"';
 const WIDGET_CSS_TAG = '<link rel="stylesheet" href="' + HOSTED_ASSET_BASE + 'jsu-wrapped.css?v=' + RELEASE_TOKEN + '">';
 const WIDGET_JS_TAG = '<script src="' + HOSTED_ASSET_BASE + 'jsu-wrapped.js?v=' + RELEASE_TOKEN + '"></script>';
+const SOCIAL_IMAGE_URL = HOSTED_ASSET_BASE + "assets/wrapped-social-preview.png";
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -69,6 +70,10 @@ function metaContentValue(html, name) {
 
 function hasExpectedWrappedTitle(value) {
   return /^JSU\/NCSY Wrapped\s+-\s+\S/.test(String(value || "").trim());
+}
+
+function hasExpectedSocialImage(value) {
+  return String(value || "").trim().split("?")[0] === SOCIAL_IMAGE_URL;
 }
 
 function embeddedCtaPanelHtml(html, selector) {
@@ -245,6 +250,8 @@ function validateWordPressPage(page, options) {
   const pageTitle = titleValue(html);
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
+  const ogImage = metaContentValue(html, "og:image");
+  const twitterImage = metaContentValue(html, "twitter:image");
   const socialTitle = suggestedSocialTitle(page, html);
 
   if (status < 200 || status >= 300) {
@@ -361,6 +368,14 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
+  if (!/og:image|twitter:image/i.test(html)) {
+    errors.push("WordPress page missing social image metadata");
+    fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
+  } else if (!hasExpectedSocialImage(ogImage) && !hasExpectedSocialImage(twitterImage)) {
+    errors.push("WordPress page social image metadata should use the JSU/NCSY Wrapped campaign image");
+    fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
+  }
+
   if (!/privacy/i.test(text) || !/(cookie|osano)/i.test(html)) {
     errors.push("WordPress page missing privacy/cookie affordance");
   }
@@ -412,6 +427,8 @@ function formatFixPacket(page, report) {
     "Set these metadata fields if your SEO/social plugin exposes them:",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
+    `og:image: ${SOCIAL_IMAGE_URL}`,
+    `twitter:image: ${SOCIAL_IMAGE_URL}`,
     ...contextFieldLines,
     "",
     "Follow-up verification:",
@@ -547,6 +564,7 @@ module.exports = {
   hostedAssetUrls,
   hasId,
   headerValue,
+  hasExpectedSocialImage,
   isSafeCtaHref,
   titleFromSlug,
   titleSubjectFromValue,
