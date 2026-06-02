@@ -1,6 +1,6 @@
 const DEFAULT_URL = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
 const DEFAULT_TIMEOUT_MS = 15000;
-const RELEASE_TOKEN = "jsuw-prod-20260601h";
+const RELEASE_TOKEN = "jsuw-prod-20260602a";
 const HOSTED_ASSET_BASE = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const CHAPTER_DATA_ATTR = 'data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
 const CONFIG_DATA_ATTR = 'data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=' + RELEASE_TOKEN + '"';

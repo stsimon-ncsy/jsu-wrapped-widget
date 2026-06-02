@@ -26,7 +26,7 @@ The data validator checks the static JSON/config package for duplicate story and
 
 The public renderer also applies the same static URL guard before rendering custom media images or navigating final-card CTA links. That runtime guard is a last-resort defense for embeds that accidentally point at an unreviewed config file; it does not replace `node validate-wrapped-data.js` or the builder warnings.
 
-Hosted preview pages, the CTA prefill smoke page, the CTA link smoke page, the analytics smoke page, the WordPress inline embed, the builder JSON fetches, and the pasteable README snippet use a shared static asset cache token, currently `jsuw-prod-20260601h`, on JS/CSS/JSON references. When hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers, run `node bump-cache-token.js jsuw-prod-YYYYMMDDx`, then run `node check-production.js`. The helper updates `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `cta-link-smoke.html`, `analytics-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, `README.md`, `docs/production-readiness.md`, and `qa-smoke.js`.
+Hosted preview pages, the CTA prefill smoke page, the CTA link smoke page, the analytics smoke page, the WordPress inline embed, the WordPress smoke validator, the builder JSON fetches, and the pasteable README snippet use a shared static asset cache token, currently `jsuw-prod-20260602a`, on JS/CSS/JSON references. When hosted assets or GitHub Pages JSON/config should force-refresh for staff or public reviewers, run `node bump-cache-token.js jsuw-prod-YYYYMMDDx`, then run `node check-production.js`. The helper updates `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `cta-link-smoke.html`, `analytics-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, `wordpress-smoke.js`, `README.md`, `docs/production-readiness.md`, and `qa-smoke.js`.
 
 Staff rollout guidance lives in `docs/staff-playbook.md`. Use it for launch sequencing, audience variants, CTA strategy, Gravity Form follow-up, and measurement after the technical checks pass.
 
@@ -219,8 +219,8 @@ The public WordPress page should use the hosted GitHub Pages asset URLs in the w
 <div
   id="jsu-wrapped"
   data-year="2026"
-  data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601h"
-  data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"
+  data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260602a"
+  data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"
   data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
   data-cta-label="Get involved next year"
   data-cta-target="#jsuw-wrapped-interest"></div>

@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260601h";
-  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260601h";
+  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260602a";
+  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260602a";
   var MAX_MAILTO_URL_LENGTH = 7000;
   var CARD_IDS = [
     "cover",
