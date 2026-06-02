@@ -157,6 +157,10 @@ function missingCtaContextFields(panelHtml) {
   return checks.filter((check) => !panelHasContextSignal(panelHtml, check.patterns));
 }
 
+function hasUnrenderedGravityFormsShortcode(html) {
+  return /\[gravityform\b[^\]]*\]/i.test(String(html || ""));
+}
+
 function validateCtaDestinationPage(page) {
   const errors = [];
   const fixes = [];
@@ -528,6 +532,11 @@ function validateWordPressPage(page, options) {
     const panelHtml = embeddedCtaPanelHtml(html, ctaTarget);
     const missingContextFields = missingCtaContextFields(panelHtml);
 
+    if (hasUnrenderedGravityFormsShortcode(panelHtml)) {
+      errors.push("WordPress page CTA target contains an unrendered Gravity Forms shortcode");
+      fixes.push(`Move the Gravity Form into a Shortcode block, Gravity Forms block, or template-rendered shortcode wrapped by ${ctaTarget}; Custom HTML blocks often leave [gravityform] shortcodes unrendered.`);
+    }
+
     if (missingContextFields.length) {
       errors.push(`WordPress page CTA form is missing context fields for ${missingContextFields.map((field) => field.label).join(", ")}`);
       fixes.push(`Add hidden Gravity Forms fields named ${missingContextFields.map((field) => field.suggestedName).join(", ")} so the widget can prefill story context.`);
@@ -620,15 +629,22 @@ function formatFixPacket(page, report, options) {
   const followUpCommand = directCtaHref
     ? `node wordpress-smoke.js --url "${url}" --cta-href "${directCtaHref}" --check-cta-destination`
     : `node wordpress-smoke.js --url "${url}"`;
+  const embeddedContextFieldLine = missingContextFields.length
+    ? `Add fields named: ${missingContextFields.map((field) => field.suggestedName).join(", ")}`
+    : `Confirm fields named: ${recommendedContextFields}`;
   const contextFieldLines = directCtaHref ? [
     "",
     `Direct Gravity Forms CTA URL: ${directCtaHref}`,
     "Add these hidden/context fields on the destination form page:",
     recommendedContextFields
-  ] : missingContextFields.length ? [
+  ] : ctaTarget ? [
+    "",
+    "Embedded Gravity Forms CTA setup:",
+    "Do not rely on a [gravityform] shortcode inside a Custom HTML block; many WordPress editors leave it unrendered.",
+    "Use a Shortcode block, Gravity Forms block, or template-rendered shortcode wrapped by #jsuw-wrapped-interest.",
     "",
     "Gravity Forms hidden/context fields:",
-    `Add fields named: ${missingContextFields.map((field) => field.suggestedName).join(", ")}`,
+    embeddedContextFieldLine,
     `Recommended full set: ${recommendedContextFields}`
   ] : [];
 

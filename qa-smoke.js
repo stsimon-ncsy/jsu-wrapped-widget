@@ -2126,6 +2126,7 @@ function runWordPressSmokeScriptSmoke() {
   const twitterUrlTag = '<meta name="twitter:url" content="' + socialUrl + '">';
   const minimalCtaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
   const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_chapter_slug"><input name="wrapped_region"><input name="wrapped_scope"><input name="wrapped_slug"><input name="wrapped_name"><input name="wrapped_variant"><input name="wrapped_year"><input name="wrapped_url"></form></section>';
+  const shortcodeCtaPanelHtml = '<section id="jsuw-wrapped-interest"><div class="jsuw-form-card">[gravityform id="255" title="false" description="false" ajax="true"]</div></section>';
   const destinationFormHtml = [
     "<html><head><title>Wrapped interest</title></head><body>",
     '<div class="gform_wrapper">',
@@ -2207,6 +2208,11 @@ function runWordPressSmokeScriptSmoke() {
   const minimalCtaContextReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace(ctaPanelHtml, minimalCtaPanelHtml),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const unrenderedShortcodeReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace(ctaPanelHtml, shortcodeCtaPanelHtml),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingHostedAttrsReport = wordpressSmoke.validateWordPressPage({
@@ -2385,6 +2391,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("chapter slug")), "WordPress smoke should require a chapter slug context field");
   assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("variant")), "WordPress smoke should require a variant context field");
   assert(!minimalCtaContextReport.ok && minimalCtaContextReport.errors.some((error) => error.includes("year")), "WordPress smoke should require a year context field");
+  assert(!unrenderedShortcodeReport.ok && unrenderedShortcodeReport.errors.some((error) => error.includes("unrendered Gravity Forms shortcode")), "WordPress smoke should call out unrendered Gravity Forms shortcodes in Custom HTML panels");
+  assert(unrenderedShortcodeReport.fixes.some((fix) => fix.includes("Shortcode block") && fix.includes("jsuw-wrapped-interest")), "WordPress smoke should suggest a rendered Shortcode or Gravity Forms block for embedded CTA forms");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-config-source")), "WordPress smoke should suggest the missing config-source attribute");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-share-base")), "WordPress smoke should suggest the missing share-base attribute");
   assert(missingHostedAttrsReport.fixes[0].includes('Replace the #jsu-wrapped opening tag with: <div id="jsu-wrapped"'), "WordPress smoke should lead with the full replacement widget tag");
@@ -2419,6 +2427,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("NCSY.org is the canonical public Wrapped page"), "WordPress fix packet should identify NCSY.org as the production page host");
   assert(fixPacket.includes("GitHub Pages is the static asset/data host"), "WordPress fix packet should identify GitHub Pages as the static asset/data host");
   assert(fixPacket.includes("Gravity Forms handles only the final CTA/contact capture"), "WordPress fix packet should explain the Gravity Forms scope");
+  assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
+  assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
