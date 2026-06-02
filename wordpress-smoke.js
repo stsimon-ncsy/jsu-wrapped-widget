@@ -4,6 +4,8 @@ const RELEASE_TOKEN = "jsuw-prod-20260601h";
 const CHAPTER_DATA_ATTR = 'data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
 const CONFIG_DATA_ATTR = 'data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=' + RELEASE_TOKEN + '"';
 const SHARE_BASE_ATTR = 'data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"';
+const TEEN_DATA_ATTR = 'data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
+const ASSETS_BASE_ATTR = 'data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"';
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -36,6 +38,45 @@ function attrValue(html, attrName) {
 
 function hasReleaseToken(url) {
   return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
+}
+
+function escapeAttr(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function suggestedWidgetTag(html) {
+  const ctaLabel = attrValue(html, "data-cta-label") || "Get involved next year";
+  const ctaTarget = attrValue(html, "data-cta-target") || "#jsuw-wrapped-interest";
+  const ctaHref = attrValue(html, "data-cta-href");
+  const year = attrValue(html, "data-year") || "2026";
+  const ctaAttribute = ctaHref
+    ? `data-cta-href="${escapeAttr(ctaHref)}"`
+    : `data-cta-target="${escapeAttr(ctaTarget)}"`;
+
+  return [
+    '<div id="jsu-wrapped"',
+    `data-year="${escapeAttr(year)}"`,
+    CHAPTER_DATA_ATTR,
+    CONFIG_DATA_ATTR,
+    TEEN_DATA_ATTR,
+    ASSETS_BASE_ATTR,
+    SHARE_BASE_ATTR,
+    'data-analytics="true"',
+    `data-cta-label="${escapeAttr(ctaLabel)}"`,
+    `${ctaAttribute}></div>`
+  ].join(" ");
+}
+
+function addWidgetTagFix(html, fixes) {
+  const replacement = suggestedWidgetTag(html);
+
+  if (!fixes.some((fix) => fix.includes("Replace the #jsu-wrapped opening tag with:"))) {
+    fixes.unshift(`Replace the #jsu-wrapped opening tag with: ${replacement}`);
+  }
 }
 
 function mustInclude(text, expected, message, errors) {
@@ -74,33 +115,41 @@ function validateWordPressPage(page, options) {
   if (!dataSource) {
     errors.push("WordPress page missing widget data-source");
     fixes.push(`Add ${CHAPTER_DATA_ATTR} to the #jsu-wrapped container.`);
+    addWidgetTagFix(html, fixes);
   } else if (!/sample-wrapped-2026\.json/.test(dataSource)) {
     errors.push("WordPress page data-source should point at the chapter JSON");
     fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
+    addWidgetTagFix(html, fixes);
   } else if (!hasReleaseToken(dataSource)) {
     errors.push("WordPress page data-source is missing the shared cache token");
     fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
+    addWidgetTagFix(html, fixes);
   }
 
   if (!configSource) {
     errors.push("WordPress page missing widget data-config-source");
     fixes.push(`Add ${CONFIG_DATA_ATTR} to the #jsu-wrapped container.`);
+    addWidgetTagFix(html, fixes);
   } else if (!/wrapped-config-2026\.json/.test(configSource)) {
     errors.push("WordPress page data-config-source should point at the config JSON");
     fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
+    addWidgetTagFix(html, fixes);
   } else if (!hasReleaseToken(configSource)) {
     errors.push("WordPress page data-config-source is missing the shared cache token");
     fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
+    addWidgetTagFix(html, fixes);
   }
 
   if (teenSource && /sample-teen-wrapped-2026\.json/.test(teenSource) && !hasReleaseToken(teenSource)) {
     errors.push("WordPress page data-teen-source is missing the shared cache token");
-    fixes.push('Set data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=' + RELEASE_TOKEN + '" on the #jsu-wrapped container.');
+    fixes.push(`Set ${TEEN_DATA_ATTR} on the #jsu-wrapped container.`);
+    addWidgetTagFix(html, fixes);
   }
 
   if (!/data-share-base\s*=/.test(html) || !/\/share\//.test(html)) {
     errors.push("WordPress page missing generated share-page base");
     fixes.push(`Add ${SHARE_BASE_ATTR} to the #jsu-wrapped container.`);
+    addWidgetTagFix(html, fixes);
   }
 
   if (!ctaTarget && !ctaHref) {
@@ -246,6 +295,7 @@ if (require.main === module) {
 
 module.exports = {
   attrValue,
+  suggestedWidgetTag,
   hasId,
   headerValue,
   validateWordPressPage,

@@ -2146,6 +2146,16 @@ function runWordPressSmokeScriptSmoke() {
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const directCtaHrefHtml = goodHtml
+    .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="https://ncsy.org/wrapped-interest/"')
+    .replace('<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>', "");
+  const directCtaHrefAttrsReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: directCtaHrefHtml
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"', "")
+      .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const staleDataUrlReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260601h", "sample-wrapped-2026.json"),
@@ -2177,6 +2187,12 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingPanelReport.ok && missingPanelReport.errors.some((error) => error.includes("CTA target")), "WordPress smoke should reject missing CTA target panels");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-config-source")), "WordPress smoke should suggest the missing config-source attribute");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-share-base")), "WordPress smoke should suggest the missing share-base attribute");
+  assert(missingHostedAttrsReport.fixes[0].includes('Replace the #jsu-wrapped opening tag with: <div id="jsu-wrapped"'), "WordPress smoke should lead with the full replacement widget tag");
+  assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes('Replace the #jsu-wrapped opening tag with: <div id="jsu-wrapped"')), "WordPress smoke should suggest a full replacement widget opening tag");
+  assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes('data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"')), "WordPress smoke replacement tag should include the assets base");
+  assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes('data-analytics="true"')), "WordPress smoke replacement tag should keep analytics enabled");
+  assert(directCtaHrefAttrsReport.fixes[0].includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress smoke replacement tag should preserve direct Gravity Forms CTA URLs");
+  assert(!directCtaHrefAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should not add an embedded CTA target when preserving a direct CTA URL");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.errors.some((error) => error.includes("cache token")), "WordPress smoke should reject hosted data URLs without the shared cache token");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.fixes.some((fix) => fix.includes("data-source")), "WordPress smoke should suggest the fixed data-source attribute for stale data URLs");
   assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");
