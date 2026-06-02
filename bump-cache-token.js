@@ -9,6 +9,7 @@ const FILES = [
   "cta-prefill-smoke.html",
   "cta-link-smoke.html",
   "analytics-smoke.html",
+  "layout-smoke.html",
   "wrapped-builder.js",
   "wordpress-inline-embed.html",
   "wordpress-smoke.js",

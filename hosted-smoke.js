@@ -61,6 +61,16 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "layout smoke page",
+    path: "layout-smoke.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "layout smoke page missing noindex guard", errors);
+      mustInclude(text, "Layout smoke", "layout smoke page missing smoke title", errors);
+      mustInclude(text, "mobile story layout", "layout smoke page missing mobile layout text", errors);
+      mustInclude(text, "__jsuwLayoutSmoke", "layout smoke page missing layout capture hook", errors);
+    }
+  },
+  {
     label: "widget stylesheet",
     path: "jsu-wrapped.css",
     validate(text, errors) {

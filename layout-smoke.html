@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Layout smoke</title>
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260602a">
+    <style>
+      body {
+        background: #0c0220;
+        color: #ffffff;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+      }
+
+      .qa-page {
+        min-height: 100vh;
+      }
+
+      .qa-panel {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        box-sizing: border-box;
+        margin: 16px auto;
+        max-width: 520px;
+        padding: 14px;
+        width: min(calc(100% - 32px), 520px);
+      }
+
+      pre {
+        line-height: 1.5;
+        margin: 0;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="qa-page">
+      <div
+        id="jsu-wrapped"
+        data-year="2026"
+        data-source="./sample-wrapped-2026.json?v=jsuw-prod-20260602a"
+        data-config-source="./wrapped-config-2026.json?v=jsuw-prod-20260602a"
+        data-share-base="./share/"
+        data-cta-label="Get involved next year"
+        data-cta-target="#jsuw-wrapped-interest"
+      ></div>
+
+      <section id="jsuw-wrapped-interest" hidden>
+        <h1>Layout smoke CTA panel</h1>
+      </section>
+
+      <section class="qa-panel" aria-live="polite">
+        <h2>Layout smoke</h2>
+        <p>mobile story layout</p>
+        <pre id="layout-smoke-output">pending</pre>
+      </section>
+    </main>
+    <script src="./jsu-wrapped.js?v=jsuw-prod-20260602a"></script>
+    <script>
+      (function () {
+        var attempts = 0;
+        var output = document.getElementById("layout-smoke-output");
+        window.__jsuwLayoutSmoke = { status: "pending" };
+
+        function rounded(value) {
+          return Math.round(Number(value) || 0);
+        }
+
+        function write(lines) {
+          output.textContent = lines.join("\n");
+        }
+
+        function step() {
+          attempts += 1;
+
+          var root = document.getElementById("jsu-wrapped");
+          var story = root && root.querySelector(".jsuw-story");
+          var card = root && root.querySelector(".jsuw-card");
+          var errors = [];
+
+          if (!story || !card) {
+            if (attempts < 50) {
+              window.setTimeout(step, 150);
+              return;
+            }
+
+            errors.push("story_not_rendered");
+          }
+
+          if (story && card) {
+            var storyRect = story.getBoundingClientRect();
+            var viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+            var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            var scrollWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+            var mobile = viewportWidth <= 600;
+
+            if (scrollWidth > viewportWidth + 2) {
+              errors.push("horizontal_overflow");
+            }
+
+            if (mobile && storyRect.width / Math.max(viewportWidth, 1) < 0.92) {
+              errors.push("mobile_width_gap");
+            }
+
+            if (mobile && storyRect.height / Math.max(viewportHeight, 1) < 0.94) {
+              errors.push("mobile_height_gap");
+            }
+
+            if (!mobile && storyRect.width > 460) {
+              errors.push("desktop_story_too_wide");
+            }
+
+            write([
+              "mobile story layout",
+              "viewport_width=" + rounded(viewportWidth),
+              "viewport_height=" + rounded(viewportHeight),
+              "story_width=" + rounded(storyRect.width),
+              "story_height=" + rounded(storyRect.height),
+              "scroll_width=" + rounded(scrollWidth),
+              "layout_errors=" + (errors.length ? errors.join(",") : "none")
+            ]);
+          } else {
+            write(["mobile story layout", "layout_errors=" + errors.join(",")]);
+          }
+
+          window.__jsuwLayoutSmoke.status = errors.length ? "fail" : "ok";
+          window.__jsuwLayoutSmoke.errors = errors;
+          document.documentElement.setAttribute("data-layout-smoke", window.__jsuwLayoutSmoke.status);
+        }
+
+        function start() {
+          window.setTimeout(step, 500);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", start, { once: true });
+        } else {
+          start();
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1592,7 +1592,7 @@ function runInlineEmbedSmoke() {
 }
 
 function runAssetVersionSmoke() {
-  const files = ["index.html", "embed-example.html", "builder.html", "cta-prefill-smoke.html", "cta-link-smoke.html", "analytics-smoke.html"];
+  const files = ["index.html", "embed-example.html", "builder.html", "cta-prefill-smoke.html", "cta-link-smoke.html", "analytics-smoke.html", "layout-smoke.html"];
   const releaseToken = "jsuw-prod-20260602a";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
@@ -1635,6 +1635,7 @@ function runAssetVersionSmoke() {
   assert(docs.includes("cta-prefill-smoke.html"), "production docs should include CTA smoke page in the shared cache token bump list");
   assert(docs.includes("cta-link-smoke.html"), "production docs should include CTA link smoke page in the shared cache token bump list");
   assert(docs.includes("analytics-smoke.html"), "production docs should include analytics smoke page in the shared cache token bump list");
+  assert(docs.includes("layout-smoke.html"), "production docs should include layout smoke page in the shared cache token bump list");
   assert(docs.includes("wordpress-smoke.js"), "production docs should include the WordPress smoke validator in the shared cache token bump list");
 }
 
@@ -1656,6 +1657,7 @@ function runCacheTokenBumpSmoke() {
   assert(bump.FILES.includes("cta-prefill-smoke.html"), "cache-token helper should update the CTA prefill smoke page");
   assert(bump.FILES.includes("cta-link-smoke.html"), "cache-token helper should update the CTA link smoke page");
   assert(bump.FILES.includes("analytics-smoke.html"), "cache-token helper should update the analytics smoke page");
+  assert(bump.FILES.includes("layout-smoke.html"), "cache-token helper should update the layout smoke page");
   assert(bump.FILES.includes("wordpress-smoke.js"), "cache-token helper should update the WordPress smoke validator");
 
   let invalidMessage = "";
@@ -1941,6 +1943,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: '<meta name="robots" content="noindex,nofollow"><title>Analytics smoke</title><p>dataLayer events</p><script>window.__jsuwAnalyticsSmokeEvents = [];</script>'
     },
+    "layout-smoke.html": {
+      status: 200,
+      text: '<meta name="robots" content="noindex,nofollow"><title>Layout smoke</title><p>mobile story layout</p><script>window.__jsuwLayoutSmoke = true;</script>'
+    },
     "jsu-wrapped.css": {
       status: 200,
       text: "#jsu-wrapped { color: #fff; }"
@@ -2054,6 +2060,12 @@ function runHostedSmokeScriptSmoke() {
       text: '<title>Analytics smoke</title><p>dataLayer events</p><script>window.__jsuwAnalyticsSmokeEvents = [];</script>'
     }
   });
+  const publicLayoutSmokeAssets = Object.assign({}, goodAssets, {
+    "layout-smoke.html": {
+      status: 200,
+      text: '<title>Layout smoke</title><p>mobile story layout</p><script>window.__jsuwLayoutSmoke = true;</script>'
+    }
+  });
   const privateTeenJsonAssets = Object.assign({}, goodAssets, {
     "sample-teen-wrapped-2026.json": {
       status: 200,
@@ -2085,6 +2097,7 @@ function runHostedSmokeScriptSmoke() {
   const publicCtaPrefillSmokeReport = hostedSmoke.validateHostedAssets(publicCtaPrefillSmokeAssets);
   const publicCtaLinkSmokeReport = hostedSmoke.validateHostedAssets(publicCtaLinkSmokeAssets);
   const publicAnalyticsSmokeReport = hostedSmoke.validateHostedAssets(publicAnalyticsSmokeAssets);
+  const publicLayoutSmokeReport = hostedSmoke.validateHostedAssets(publicLayoutSmokeAssets);
   const privateTeenJsonReport = hostedSmoke.validateHostedAssets(privateTeenJsonAssets);
   const externalWordPressInlineReport = hostedSmoke.validateHostedAssets(externalWordPressInlineAssets);
   const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
@@ -2113,6 +2126,7 @@ function runHostedSmokeScriptSmoke() {
   assert(!publicCtaPrefillSmokeReport.ok && publicCtaPrefillSmokeReport.errors.some((error) => error.includes("CTA form prefill page")), "hosted smoke validator should reject a CTA form prefill smoke page without noindex");
   assert(!publicCtaLinkSmokeReport.ok && publicCtaLinkSmokeReport.errors.some((error) => error.includes("CTA link prefill page")), "hosted smoke validator should reject a CTA link smoke page without noindex");
   assert(!publicAnalyticsSmokeReport.ok && publicAnalyticsSmokeReport.errors.some((error) => error.includes("analytics smoke page")), "hosted smoke validator should reject an analytics smoke page without noindex");
+  assert(!publicLayoutSmokeReport.ok && publicLayoutSmokeReport.errors.some((error) => error.includes("layout smoke page")), "hosted smoke validator should reject a layout smoke page without noindex");
   assert(!privateTeenJsonReport.ok && privateTeenJsonReport.errors.some((error) => error.includes("teen data JSON")), "hosted smoke validator should reject teen JSON with private contact fields");
   assert(!externalWordPressInlineReport.ok && externalWordPressInlineReport.errors.some((error) => error.includes("WordPress inline embed")), "hosted smoke validator should reject WordPress inline handoff with external widget scripts");
   assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
@@ -2122,6 +2136,7 @@ function runHostedSmokeScriptSmoke() {
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-link-smoke.html"), "hosted smoke dry run should list CTA link smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-link-target-smoke.html"), "hosted smoke dry run should list CTA link target page");
   assert(dryRunOutput.includes("https://example.org/wrapped/analytics-smoke.html"), "hosted smoke dry run should list analytics smoke page");
+  assert(dryRunOutput.includes("https://example.org/wrapped/layout-smoke.html"), "hosted smoke dry run should list layout smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/sample-teen-wrapped-2026.json"), "hosted smoke dry run should list teen data JSON");
   assert(dryRunOutput.includes("https://example.org/wrapped/wordpress-inline-embed.html"), "hosted smoke dry run should list WordPress inline handoff");
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
@@ -2138,6 +2153,7 @@ function runHostedSmokeScriptSmoke() {
   assert(docs.includes("WordPress inline embed"), "production docs should mention hosted WordPress inline embed checks");
   assert(docs.includes("CTA link prefill"), "production docs should mention hosted CTA link prefill checks");
   assert(docs.includes("analytics smoke"), "production docs should mention hosted analytics smoke checks");
+  assert(docs.includes("layout smoke"), "production docs should mention hosted layout smoke checks");
   assert(docs.includes("social preview image"), "production docs should mention hosted social preview image checks");
 }
 
@@ -2665,16 +2681,18 @@ function runRenderSmokeScriptSmoke() {
   assert(dryRunOutput.includes("/cta-prefill-smoke.html?chapter=baltimore"), "render smoke dry run should list the CTA prefill smoke page");
   assert(dryRunOutput.includes("/cta-link-smoke.html?chapter=baltimore"), "render smoke dry run should list the CTA link smoke page");
   assert(dryRunOutput.includes("/analytics-smoke.html?chapter=baltimore"), "render smoke dry run should list the analytics smoke page");
+  assert(dryRunOutput.includes("/layout-smoke.html?chapter=baltimore"), "render smoke dry run should list the layout smoke page");
   assert(dryRunOutput.includes("/builder.html"), "render smoke dry run should list the builder URL");
   assert(listed.includes("node --check render-smoke.js"), "production QA should syntax-check the render smoke helper");
   assert(listed.includes("node render-smoke.js --skip-if-missing"), "production QA should run render smoke when a browser is available");
   assert(workflow.includes("node render-smoke.js --browser \"${{ steps.chrome.outputs.chrome-path }}\" --timeout-ms 60000"), "CI enforced render smoke should allow enough time for cold headless Chrome startup");
   assert(readme.includes("node render-smoke.js --skip-if-missing"), "README should document optional headless render smoke checks");
   assert(docs.includes("node render-smoke.js --skip-if-missing"), "production docs should document optional headless render smoke checks");
-  assert(docs.includes("picker, Baltimore story, CTA form prefill, CTA link prefill, analytics dataLayer, and builder"), "production docs should describe all render-smoke page types");
+  assert(docs.includes("picker, Baltimore story, layout smoke, CTA form prefill, CTA link prefill, analytics dataLayer, and builder"), "production docs should describe all render-smoke page types");
   assert(docs.includes("CTA form prefill"), "production docs should document CTA form prefill render coverage");
   assert(docs.includes("CTA link prefill"), "production docs should document CTA link prefill render coverage");
   assert(docs.includes("analytics dataLayer"), "production docs should document analytics render coverage");
+  assert(docs.includes("layout smoke"), "production docs should document layout smoke render coverage");
   assert(!renderSmokeSource.includes("spawnSync"), "render smoke should launch browsers asynchronously so the local static server can answer requests");
   assert(typeof renderSmoke.findBrowserCandidates === "function", "render smoke should expose browser candidate resolution for smoke coverage");
   assert(typeof renderSmoke.browserDumpDomArgs === "function", "render smoke should expose Chrome dump-DOM args for smoke coverage");

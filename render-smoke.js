@@ -22,6 +22,12 @@ const PAGE_CHECKS = [
     requiredText: ["Baltimore", "your year is wrapped"]
   },
   {
+    label: "layout smoke",
+    path: "/layout-smoke.html?chapter=baltimore&qa=render-smoke",
+    requiredSelectors: ['data-layout-smoke="ok"', "jsuw-story", "layout_errors=none"],
+    requiredText: ["Layout smoke", "mobile story layout"]
+  },
+  {
     label: "CTA form prefill",
     path: "/cta-prefill-smoke.html?chapter=baltimore&qa=render-smoke",
     requiredSelectors: [
@@ -542,7 +548,7 @@ function usage() {
     "Usage:",
     "  node render-smoke.js [--skip-if-missing] [--browser path/to/chrome] [--timeout-ms 20000] [--dry-run]",
     "",
-    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, CTA form/link prefill, analytics dataLayer, and builder render real DOM."
+    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, layout, CTA form/link prefill, analytics dataLayer, and builder render real DOM."
   ].join("\n");
 }
 
@@ -562,7 +568,7 @@ async function main() {
     return;
   }
 
-  console.log("render smoke checking local picker, story, CTA form/link prefill, analytics dataLayer, and builder");
+  console.log("render smoke checking local picker, story, layout, CTA form/link prefill, analytics dataLayer, and builder");
   const report = await runRenderSmoke(settings);
 
   if (!report.ok) {
