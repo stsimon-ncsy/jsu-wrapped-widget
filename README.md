@@ -144,6 +144,14 @@ If the final CTA should link to a separate Gravity Forms page instead of an embe
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"
 ```
 
+After that separate form page is published, check the destination itself:
+
+```bash
+node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --cta-href "https://ncsy.org/wrapped-interest/" --check-cta-destination
+```
+
+That destination check fetches the Gravity Forms page and confirms it is HTML with the hidden/context fields the widget pre-populates.
+
 The packet includes the current replacement `#jsu-wrapped` tag, exact page/social title, suggested canonical/social URLs, `og:title`, `twitter:title`, `og:image`, `twitter:image`, large-card metadata, and the follow-up smoke command.
 
 For a local render check on machines with Chrome or Edge installed, run:

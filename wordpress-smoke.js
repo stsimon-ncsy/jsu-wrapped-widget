@@ -157,6 +157,44 @@ function missingCtaContextFields(panelHtml) {
   return checks.filter((check) => !panelHasContextSignal(panelHtml, check.patterns));
 }
 
+function validateCtaDestinationPage(page) {
+  const errors = [];
+  const fixes = [];
+  const status = Number(page && page.status);
+  const html = String(page && page.text || "");
+  const text = visibleText(html);
+  const contentType = headerValue(page && page.headers, "content-type").toLowerCase();
+  const missingContextFields = missingCtaContextFields(html);
+
+  if (status < 200 || status >= 300) {
+    errors.push(`Gravity Forms destination returned HTTP ${status || "unknown"}`);
+    return { errors, fixes, ok: false };
+  }
+
+  if (contentType && !contentType.includes("text/html")) {
+    errors.push(`Gravity Forms destination content type is ${contentType}, expected text/html`);
+  }
+
+  if (!/(gform_|gform_wrapper|wrapped_chapter|wrapped_region|wrapped_url|wrapped_scope|wrapped_slug|wrapped_name)/i.test(html)) {
+    errors.push("Gravity Forms destination should include a Gravity Forms form and wrapped_* context fields");
+  }
+
+  if (missingContextFields.length) {
+    errors.push(`Gravity Forms destination is missing context fields for ${missingContextFields.map((field) => field.label).join(", ")}`);
+    fixes.push(`Add hidden Gravity Forms fields named ${missingContextFields.map((field) => field.suggestedName).join(", ")} on the CTA destination form page.`);
+  }
+
+  if (/\b(undefined|null|NaN)\b/i.test(text)) {
+    errors.push("Gravity Forms destination contains visible broken placeholder text");
+  }
+
+  return {
+    errors,
+    fixes,
+    ok: errors.length === 0
+  };
+}
+
 function titleSubjectFromValue(value) {
   const match = String(value || "").trim().match(/^(?:JSU\/NCSY|NCSY|JSU)\s+Wrapped\s+-\s+(.+)$/i);
 
@@ -284,6 +322,20 @@ function hasCtaUrlPayload(value) {
     return foundPayload;
   } catch (error) {
     return /[?&](wrapped_(submission|config|data|json|metrics|record|records)|builder_(submission|payload)|story_(json|data)|config_json|json|payload|metrics)=/i.test(text);
+  }
+}
+
+function resolveCtaDestinationUrl(value, baseUrl) {
+  const text = String(value || "").trim();
+
+  if (!text || !isSafeCtaHref(text) || hasCtaUrlPayload(text)) {
+    return "";
+  }
+
+  try {
+    return new URL(text, String(baseUrl || DEFAULT_URL)).href;
+  } catch (error) {
+    return "";
   }
 }
 
@@ -565,6 +617,9 @@ function formatFixPacket(page, report, options) {
   const directCtaHref = settings.ctaHref && isSafeCtaHref(settings.ctaHref) && !hasCtaUrlPayload(settings.ctaHref) ? settings.ctaHref : "";
   const recommendedContextFields = "wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url";
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
+  const followUpCommand = directCtaHref
+    ? `node wordpress-smoke.js --url "${url}" --cta-href "${directCtaHref}" --check-cta-destination`
+    : `node wordpress-smoke.js --url "${url}"`;
   const contextFieldLines = directCtaHref ? [
     "",
     `Direct Gravity Forms CTA URL: ${directCtaHref}`,
@@ -607,7 +662,7 @@ function formatFixPacket(page, report, options) {
     ...contextFieldLines,
     "",
     "Follow-up verification:",
-    `node wordpress-smoke.js --url "${url}"`,
+    followUpCommand,
     "",
     validationReport.ok ? "Current live smoke: ok" : "Current live smoke still reports:",
     validationReport.ok ? "" : validationReport.errors.map((error) => `- ${error}`).join("\n")
@@ -637,6 +692,7 @@ async function fetchWithTimeout(url, timeoutMs) {
 
 function parseArgs(args) {
   const settings = {
+    checkCtaDestination: false,
     ctaHref: "",
     dryRun: false,
     fixPacket: false,
@@ -656,6 +712,8 @@ function parseArgs(args) {
     } else if (arg === "--timeout-ms") {
       settings.timeoutMs = Number(args[index + 1]) || DEFAULT_TIMEOUT_MS;
       index += 1;
+    } else if (arg === "--check-cta-destination") {
+      settings.checkCtaDestination = true;
     } else if (arg === "--dry-run") {
       settings.dryRun = true;
     } else if (arg === "--fix-packet") {
@@ -671,12 +729,13 @@ function parseArgs(args) {
 function usage() {
   return [
     "Usage:",
-    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--cta-href https://ncsy.org/wrapped-interest/] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
+    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--cta-href https://ncsy.org/wrapped-interest/] [--check-cta-destination] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
     "",
     "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, and social title basics.",
     "",
     "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale.",
-    "Use --cta-href when the final CTA should link to a separate Gravity Forms page instead of opening an embedded same-page panel."
+    "Use --cta-href when the final CTA should link to a separate Gravity Forms page instead of opening an embedded same-page panel.",
+    "Use --check-cta-destination after that form page is published to verify its Gravity Forms hidden/context fields."
   ].join("\n");
 }
 
@@ -690,12 +749,36 @@ async function main() {
 
   if (settings.dryRun) {
     console.log(`WordPress smoke would check ${settings.url}`);
+    if (settings.checkCtaDestination) {
+      const destinationUrl = resolveCtaDestinationUrl(settings.ctaHref, settings.url);
+      console.log(destinationUrl
+        ? `WordPress smoke would also check CTA destination ${destinationUrl}`
+        : "WordPress smoke would also check the CTA destination from data-cta-href when available.");
+    }
     return;
   }
 
   console.log(`WordPress smoke checking ${settings.url}`);
   const page = await fetchWithTimeout(settings.url, settings.timeoutMs);
   const report = validateWordPressPage(page, settings);
+
+  if (settings.checkCtaDestination) {
+    const ctaHref = settings.ctaHref || attrValue(page.text, "data-cta-href");
+    const destinationUrl = resolveCtaDestinationUrl(ctaHref, page.url);
+
+    if (!destinationUrl) {
+      report.errors.push("WordPress CTA destination check requested but no safe direct CTA href was available");
+      report.fixes.push('Set data-cta-href to the clean Gravity Forms page URL, or pass --cta-href "https://ncsy.org/wrapped-interest/".');
+    } else {
+      console.log(`WordPress smoke checking CTA destination ${destinationUrl}`);
+      const destinationPage = await fetchWithTimeout(destinationUrl, settings.timeoutMs);
+      const destinationReport = validateCtaDestinationPage(destinationPage);
+
+      report.errors.push(...destinationReport.errors);
+      report.fixes.push(...destinationReport.fixes);
+      report.ok = report.errors.length === 0;
+    }
+  }
 
   if (settings.fixPacket) {
     console.log(formatFixPacket(page, report, settings));
@@ -748,11 +831,13 @@ module.exports = {
   isSafeCtaHref,
   linkHrefValue,
   matchesSocialUrl,
+  resolveCtaDestinationUrl,
   suggestedSocialImageAlt,
   suggestedSocialUrl,
   titleFromSlug,
   titleSubjectFromValue,
   titleValue,
+  validateCtaDestinationPage,
   validateWordPressPage,
   visibleText
 };

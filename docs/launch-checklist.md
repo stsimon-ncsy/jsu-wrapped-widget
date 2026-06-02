@@ -20,6 +20,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm hosted widget CSS/JS or the self-contained inline embed is present and current.
 - If the live shell is stale, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet` and apply the copy-ready packet.
 - If the CTA should link to a separate Gravity Forms page, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"` and apply the direct-CTA packet.
+- After the separate Gravity Forms page is published, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --cta-href "https://ncsy.org/wrapped-interest/" --check-cta-destination`.
 - Confirm the page does not add theme CSS that clips the mobile story viewport.
 - Confirm privacy/cookie links are present through the site wrapper, Osano, or the page footer plan.
 - Open the WordPress page on mobile and desktop and verify the story fills the mobile viewport cleanly.

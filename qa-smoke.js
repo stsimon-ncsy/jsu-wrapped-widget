@@ -2126,6 +2126,23 @@ function runWordPressSmokeScriptSmoke() {
   const twitterUrlTag = '<meta name="twitter:url" content="' + socialUrl + '">';
   const minimalCtaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
   const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_chapter_slug"><input name="wrapped_region"><input name="wrapped_scope"><input name="wrapped_slug"><input name="wrapped_name"><input name="wrapped_variant"><input name="wrapped_year"><input name="wrapped_url"></form></section>';
+  const destinationFormHtml = [
+    "<html><head><title>Wrapped interest</title></head><body>",
+    '<div class="gform_wrapper">',
+    '<form id="gform_42">',
+    '<input type="hidden" name="wrapped_chapter">',
+    '<input type="hidden" name="wrapped_chapter_slug">',
+    '<input type="hidden" name="wrapped_region">',
+    '<input type="hidden" name="wrapped_scope">',
+    '<input type="hidden" name="wrapped_slug">',
+    '<input type="hidden" name="wrapped_name">',
+    '<input type="hidden" name="wrapped_variant">',
+    '<input type="hidden" name="wrapped_year">',
+    '<input type="hidden" name="wrapped_url">',
+    "</form>",
+    "</div>",
+    "</body></html>"
+  ].join("");
   const goodHtml = [
     "<html><head>",
     "<title>JSU/NCSY Wrapped - Baltimore</title>",
@@ -2271,6 +2288,24 @@ function runWordPressSmokeScriptSmoke() {
       .replace(ogImageAltTag, ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const goodDestinationReport = wordpressSmoke.validateCtaDestinationPage({
+    status: 200,
+    headers: { "content-type": "text/html; charset=UTF-8" },
+    text: destinationFormHtml,
+    url: "https://ncsy.org/wrapped-interest/"
+  });
+  const missingDestinationContextReport = wordpressSmoke.validateCtaDestinationPage({
+    status: 200,
+    headers: { "content-type": "text/html" },
+    text: destinationFormHtml.replace('<input type="hidden" name="wrapped_url">', '<input type="hidden" name="input_9">'),
+    url: "https://ncsy.org/wrapped-interest/"
+  });
+  const nonHtmlDestinationReport = wordpressSmoke.validateCtaDestinationPage({
+    status: 200,
+    headers: { "content-type": "application/json" },
+    text: "{}",
+    url: "https://ncsy.org/wrapped-interest/"
+  });
   assert(typeof wordpressSmoke.formatFixPacket === "function", "WordPress smoke should expose a fix-packet formatter");
   const fixPacket = wordpressSmoke.formatFixPacket({
     status: 200,
@@ -2318,6 +2353,11 @@ function runWordPressSmokeScriptSmoke() {
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--url", "https://ncsy.org/ncsy-wrapped/?chapter=baltimore", "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const destinationDryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--url", "https://ncsy.org/ncsy-wrapped/?chapter=baltimore", "--cta-href", "https://ncsy.org/wrapped-interest/", "--check-cta-destination", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
     stdio: "pipe"
@@ -2371,6 +2411,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("twitter:card")), "WordPress smoke should reject pages without summary_large_image Twitter card metadata");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image dimensions")), "WordPress smoke should reject pages without social image dimensions");
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
+  assert(goodDestinationReport.ok, `WordPress smoke rejected a good direct Gravity Forms destination: ${goodDestinationReport.errors.join("; ")}`);
+  assert(!missingDestinationContextReport.ok && missingDestinationContextReport.errors.some((error) => error.includes("Gravity Forms destination") && error.includes("Wrapped URL")), "WordPress smoke should reject direct Gravity Forms destinations missing wrapped_url");
+  assert(missingDestinationContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest wrapped_url for direct Gravity Forms destinations");
+  assert(!nonHtmlDestinationReport.ok && nonHtmlDestinationReport.errors.some((error) => error.includes("content type")), "WordPress smoke should reject non-HTML direct CTA destinations");
   assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
@@ -2401,11 +2445,13 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");
   assert(!brokenTextReport.ok && brokenTextReport.errors.some((error) => error.includes("broken placeholder text")), "WordPress smoke should reject visible broken placeholder text");
   assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress smoke dry run should show the target URL");
+  assert(destinationDryRunOutput.includes("would also check CTA destination https://ncsy.org/wrapped-interest/"), "WordPress smoke dry run should show the direct CTA destination when requested");
   assert(listed.includes("node --check wordpress-smoke.js"), "production QA should syntax-check the WordPress smoke helper");
   assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
   assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");
   assert(source.includes("settings.fixPacket && !report.ok"), "WordPress fix-packet mode should return after the packet on stale pages instead of duplicating detailed fixes");
   assert(source.includes("--cta-href"), "WordPress smoke should support a direct Gravity Forms CTA href option");
+  assert(source.includes("--check-cta-destination"), "WordPress smoke should support an explicit direct Gravity Forms destination check option");
   assert(readme.includes("node wordpress-smoke.js"), "README should document WordPress smoke checks");
   assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
   assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
@@ -2415,6 +2461,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(readme.includes("--cta-href"), "README should document the direct Gravity Forms CTA href fix-packet option");
   assert(docs.includes("--cta-href"), "production docs should document the direct Gravity Forms CTA href fix-packet option");
   assert(checklist.includes("--cta-href"), "launch checklist should document the direct Gravity Forms CTA href fix-packet option");
+  assert(readme.includes("--check-cta-destination"), "README should document direct Gravity Forms destination checks");
+  assert(docs.includes("--check-cta-destination"), "production docs should document direct Gravity Forms destination checks");
+  assert(checklist.includes("--check-cta-destination"), "launch checklist should document direct Gravity Forms destination checks");
 }
 
 function runRenderSmokeScriptSmoke() {
