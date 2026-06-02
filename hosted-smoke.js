@@ -34,6 +34,16 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "builder script",
+    path: "wrapped-builder.js",
+    validate(text, errors) {
+      mustInclude(text, "Review form opened with chapter context. Submission JSON copied", "builder script missing clipboard-first review form handoff", errors);
+      mustNotInclude(text, "MAX_REVIEW_FORM_URL_LENGTH", "builder script still uses review form URL length JSON prefill", errors);
+      mustNotInclude(text, "REVIEW_FORM_SUBMISSION_PARAM", "builder script still has full submission JSON review form param", errors);
+      mustNotInclude(text, "Submission JSON is prefilled in the review form", "builder script still claims JSON is prefilled in review form", errors);
+    }
+  },
+  {
     label: "chapter data JSON",
     path: "sample-wrapped-2026.json",
     validate(text, errors) {
@@ -100,6 +110,12 @@ function fetchPlan(baseUrl) {
 
 function mustInclude(text, expected, message, errors) {
   if (!String(text || "").includes(expected)) {
+    errors.push(message);
+  }
+}
+
+function mustNotInclude(text, unexpected, message, errors) {
+  if (String(text || "").includes(unexpected)) {
     errors.push(message);
   }
 }

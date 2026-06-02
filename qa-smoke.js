@@ -1888,6 +1888,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: "window.JSUWrapped = {};"
     },
+    "wrapped-builder.js": {
+      status: 200,
+      text: "Review form opened with chapter context. Submission JSON copied; paste it into the form before sending."
+    },
     "sample-wrapped-2026.json": {
       status: 200,
       text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
@@ -1932,9 +1936,16 @@ function runHostedSmokeScriptSmoke() {
       status: 200
     }
   });
+  const staleBuilderScriptAssets = Object.assign({}, goodAssets, {
+    "wrapped-builder.js": {
+      status: 200,
+      text: "MAX_REVIEW_FORM_URL_LENGTH Submission JSON is prefilled in the review form"
+    }
+  });
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
+  const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
     encoding: "utf8",
@@ -1948,7 +1959,9 @@ function runHostedSmokeScriptSmoke() {
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
   assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
   assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
+  assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
+  assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
   assert(listed.includes("node --check hosted-smoke.js"), "production QA should syntax-check the hosted smoke helper");
