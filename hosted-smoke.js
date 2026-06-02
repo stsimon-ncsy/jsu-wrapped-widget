@@ -149,7 +149,17 @@ const ASSET_CHECKS = [
     path: "share/baltimore/",
     validate(text, errors) {
       mustInclude(text, "JSU/NCSY Wrapped - Baltimore", "Baltimore share page missing title metadata", errors);
+      mustInclude(text, 'property="og:description"', "Baltimore share page missing OG description metadata", errors);
+      mustInclude(text, 'name="twitter:description"', "Baltimore share page missing Twitter description metadata", errors);
+      mustInclude(text, 'property="og:url"', "Baltimore share page missing OG URL metadata", errors);
+      mustInclude(text, 'property="og:image" content="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"', "Baltimore share page missing campaign OG image", errors);
       mustInclude(text, 'property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"', "Baltimore share page missing social image alt text", errors);
+      mustInclude(text, 'property="og:image:width" content="1200"', "Baltimore share page missing social image width", errors);
+      mustInclude(text, 'property="og:image:height" content="630"', "Baltimore share page missing social image height", errors);
+      mustInclude(text, 'name="twitter:card" content="summary_large_image"', "Baltimore share page missing large Twitter card metadata", errors);
+      mustInclude(text, 'name="twitter:image" content="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"', "Baltimore share page missing campaign Twitter image", errors);
+      mustInclude(text, 'name="twitter:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"', "Baltimore share page missing Twitter image alt text", errors);
+      mustInclude(text, 'rel="canonical"', "Baltimore share page missing canonical story URL", errors);
       mustInclude(text, 'http-equiv="refresh"', "Baltimore share page missing human redirect", errors);
       mustInclude(text, "?chapter=baltimore", "Baltimore share page missing chapter redirect", errors);
     }

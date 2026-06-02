@@ -1913,6 +1913,9 @@ function runHostedSmokeScriptSmoke() {
   socialPreviewPng.write("IHDR", 12, "ascii");
   socialPreviewPng.writeUInt32BE(1200, 16);
   socialPreviewPng.writeUInt32BE(630, 20);
+  const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
+  const baltimoreShareDescription = "Baltimore Wrapped for 2025-2026 - Atlantic Seaboard. 338 events. 533 teens. 2,232 engagement moments.";
+  const baltimoreStoryUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore";
   const goodAssets = {
     "": {
       status: 200,
@@ -1987,7 +1990,17 @@ function runHostedSmokeScriptSmoke() {
       text: [
         "<title>JSU/NCSY Wrapped - Baltimore</title>",
         'property="og:title" content="JSU/NCSY Wrapped - Baltimore"',
+        'property="og:description" content="' + baltimoreShareDescription + '"',
+        'name="twitter:description" content="' + baltimoreShareDescription + '"',
+        'property="og:url" content="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/baltimore/"',
+        'property="og:image" content="' + socialImageUrl + '"',
         'property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"',
+        'property="og:image:width" content="1200"',
+        'property="og:image:height" content="630"',
+        'name="twitter:card" content="summary_large_image"',
+        'name="twitter:image" content="' + socialImageUrl + '"',
+        'name="twitter:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"',
+        'rel="canonical" href="' + baltimoreStoryUrl + '"',
         'http-equiv="refresh"',
         "?chapter=baltimore"
       ].join("")
@@ -1998,6 +2011,18 @@ function runHostedSmokeScriptSmoke() {
     "share/baltimore/": {
       status: 200,
       text: "<title>Broken</title>"
+    }
+  });
+  const thinShareMetadataAssets = Object.assign({}, goodAssets, {
+    "share/baltimore/": {
+      status: 200,
+      text: [
+        "<title>JSU/NCSY Wrapped - Baltimore</title>",
+        'property="og:title" content="JSU/NCSY Wrapped - Baltimore"',
+        'property="og:image:alt" content="JSU/NCSY Wrapped social preview for Baltimore"',
+        'http-equiv="refresh"',
+        "?chapter=baltimore"
+      ].join("")
     }
   });
   const missingSocialPreviewAssets = Object.assign({}, goodAssets);
@@ -2054,6 +2079,7 @@ function runHostedSmokeScriptSmoke() {
     }
   });
   const badReport = hostedSmoke.validateHostedAssets(badAssets);
+  const thinShareMetadataReport = hostedSmoke.validateHostedAssets(thinShareMetadataAssets);
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
   const publicCtaPrefillSmokeReport = hostedSmoke.validateHostedAssets(publicCtaPrefillSmokeAssets);
@@ -2074,6 +2100,9 @@ function runHostedSmokeScriptSmoke() {
 
   assert(goodReport.ok, `hosted smoke validator rejected good assets: ${goodReport.errors.join("; ")}`);
   assert(!badReport.ok && badReport.errors.some((error) => error.includes("Baltimore share page")), "hosted smoke validator should reject broken share metadata");
+  assert(!thinShareMetadataReport.ok && thinShareMetadataReport.errors.some((error) => error.includes("Baltimore share page") && error.includes("description")), "hosted smoke validator should reject share pages without social descriptions");
+  assert(!thinShareMetadataReport.ok && thinShareMetadataReport.errors.some((error) => error.includes("Baltimore share page") && error.includes("Twitter image alt")), "hosted smoke validator should reject share pages without Twitter image alt text");
+  assert(!thinShareMetadataReport.ok && thinShareMetadataReport.errors.some((error) => error.includes("Baltimore share page") && error.includes("canonical")), "hosted smoke validator should reject share pages without canonical story URLs");
   assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
   assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
   assert(!publicCtaPrefillSmokeReport.ok && publicCtaPrefillSmokeReport.errors.some((error) => error.includes("CTA form prefill page")), "hosted smoke validator should reject a CTA form prefill smoke page without noindex");
