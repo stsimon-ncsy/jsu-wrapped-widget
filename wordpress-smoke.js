@@ -463,6 +463,7 @@ function validateWordPressPage(page, options) {
   const ogImageWidth = metaContentValue(html, "og:image:width");
   const ogImageHeight = metaContentValue(html, "og:image:height");
   const ogImageAlt = metaContentValue(html, "og:image:alt");
+  const twitterImageAlt = metaContentValue(html, "twitter:image:alt");
   const socialTitle = suggestedSocialTitle(page, html);
   const socialDescription = suggestedSocialDescription(page, html);
   const socialUrl = suggestedSocialUrl(page);
@@ -638,6 +639,11 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:image:alt to "${socialImageAlt}".`);
   }
 
+  if (String(twitterImageAlt || "").trim() !== socialImageAlt) {
+    errors.push("WordPress page Twitter image alt metadata should describe the Wrapped preview");
+    fixes.push(`Set twitter:image:alt to "${socialImageAlt}".`);
+  }
+
   if (!/privacy/i.test(text) || !/(cookie|osano)/i.test(html)) {
     errors.push("WordPress page missing privacy/cookie affordance");
   }
@@ -726,6 +732,7 @@ function formatFixPacket(page, report, options) {
     `og:image:width: ${SOCIAL_IMAGE_WIDTH}`,
     `og:image:height: ${SOCIAL_IMAGE_HEIGHT}`,
     `og:image:alt: ${socialImageAlt}`,
+    `twitter:image:alt: ${socialImageAlt}`,
     ...contextFieldLines,
     "",
     "Follow-up verification:",
