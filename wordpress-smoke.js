@@ -310,10 +310,11 @@ function escapeAttr(value) {
     .replace(/>/g, "&gt;");
 }
 
-function suggestedWidgetTag(html) {
+function suggestedWidgetTag(html, options) {
+  const settings = options || {};
   const ctaLabel = attrValue(html, "data-cta-label") || "Get involved next year";
   const ctaTarget = attrValue(html, "data-cta-target") || "#jsuw-wrapped-interest";
-  const ctaHref = attrValue(html, "data-cta-href");
+  const ctaHref = settings.ctaHref || attrValue(html, "data-cta-href");
   const safeCtaHref = isSafeCtaHref(ctaHref) && !hasCtaUrlPayload(ctaHref) ? ctaHref : "";
   const year = attrValue(html, "data-year") || "2026";
   const ctaAttribute = safeCtaHref
@@ -334,8 +335,8 @@ function suggestedWidgetTag(html) {
   ].join(" ");
 }
 
-function addWidgetTagFix(html, fixes) {
-  const replacement = suggestedWidgetTag(html);
+function addWidgetTagFix(html, fixes, options) {
+  const replacement = suggestedWidgetTag(html, options);
 
   if (!fixes.some((fix) => fix.includes("Replace the #jsu-wrapped opening tag with:"))) {
     fixes.unshift(`Replace the #jsu-wrapped opening tag with: ${replacement}`);
@@ -412,41 +413,41 @@ function validateWordPressPage(page, options) {
   if (!dataSource) {
     errors.push("WordPress page missing widget data-source");
     fixes.push(`Add ${CHAPTER_DATA_ATTR} to the #jsu-wrapped container.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   } else if (!/sample-wrapped-2026\.json/.test(dataSource)) {
     errors.push("WordPress page data-source should point at the chapter JSON");
     fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   } else if (!hasReleaseToken(dataSource)) {
     errors.push("WordPress page data-source is missing the shared cache token");
     fixes.push(`Set the #jsu-wrapped chapter data attribute to ${CHAPTER_DATA_ATTR}.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   }
 
   if (!configSource) {
     errors.push("WordPress page missing widget data-config-source");
     fixes.push(`Add ${CONFIG_DATA_ATTR} to the #jsu-wrapped container.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   } else if (!/wrapped-config-2026\.json/.test(configSource)) {
     errors.push("WordPress page data-config-source should point at the config JSON");
     fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   } else if (!hasReleaseToken(configSource)) {
     errors.push("WordPress page data-config-source is missing the shared cache token");
     fixes.push(`Set the #jsu-wrapped config attribute to ${CONFIG_DATA_ATTR}.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   }
 
   if (teenSource && /sample-teen-wrapped-2026\.json/.test(teenSource) && !hasReleaseToken(teenSource)) {
     errors.push("WordPress page data-teen-source is missing the shared cache token");
     fixes.push(`Set ${TEEN_DATA_ATTR} on the #jsu-wrapped container.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   }
 
   if (!/data-share-base\s*=/.test(html) || !/\/share\//.test(html)) {
     errors.push("WordPress page missing generated share-page base");
     fixes.push(`Add ${SHARE_BASE_ATTR} to the #jsu-wrapped container.`);
-    addWidgetTagFix(html, fixes);
+    addWidgetTagFix(html, fixes, settings);
   }
 
   if (!ctaTarget && !ctaHref) {
@@ -552,20 +553,28 @@ function validateWordPressPage(page, options) {
   };
 }
 
-function formatFixPacket(page, report) {
+function formatFixPacket(page, report, options) {
+  const settings = options || {};
   const html = String(page && page.text || "");
   const url = String(page && page.url || DEFAULT_URL);
-  const validationReport = report || validateWordPressPage(page);
+  const validationReport = report || validateWordPressPage(page, settings);
   const socialTitle = suggestedSocialTitle(page, html);
   const socialUrl = suggestedSocialUrl(page);
   const socialImageAlt = suggestedSocialImageAlt(page, html);
   const ctaTarget = attrValue(html, "data-cta-target");
+  const directCtaHref = settings.ctaHref && isSafeCtaHref(settings.ctaHref) && !hasCtaUrlPayload(settings.ctaHref) ? settings.ctaHref : "";
+  const recommendedContextFields = "wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url";
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
-  const contextFieldLines = missingContextFields.length ? [
+  const contextFieldLines = directCtaHref ? [
+    "",
+    `Direct Gravity Forms CTA URL: ${directCtaHref}`,
+    "Add these hidden/context fields on the destination form page:",
+    recommendedContextFields
+  ] : missingContextFields.length ? [
     "",
     "Gravity Forms hidden/context fields:",
     `Add fields named: ${missingContextFields.map((field) => field.suggestedName).join(", ")}`,
-    "Recommended full set: wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url"
+    `Recommended full set: ${recommendedContextFields}`
   ] : [];
 
   return [
@@ -574,7 +583,7 @@ function formatFixPacket(page, report) {
     `URL: ${url}`,
     "",
     "Replace #jsu-wrapped with:",
-    suggestedWidgetTag(html),
+    suggestedWidgetTag(html, settings),
     "",
     "Hosted CSS/JS assets:",
     WIDGET_CSS_TAG,
@@ -628,6 +637,7 @@ async function fetchWithTimeout(url, timeoutMs) {
 
 function parseArgs(args) {
   const settings = {
+    ctaHref: "",
     dryRun: false,
     fixPacket: false,
     timeoutMs: DEFAULT_TIMEOUT_MS,
@@ -639,6 +649,9 @@ function parseArgs(args) {
 
     if (arg === "--url") {
       settings.url = args[index + 1] || DEFAULT_URL;
+      index += 1;
+    } else if (arg === "--cta-href" || arg === "--form-url") {
+      settings.ctaHref = args[index + 1] || "";
       index += 1;
     } else if (arg === "--timeout-ms") {
       settings.timeoutMs = Number(args[index + 1]) || DEFAULT_TIMEOUT_MS;
@@ -658,11 +671,12 @@ function parseArgs(args) {
 function usage() {
   return [
     "Usage:",
-    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
+    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--cta-href https://ncsy.org/wrapped-interest/] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
     "",
     "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, and social title basics.",
     "",
-    "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale."
+    "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale.",
+    "Use --cta-href when the final CTA should link to a separate Gravity Forms page instead of opening an embedded same-page panel."
   ].join("\n");
 }
 
@@ -681,10 +695,10 @@ async function main() {
 
   console.log(`WordPress smoke checking ${settings.url}`);
   const page = await fetchWithTimeout(settings.url, settings.timeoutMs);
-  const report = validateWordPressPage(page);
+  const report = validateWordPressPage(page, settings);
 
   if (settings.fixPacket) {
-    console.log(formatFixPacket(page, report));
+    console.log(formatFixPacket(page, report, settings));
     if (settings.fixPacket && !report.ok) {
       process.exitCode = 1;
       return;

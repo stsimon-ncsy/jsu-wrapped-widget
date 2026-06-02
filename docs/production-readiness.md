@@ -18,6 +18,8 @@ After the WordPress page is pasted and published, run `node wordpress-smoke.js -
 
 If that live check reports stale WordPress markup, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet`. The fix packet prints one compact copy-ready block with the current replacement `#jsu-wrapped` tag, exact page/social title, suggested canonical/social URLs, `og:title`, `twitter:title`, `og:image`, `twitter:image`, large-card metadata, and the follow-up smoke command.
 
+When the final-card CTA should open a separate Gravity Forms page instead of a same-page embedded panel, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"`. The replacement widget tag will use `data-cta-href`, and the runtime will append only short `wrapped_*` context parameters.
+
 For a local browser render check, run `node render-smoke.js --skip-if-missing`. It serves the static files locally, launches an installed Chrome or Edge in headless mode when available, and verifies the picker, Baltimore story, CTA form prefill, CTA link prefill, analytics dataLayer, and builder render real DOM in mobile and desktop viewports. It also exercises a noindex CTA form prefill smoke page so the final-card CTA has to open a Gravity-Forms-style panel and populate chapter context, a noindex CTA link prefill smoke page so the final-card CTA has to navigate to a Gravity-Forms-style target URL with short `wrapped_*` params, and a noindex analytics smoke page so the browser runtime has to push `jsu_wrapped_story_view`, `jsu_wrapped_card_view`, and `jsu_wrapped_card_engagement` with chapter/scope context. `node check-production.js` runs the same command with `--skip-if-missing`, preserving the no-dependency workflow on machines without a browser.
 
 The check runs `git diff --exit-code wordpress-inline-embed.html` immediately after `node sync-wordpress-inline.js`, so stale generated WordPress handoff code cannot slip into the repo unnoticed. Static social share pages are regenerated with `node generate-share-pages.js` and checked with both `git diff --exit-code share` and `git status --porcelain -- share`. The generator also removes stale generated share-page directories when a story is removed from the JSON, so old chapter, region, or program share previews do not stay live by accident.
@@ -227,6 +229,8 @@ The public WordPress page should use the hosted GitHub Pages asset URLs in the w
 ```
 
 Render the Gravity Form in a nearby WordPress shortcode/block or template field, then wrap or target it with `#jsuw-wrapped-interest`. Some WordPress custom HTML blocks do not execute shortcodes, so use a Shortcode block, Gravity Forms block, template field, or server-rendered shortcode when needed. The widget can then reveal the panel and fill matching fields when the final-card CTA is clicked.
+
+If the form lives on a separate page, use `data-cta-href="https://ncsy.org/wrapped-interest/"` instead of `data-cta-target`. You can generate that replacement snippet with `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"`.
 
 For Gravity Forms, add hidden fields whose labels or input names clearly include the context they should receive, such as `chapter name`, `region`, `scope type`, `scope slug`, `scope name`, `program`, `variant`, `year label`, and `wrapped url`. The widget fills matching empty fields when the CTA opens the form.
 

@@ -2280,6 +2280,16 @@ function runWordPressSmokeScriptSmoke() {
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const directCtaFixPacket = wordpressSmoke.formatFixPacket({
+    status: 200,
+    text: goodHtml
+      .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  }, null, {
+    ctaHref: "https://ncsy.org/wrapped-interest/"
+  });
   const missingContextFixPacket = wordpressSmoke.formatFixPacket({
     status: 200,
     text: goodHtml.replace('<input name="wrapped_url">', '<input name="input_3">'),
@@ -2363,6 +2373,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
   assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
+  assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
+  assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
+  assert(directCtaFixPacket.includes("Direct Gravity Forms CTA URL: https://ncsy.org/wrapped-interest/"), "WordPress fix packet should label the direct Gravity Forms CTA URL");
+  assert(directCtaFixPacket.includes("Add these hidden/context fields on the destination form page"), "WordPress fix packet should clarify that direct CTA context fields belong on the destination form page");
   assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"'), "WordPress fix packet should include the config source");
   assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget stylesheet");
   assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget script");
@@ -2391,12 +2405,16 @@ function runWordPressSmokeScriptSmoke() {
   assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
   assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");
   assert(source.includes("settings.fixPacket && !report.ok"), "WordPress fix-packet mode should return after the packet on stale pages instead of duplicating detailed fixes");
+  assert(source.includes("--cta-href"), "WordPress smoke should support a direct Gravity Forms CTA href option");
   assert(readme.includes("node wordpress-smoke.js"), "README should document WordPress smoke checks");
   assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
   assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
   assert(readme.includes("--fix-packet"), "README should document the WordPress fix-packet helper");
   assert(docs.includes("--fix-packet"), "production docs should document the WordPress fix-packet helper");
   assert(checklist.includes("--fix-packet"), "launch checklist should document the WordPress fix-packet helper");
+  assert(readme.includes("--cta-href"), "README should document the direct Gravity Forms CTA href fix-packet option");
+  assert(docs.includes("--cta-href"), "production docs should document the direct Gravity Forms CTA href fix-packet option");
+  assert(checklist.includes("--cta-href"), "launch checklist should document the direct Gravity Forms CTA href fix-packet option");
 }
 
 function runRenderSmokeScriptSmoke() {
