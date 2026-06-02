@@ -50,6 +50,16 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "analytics smoke page",
+    path: "analytics-smoke.html",
+    validate(text, errors) {
+      mustInclude(text, '<meta name="robots" content="noindex,nofollow">', "analytics smoke page missing noindex guard", errors);
+      mustInclude(text, "Analytics smoke", "analytics smoke page missing smoke title", errors);
+      mustInclude(text, "dataLayer events", "analytics smoke page missing dataLayer text", errors);
+      mustInclude(text, "__jsuwAnalyticsSmokeEvents", "analytics smoke page missing dataLayer capture hook", errors);
+    }
+  },
+  {
     label: "widget stylesheet",
     path: "jsu-wrapped.css",
     validate(text, errors) {

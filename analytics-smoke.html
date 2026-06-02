@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Analytics smoke</title>
+    <link rel="stylesheet" href="./jsu-wrapped.css?v=jsuw-prod-20260601h">
+    <style>
+      body {
+        background: #f4f7fb;
+        color: #170724;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+      }
+
+      .qa-page {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .qa-panel {
+        background: #ffffff;
+        border: 1px solid #d9def0;
+        border-radius: 12px;
+        box-sizing: border-box;
+        max-width: 520px;
+        padding: 16px;
+        width: min(100%, 520px);
+      }
+
+      pre {
+        line-height: 1.5;
+        margin: 0;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+    </style>
+    <script>
+      (function () {
+        var events = [];
+        window.dataLayer = window.dataLayer || [];
+
+        var originalPush = window.dataLayer.push.bind(window.dataLayer);
+
+        window.dataLayer.push = function () {
+          Array.prototype.forEach.call(arguments, function (payload) {
+            if (payload && payload.event) {
+              events.push(payload);
+            }
+          });
+
+          return originalPush.apply(window.dataLayer, arguments);
+        };
+
+        window.__jsuwAnalyticsSmokeEvents = events;
+      })();
+    </script>
+  </head>
+  <body>
+    <main class="qa-page">
+      <div
+        id="jsu-wrapped"
+        data-year="2026"
+        data-source="./sample-wrapped-2026.json?v=jsuw-prod-20260601h"
+        data-config-source="./wrapped-config-2026.json?v=jsuw-prod-20260601h"
+        data-share-base="./share/"
+        data-cta-label="Get involved next year"
+        data-cta-target="#jsuw-wrapped-interest"
+      ></div>
+
+      <section id="jsuw-wrapped-interest" class="qa-panel" hidden>
+        <h1>Analytics smoke</h1>
+        <p>dataLayer events</p>
+      </section>
+
+      <section class="qa-panel" aria-live="polite">
+        <h2>Analytics smoke</h2>
+        <p>dataLayer events</p>
+        <pre id="analytics-smoke-output">pending</pre>
+      </section>
+    </main>
+    <script src="./jsu-wrapped.js?v=jsuw-prod-20260601h"></script>
+    <script>
+      (function () {
+        var root = document.getElementById("jsu-wrapped");
+        var output = document.getElementById("analytics-smoke-output");
+        var clickedNext = false;
+        var attempts = 0;
+
+        function eventNames(events) {
+          return events.map(function (item) {
+            return item.event;
+          });
+        }
+
+        function hasEvent(events, name) {
+          return eventNames(events).indexOf(name) !== -1;
+        }
+
+        function firstEvent(events, name) {
+          for (var index = 0; index < events.length; index += 1) {
+            if (events[index].event === name) {
+              return events[index];
+            }
+          }
+
+          return {};
+        }
+
+        function writeSummary(events) {
+          var cardView = firstEvent(events, "jsu_wrapped_card_view");
+          var engagement = firstEvent(events, "jsu_wrapped_card_engagement");
+          var lines = [
+            eventNames(events).join(","),
+            "chapter_slug=" + (cardView.chapter_slug || ""),
+            "scope_type=" + (cardView.scope_type || ""),
+            "card_duration_ms=" + (engagement.card_duration_ms || "")
+          ];
+
+          output.textContent = lines.join("\n");
+        }
+
+        function step() {
+          attempts += 1;
+
+          var events = window.__jsuwAnalyticsSmokeEvents || [];
+          var next = root && root.querySelector('[data-jsuw-action="next"]');
+
+          if (!clickedNext && hasEvent(events, "jsu_wrapped_card_view") && next) {
+            clickedNext = true;
+            next.click();
+          }
+
+          writeSummary(events);
+
+          if (
+            hasEvent(events, "jsu_wrapped_story_view") &&
+            hasEvent(events, "jsu_wrapped_card_view") &&
+            hasEvent(events, "jsu_wrapped_card_engagement") &&
+            output.textContent.indexOf("chapter_slug=baltimore") !== -1 &&
+            output.textContent.indexOf("scope_type=chapter") !== -1
+          ) {
+            document.documentElement.setAttribute("data-analytics-smoke", "ok");
+            return;
+          }
+
+          if (attempts < 50) {
+            window.setTimeout(step, 150);
+          } else {
+            document.documentElement.setAttribute("data-analytics-smoke", "timeout");
+          }
+        }
+
+        function start() {
+          window.setTimeout(step, 350);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", start, { once: true });
+        } else {
+          start();
+        }
+      })();
+    </script>
+  </body>
+</html>

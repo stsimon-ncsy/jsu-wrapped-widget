@@ -47,6 +47,19 @@ const PAGE_CHECKS = [
     requiredText: ["CTA link target smoke", "Gravity Forms link params"]
   },
   {
+    label: "analytics dataLayer",
+    path: "/analytics-smoke.html?chapter=baltimore&qa=render-smoke",
+    requiredSelectors: [
+      'data-analytics-smoke="ok"',
+      "jsu_wrapped_story_view",
+      "jsu_wrapped_card_view",
+      "jsu_wrapped_card_engagement",
+      "chapter_slug=baltimore",
+      "scope_type=chapter"
+    ],
+    requiredText: ["Analytics smoke", "dataLayer events"]
+  },
+  {
     label: "builder",
     path: "/builder.html?qa=render-smoke",
     requiredSelectors: ['id="wrapped-builder"', "builder-panel--preview"],
@@ -529,7 +542,7 @@ function usage() {
     "Usage:",
     "  node render-smoke.js [--skip-if-missing] [--browser path/to/chrome] [--timeout-ms 20000] [--dry-run]",
     "",
-    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, CTA form/link prefill, and builder render real DOM."
+    "Serves the static widget locally and uses Chrome/Edge headless to confirm the picker, story, CTA form/link prefill, analytics dataLayer, and builder render real DOM."
   ].join("\n");
 }
 
@@ -549,7 +562,7 @@ async function main() {
     return;
   }
 
-  console.log("render smoke checking local picker, story, CTA form/link prefill, and builder");
+  console.log("render smoke checking local picker, story, CTA form/link prefill, analytics dataLayer, and builder");
   const report = await runRenderSmoke(settings);
 
   if (!report.ok) {
