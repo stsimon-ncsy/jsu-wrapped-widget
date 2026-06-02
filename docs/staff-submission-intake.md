@@ -7,7 +7,7 @@ Use this when you invite pilot staff to customize Wrapped stories without giving
 1. Create one dedicated intake form, for example **Wrapped Builder Submission**.
 2. Send staff a builder link that includes `review_url`.
 3. Staff make edits in `builder.html`, fill in their name/email, and click **Open review form**.
-4. The builder opens the form with context in the URL and copies the submission JSON to the clipboard.
+4. The builder opens the form with short context in the URL and copies the submission JSON to the clipboard.
 5. Staff submit the form. If the JSON field is empty, they paste the copied JSON before submitting.
 6. Export the form entries as JSON, save them in an ignored local folder such as `staff-submissions/`, review, merge, run QA, and push.
 
@@ -38,7 +38,7 @@ wrapped_preview
 wrapped_submission
 ```
 
-Make **Submission JSON** a paragraph/textarea field. It should allow dynamic population from `wrapped_submission`. This is the only required field for automated merging, but name/email and preview URL make review much easier.
+Make **Submission JSON** a paragraph/textarea field with the parameter name `wrapped_submission`. Do not depend on URL prefill for the full JSON packet; it can be too long for reliable browser/server handling. Staff should paste the copied JSON into this field when it is blank. This is the only required field for automated merging, but name/email and preview URL make review much easier.
 
 ## Staff Builder Link
 

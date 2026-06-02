@@ -911,7 +911,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
   assert(builderHtml.includes("Preferred: Open review form"), "builder should make the form-based staff review path explicit");
   assert(builderHtml.includes("If no form is set, open an email draft"), "builder should tell staff how to fall back when no form is configured");
-  assert(builderHtml.includes("Download submission if browser copy or form prefill is awkward"), "builder should give staff a clear file-attachment fallback");
+  assert(builderHtml.includes("passes only short chapter context in the form link"), "builder should explain that review form links use short context only");
+  assert(builderHtml.includes("Download submission if browser copy or paste is awkward"), "builder should give staff a clear file-attachment fallback");
+  assert(builderHtml.includes("For pilot staff, use Open review form when a review form is configured"), "builder export help should align with the form-first staff handoff");
   assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
   assert(builderJs.includes("review_email"), "builder should allow review email to be set from a staff distribution URL");
   assert(builderJs.includes("reviewEmail"), "builder should allow camelCase review email links");
@@ -951,9 +953,10 @@ function runBuilderSubmissionSmoke() {
   assert(builderJs.includes("function formSubmission"), "builder should copy JSON and open an optional review form");
   assert(builderJs.includes("review_url"), "builder should support a review_url query parameter for form-based submissions");
   assert(builderJs.includes("data-review-url"), "builder should support a data-review-url fallback for form-based submissions");
-  assert(builderJs.includes("MAX_REVIEW_FORM_URL_LENGTH"), "builder should avoid overlong review form prefill links");
-  assert(builderJs.includes("wrapped_submission"), "builder should prefill small staff submission JSON packets into review form links");
-  assert(builderJs.includes("Submission JSON is prefilled in the review form"), "builder should tell staff when the review form already includes the JSON");
+  assert(!builderJs.includes("MAX_REVIEW_FORM_URL_LENGTH"), "builder should not rely on URL length checks for full JSON review form prefill");
+  assert(!builderJs.includes("REVIEW_FORM_SUBMISSION_PARAM"), "builder should not append full submission JSON to review form URLs");
+  assert(!builderJs.includes("searchParams.set(\"wrapped_submission\""), "builder should keep full submission JSON out of review form query strings");
+  assert(builderJs.includes("Review form opened with chapter context. Submission JSON copied"), "builder should tell staff to paste copied JSON into the review form");
   assert(builderJs.includes("function renderReviewEmailStatus"), "builder should render the configured review email status");
   assert(builderJs.includes("mailto:"), "builder email handoff should not require a backend");
   assert(builderJs.includes("copyTextToClipboard"), "builder should have a clipboard fallback for submission JSON");
@@ -973,13 +976,15 @@ function runBuilderSubmissionSmoke() {
   assert(readme.includes("review_email"), "README should document pre-addressed staff review links");
   assert(readme.includes("review_url"), "README should document optional staff review form links");
   assert(readme.includes("Review form URLs must use"), "README should document safe review form URL requirements");
-  assert(readme.includes("wrapped_submission"), "README should document the review form JSON prefill parameter");
-  assert(readme.includes("usually includes the submission JSON automatically"), "README should document the low-friction email handoff");
+  assert(readme.includes("passes only short context fields"), "README should document that review form URLs carry only short context");
+  assert(readme.includes("Click **Open review form** when a review form link is provided"), "README should document the form-first staff handoff");
+  assert(readme.includes("Use **Open email draft** as the fallback"), "README should document the email fallback after the form path");
   assert(readme.includes("Copy staff link"), "README should document the pilot staff link helper");
   assert(playbook.includes("review_email"), "staff playbook should document pre-addressed staff review links");
   assert(playbook.includes("review_url"), "staff playbook should document optional staff review form links");
-  assert(playbook.includes("wrapped_submission"), "staff playbook should document the review form JSON prefill parameter");
-  assert(playbook.includes("usually includes the submission JSON automatically"), "staff playbook should document the low-friction email handoff");
+  assert(playbook.includes("Do not rely on the builder to put the full submission JSON in the URL"), "staff playbook should document the long JSON URL limit");
+  assert(playbook.includes("Use **Open review form** as the primary return path when `review_url` is configured"), "staff playbook should document the form-first staff handoff");
+  assert(playbook.includes("Use **Open email draft** as the fallback"), "staff playbook should document the email fallback after the form path");
   assert(playbook.includes("Copy staff link"), "staff playbook should document the pilot staff link helper");
 }
 
@@ -2173,6 +2178,8 @@ function runPilotStaffGuideSmoke() {
     "Pick your region and chapter",
     "Make only the changes you want reviewed",
     "Fill in Submission info",
+    "Use **Open review form** first when your builder link includes one",
+    "chapter context, not the full JSON packet",
     "Open email draft",
     "Open review form",
     "Copy submission",
@@ -2205,6 +2212,7 @@ function runStaffSubmissionIntakeDocSmoke() {
     "Recommended Pilot Flow",
     "Gravity Forms Fields",
     "wrapped_submission",
+    "Do not depend on URL prefill for the full JSON packet",
     "Staff Builder Link",
     "Message To Staff",
     "Reviewing Returned Submissions",

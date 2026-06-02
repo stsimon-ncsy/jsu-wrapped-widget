@@ -44,15 +44,15 @@ Avoid changing everything at once. Smaller submissions are easier to review and 
 
 Recommended path:
 
-1. Click **Open email draft**.
+1. Use **Open review form** first when your builder link includes one.
 2. The builder copies the submission JSON to your clipboard.
-3. Check the email draft. Most small submissions are included automatically.
-4. If the JSON is not already in the draft, paste the copied JSON into the email before sending.
+3. The form link carries chapter context, not the full JSON packet.
+4. Paste the copied JSON into the Submission JSON field before submitting.
 
 Other options:
 
+- Use **Open email draft** if there is no review form, or if your reviewer asked you to email the JSON. The builder copies the JSON first; if the draft is missing the JSON, paste it before sending.
 - Use **Copy submission** if you want to paste into Slack, Teams, or a review form.
-- Use **Open review form** if your reviewer gave you a form link. The builder copies the submission JSON first. Many small submissions are also filled into the form automatically; if the JSON field is blank, paste the copied JSON before sending.
 - Use **Download submission** if attaching a file is easier.
 - If you are unsure, download the submission file and send that file to your reviewer.
 

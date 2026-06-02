@@ -67,7 +67,7 @@ Builder is an internal staff tool. It is public only because GitHub Pages is sta
 1. Pick the region, chapter, edit scope, and version.
 2. Adjust generated screens, metrics, custom screens, brand, or CTA.
 3. Fill in the required submission info fields with your name and email, plus an optional reviewer note.
-4. Click **Open email draft** to copy the smaller JSON and start a review email. The draft usually includes the submission JSON automatically; if the edit packet is too large, paste the copied JSON before sending. Staff can also click **Open review form** if a form link was provided, **Copy submission** to paste into email, Slack, Teams, or a review form, or **Download submission** to attach it as a file.
+4. Click **Open review form** when a review form link is provided. The builder copies the smaller JSON first and passes only short context fields in the form URL. Paste the copied JSON into the form if the textarea is blank. Use **Open email draft** as the fallback, or use **Copy submission** / **Download submission** for Slack, Teams, locked-down browsers, or oversized packets.
 5. Send that submission JSON to the repo maintainer for review.
 
 To prefill the email recipient for pilot staff, set `data-review-email` on the `#wrapped-builder` element in `builder.html`, or send staff a pre-addressed builder link with `review_email`:
@@ -84,7 +84,7 @@ To send staff to a separate intake form after copying the submission JSON, set `
 https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html?review_email=wrapped-review@example.org&review_url=https%3A%2F%2Fncsy.org%2Fwrapped-review%2F
 ```
 
-The builder appends lightweight context such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. For small edit packets, it also adds `wrapped_submission` so a Gravity Forms textarea can be dynamically populated with the submission JSON. Keep the builder's clipboard copy and download options as fallbacks for larger submissions or locked-down browsers.
+The builder passes only short context fields such as `wrapped_scope`, `wrapped_slug`, `wrapped_variant`, and `wrapped_preview` to the form URL. It does not put the full submission JSON in the URL because those packets can be too long for reliable browser/server handling. Configure the Gravity Forms textarea as `wrapped_submission` for pasted JSON and exported entries, and keep the builder's clipboard copy and download options as fallbacks for locked-down browsers.
 
 Review form URLs must use `https://`, `http://`, `/`, `./`, or `../` links. Unsafe schemes are ignored by the builder.
 
