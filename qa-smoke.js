@@ -1558,7 +1558,7 @@ function runInlineEmbedSmoke() {
 }
 
 function runAssetVersionSmoke() {
-  const files = ["index.html", "embed-example.html", "builder.html"];
+  const files = ["index.html", "embed-example.html", "builder.html", "cta-prefill-smoke.html"];
   const releaseToken = "jsuw-prod-20260601h";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
@@ -1598,6 +1598,7 @@ function runAssetVersionSmoke() {
   });
   assert(readme.includes("Bump the shared cache token"), "README should remind maintainers to update the pasteable snippet cache token");
   assert(docs.includes("README.md"), "production docs should include README in the shared cache token bump list");
+  assert(docs.includes("cta-prefill-smoke.html"), "production docs should include CTA smoke page in the shared cache token bump list");
 }
 
 function runCacheTokenBumpSmoke() {
@@ -1615,6 +1616,7 @@ function runCacheTokenBumpSmoke() {
   assert(result.count === 2, `cache-token helper replaced ${result.count} tokens instead of 2`);
   assert(result.text === "one?v=jsuw-prod-20260602a two?v=jsuw-prod-20260602a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
   assert(bump.validateToken("jsuw-prod-20260601h") === "jsuw-prod-20260601h", "cache-token helper should accept production token format");
+  assert(bump.FILES.includes("cta-prefill-smoke.html"), "cache-token helper should update the CTA prefill smoke page");
 
   let invalidMessage = "";
   try {
