@@ -2139,6 +2139,11 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replace('<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const missingCtaContextReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml.replace('<input name="wrapped_url">', '<input name="input_3">'),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const missingHostedAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
@@ -2170,6 +2175,11 @@ function runWordPressSmokeScriptSmoke() {
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const missingContextFixPacket = wordpressSmoke.formatFixPacket({
+    status: 200,
+    text: goodHtml.replace('<input name="wrapped_url">', '<input name="input_3">'),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const staleDataUrlReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260601h", "sample-wrapped-2026.json"),
@@ -2199,6 +2209,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(goodReport.ok, `WordPress smoke validator rejected good page: ${goodReport.errors.join("; ")}`);
   assert(!missingWidgetReport.ok && missingWidgetReport.errors.some((error) => error.includes("widget container")), "WordPress smoke should reject pages without the widget container");
   assert(!missingPanelReport.ok && missingPanelReport.errors.some((error) => error.includes("CTA target")), "WordPress smoke should reject missing CTA target panels");
+  assert(!missingCtaContextReport.ok && missingCtaContextReport.errors.some((error) => error.includes("Wrapped URL")), "WordPress smoke should reject embedded CTA forms without a Wrapped URL context field");
+  assert(missingCtaContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest the missing Wrapped URL field name");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-config-source")), "WordPress smoke should suggest the missing config-source attribute");
   assert(!missingHostedAttrsReport.ok && missingHostedAttrsReport.fixes.some((fix) => fix.includes("data-share-base")), "WordPress smoke should suggest the missing share-base attribute");
   assert(missingHostedAttrsReport.fixes[0].includes('Replace the #jsu-wrapped opening tag with: <div id="jsu-wrapped"'), "WordPress smoke should lead with the full replacement widget tag");
@@ -2214,6 +2226,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"'), "WordPress fix packet should include the config source");
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
+  assert(missingContextFixPacket.includes("Gravity Forms hidden/context fields:"), "WordPress fix packet should call out missing Gravity Forms context fields");
+  assert(missingContextFixPacket.includes("wrapped_url"), "WordPress fix packet should include missing Wrapped URL field names");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.errors.some((error) => error.includes("cache token")), "WordPress smoke should reject hosted data URLs without the shared cache token");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.fixes.some((fix) => fix.includes("data-source")), "WordPress smoke should suggest the fixed data-source attribute for stale data URLs");
   assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");

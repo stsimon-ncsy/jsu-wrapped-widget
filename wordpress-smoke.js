@@ -55,6 +55,47 @@ function hasExpectedWrappedTitle(value) {
   return /^JSU\/NCSY Wrapped\s+-\s+\S/.test(String(value || "").trim());
 }
 
+function embeddedCtaPanelHtml(html, selector) {
+  const id = String(selector || "").charAt(0) === "#" ? String(selector || "").slice(1) : "";
+
+  if (!id) {
+    return "";
+  }
+
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = String(html || "").match(new RegExp("<([a-z][\\w:-]*)\\b(?=[^>]*\\bid\\s*=\\s*['\"]" + escaped + "['\"])[^>]*>[\\s\\S]*?<\\/\\1>", "i"));
+
+  return match ? match[0] : "";
+}
+
+function panelHasContextSignal(panelHtml, patterns) {
+  const normalized = visibleText(panelHtml).toLowerCase() + " " + String(panelHtml || "").toLowerCase().replace(/[_-]+/g, " ");
+
+  return patterns.some((pattern) => pattern.test(normalized));
+}
+
+function missingCtaContextFields(panelHtml) {
+  const checks = [
+    {
+      label: "chapter name",
+      suggestedName: "wrapped_chapter",
+      patterns: [/\bwrapped\s+chapter\b/, /\bchapter\s+name\b/, /\bschool\s+or\s+chapter\b/]
+    },
+    {
+      label: "region",
+      suggestedName: "wrapped_region",
+      patterns: [/\bwrapped\s+region\b/, /\bregion\b/]
+    },
+    {
+      label: "Wrapped URL",
+      suggestedName: "wrapped_url",
+      patterns: [/\bwrapped\s+url\b/, /\bwrapped\s+link\b/, /\bwrapped\s+page\b/, /\bpage\s+url\b/, /\bpage\s+link\b/]
+    }
+  ];
+
+  return checks.filter((check) => !panelHasContextSignal(panelHtml, check.patterns));
+}
+
 function titleSubjectFromValue(value) {
   const match = String(value || "").trim().match(/^(?:JSU\/NCSY|NCSY|JSU)\s+Wrapped\s+-\s+(.+)$/i);
 
@@ -234,6 +275,14 @@ function validateWordPressPage(page, options) {
     if (!/(gform_|gform_wrapper|wrapped_chapter|wrapped_region|wrapped_url)/i.test(html)) {
       errors.push("WordPress page CTA target panel should include Gravity Forms/context fields");
     }
+
+    const panelHtml = embeddedCtaPanelHtml(html, ctaTarget);
+    const missingContextFields = missingCtaContextFields(panelHtml);
+
+    if (missingContextFields.length) {
+      errors.push(`WordPress page CTA form is missing context fields for ${missingContextFields.map((field) => field.label).join(", ")}`);
+      fixes.push(`Add hidden Gravity Forms fields named ${missingContextFields.map((field) => field.suggestedName).join(", ")} so the widget can prefill story context.`);
+    }
   }
 
   if (!hasExpectedWrappedTitle(pageTitle)) {
@@ -273,6 +322,14 @@ function formatFixPacket(page, report) {
   const url = String(page && page.url || DEFAULT_URL);
   const validationReport = report || validateWordPressPage(page);
   const socialTitle = suggestedSocialTitle(page, html);
+  const ctaTarget = attrValue(html, "data-cta-target");
+  const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
+  const contextFieldLines = missingContextFields.length ? [
+    "",
+    "Gravity Forms hidden/context fields:",
+    `Add fields named: ${missingContextFields.map((field) => field.suggestedName).join(", ")}`,
+    "Recommended full set: wrapped_chapter, wrapped_region, wrapped_url, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year"
+  ] : [];
 
   return [
     "WordPress Wrapped launch packet",
@@ -287,6 +344,7 @@ function formatFixPacket(page, report) {
     "Set these metadata fields if your SEO/social plugin exposes them:",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
+    ...contextFieldLines,
     "",
     "Follow-up verification:",
     `node wordpress-smoke.js --url "${url}"`,
@@ -409,8 +467,10 @@ if (require.main === module) {
 
 module.exports = {
   attrValue,
+  embeddedCtaPanelHtml,
   formatFixPacket,
   metaContentValue,
+  missingCtaContextFields,
   suggestedSocialTitle,
   suggestedWidgetTag,
   hasId,
