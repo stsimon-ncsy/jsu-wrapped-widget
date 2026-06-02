@@ -17,6 +17,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm the public page is the intended no-header/no-footer page or approved template.
 - Confirm the page uses the current embed snippet from `README.md` or the current `wordpress-inline-embed.html`.
 - Confirm JSON/config/share assets are loading from GitHub Pages or another public static host.
+- If the live shell is stale, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet` and apply the copy-ready packet.
 - Confirm the page does not add theme CSS that clips the mobile story viewport.
 - Confirm privacy/cookie links are present through the site wrapper, Osano, or the page footer plan.
 - Open the WordPress page on mobile and desktop and verify the story fills the mobile viewport cleanly.

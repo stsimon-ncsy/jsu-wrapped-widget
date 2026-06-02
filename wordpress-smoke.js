@@ -268,6 +268,34 @@ function validateWordPressPage(page, options) {
   };
 }
 
+function formatFixPacket(page, report) {
+  const html = String(page && page.text || "");
+  const url = String(page && page.url || DEFAULT_URL);
+  const validationReport = report || validateWordPressPage(page);
+  const socialTitle = suggestedSocialTitle(page, html);
+
+  return [
+    "WordPress Wrapped launch packet",
+    "",
+    `URL: ${url}`,
+    "",
+    "Replace #jsu-wrapped with:",
+    suggestedWidgetTag(html),
+    "",
+    `Page/social title: ${socialTitle}`,
+    "",
+    "Set these metadata fields if your SEO/social plugin exposes them:",
+    `og:title: ${socialTitle}`,
+    `twitter:title: ${socialTitle}`,
+    "",
+    "Follow-up verification:",
+    `node wordpress-smoke.js --url "${url}"`,
+    "",
+    validationReport.ok ? "Current live smoke: ok" : "Current live smoke still reports:",
+    validationReport.ok ? "" : validationReport.errors.map((error) => `- ${error}`).join("\n")
+  ].filter((line) => line !== "").join("\n");
+}
+
 async function fetchWithTimeout(url, timeoutMs) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -292,6 +320,7 @@ async function fetchWithTimeout(url, timeoutMs) {
 function parseArgs(args) {
   const settings = {
     dryRun: false,
+    fixPacket: false,
     timeoutMs: DEFAULT_TIMEOUT_MS,
     url: DEFAULT_URL
   };
@@ -307,6 +336,8 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--dry-run") {
       settings.dryRun = true;
+    } else if (arg === "--fix-packet") {
+      settings.fixPacket = true;
     } else if (arg === "--help" || arg === "-h") {
       settings.help = true;
     }
@@ -318,9 +349,11 @@ function parseArgs(args) {
 function usage() {
   return [
     "Usage:",
-    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--timeout-ms 15000] [--dry-run]",
+    "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
     "",
-    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, and social title basics."
+    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, and social title basics.",
+    "",
+    "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale."
   ].join("\n");
 }
 
@@ -340,6 +373,14 @@ async function main() {
   console.log(`WordPress smoke checking ${settings.url}`);
   const page = await fetchWithTimeout(settings.url, settings.timeoutMs);
   const report = validateWordPressPage(page);
+
+  if (settings.fixPacket) {
+    console.log(formatFixPacket(page, report));
+    if (settings.fixPacket && !report.ok) {
+      process.exitCode = 1;
+      return;
+    }
+  }
 
   if (!report.ok) {
     console.error("WordPress smoke failed:");
@@ -368,6 +409,7 @@ if (require.main === module) {
 
 module.exports = {
   attrValue,
+  formatFixPacket,
   metaContentValue,
   suggestedSocialTitle,
   suggestedWidgetTag,

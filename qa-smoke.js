@@ -2161,6 +2161,15 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  assert(typeof wordpressSmoke.formatFixPacket === "function", "WordPress smoke should expose a fix-packet formatter");
+  const fixPacket = wordpressSmoke.formatFixPacket({
+    status: 200,
+    text: goodHtml
+      .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"', "")
+      .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const staleDataUrlReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260601h", "sample-wrapped-2026.json"),
@@ -2200,6 +2209,11 @@ function runWordPressSmokeScriptSmoke() {
   assert(!directCtaHrefAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should not add an embedded CTA target when preserving a direct CTA URL");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
   assert(wrongSocialTitleReport.fixes.some((fix) => fix.includes('"JSU/NCSY Wrapped - Baltimore"')), "WordPress smoke should suggest the exact corrected chapter title when it can infer one");
+  assert(fixPacket.includes("WordPress Wrapped launch packet"), "WordPress fix packet should include a clear header");
+  assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
+  assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"'), "WordPress fix packet should include the config source");
+  assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
+  assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.errors.some((error) => error.includes("cache token")), "WordPress smoke should reject hosted data URLs without the shared cache token");
   assert(!staleDataUrlReport.ok && staleDataUrlReport.fixes.some((fix) => fix.includes("data-source")), "WordPress smoke should suggest the fixed data-source attribute for stale data URLs");
   assert(!missingPrivacyReport.ok && missingPrivacyReport.errors.some((error) => error.includes("privacy")), "WordPress smoke should reject pages without privacy/cookie affordances");
@@ -2208,9 +2222,13 @@ function runWordPressSmokeScriptSmoke() {
   assert(listed.includes("node --check wordpress-smoke.js"), "production QA should syntax-check the WordPress smoke helper");
   assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
   assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");
+  assert(source.includes("settings.fixPacket && !report.ok"), "WordPress fix-packet mode should return after the packet on stale pages instead of duplicating detailed fixes");
   assert(readme.includes("node wordpress-smoke.js"), "README should document WordPress smoke checks");
   assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
   assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
+  assert(readme.includes("--fix-packet"), "README should document the WordPress fix-packet helper");
+  assert(docs.includes("--fix-packet"), "production docs should document the WordPress fix-packet helper");
+  assert(checklist.includes("--fix-packet"), "launch checklist should document the WordPress fix-packet helper");
 }
 
 function runRenderSmokeScriptSmoke() {
