@@ -1902,6 +1902,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: JSON.stringify([{ chapter_slug: "baltimore", chapter_name: "Baltimore" }])
     },
+    "sample-teen-wrapped-2026.json": {
+      status: 200,
+      text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya" }])
+    },
     "wrapped-config-2026.json": {
       status: 200,
       text: JSON.stringify({ version: 1, year: "2026" })
@@ -1948,6 +1952,12 @@ function runHostedSmokeScriptSmoke() {
       text: "<title>CTA prefill smoke</title><p>Gravity Forms style fields</p>"
     }
   });
+  const privateTeenJsonAssets = Object.assign({}, goodAssets, {
+    "sample-teen-wrapped-2026.json": {
+      status: 200,
+      text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya", teen_id: "123", email: "maya@example.org" }])
+    }
+  });
   const staleBuilderScriptAssets = Object.assign({}, goodAssets, {
     "wrapped-builder.js": {
       status: 200,
@@ -1958,6 +1968,7 @@ function runHostedSmokeScriptSmoke() {
   const missingSocialPreviewReport = hostedSmoke.validateHostedAssets(missingSocialPreviewAssets);
   const wrongSocialPreviewTypeReport = hostedSmoke.validateHostedAssets(wrongSocialPreviewTypeAssets);
   const publicCtaPrefillSmokeReport = hostedSmoke.validateHostedAssets(publicCtaPrefillSmokeAssets);
+  const privateTeenJsonReport = hostedSmoke.validateHostedAssets(privateTeenJsonAssets);
   const staleBuilderScriptReport = hostedSmoke.validateHostedAssets(staleBuilderScriptAssets);
   const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--base", "https://example.org/wrapped", "--dry-run"], {
     cwd: __dirname,
@@ -1973,9 +1984,11 @@ function runHostedSmokeScriptSmoke() {
   assert(!missingSocialPreviewReport.ok && missingSocialPreviewReport.errors.some((error) => error.includes("social preview image")), "hosted smoke validator should reject a missing social preview image");
   assert(!wrongSocialPreviewTypeReport.ok && wrongSocialPreviewTypeReport.errors.some((error) => error.includes("content type")), "hosted smoke validator should reject the wrong social preview image content type");
   assert(!publicCtaPrefillSmokeReport.ok && publicCtaPrefillSmokeReport.errors.some((error) => error.includes("CTA form prefill page")), "hosted smoke validator should reject a CTA form prefill smoke page without noindex");
+  assert(!privateTeenJsonReport.ok && privateTeenJsonReport.errors.some((error) => error.includes("teen data JSON")), "hosted smoke validator should reject teen JSON with private contact fields");
   assert(!staleBuilderScriptReport.ok && staleBuilderScriptReport.errors.some((error) => error.includes("builder script")), "hosted smoke validator should reject stale builder script handoff behavior");
   assert(dryRunOutput.includes("https://example.org/wrapped/"), "hosted smoke dry run should list normalized base URL");
   assert(dryRunOutput.includes("https://example.org/wrapped/cta-prefill-smoke.html"), "hosted smoke dry run should list CTA form prefill smoke page");
+  assert(dryRunOutput.includes("https://example.org/wrapped/sample-teen-wrapped-2026.json"), "hosted smoke dry run should list teen data JSON");
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");

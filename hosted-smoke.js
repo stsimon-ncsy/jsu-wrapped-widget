@@ -1,5 +1,8 @@
 const DEFAULT_BASE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const DEFAULT_TIMEOUT_MS = 15000;
+const TEEN_PRIVATE_FIELD_RE = /(^|_)(teen|student|crm|contact)?_?(id|email|phone|address|birth|dob|first_name|last_name|legal_name)($|_)/i;
+const EMAIL_VALUE_RE = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+const PHONE_VALUE_RE = /\b(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)\d{3}[-.\s]?\d{4}\b/;
 
 const ASSET_CHECKS = [
   {
@@ -66,6 +69,24 @@ const ASSET_CHECKS = [
       if (!data.some((record) => record && record.chapter_slug === "baltimore")) {
         errors.push("chapter data JSON missing Baltimore sample record");
       }
+    }
+  },
+  {
+    label: "teen data JSON",
+    path: "sample-teen-wrapped-2026.json",
+    validate(text, errors) {
+      const data = parseJson(text, "teen data JSON", errors);
+
+      if (!Array.isArray(data)) {
+        errors.push("teen data JSON is not an array");
+        return;
+      }
+
+      if (!data.some((record) => record && record.teen_slug === "maya-test")) {
+        errors.push("teen data JSON missing Maya test record");
+      }
+
+      data.forEach((record, index) => validateTeenProofOfConceptRecord(record, index, errors));
     }
   },
   {
@@ -136,6 +157,31 @@ function parseJson(text, label, errors) {
     errors.push(`${label} did not parse as JSON: ${error.message}`);
     return null;
   }
+}
+
+function validateTeenProofOfConceptRecord(record, index, errors) {
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    errors.push(`teen data JSON record ${index + 1} is not an object`);
+    return;
+  }
+
+  Object.keys(record).forEach((key) => {
+    const value = record[key];
+
+    if (TEEN_PRIVATE_FIELD_RE.test(key)) {
+      errors.push(`teen data JSON record ${index + 1} includes private field ${key}`);
+      return;
+    }
+
+    if (typeof value === "string" && EMAIL_VALUE_RE.test(value)) {
+      errors.push(`teen data JSON record ${index + 1} includes email-like value in ${key}`);
+      return;
+    }
+
+    if (typeof value === "string" && PHONE_VALUE_RE.test(value)) {
+      errors.push(`teen data JSON record ${index + 1} includes phone-like value in ${key}`);
+    }
+  });
 }
 
 function validatePngDimensions(buffer, expectedWidth, expectedHeight, label, errors) {
