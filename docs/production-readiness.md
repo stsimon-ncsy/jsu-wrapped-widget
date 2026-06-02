@@ -207,8 +207,25 @@ node sync-wordpress-inline.js
 
 The smoke test compares the inline CSS/renderer against `jsu-wrapped.css` and `jsu-wrapped.js`, which prevents stale WordPress handoff code from drifting behind the hosted version.
 
-The page can keep JSON/config hosted on GitHub Pages while the embed runs on `ncsy.org`, as long as the GitHub Pages URLs remain public.
+NCSY.org should own the public page and Gravity Forms shell. GitHub Pages can remain the static asset and JSON host for `jsu-wrapped.js`, `jsu-wrapped.css`, `sample-wrapped-2026.json`, `wrapped-config-2026.json`, share pages, and social images as long as those URLs remain public. That split keeps forms, Osano, GTM, privacy links, and social metadata on the NCSY domain while avoiding WordPress upload restrictions for large JSON files.
+
+The public WordPress page should use the hosted GitHub Pages asset URLs in the widget attributes:
+
+```html
+<div
+  id="jsu-wrapped"
+  data-year="2026"
+  data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260601h"
+  data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260601h"
+  data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
+  data-cta-label="Get involved next year"
+  data-cta-target="#jsuw-wrapped-interest"></div>
+```
+
+Render the Gravity Form in a nearby WordPress shortcode/block or template field, then wrap or target it with `#jsuw-wrapped-interest`. Some WordPress custom HTML blocks do not execute shortcodes, so use a Shortcode block, Gravity Forms block, template field, or server-rendered shortcode when needed. The widget can then reveal the panel and fill matching fields when the final-card CTA is clicked.
 
 For Gravity Forms, add hidden fields whose labels or input names clearly include the context they should receive, such as `chapter name`, `region`, `scope type`, `scope slug`, `scope name`, `program`, `variant`, `year label`, and `wrapped url`. The widget fills matching empty fields when the CTA opens the form.
+
+Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string. Final-card CTA links and builder review links should pass only short context parameters such as `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_chapter_slug`, `wrapped_chapter`, `wrapped_region`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`. Large packets belong in hosted JSON files, a copied textarea value such as `wrapped_submission`, or a file upload/review workflow.
 
 Teen mode is still a proof of concept. Runtime metadata labels it as a test version and sets `robots` to `noindex,nofollow`; do not remove that guard until real teen-level data, consent, and privacy review are complete. The data validator intentionally rejects teen record ID/contact fields and obvious email or phone values so accidental real identifying data does not enter the static package silently.

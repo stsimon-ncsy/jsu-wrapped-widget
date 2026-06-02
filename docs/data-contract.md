@@ -15,6 +15,8 @@ node check-production.js
 - `wrapped-config-2026.json`: copy, metric, brand, CTA, variant, and custom-screen overrides.
 - `sample-teen-wrapped-2026.json`: teen proof-of-concept records only. Do not use real teen-level data until consent and privacy review are complete.
 
+Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string. Static JSON can stay on GitHub Pages or another public static host; Gravity Forms links should receive only short context fields such as `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_region`, `wrapped_year`, and `wrapped_url`.
+
 ## Public Story Records
 
 Each chapter record should include:

@@ -2336,6 +2336,7 @@ function runStaffSubmissionIntakeDocSmoke() {
   const readme = loadText("README.md");
   const playbook = loadText("docs/staff-playbook.md");
   const productionDocs = loadText("docs/production-readiness.md");
+  const dataContract = loadText("docs/data-contract.md");
   const requiredPhrases = [
     "Staff Submission Intake Setup",
     "Recommended Pilot Flow",
@@ -2359,6 +2360,11 @@ function runStaffSubmissionIntakeDocSmoke() {
   assert(readme.includes(path), "README should link the staff submission intake setup doc");
   assert(playbook.includes(path), "staff playbook should link the staff submission intake setup doc");
   assert(productionDocs.includes(path), "production readiness docs should link the staff submission intake setup doc");
+  assert(productionDocs.includes("NCSY.org should own the public page and Gravity Forms shell"), "production docs should document the WordPress/GitHub Pages hosting split");
+  assert(productionDocs.includes("GitHub Pages can remain the static asset and JSON host"), "production docs should document GitHub Pages as the static JSON host");
+  assert(productionDocs.includes("Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string"), "production docs should ban URL-passing full JSON packets");
+  assert(intakeDoc.includes("Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string"), "intake docs should ban URL-passing full JSON packets");
+  assert(dataContract.includes("Do not pass the full story JSON, config JSON, metrics object, or builder submission packet in a query string"), "data contract should ban URL-passing full JSON packets");
 }
 
 function runStaffSubmissionPrivacySmoke() {
