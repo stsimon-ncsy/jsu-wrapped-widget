@@ -909,9 +909,9 @@ function runBuilderSubmissionSmoke() {
   assert(builderHtml.includes("data-builder-submission-status"), "builder should show submission validation feedback near review actions");
   assert(builderHtml.includes('data-builder-field="cta_href"'), "builder should expose a direct CTA URL field");
   assert(builderHtml.includes("Send for review"), "builder should label the staff submission action group");
-  assert(builderHtml.includes("Recommended: Open email draft"), "builder should make the recommended staff review path explicit");
-  assert(builderHtml.includes("paste the copied JSON into the email"), "builder should tell staff exactly how to return the submission JSON");
-  assert(builderHtml.includes("Download submission if email paste is awkward"), "builder should give staff a clear file-attachment fallback");
+  assert(builderHtml.includes("Preferred: Open review form"), "builder should make the form-based staff review path explicit");
+  assert(builderHtml.includes("If no form is set, open an email draft"), "builder should tell staff how to fall back when no form is configured");
+  assert(builderHtml.includes("Download submission if browser copy or form prefill is awkward"), "builder should give staff a clear file-attachment fallback");
   assert(builderHtml.includes("data-review-email"), "builder should allow a configurable submission review email address");
   assert(builderJs.includes("review_email"), "builder should allow review email to be set from a staff distribution URL");
   assert(builderJs.includes("reviewEmail"), "builder should allow camelCase review email links");
