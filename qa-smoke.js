@@ -578,6 +578,33 @@ function runFormPrefillSmoke() {
   assert(context.program_name === "Shabbat Across JSU", "form prefill program name missing");
   assert(context.variant_slug === "donor-recap", "form prefill variant slug missing");
   assert(context.wrapped_url.includes("variant=donor-recap"), "form prefill wrapped URL missing variant context");
+
+  const ctaUrl = api.createCtaPrefillUrl(
+    "https://ncsy.org/ncsy-wrapped-interest/?utm_source=wrapped",
+    {
+      chapter_slug: "baltimore",
+      chapter_name: "Baltimore",
+      region_name: "Atlantic Seaboard",
+      year_label: "2025-2026"
+    },
+    "https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore&variant=donor-recap"
+  );
+  const parsedCtaUrl = new URL(ctaUrl);
+
+  assert(parsedCtaUrl.origin === "https://ncsy.org", "CTA prefill should preserve the form origin");
+  assert(parsedCtaUrl.searchParams.get("utm_source") === "wrapped", "CTA prefill should preserve existing form params");
+  assert(parsedCtaUrl.searchParams.get("wrapped_scope") === "chapter", "CTA prefill scope missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_slug") === "baltimore", "CTA prefill slug missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_name") === "Baltimore", "CTA prefill name missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_chapter_slug") === "baltimore", "CTA prefill chapter slug missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_chapter") === "Baltimore", "CTA prefill chapter name missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_region") === "Atlantic Seaboard", "CTA prefill region missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_variant") === "donor-recap", "CTA prefill variant missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_year") === "2025-2026", "CTA prefill year missing");
+  assert(parsedCtaUrl.searchParams.get("wrapped_url") === "https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore&variant=donor-recap", "CTA prefill wrapped URL missing");
+  assert(!ctaUrl.includes("events_hosted"), "CTA prefill should not include full story JSON or metrics");
+  assert(api.createCtaPrefillUrl("#interest", { chapter_slug: "baltimore" }, "https://example.org/wrapped/?chapter=baltimore") === "#interest", "CTA prefill should leave local fragments alone");
+  assert(api.createCtaPrefillUrl("javascript:alert(1)", { chapter_slug: "baltimore" }, "https://example.org/wrapped/?chapter=baltimore") === "", "CTA prefill should reject unsafe URLs");
 }
 
 function runRuntimeUrlSafetySmoke() {
@@ -2204,6 +2231,9 @@ function runDataContractDocSmoke() {
     "card_overrides",
     "custom_cards",
     "Unsafe protocols",
+    "wrapped_chapter_slug",
+    "wrapped_url",
+    "It does not put the full story JSON or metrics in the URL",
     "Media cards need an image URL",
     "brand_logo",
     "palette",
@@ -2270,6 +2300,8 @@ function runStaffSubmissionIntakeDocSmoke() {
     "Recommended Pilot Flow",
     "Gravity Forms Fields",
     "wrapped_submission",
+    "public final-card CTA",
+    "wrapped_chapter_slug",
     "Do not depend on URL prefill for the full JSON packet",
     "Staff Builder Link",
     "Message To Staff",

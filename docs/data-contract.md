@@ -66,7 +66,7 @@ Common section keys:
 - `palette`: `electric`, `purple-gold`, or `sunset`.
 - `cta_label`: final-card button label.
 - `cta_target` or `ctaTarget`: embedded form panel selector, such as `#jsuw-wrapped-interest`.
-- `cta_href` or `ctaHref`: direct final-card destination URL. Use `https://`, `http://`, root-relative paths such as `/ncsy-wrapped/`, dot-relative paths, query strings, or fragments. Unsafe protocols such as `javascript:` and `data:` are rejected.
+- `cta_href` or `ctaHref`: direct final-card destination URL. Use `https://`, `http://`, root-relative paths such as `/ncsy-wrapped/`, dot-relative paths, query strings, or fragments. Unsafe protocols such as `javascript:` and `data:` are rejected. When the CTA opens a URL instead of an embedded panel, the widget appends short Gravity Forms-friendly context params such as `wrapped_scope`, `wrapped_slug`, `wrapped_name`, `wrapped_chapter_slug`, `wrapped_chapter`, `wrapped_region`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`. It does not put the full story JSON or metrics in the URL.
 - `record_overrides`: corrected data values, such as a fixed `events_hosted` count.
 - `card_overrides`: generated-card copy overrides keyed by card id.
 - `custom_cards`: extra screens for local story needs.

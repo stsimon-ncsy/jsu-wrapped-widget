@@ -446,6 +446,64 @@
     };
   }
 
+  function createCtaPrefillParams(record, url) {
+    var context = createFormPrefillContext(record, url);
+
+    return compactPayload({
+      wrapped_source: "jsu_wrapped",
+      wrapped_scope: context.scope_type,
+      wrapped_slug: context.scope_slug,
+      wrapped_name: context.scope_name,
+      wrapped_chapter_slug: context.chapter_slug,
+      wrapped_chapter: context.chapter_name,
+      wrapped_region: context.region_name,
+      wrapped_variant: context.variant_slug,
+      wrapped_year: context.year_label || context.school_year,
+      wrapped_program_slug: context.program_slug,
+      wrapped_program: context.program_name,
+      wrapped_campaign_slug: context.campaign_slug,
+      wrapped_campaign: context.campaign_name,
+      wrapped_url: context.wrapped_url
+    });
+  }
+
+  function createCtaPrefillUrl(href, record, currentUrl) {
+    var rawHref = asText(href, "").trim();
+    var wrappedUrl = asText(currentUrl || root && root.location && root.location.href, "");
+    var baseUrl = wrappedUrl || "https://jsu-wrapped.local/";
+    var parsed = null;
+
+    if (!isSafeStaticUrl(rawHref)) {
+      return "";
+    }
+
+    if (rawHref.charAt(0) === "#") {
+      return rawHref;
+    }
+
+    try {
+      parsed = new URL(rawHref, baseUrl);
+    } catch (error) {
+      return rawHref;
+    }
+
+    var params = createCtaPrefillParams(record, wrappedUrl);
+
+    Object.keys(params).forEach(function (key) {
+      parsed.searchParams.set(key, params[key]);
+    });
+
+    if (/^https?:\/\//i.test(rawHref)) {
+      return parsed.toString();
+    }
+
+    if (rawHref.charAt(0) === "?") {
+      return parsed.search + parsed.hash;
+    }
+
+    return parsed.pathname + parsed.search + parsed.hash;
+  }
+
   function selectorEscape(value) {
     if (root.CSS && typeof root.CSS.escape === "function") {
       return root.CSS.escape(value);
@@ -3634,12 +3692,13 @@
     var targetSelector = asText(trigger && trigger.getAttribute("data-jsuw-cta-target") || cta.target, "");
     var href = asText(trigger && trigger.getAttribute("data-jsuw-cta-href") || cta.href, "");
     var safeHref = isSafeStaticUrl(href) ? href : "";
+    var prefilledHref = safeHref ? createCtaPrefillUrl(safeHref, state.record, root && root.location && root.location.href) : "";
     var panel = null;
 
     trackAnalyticsEvent(state, "jsu_wrapped_cta_click", {
       cta_label: label,
       cta_target: targetSelector,
-      cta_href: safeHref
+      cta_href: prefilledHref || safeHref
     });
 
     if (hasValue(targetSelector) && root.document && typeof root.document.querySelector === "function") {
@@ -3684,8 +3743,8 @@
       return;
     }
 
-    if (hasValue(safeHref) && root.location) {
-      root.location.href = safeHref;
+    if (hasValue(prefilledHref || safeHref) && root.location) {
+      root.location.href = prefilledHref || safeHref;
       return;
     }
 
@@ -4502,6 +4561,7 @@
     buildRegionUrl: buildRegionUrl,
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,
+    createCtaPrefillUrl: createCtaPrefillUrl,
     createFallbackSvg: createFallbackSvg,
     getVariantSlug: getVariantSlug,
     getProgramSlug: getProgramSlug,

@@ -40,6 +40,8 @@ wrapped_submission
 
 Make **Submission JSON** a paragraph/textarea field with the parameter name `wrapped_submission`. Do not depend on URL prefill for the full JSON packet; it can be too long for reliable browser/server handling. Staff should paste the copied JSON into this field when it is blank. This is the only required field for automated merging, but name/email and preview URL make review much easier.
 
+The public final-card CTA can use the same pattern for a simpler interest form. Set `cta_href` to the Gravity Forms page URL; the widget will append short context params like `wrapped_chapter_slug`, `wrapped_chapter`, `wrapped_region`, `wrapped_variant`, `wrapped_year`, and `wrapped_url`. Keep any actual submission JSON in a textarea or upload flow, not in the URL.
+
 ## Staff Builder Link
 
 After the form is live, create a pilot link from the builder:
