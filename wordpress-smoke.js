@@ -298,6 +298,10 @@ function suggestedSocialUrl(page) {
 }
 
 function matchesSocialUrl(value, expected) {
+  if (!String(value || "").trim()) {
+    return false;
+  }
+
   return normalizedUrl(value, expected) === normalizedUrl(expected, DEFAULT_URL);
 }
 
@@ -596,6 +600,16 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
+  if (!hasExpectedWrappedTitle(ogTitle)) {
+    errors.push("WordPress page og:title should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
+    fixes.push(`Set og:title to "${socialTitle}".`);
+  }
+
+  if (!hasExpectedWrappedTitle(twitterTitle)) {
+    errors.push("WordPress page twitter:title should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
+    fixes.push(`Set twitter:title to "${socialTitle}".`);
+  }
+
   if (String(ogType || "").trim().toLowerCase() !== "website") {
     errors.push("WordPress page og:type should be website");
     fixes.push("Set og:type to website.");
@@ -635,12 +649,32 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:url and twitter:url to ${socialUrl}.`);
   }
 
+  if (!matchesSocialUrl(ogUrl, socialUrl)) {
+    errors.push("WordPress page og:url should use the chapter URL");
+    fixes.push(`Set og:url to ${socialUrl}.`);
+  }
+
+  if (!matchesSocialUrl(twitterUrl, socialUrl)) {
+    errors.push("WordPress page twitter:url should use the chapter URL");
+    fixes.push(`Set twitter:url to ${socialUrl}.`);
+  }
+
   if (!/og:image|twitter:image/i.test(html)) {
     errors.push("WordPress page missing social image metadata");
     fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
   } else if (!hasExpectedSocialImage(ogImage) && !hasExpectedSocialImage(twitterImage)) {
     errors.push("WordPress page social image metadata should use the JSU/NCSY Wrapped campaign image");
     fixes.push(`Set og:image and twitter:image to ${SOCIAL_IMAGE_URL}.`);
+  }
+
+  if (!hasExpectedSocialImage(ogImage)) {
+    errors.push("WordPress page og:image should use the JSU/NCSY Wrapped campaign image");
+    fixes.push(`Set og:image to ${SOCIAL_IMAGE_URL}.`);
+  }
+
+  if (!hasExpectedSocialImage(twitterImage)) {
+    errors.push("WordPress page twitter:image should use the JSU/NCSY Wrapped campaign image");
+    fixes.push(`Set twitter:image to ${SOCIAL_IMAGE_URL}.`);
   }
 
   if (!hasExpectedSocialImage(ogImageSecure)) {

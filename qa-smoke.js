@@ -2155,6 +2155,7 @@ function runWordPressSmokeScriptSmoke() {
   const ogImageTag = '<meta property="og:image" content="' + socialImageUrl + '">';
   const ogImageSecureTag = '<meta property="og:image:secure_url" content="' + socialImageUrl + '">';
   const twitterImageTag = '<meta name="twitter:image" content="' + socialImageUrl + '">';
+  const twitterTitleTag = '<meta name="twitter:title" content="JSU/NCSY Wrapped - Baltimore">';
   const twitterCardTag = '<meta name="twitter:card" content="summary_large_image">';
   const ogImageWidthTag = '<meta property="og:image:width" content="1200">';
   const ogImageHeightTag = '<meta property="og:image:height" content="630">';
@@ -2194,6 +2195,7 @@ function runWordPressSmokeScriptSmoke() {
     ogTypeTag,
     ogSiteNameTag,
     '<meta property="og:title" content="JSU/NCSY Wrapped - Baltimore">',
+    twitterTitleTag,
     metaDescriptionTag,
     ogDescriptionTag,
     twitterDescriptionTag,
@@ -2316,6 +2318,14 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml
       .replace(ogImageTag, "")
       .replace(ogImageSecureTag, "")
+      .replace(twitterImageTag, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingTwitterPairedMetadataReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml
+      .replace(twitterTitleTag, "")
+      .replace(twitterUrlTag, "")
       .replace(twitterImageTag, ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2500,12 +2510,15 @@ function runWordPressSmokeScriptSmoke() {
   assert(unsafeCtaHrefStaleAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should fall back to the embedded CTA target for unsafe direct URLs");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
   assert(wrongSocialTitleReport.fixes.some((fix) => fix.includes('"JSU/NCSY Wrapped - Baltimore"')), "WordPress smoke should suggest the exact corrected chapter title when it can infer one");
+  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:title")), "WordPress smoke should reject pages without twitter:title metadata");
   assert(!missingSocialImageReport.ok && missingSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject pages without social image metadata");
   assert(missingSocialImageReport.fixes.some((fix) => fix.includes("og:image") && fix.includes("wrapped-social-preview.png")), "WordPress smoke should suggest the campaign social image");
+  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:image")), "WordPress smoke should reject pages without twitter:image metadata");
   assert(!wrongSocialImageReport.ok && wrongSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject generic social image metadata");
   assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("canonical URL")), "WordPress smoke should reject pages without canonical URL metadata");
   assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("social URL")), "WordPress smoke should reject pages without social URL metadata");
   assert(missingSocialUrlReport.fixes.some((fix) => fix.includes("og:url") && fix.includes("?chapter=baltimore")), "WordPress smoke should suggest chapter-specific social URL metadata");
+  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:url")), "WordPress smoke should reject pages without twitter:url metadata");
   assert(!missingSocialDescriptionReport.ok && missingSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject pages without social description metadata");
   assert(missingSocialDescriptionReport.fixes.some((fix) => fix.includes("og:description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific social description metadata");
   assert(!missingMetaDescriptionReport.ok && missingMetaDescriptionReport.errors.some((error) => error.includes("meta description")), "WordPress smoke should reject pages without plain meta description metadata");
