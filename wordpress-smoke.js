@@ -251,6 +251,37 @@ function suggestedSocialImageAlt(page, html) {
   return subject ? `JSU/NCSY Wrapped social preview for ${subject}` : "JSU/NCSY Wrapped social preview";
 }
 
+function suggestedSocialDescription(page, html) {
+  const socialTitle = suggestedSocialTitle(page, html);
+  const subject = titleSubjectFromValue(socialTitle);
+  const hasSpecificSubject = subject && !/^\[/.test(subject);
+
+  return hasSpecificSubject
+    ? `See the JSU/NCSY Wrapped recap for ${subject}: events, teens, engagement moments, and community story.`
+    : "See the JSU/NCSY Wrapped recap: events, teens, engagement moments, and community story.";
+}
+
+function hasExpectedSocialDescription(value, expected, subject) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  const normalized = text.toLowerCase();
+  const expectedNormalized = String(expected || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const subjectText = String(subject || "").trim().toLowerCase();
+
+  if (!text || /\b(privacy policy|cookie policy|behavioral standards)\b/i.test(text)) {
+    return false;
+  }
+
+  if (expectedNormalized && normalized === expectedNormalized) {
+    return true;
+  }
+
+  if (!/jsu\/ncsy wrapped/i.test(text)) {
+    return false;
+  }
+
+  return !subjectText || /^\[/.test(subjectText) || normalized.includes(subjectText);
+}
+
 function normalizedUrl(value, base) {
   try {
     const parsed = new URL(String(value || ""), String(base || DEFAULT_URL));
@@ -421,6 +452,8 @@ function validateWordPressPage(page, options) {
   const pageTitle = titleValue(html);
   const ogTitle = metaContentValue(html, "og:title");
   const twitterTitle = metaContentValue(html, "twitter:title");
+  const ogDescription = metaContentValue(html, "og:description");
+  const twitterDescription = metaContentValue(html, "twitter:description");
   const canonicalUrl = linkHrefValue(html, "canonical");
   const ogUrl = metaContentValue(html, "og:url");
   const twitterUrl = metaContentValue(html, "twitter:url");
@@ -431,8 +464,10 @@ function validateWordPressPage(page, options) {
   const ogImageHeight = metaContentValue(html, "og:image:height");
   const ogImageAlt = metaContentValue(html, "og:image:alt");
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialDescription = suggestedSocialDescription(page, html);
   const socialUrl = suggestedSocialUrl(page);
   const socialImageAlt = suggestedSocialImageAlt(page, html);
+  const socialSubject = titleSubjectFromValue(socialTitle);
 
   if (status < 200 || status >= 300) {
     errors.push(`WordPress page returned HTTP ${status || "unknown"}`);
@@ -556,6 +591,14 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title and twitter:title to "${socialTitle}".`);
   }
 
+  if (!/og:description|twitter:description/i.test(html)) {
+    errors.push("WordPress page missing social description metadata");
+    fixes.push(`Add og:description and twitter:description metadata using "${socialDescription}".`);
+  } else if (!hasExpectedSocialDescription(ogDescription, socialDescription, socialSubject) && !hasExpectedSocialDescription(twitterDescription, socialDescription, socialSubject)) {
+    errors.push("WordPress page social description metadata should use chapter-specific JSU/NCSY Wrapped copy");
+    fixes.push(`Set og:description and twitter:description to "${socialDescription}".`);
+  }
+
   if (!canonicalUrl) {
     errors.push("WordPress page missing canonical URL metadata");
     fixes.push(`Set the canonical URL to ${socialUrl}.`);
@@ -620,6 +663,7 @@ function formatFixPacket(page, report, options) {
   const url = String(page && page.url || DEFAULT_URL);
   const validationReport = report || validateWordPressPage(page, settings);
   const socialTitle = suggestedSocialTitle(page, html);
+  const socialDescription = suggestedSocialDescription(page, html);
   const socialUrl = suggestedSocialUrl(page);
   const socialImageAlt = suggestedSocialImageAlt(page, html);
   const ctaTarget = attrValue(html, "data-cta-target");
@@ -671,6 +715,8 @@ function formatFixPacket(page, report, options) {
     "Set these metadata fields if your SEO/social plugin exposes them:",
     `og:title: ${socialTitle}`,
     `twitter:title: ${socialTitle}`,
+    `og:description: ${socialDescription}`,
+    `twitter:description: ${socialDescription}`,
     `canonical: ${socialUrl}`,
     `og:url: ${socialUrl}`,
     `twitter:url: ${socialUrl}`,
@@ -853,6 +899,7 @@ module.exports = {
   linkHrefValue,
   matchesSocialUrl,
   resolveCtaDestinationUrl,
+  suggestedSocialDescription,
   suggestedSocialImageAlt,
   suggestedSocialUrl,
   titleFromSlug,
