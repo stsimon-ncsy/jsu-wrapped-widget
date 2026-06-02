@@ -130,7 +130,7 @@ After the WordPress page is pasted and published, run the live WordPress shell s
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 ```
 
-That check verifies the WordPress page has the widget container, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title markup.
+That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title markup.
 
 If the live WordPress page is stale, print one compact copy-ready update packet:
 

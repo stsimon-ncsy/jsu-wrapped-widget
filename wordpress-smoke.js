@@ -1,11 +1,14 @@
 const DEFAULT_URL = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
 const DEFAULT_TIMEOUT_MS = 15000;
 const RELEASE_TOKEN = "jsuw-prod-20260601h";
+const HOSTED_ASSET_BASE = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/";
 const CHAPTER_DATA_ATTR = 'data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
 const CONFIG_DATA_ATTR = 'data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=' + RELEASE_TOKEN + '"';
 const SHARE_BASE_ATTR = 'data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"';
 const TEEN_DATA_ATTR = 'data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=' + RELEASE_TOKEN + '"';
 const ASSETS_BASE_ATTR = 'data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"';
+const WIDGET_CSS_TAG = '<link rel="stylesheet" href="' + HOSTED_ASSET_BASE + 'jsu-wrapped.css?v=' + RELEASE_TOKEN + '">';
+const WIDGET_JS_TAG = '<script src="' + HOSTED_ASSET_BASE + 'jsu-wrapped.js?v=' + RELEASE_TOKEN + '"></script>';
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -34,6 +37,19 @@ function attrValue(html, attrName) {
   const match = String(html || "").match(new RegExp("\\b" + escaped + "\\s*=\\s*(['\"])(.*?)\\1", "i"));
 
   return match ? match[2] : "";
+}
+
+function attrValues(html, attrName) {
+  const escaped = String(attrName || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp("\\b" + escaped + "\\s*=\\s*(['\"])(.*?)\\1", "ig");
+  const values = [];
+  let match;
+
+  while ((match = pattern.exec(String(html || "")))) {
+    values.push(match[2]);
+  }
+
+  return values;
 }
 
 function titleValue(html) {
@@ -142,13 +158,29 @@ function suggestedSocialTitle(page, html) {
 }
 
 function hasReleaseToken(url) {
-  return String(url || "").includes("?v=" + RELEASE_TOKEN) || String(url || "").includes("&v=" + RELEASE_TOKEN);
+  const text = String(url || "");
+  return text.includes("?v=" + RELEASE_TOKEN) || text.includes("&v=" + RELEASE_TOKEN) || text.includes("&amp;v=" + RELEASE_TOKEN);
 }
 
 function isSafeCtaHref(value) {
   const text = String(value || "").trim();
 
   return !text || /^(https?:\/\/|\/(?!\/)|\.\/|\.\.\/|\?|#)/i.test(text);
+}
+
+function hostedAssetUrls(html, fileName, attrName) {
+  const escapedFile = String(fileName || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp("(^|/)" + escapedFile + "(?:[?#].*)?$", "i");
+
+  return attrValues(html, attrName).filter((value) => pattern.test(String(value || "")));
+}
+
+function hasInlineWidgetStyles(html) {
+  return /<style\b[^>]*>[\s\S]*?#jsu-wrapped[\s\S]*?\.jsuw-shell[\s\S]*?<\/style>/i.test(String(html || ""));
+}
+
+function hasInlineWidgetScript(html) {
+  return /<script\b(?![^>]*\bsrc\s*=)[^>]*>[\s\S]*?(?:\(function\s*\(root,\s*factory\)|root\.JSUWrapped|JSUWrapped)[\s\S]*?<\/script>/i.test(String(html || ""));
 }
 
 function escapeAttr(value) {
@@ -226,6 +258,25 @@ function validateWordPressPage(page, options) {
 
   if (!hasId(html, "jsu-wrapped")) {
     errors.push("WordPress page missing widget container #jsu-wrapped");
+  }
+
+  const stylesheetUrls = hostedAssetUrls(html, "jsu-wrapped.css", "href");
+  const scriptUrls = hostedAssetUrls(html, "jsu-wrapped.js", "src");
+
+  if (!hasInlineWidgetStyles(html) && !stylesheetUrls.length) {
+    errors.push("WordPress page missing widget stylesheet");
+    fixes.push(`Add the hosted widget stylesheet: ${WIDGET_CSS_TAG}`);
+  } else if (stylesheetUrls.some((url) => !hasReleaseToken(url))) {
+    errors.push("WordPress page widget stylesheet is missing the shared cache token");
+    fixes.push(`Use the current hosted widget stylesheet: ${WIDGET_CSS_TAG}`);
+  }
+
+  if (!hasInlineWidgetScript(html) && !scriptUrls.length) {
+    errors.push("WordPress page missing widget script");
+    fixes.push(`Add the hosted widget script: ${WIDGET_JS_TAG}`);
+  } else if (scriptUrls.some((url) => !hasReleaseToken(url))) {
+    errors.push("WordPress page widget script is missing the shared cache token");
+    fixes.push(`Use the current hosted widget script: ${WIDGET_JS_TAG}`);
   }
 
   if (!dataSource) {
@@ -350,6 +401,11 @@ function formatFixPacket(page, report) {
     "",
     "Replace #jsu-wrapped with:",
     suggestedWidgetTag(html),
+    "",
+    "Hosted CSS/JS assets:",
+    WIDGET_CSS_TAG,
+    WIDGET_JS_TAG,
+    "Skip these only if you paste the full self-contained wordpress-inline-embed.html block.",
     "",
     `Page/social title: ${socialTitle}`,
     "",
@@ -479,12 +535,16 @@ if (require.main === module) {
 
 module.exports = {
   attrValue,
+  attrValues,
   embeddedCtaPanelHtml,
   formatFixPacket,
+  hasInlineWidgetScript,
+  hasInlineWidgetStyles,
   metaContentValue,
   missingCtaContextFields,
   suggestedSocialTitle,
   suggestedWidgetTag,
+  hostedAssetUrls,
   hasId,
   headerValue,
   isSafeCtaHref,
