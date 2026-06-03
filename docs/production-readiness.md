@@ -178,7 +178,7 @@ Allowed global CSS constructs are limited to animation/support wrappers such as 
 
 On mobile, the widget should feel like a story surface rather than a small embedded card. Keep `#jsu-wrapped` full-width and horizontally clipped inside its own scoped container, then let `.jsuw-shell` and `.jsuw-story` fill the available mobile viewport under the small-screen media queries. The production smoke test checks for the scoped overflow guard, full-width mobile shell, `100vh`/`100svh` fallbacks, dynamic `100dvh` story sizing, and the mobile aspect-ratio override.
 
-Narrow phone layouts also need the story chrome to compress instead of clipping. At widths around 390-430px, hide the redundant numeric card count, keep the sound/autoplay controls inside the header track, reduce the fixed Next-button minimum, and keep the bottom controls high enough to clear floating privacy/accessibility widgets.
+Narrow phone layouts also need the story chrome to compress instead of clipping. At widths around 390-430px, hide the redundant numeric card count, keep the sound/autoplay controls inside the header track, reduce the fixed Next-button minimum, and keep the bottom controls high enough and inset far enough from the right edge to clear floating privacy/accessibility widgets.
 
 ## Big Stat Glyph Safety
 

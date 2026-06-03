@@ -1892,6 +1892,7 @@ function runMobileFullscreenLayoutSmoke() {
   const mobileBody = cssAtRuleBody(css, "@media (max-width: 600px)");
   const mobileControlsBody = mobileBody.match(/#jsu-wrapped \.jsuw-controls\s*\{([^}]*)\}/);
   const mobileControlsBottom = mobileControlsBody ? cssNumericDeclaration(mobileControlsBody[1], "bottom") : NaN;
+  const mobileControlsRight = mobileControlsBody ? cssNumericDeclaration(mobileControlsBody[1], "right") : NaN;
 
   assert(/#jsu-wrapped\s*\{/.test(css), "widget root CSS block is missing");
   assert(css.includes("overflow-x: hidden;"), "widget root should clip horizontal overflow inside the scoped container");
@@ -1905,6 +1906,7 @@ function runMobileFullscreenLayoutSmoke() {
   assert(/#jsu-wrapped \.jsuw-card-count\s*\{[^}]*display:\s*none;/.test(mobileBody), "mobile story chrome should hide the count to avoid clipped sound/autoplay controls");
   assert(/#jsu-wrapped \.jsuw-nav-button--next\s*\{[^}]*min-width:\s*88px;/.test(mobileBody), "mobile story chrome should shrink the Next button to avoid clipped controls");
   assert(mobileControlsBottom >= 24, `mobile story controls should sit above third-party floating widgets; bottom is ${mobileControlsBottom}`);
+  assert(mobileControlsRight >= 56, `mobile story controls should leave room for third-party floating widgets; right is ${mobileControlsRight}`);
   assert(docs.includes("Mobile Fullscreen Contract"), "production docs missing mobile fullscreen contract");
   assert(docs.includes("floating privacy/accessibility widgets"), "production docs should mention keeping controls clear of floating privacy/accessibility widgets");
 }
