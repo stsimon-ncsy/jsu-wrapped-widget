@@ -2292,6 +2292,20 @@ function runWordPressSmokeScriptSmoke() {
       .replace("jsu-wrapped.js?v=jsuw-prod-20260603a", "jsu-wrapped.js"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const inlineCss = '<style>#jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; }</style>';
+  const inlineJs = '<script>(function (root, factory) { window.JSUWrapped = {}; })();</script>';
+  const inlineGoodHtml = goodHtml
+    .replace(hostedCssTag, inlineCss)
+    .replace(hostedJsTag, inlineJs)
+    .replace("</head><body>", '</head><body><div id="jsu-wrapped-wordpress-shell">')
+    .replace(ctaPanelHtml, ctaPanelHtml + "</div>");
+  const lateInlineCssReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: inlineGoodHtml
+      .replace(inlineCss, "")
+      .replace('<div id="jsu-wrapped-wordpress-shell">', '<div id="jsu-wrapped-wordpress-shell"><script src="https://cmp.osano.com/example/osano.js"></script>' + inlineCss),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const missingPanelReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml.replace(ctaPanelHtml, ""),
@@ -2546,6 +2560,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingWidgetAssetsReport.fixes.some((fix) => fix.includes("jsu-wrapped.js")), "WordPress smoke should suggest adding the widget script");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("stylesheet") && error.includes("cache token")), "WordPress smoke should reject stale widget stylesheet URLs");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("script") && error.includes("cache token")), "WordPress smoke should reject stale widget script URLs");
+  assert(!lateInlineCssReport.ok && lateInlineCssReport.errors.some((error) => error.includes("inline CSS") && error.includes("first paint")), "WordPress smoke should reject inline CSS that loads after shell markup");
+  assert(!lateInlineCssReport.ok && lateInlineCssReport.errors.some((error) => error.includes("Osano") && error.includes("first paint")), "WordPress smoke should reject inline CSS that loads after Osano");
+  assert(lateInlineCssReport.fixes.some((fix) => fix.includes("Move the inline <style> block above #jsu-wrapped-wordpress-shell")), "WordPress smoke should suggest moving inline CSS before the shell");
   assert(!missingPanelReport.ok && missingPanelReport.errors.some((error) => error.includes("CTA target")), "WordPress smoke should reject missing CTA target panels");
   assert(!missingCtaContextReport.ok && missingCtaContextReport.errors.some((error) => error.includes("Wrapped URL")), "WordPress smoke should reject embedded CTA forms without a Wrapped URL context field");
   assert(missingCtaContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest the missing Wrapped URL field name");

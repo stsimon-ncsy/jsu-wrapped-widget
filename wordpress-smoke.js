@@ -387,8 +387,36 @@ function hostedAssetUrls(html, fileName, attrName) {
   return attrValues(html, attrName).filter((value) => pattern.test(String(value || "")));
 }
 
+function tagIndexWithId(html, id) {
+  const source = String(html || "");
+  const escaped = String(id || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = source.match(new RegExp("<[a-z][\\w:-]*\\b(?=[^>]*\\bid\\s*=\\s*['\"]" + escaped + "['\"])[^>]*>", "i"));
+
+  return match && typeof match.index === "number" ? match.index : -1;
+}
+
+function inlineWidgetStyleIndex(html) {
+  const source = String(html || "");
+  const pattern = /<style\b[^>]*>[\s\S]*?<\/style>/ig;
+  let match;
+
+  while ((match = pattern.exec(source))) {
+    if (/#jsu-wrapped/i.test(match[0]) && /\.jsuw-shell/i.test(match[0])) {
+      return match.index;
+    }
+  }
+
+  return -1;
+}
+
+function osanoScriptIndex(html) {
+  const match = String(html || "").match(/<script\b[^>]*\bsrc\s*=\s*['"][^'"]*cmp\.osano\.com[^'"]*['"][^>]*>/i);
+
+  return match && typeof match.index === "number" ? match.index : -1;
+}
+
 function hasInlineWidgetStyles(html) {
-  return /<style\b[^>]*>[\s\S]*?#jsu-wrapped[\s\S]*?\.jsuw-shell[\s\S]*?<\/style>/i.test(String(html || ""));
+  return inlineWidgetStyleIndex(html) !== -1;
 }
 
 function hasInlineWidgetScript(html) {
@@ -433,6 +461,12 @@ function addWidgetTagFix(html, fixes, options) {
 
   if (!fixes.some((fix) => fix.includes("Replace the #jsu-wrapped opening tag with:"))) {
     fixes.unshift(`Replace the #jsu-wrapped opening tag with: ${replacement}`);
+  }
+}
+
+function addUniqueFix(fixes, fix) {
+  if (!fixes.includes(fix)) {
+    fixes.push(fix);
   }
 }
 
@@ -495,6 +529,9 @@ function validateWordPressPage(page, options) {
 
   const stylesheetUrls = hostedAssetUrls(html, "jsu-wrapped.css", "href");
   const scriptUrls = hostedAssetUrls(html, "jsu-wrapped.js", "src");
+  const inlineStyleIndex = inlineWidgetStyleIndex(html);
+  const shellIndex = tagIndexWithId(html, "jsu-wrapped-wordpress-shell");
+  const osanoIndex = osanoScriptIndex(html);
 
   if (!hasInlineWidgetStyles(html) && !stylesheetUrls.length) {
     errors.push("WordPress page missing widget stylesheet");
@@ -502,6 +539,16 @@ function validateWordPressPage(page, options) {
   } else if (stylesheetUrls.some((url) => !hasReleaseToken(url))) {
     errors.push("WordPress page widget stylesheet is missing the shared cache token");
     fixes.push(`Use the current hosted widget stylesheet: ${WIDGET_CSS_TAG}`);
+  }
+
+  if (inlineStyleIndex !== -1 && shellIndex !== -1 && inlineStyleIndex > shellIndex) {
+    errors.push("WordPress inline CSS loads after shell markup, which can cause a short first paint");
+    addUniqueFix(fixes, "Move the inline <style> block above #jsu-wrapped-wordpress-shell and before the Osano script, or paste the current wordpress-inline-embed.html block.");
+  }
+
+  if (inlineStyleIndex !== -1 && osanoIndex !== -1 && inlineStyleIndex > osanoIndex) {
+    errors.push("WordPress inline CSS loads after Osano, which can delay fullscreen first paint");
+    addUniqueFix(fixes, "Move the inline <style> block above #jsu-wrapped-wordpress-shell and before the Osano script, or paste the current wordpress-inline-embed.html block.");
   }
 
   if (!hasInlineWidgetScript(html) && !scriptUrls.length) {
