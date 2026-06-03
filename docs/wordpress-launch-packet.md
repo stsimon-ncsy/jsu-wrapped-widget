@@ -25,6 +25,7 @@ Do not paste separate CSS/JS tags a second time if you use the block above.
 ## Page And Social Metadata
 
 Set these values where the WordPress SEO/social plugin exposes them.
+Yoast may render `og:type=article`, `og:site_name=NCSY`, and a Cloudinary-optimized copy of the campaign image; that is acceptable as long as the raw page has the correct Wrapped title, description, canonical/OG URL, and `wrapped-social-preview` image.
 
 ```text
 Page/social title: JSU/NCSY Wrapped - Baltimore

@@ -136,7 +136,7 @@ After the WordPress page is pasted and published, run the live WordPress shell s
 node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 ```
 
-That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and basic JSU/NCSY Wrapped social title, meta description, `og:type`, `og:site_name`, `og:description`, `twitter:description`, image markup, `og:image:secure_url`, and `twitter:image:alt`.
+That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and crawler-readable JSU/NCSY Wrapped title, meta description, `og:description`, `og:site_name`, canonical/Open Graph URL, and campaign image metadata. Yoast/Open Graph output is accepted as the primary social preview source; Twitter-specific tags such as `twitter:image:alt` and image alt fields are recommended but not required when the Open Graph preview is complete.
 
 If the live WordPress page is stale, print one compact copy-ready update packet:
 
@@ -160,7 +160,7 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 
 That destination check fetches the Gravity Forms page and confirms it is HTML with the hidden/context fields the widget pre-populates.
 
-The packet includes a single paste-ready WordPress HTML block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together. It also includes the exact page/social title, suggested canonical/social URLs, meta description, `og:type`, `og:site_name`, `og:title`, `twitter:title`, `og:description`, `twitter:description`, `og:image`, `og:image:secure_url`, `twitter:image`, `og:image:alt`, `twitter:image:alt`, large-card metadata, and the follow-up smoke command.
+The packet includes a single paste-ready WordPress HTML block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together. It also includes the exact page/social title, suggested canonical/social URLs, meta description, Open Graph identity, campaign image metadata, optional Twitter/card metadata, optional image alt metadata, and the follow-up smoke command.
 
 For a local render check on machines with Chrome or Edge installed, run:
 

@@ -83,7 +83,9 @@ function hasExpectedWrappedTitle(value) {
 }
 
 function hasExpectedSocialImage(value) {
-  return String(value || "").trim().split("?")[0] === SOCIAL_IMAGE_URL;
+  const normalized = String(value || "").trim().split("?")[0];
+
+  return normalized === SOCIAL_IMAGE_URL || /(?:^|\/)wrapped-social-preview(?:\/wrapped-social-preview)?\.png$/i.test(normalized);
 }
 
 function embeddedCtaPanelHtml(html, selector) {
@@ -605,19 +607,19 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:title to "${socialTitle}".`);
   }
 
-  if (!hasExpectedWrappedTitle(twitterTitle)) {
+  if (twitterTitle && !hasExpectedWrappedTitle(twitterTitle)) {
     errors.push("WordPress page twitter:title should use JSU/NCSY Wrapped - [Chapter or Scope Name]");
     fixes.push(`Set twitter:title to "${socialTitle}".`);
   }
 
-  if (String(ogType || "").trim().toLowerCase() !== "website") {
-    errors.push("WordPress page og:type should be website");
-    fixes.push("Set og:type to website.");
+  if (!["article", "website"].includes(String(ogType || "").trim().toLowerCase())) {
+    errors.push("WordPress page og:type should be website or article");
+    fixes.push("Set og:type to website or article.");
   }
 
-  if (String(ogSiteName || "").trim() !== "JSU/NCSY Wrapped") {
-    errors.push("WordPress page social site name metadata should be JSU/NCSY Wrapped");
-    fixes.push("Set og:site_name to JSU/NCSY Wrapped.");
+  if (!["JSU/NCSY Wrapped", "NCSY", "JSU"].includes(String(ogSiteName || "").trim())) {
+    errors.push("WordPress page social site name metadata should identify NCSY, JSU, or JSU/NCSY Wrapped");
+    fixes.push("Set og:site_name to NCSY, JSU, or JSU/NCSY Wrapped.");
   }
 
   if (!hasExpectedSocialDescription(metaDescription, socialDescription, socialSubject)) {
@@ -654,7 +656,7 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:url to ${socialUrl}.`);
   }
 
-  if (!matchesSocialUrl(twitterUrl, socialUrl)) {
+  if (twitterUrl && !matchesSocialUrl(twitterUrl, socialUrl)) {
     errors.push("WordPress page twitter:url should use the chapter URL");
     fixes.push(`Set twitter:url to ${socialUrl}.`);
   }
@@ -672,32 +674,32 @@ function validateWordPressPage(page, options) {
     fixes.push(`Set og:image to ${SOCIAL_IMAGE_URL}.`);
   }
 
-  if (!hasExpectedSocialImage(twitterImage)) {
+  if (twitterImage && !hasExpectedSocialImage(twitterImage)) {
     errors.push("WordPress page twitter:image should use the JSU/NCSY Wrapped campaign image");
     fixes.push(`Set twitter:image to ${SOCIAL_IMAGE_URL}.`);
   }
 
-  if (!hasExpectedSocialImage(ogImageSecure)) {
+  if (ogImageSecure && !hasExpectedSocialImage(ogImageSecure)) {
     errors.push("WordPress page secure image metadata should use the JSU/NCSY Wrapped campaign image");
     fixes.push(`Set og:image:secure_url to ${SOCIAL_IMAGE_URL}.`);
   }
 
-  if (String(twitterCard || "").trim().toLowerCase() !== "summary_large_image") {
+  if (twitterCard && String(twitterCard || "").trim().toLowerCase() !== "summary_large_image") {
     errors.push("WordPress page twitter:card should be summary_large_image");
     fixes.push("Set twitter:card to summary_large_image.");
   }
 
-  if (String(ogImageWidth || "").trim() !== SOCIAL_IMAGE_WIDTH || String(ogImageHeight || "").trim() !== SOCIAL_IMAGE_HEIGHT) {
+  if ((ogImageWidth || ogImageHeight) && (String(ogImageWidth || "").trim() !== SOCIAL_IMAGE_WIDTH || String(ogImageHeight || "").trim() !== SOCIAL_IMAGE_HEIGHT)) {
     errors.push(`WordPress page social image dimensions should be ${SOCIAL_IMAGE_WIDTH}x${SOCIAL_IMAGE_HEIGHT}`);
     fixes.push(`Set og:image:width to ${SOCIAL_IMAGE_WIDTH} and og:image:height to ${SOCIAL_IMAGE_HEIGHT}.`);
   }
 
-  if (String(ogImageAlt || "").trim() !== socialImageAlt) {
+  if (ogImageAlt && String(ogImageAlt || "").trim() !== socialImageAlt) {
     errors.push("WordPress page social image alt metadata should describe the Wrapped preview");
     fixes.push(`Set og:image:alt to "${socialImageAlt}".`);
   }
 
-  if (String(twitterImageAlt || "").trim() !== socialImageAlt) {
+  if (twitterImageAlt && String(twitterImageAlt || "").trim() !== socialImageAlt) {
     errors.push("WordPress page Twitter image alt metadata should describe the Wrapped preview");
     fixes.push(`Set twitter:image:alt to "${socialImageAlt}".`);
   }
@@ -874,7 +876,7 @@ function usage() {
     "Usage:",
     "  node wordpress-smoke.js [--url https://ncsy.org/ncsy-wrapped/?chapter=baltimore] [--cta-href https://ncsy.org/wrapped-interest/] [--check-cta-destination] [--timeout-ms 15000] [--dry-run] [--fix-packet]",
     "",
-    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, social titles, social descriptions, canonical/social URLs, campaign image metadata, and image alt text.",
+    "Fetches a live WordPress Wrapped page and checks the widget shell, hosted data/config references, share base, CTA form target, privacy/cookie affordance, social titles, social descriptions, canonical/Open Graph URLs, and campaign image metadata.",
     "",
     "Use --fix-packet to print one compact copy-ready WordPress update packet when the page is still stale.",
     "Use --cta-href when the final CTA should link to a separate Gravity Forms page instead of opening an embedded same-page panel.",

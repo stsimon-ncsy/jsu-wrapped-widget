@@ -19,6 +19,7 @@
   var SCRIPT_SRC = SCRIPT_ELEMENT ? SCRIPT_ELEMENT.src : "";
   var DEFAULT_AUTOPLAY_DELAY = 5200;
   var SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
+  var customSelectCounter = 0;
 
   function hasValue(value) {
     return value !== null && value !== undefined && String(value).trim() !== "";
@@ -717,7 +718,334 @@
       }
     });
 
+    syncEnhancedSelects(panel);
+
     return filled;
+  }
+
+  function customSelectId() {
+    customSelectCounter += 1;
+    return "jsuw-select-" + customSelectCounter;
+  }
+
+  function selectLabel(select) {
+    var label = select && select.getAttribute && select.getAttribute("aria-label");
+
+    if (hasValue(label)) {
+      return label;
+    }
+
+    if (select && select.labels && select.labels.length) {
+      label = Array.prototype.map.call(select.labels, function (item) {
+        return item.textContent;
+      }).filter(Boolean).join(" ");
+
+      if (hasValue(label)) {
+        return label;
+      }
+    }
+
+    if (select && select.id && root.document && typeof root.document.querySelector === "function") {
+      try {
+        label = root.document.querySelector('label[for="' + selectorEscape(select.id) + '"]');
+      } catch (error) {
+        label = null;
+      }
+
+      if (label && hasValue(label.textContent)) {
+        return label.textContent;
+      }
+    }
+
+    if (select && typeof select.closest === "function") {
+      var wrapper = select.closest(".gfield");
+      var fieldLabel = wrapper && wrapper.querySelector ? wrapper.querySelector(".gfield_label, .gform-field-label, legend") : null;
+
+      if (fieldLabel && hasValue(fieldLabel.textContent)) {
+        return fieldLabel.textContent;
+      }
+    }
+
+    return "Choose an option";
+  }
+
+  function optionLabel(option) {
+    return hasValue(option && option.textContent) ? option.textContent.trim() : String(option && option.value || "");
+  }
+
+  function setSelectValue(select, value) {
+    if (!select) {
+      return;
+    }
+
+    select.value = value;
+
+    try {
+      select.dispatchEvent(new root.Event("input", { bubbles: true }));
+      select.dispatchEvent(new root.Event("change", { bubbles: true }));
+    } catch (error) {}
+  }
+
+  function closeCustomSelect(shell) {
+    if (!shell) {
+      return;
+    }
+
+    shell.removeAttribute("data-jsuw-select-open");
+
+    var button = shell.querySelector && shell.querySelector(".jsuw-select-button");
+
+    if (button) {
+      button.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function closeOtherCustomSelects(doc, currentShell) {
+    if (!doc || typeof doc.querySelectorAll !== "function") {
+      return;
+    }
+
+    Array.prototype.forEach.call(doc.querySelectorAll("#jsu-wrapped-wordpress-shell .jsuw-select-shell[data-jsuw-select-open='true']"), function (shell) {
+      if (shell !== currentShell) {
+        closeCustomSelect(shell);
+      }
+    });
+  }
+
+  function syncEnhancedSelect(shell) {
+    if (!shell || !shell.querySelector) {
+      return;
+    }
+
+    var select = shell.querySelector("select[data-jsuw-select-enhanced]");
+    var text = shell.querySelector(".jsuw-select-button-text");
+    var selectedOption = select && select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+    var selectedValue = select ? select.value : "";
+
+    if (text) {
+      text.textContent = optionLabel(selectedOption);
+    }
+
+    Array.prototype.forEach.call(shell.querySelectorAll(".jsuw-select-option"), function (button) {
+      var isSelected = button.getAttribute("data-jsuw-select-value") === selectedValue;
+
+      button.classList.toggle("jsuw-select-option--selected", isSelected);
+      button.setAttribute("aria-selected", isSelected ? "true" : "false");
+    });
+  }
+
+  function syncEnhancedSelects(panel) {
+    if (!panel || typeof panel.querySelectorAll !== "function") {
+      return;
+    }
+
+    Array.prototype.forEach.call(panel.querySelectorAll(".jsuw-select-shell"), syncEnhancedSelect);
+  }
+
+  function focusCustomSelectOption(shell, direction) {
+    if (!shell || !shell.querySelectorAll) {
+      return;
+    }
+
+    var options = Array.prototype.filter.call(shell.querySelectorAll(".jsuw-select-option"), function (item) {
+      return !item.disabled;
+    });
+    var selected = shell.querySelector(".jsuw-select-option--selected:not(:disabled)");
+    var target = selected || options[0];
+
+    if (direction === "last") {
+      target = options[options.length - 1] || target;
+    }
+
+    if (target && typeof target.focus === "function") {
+      target.focus();
+    }
+  }
+
+  function openCustomSelect(shell) {
+    if (!shell || !root.document) {
+      return;
+    }
+
+    closeOtherCustomSelects(root.document, shell);
+    shell.setAttribute("data-jsuw-select-open", "true");
+
+    var button = shell.querySelector && shell.querySelector(".jsuw-select-button");
+
+    if (button) {
+      button.setAttribute("aria-expanded", "true");
+    }
+
+    syncEnhancedSelect(shell);
+  }
+
+  function installCustomSelectDocumentHandlers(doc) {
+    if (!doc || doc.__jsuwSelectHandlersInstalled) {
+      return;
+    }
+
+    doc.__jsuwSelectHandlersInstalled = true;
+
+    doc.addEventListener("click", function (event) {
+      var target = event && event.target;
+
+      if (target && typeof target.closest === "function" && target.closest("#jsu-wrapped-wordpress-shell .jsuw-select-shell")) {
+        return;
+      }
+
+      closeOtherCustomSelects(doc, null);
+    });
+
+    doc.addEventListener("keydown", function (event) {
+      if (event && event.key === "Escape") {
+        closeOtherCustomSelects(doc, null);
+      }
+    });
+  }
+
+  function enhanceFormSelects(panel) {
+    if (!panel || !root.document || typeof panel.querySelectorAll !== "function") {
+      return 0;
+    }
+
+    var enhanced = 0;
+
+    installCustomSelectDocumentHandlers(root.document);
+
+    Array.prototype.forEach.call(panel.querySelectorAll("select:not([multiple])"), function (select) {
+      var className = select.getAttribute("class") || "";
+
+      if (
+        select.hasAttribute("data-jsuw-select-enhanced") ||
+        select.size > 1 ||
+        /select2-hidden-accessible|chosen-select/i.test(className) ||
+        typeof select.closest === "function" && select.closest(".jsuw-select-shell")
+      ) {
+        return;
+      }
+
+      var parent = select.parentNode;
+
+      if (!parent) {
+        return;
+      }
+
+      var shell = root.document.createElement("div");
+      var button = root.document.createElement("button");
+      var buttonText = root.document.createElement("span");
+      var menu = root.document.createElement("div");
+      var menuId = customSelectId();
+
+      shell.className = "jsuw-select-shell";
+      parent.insertBefore(shell, select);
+      shell.appendChild(select);
+
+      select.setAttribute("data-jsuw-select-enhanced", "true");
+      select.classList.add("jsuw-native-select-hidden");
+      select.setAttribute("tabindex", "-1");
+      select.setAttribute("aria-hidden", "true");
+
+      button.type = "button";
+      button.className = "jsuw-select-button";
+      button.setAttribute("aria-haspopup", "listbox");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-controls", menuId);
+      button.setAttribute("aria-label", selectLabel(select));
+
+      buttonText.className = "jsuw-select-button-text";
+      button.appendChild(buttonText);
+
+      menu.className = "jsuw-select-menu";
+      menu.id = menuId;
+      menu.setAttribute("role", "listbox");
+      menu.setAttribute("aria-label", selectLabel(select));
+
+      Array.prototype.forEach.call(select.options, function (option) {
+        var optionButton = root.document.createElement("button");
+
+        optionButton.type = "button";
+        optionButton.className = "jsuw-select-option";
+        optionButton.textContent = optionLabel(option);
+        optionButton.setAttribute("role", "option");
+        optionButton.setAttribute("data-jsuw-select-value", option.value);
+
+        if (option.disabled) {
+          optionButton.disabled = true;
+        }
+
+        optionButton.addEventListener("click", function () {
+          if (option.disabled) {
+            return;
+          }
+
+          setSelectValue(select, option.value);
+          syncEnhancedSelect(shell);
+          closeCustomSelect(shell);
+          button.focus();
+        });
+
+        optionButton.addEventListener("keydown", function (event) {
+          var options = Array.prototype.filter.call(shell.querySelectorAll(".jsuw-select-option"), function (item) {
+            return !item.disabled;
+          });
+          var index = options.indexOf(optionButton);
+          var target = null;
+
+          if (event.key === "ArrowDown") {
+            target = options[Math.min(index + 1, options.length - 1)];
+          } else if (event.key === "ArrowUp") {
+            target = options[Math.max(index - 1, 0)];
+          } else if (event.key === "Home") {
+            target = options[0];
+          } else if (event.key === "End") {
+            target = options[options.length - 1];
+          } else if (event.key === "Escape") {
+            closeCustomSelect(shell);
+            button.focus();
+            event.preventDefault();
+            return;
+          } else if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            optionButton.click();
+            return;
+          }
+
+          if (target) {
+            event.preventDefault();
+            target.focus();
+          }
+        });
+
+        menu.appendChild(optionButton);
+      });
+
+      button.addEventListener("click", function () {
+        if (shell.hasAttribute("data-jsuw-select-open")) {
+          closeCustomSelect(shell);
+        } else {
+          openCustomSelect(shell);
+        }
+      });
+
+      button.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          openCustomSelect(shell);
+          focusCustomSelectOption(shell, event.key === "ArrowUp" ? "last" : "first");
+        }
+      });
+
+      select.addEventListener("change", function () {
+        syncEnhancedSelect(shell);
+      });
+
+      shell.appendChild(button);
+      shell.appendChild(menu);
+      syncEnhancedSelect(shell);
+      enhanced += 1;
+    });
+
+    return enhanced;
   }
 
   function getBrandChoice(record) {
@@ -3771,10 +4099,13 @@
       panel.classList.add("jsuw-form-panel--open");
       panel.setAttribute("aria-hidden", "false");
       prefillFormPanel(panel, state);
+      enhanceFormSelects(panel);
 
       if (root.setTimeout) {
         root.setTimeout(function () {
           prefillFormPanel(panel, state);
+          enhanceFormSelects(panel);
+          syncEnhancedSelects(panel);
         }, 350);
       }
 
@@ -3786,7 +4117,7 @@
         panel.scrollIntoView();
       }
 
-      var focusTarget = panel.querySelector("input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])");
+      var focusTarget = panel.querySelector(".jsuw-select-button, input, textarea, button, a[href], [tabindex]:not([tabindex='-1']), select:not(.jsuw-native-select-hidden)");
 
       if (focusTarget && typeof focusTarget.focus === "function") {
         try {
@@ -4618,6 +4949,7 @@
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,
     createCtaPrefillUrl: createCtaPrefillUrl,
+    enhanceFormSelects: enhanceFormSelects,
     createFallbackSvg: createFallbackSvg,
     getVariantSlug: getVariantSlug,
     getProgramSlug: getProgramSlug,

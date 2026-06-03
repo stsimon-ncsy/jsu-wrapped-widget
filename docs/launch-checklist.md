@@ -48,14 +48,14 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 ## Social Preview
 
 - Confirm the main social title format is `JSU/NCSY Wrapped - [Chapter or Scope Name]`.
-- Confirm WordPress exposes `og:type=website` and `og:site_name=JSU/NCSY Wrapped`.
+- Confirm WordPress exposes usable Open Graph identity, such as `og:type=website` or `article`, and an `og:site_name` that identifies NCSY, JSU, or JSU/NCSY Wrapped.
 - Confirm the plain meta description uses chapter, region, or program Wrapped copy.
 - Confirm `og:description` and `twitter:description` use chapter, region, or program Wrapped copy rather than footer/privacy/cookie fallback text.
 - Confirm canonical, `og:url`, and `twitter:url` metadata use the chapter, region, or program URL rather than the generic Wrapped landing page.
 - Open at least one generated share page, such as `/share/baltimore/`, and confirm Open Graph and Twitter metadata are present.
 - Confirm the share preview image uses the intended `assets/wrapped-social-preview.png` or updated campaign image.
-- Confirm WordPress exposes both `og:image` and `twitter:image` using the campaign social preview image.
-- Confirm WordPress exposes `twitter:card=summary_large_image`, `og:image:secure_url`, `og:image:width=1200`, `og:image:height=630`, `og:image:alt`, and `twitter:image:alt` where the SEO plugin allows it.
+- Confirm WordPress exposes `og:image` using the campaign social preview image. A Cloudinary-optimized copy of `wrapped-social-preview.png` is acceptable.
+- Confirm `twitter:image`, `twitter:card=summary_large_image`, `og:image:secure_url`, `og:image:width=1200`, `og:image:height=630`, `og:image:alt`, and `twitter:image:alt` where the SEO plugin allows them; do not block launch if the Open Graph preview is complete.
 - Confirm the in-story share button points at generated share pages when `data-share-base` is configured.
 - Confirm a test share opens the intended interactive chapter, region, or program story after redirect.
 

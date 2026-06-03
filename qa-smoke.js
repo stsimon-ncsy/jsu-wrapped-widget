@@ -1582,6 +1582,7 @@ function runInlineEmbedSmoke() {
   const rendererEnd = inline.lastIndexOf("</script>");
   const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
   const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
+  const formCardCssBlock = css.match(/#jsu-wrapped-wordpress-shell \.jsuw-form-card\s*\{([^}]*)\}/m);
 
   assert(inline.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress inline embed should keep the embedded Gravity Forms CTA target");
   assert(!inline.includes('data-cta-href="https://ncsy.org/contact/"'), "WordPress inline embed should not replace the embedded Gravity Forms CTA with the generic contact page");
@@ -1596,6 +1597,13 @@ function runInlineEmbedSmoke() {
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card select option"), "WordPress shell CSS missing native Gravity Forms dropdown option styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container"), "WordPress shell CSS missing enhanced Gravity Forms dropdown styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-select-button"), "WordPress shell CSS missing custom Gravity Forms select button styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-select-menu"), "WordPress shell CSS missing custom Gravity Forms select menu styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-native-select-hidden"), "WordPress shell CSS missing hidden native select fallback styling");
+  assert(formCardCssBlock && /overflow:\s*visible;/.test(formCardCssBlock[1]), "WordPress shell form card should not clip custom dropdown menus");
+  assert(renderer.includes("function enhanceFormSelects"), "Widget renderer missing scoped Gravity Forms select enhancer");
+  assert(renderer.includes("data-jsuw-select-enhanced"), "Widget renderer missing select enhancement guard attribute");
+  assert(renderer.includes("jsuw-select-option--selected"), "Widget renderer missing custom selected option state");
   assert(styleStart >= 0 && styleEnd > styleStart, "WordPress embed missing top-level style block");
   assert(scriptStart > styleEnd, "WordPress embed missing inline script after styles");
   assert(embeddedCss === css, "WordPress inline CSS is not synced with jsu-wrapped.css");
@@ -2404,6 +2412,23 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replaceAll(socialUrl, "https://ncsy.org/ncsy-wrapped/"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const yoastCloudinaryHtml = goodHtml
+    .replace(ogTypeTag, '<meta property="og:type" content="article">')
+    .replace(ogSiteNameTag, '<meta property="og:site_name" content="NCSY">')
+    .replace(ogImageTag, '<meta property="og:image" content="https://res.cloudinary.com/ouwp/images/f_auto,q_auto/v1778869359/NCSY/MAIN/wrapped-social-preview/wrapped-social-preview.png?_i=AA">')
+    .replace(ogImageSecureTag, "")
+    .replace(twitterTitleTag, "")
+    .replace(twitterDescriptionTag, "")
+    .replace(twitterUrlTag, "")
+    .replace(twitterImageTag, "")
+    .replace(twitterCardTag, "")
+    .replace(ogImageAltTag, "")
+    .replace(twitterImageAltTag, "");
+  const yoastCloudinaryReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: yoastCloudinaryHtml,
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const missingSocialCardDetailsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
@@ -2543,28 +2568,22 @@ function runWordPressSmokeScriptSmoke() {
   assert(unsafeCtaHrefStaleAttrsReport.fixes[0].includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress smoke replacement tag should fall back to the embedded CTA target for unsafe direct URLs");
   assert(!wrongSocialTitleReport.ok && wrongSocialTitleReport.errors.some((error) => error.includes("JSU/NCSY Wrapped - [Chapter or Scope Name]")), "WordPress smoke should reject generic NCSY-only social titles");
   assert(wrongSocialTitleReport.fixes.some((fix) => fix.includes('"JSU/NCSY Wrapped - Baltimore"')), "WordPress smoke should suggest the exact corrected chapter title when it can infer one");
-  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:title")), "WordPress smoke should reject pages without twitter:title metadata");
+  assert(missingTwitterPairedMetadataReport.ok, `WordPress smoke should allow missing Twitter-specific metadata when complete Open Graph metadata is present: ${missingTwitterPairedMetadataReport.errors.join("; ")}`);
   assert(!missingSocialImageReport.ok && missingSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject pages without social image metadata");
   assert(missingSocialImageReport.fixes.some((fix) => fix.includes("og:image") && fix.includes("wrapped-social-preview.png")), "WordPress smoke should suggest the campaign social image");
-  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:image")), "WordPress smoke should reject pages without twitter:image metadata");
   assert(!wrongSocialImageReport.ok && wrongSocialImageReport.errors.some((error) => error.includes("social image")), "WordPress smoke should reject generic social image metadata");
   assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("canonical URL")), "WordPress smoke should reject pages without canonical URL metadata");
   assert(!missingSocialUrlReport.ok && missingSocialUrlReport.errors.some((error) => error.includes("social URL")), "WordPress smoke should reject pages without social URL metadata");
   assert(missingSocialUrlReport.fixes.some((fix) => fix.includes("og:url") && fix.includes("?chapter=baltimore")), "WordPress smoke should suggest chapter-specific social URL metadata");
-  assert(!missingTwitterPairedMetadataReport.ok && missingTwitterPairedMetadataReport.errors.some((error) => error.includes("twitter:url")), "WordPress smoke should reject pages without twitter:url metadata");
   assert(!missingSocialDescriptionReport.ok && missingSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject pages without social description metadata");
   assert(missingSocialDescriptionReport.fixes.some((fix) => fix.includes("og:description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific social description metadata");
   assert(!missingMetaDescriptionReport.ok && missingMetaDescriptionReport.errors.some((error) => error.includes("meta description")), "WordPress smoke should reject pages without plain meta description metadata");
   assert(missingMetaDescriptionReport.fixes.some((fix) => fix.includes("meta description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific plain meta description metadata");
   assert(!wrongSocialDescriptionReport.ok && wrongSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject privacy/cookie fallback social descriptions");
   assert(!wrongSocialUrlReport.ok && wrongSocialUrlReport.errors.some((error) => error.includes("chapter URL")), "WordPress smoke should reject generic URL metadata that drops the chapter parameter");
+  assert(yoastCloudinaryReport.ok, `WordPress smoke should accept a Yoast OG preview with the Cloudinary campaign image: ${yoastCloudinaryReport.errors.join("; ")}`);
   assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("og:type")), "WordPress smoke should reject pages without OG type metadata");
   assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("site name")), "WordPress smoke should reject pages without OG site name metadata");
-  assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("secure image")), "WordPress smoke should reject pages without OG secure image metadata");
-  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("twitter:card")), "WordPress smoke should reject pages without summary_large_image Twitter card metadata");
-  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image dimensions")), "WordPress smoke should reject pages without social image dimensions");
-  assert(!missingSocialCardDetailsReport.ok && missingSocialCardDetailsReport.errors.some((error) => error.includes("image alt")), "WordPress smoke should reject pages without social image alt metadata");
-  assert(!missingTwitterImageAltReport.ok && missingTwitterImageAltReport.errors.some((error) => error.includes("Twitter image alt")), "WordPress smoke should reject pages without Twitter image alt metadata");
   assert(goodDestinationReport.ok, `WordPress smoke rejected a good direct Gravity Forms destination: ${goodDestinationReport.errors.join("; ")}`);
   assert(!missingDestinationContextReport.ok && missingDestinationContextReport.errors.some((error) => error.includes("Gravity Forms destination") && error.includes("Wrapped URL")), "WordPress smoke should reject direct Gravity Forms destinations missing wrapped_url");
   assert(missingDestinationContextReport.fixes.some((fix) => fix.includes("wrapped_url")), "WordPress smoke should suggest wrapped_url for direct Gravity Forms destinations");
@@ -2623,7 +2642,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "WordPress smoke dry run should show the target URL");
   assert(destinationDryRunOutput.includes("would also check CTA destination https://ncsy.org/wrapped-interest/"), "WordPress smoke dry run should show the direct CTA destination when requested");
   assert(helpOutput.includes("social descriptions"), "WordPress smoke help should describe social description checks");
-  assert(helpOutput.includes("image alt"), "WordPress smoke help should describe social image alt checks");
+  assert(helpOutput.includes("campaign image metadata"), "WordPress smoke help should describe campaign image metadata checks");
   assert(listed.includes("node --check wordpress-smoke.js"), "production QA should syntax-check the WordPress smoke helper");
   assert(source.includes("process.exitCode = 1"), "WordPress smoke should set exitCode on validation failure");
   assert(!source.includes("process.exit(1)"), "WordPress smoke should not force process.exit after async fetch validation");
