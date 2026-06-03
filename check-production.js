@@ -16,6 +16,7 @@ const COMMANDS = [
   nodeCommand("--check", "render-smoke.js"),
   nodeCommand("--check", "bump-cache-token.js"),
   nodeCommand("--check", "launch-audit.js"),
+  nodeCommand("--check", "visual-review-packet.js"),
   nodeCommand("--check", "qa-smoke.js"),
   nodeCommand("validate-wrapped-data.js"),
   nodeCommand("generate-share-pages.js"),

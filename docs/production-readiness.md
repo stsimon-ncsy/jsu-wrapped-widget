@@ -26,6 +26,8 @@ After the WordPress page is pasted and published, run `node wordpress-smoke.js -
 
 For a live browser runtime check after the page is published, run `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"`. This launches an installed Chrome or Edge against the live WordPress URL in a mobile viewport, waits for the JS-rendered widget, advances to the final card, clicks Share, Download, and the CTA, and confirms the rendered page is close to full-height without horizontal overflow, the host page has GTM or Google tag plumbing, JSU/NCSY `dataLayer` events include chapter/scope/action context, and the embedded Gravity Forms CTA panel opens with populated `wrapped_*` context fields. It is intentionally separate from `node check-production.js` because it needs network access, a live WordPress page, and a local browser. Use `--skip-if-missing` on machines where the browser runtime is optional, and use `--browser` to point at a specific Chrome or Edge executable.
 
+For human visual review evidence, run `node visual-review-packet.js`. The helper uses the same installed Chrome or Edge discovery as the render smoke, captures the live picker, cover card, engagement moments card, and final card at mobile and desktop sizes, and writes PNGs plus a manifest into ignored `qa-artifacts/`. This does not replace human review; it gives the reviewer stable screenshots to inspect for clipped controls, overlapping text, missing logos, broken numbers, awkward first-load height, and desktop/mobile framing.
+
 If that live check reports stale WordPress markup, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet`. The fix packet prints one compact copy-ready block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together, plus the exact page/social title, suggested canonical/social URLs, meta description, Open Graph identity, campaign image metadata, optional Twitter/card metadata, optional image alt metadata, and the follow-up smoke command.
 
 If the stale live check mentions inline CSS ordering, paste the full current `wordpress-inline-embed.html` block instead of changing only the widget tag. Replacing only `#jsu-wrapped` updates data/cache attributes, but it cannot move stale inline CSS above the WordPress shell.
@@ -174,9 +176,9 @@ Allowed global CSS constructs are limited to animation/support wrappers such as 
 
 ## Mobile Fullscreen Contract
 
-On mobile, the widget should feel like a story surface rather than a small embedded card. Keep `#jsu-wrapped` full-width and horizontally clipped inside its own scoped container, then let `.jsuw-shell` and `.jsuw-story` fill the available mobile viewport under the small-screen media queries. The production smoke test checks for the scoped overflow guard, full-width mobile shell, `100svh` story sizing, and the mobile aspect-ratio override.
+On mobile, the widget should feel like a story surface rather than a small embedded card. Keep `#jsu-wrapped` full-width and horizontally clipped inside its own scoped container, then let `.jsuw-shell` and `.jsuw-story` fill the available mobile viewport under the small-screen media queries. The production smoke test checks for the scoped overflow guard, full-width mobile shell, `100vh`/`100svh` fallbacks, dynamic `100dvh` story sizing, and the mobile aspect-ratio override.
 
-Narrow phone layouts also need the story chrome to compress instead of clipping. At widths around 390-430px, hide the redundant numeric card count, keep the sound/autoplay controls inside the header track, and reduce the fixed Next-button minimum so the bottom controls remain fully visible.
+Narrow phone layouts also need the story chrome to compress instead of clipping. At widths around 390-430px, hide the redundant numeric card count, keep the sound/autoplay controls inside the header track, reduce the fixed Next-button minimum, and keep the bottom controls high enough to clear floating privacy/accessibility widgets.
 
 ## Big Stat Glyph Safety
 

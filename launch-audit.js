@@ -32,7 +32,7 @@ const postDeployLiveGates = [
 const manualExternalConfirmations = [
   `GTM Preview and GA4 DebugView show JSU/NCSY Wrapped events arriving for property ${GA4_PROPERTY}.`,
   "Gravity Forms receives a real chapter-link test submission and staff can see the chapter, region, source URL, scope, variant, and year context.",
-  "A human mobile and desktop visual review finds no clipped controls, overlapping text, missing logos, broken numbers, or awkward first-load height.",
+  "Run `node visual-review-packet.js`, then complete a human mobile and desktop visual review for clipped controls, overlapping text, missing logos, broken numbers, awkward first-load height, and framing.",
   "A real social share/debugger preview uses the intended JSU/NCSY title, description, URL, and campaign image for at least one chapter link.",
   "Staff ownership is clear for form replies, pilot builder submissions, and post-launch follow-up."
 ];

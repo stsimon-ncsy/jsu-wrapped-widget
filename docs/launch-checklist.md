@@ -31,6 +31,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm the page does not add theme CSS that clips the mobile story viewport.
 - Confirm privacy/cookie links are present through the site wrapper, Osano, or the page footer plan.
 - Open the WordPress page on mobile and desktop and verify the story fills the mobile viewport cleanly.
+- Run `node visual-review-packet.js` and inspect the generated `qa-artifacts/` screenshots for the picker, cover, engagement moments, and final card at mobile and desktop sizes.
 - Use `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` as the repeatable browser check for the mobile viewport, final-card actions, form prefill, host analytics tag plumbing, and analytics event context.
 
 ## Gravity Forms

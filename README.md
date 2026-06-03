@@ -154,6 +154,14 @@ node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=ba
 
 That command launches Chrome or Edge against the live page in a mobile viewport, waits for the widget to render, advances to the final card, clicks Share, Download, and the CTA, and confirms mobile/full-height runtime layout, host GTM or Google tag plumbing, JSU/NCSY `dataLayer` event context, and embedded Gravity Forms CTA prefill. It is intentionally separate from `node check-production.js` because it needs the live WordPress page, network access, and a local browser.
 
+To create a screenshot packet for human visual review, run:
+
+```bash
+node visual-review-packet.js
+```
+
+The packet saves mobile and desktop screenshots for the picker, cover card, engagement moments card, and final card into ignored `qa-artifacts/`. Use it to review clipped controls, overlapping text, missing logos, broken numbers, first-load height, and desktop/mobile framing before wider rollout.
+
 If the live WordPress page is stale, print one compact copy-ready update packet:
 
 ```bash

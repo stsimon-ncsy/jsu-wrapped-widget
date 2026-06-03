@@ -1890,17 +1890,23 @@ function runMobileFullscreenLayoutSmoke() {
   const css = loadText("jsu-wrapped.css");
   const docs = loadText("docs/production-readiness.md");
   const mobileBody = cssAtRuleBody(css, "@media (max-width: 600px)");
+  const mobileControlsBody = mobileBody.match(/#jsu-wrapped \.jsuw-controls\s*\{([^}]*)\}/);
+  const mobileControlsBottom = mobileControlsBody ? cssNumericDeclaration(mobileControlsBody[1], "bottom") : NaN;
 
   assert(/#jsu-wrapped\s*\{/.test(css), "widget root CSS block is missing");
   assert(css.includes("overflow-x: hidden;"), "widget root should clip horizontal overflow inside the scoped container");
   assert(css.includes("@media (max-width: 600px)"), "mobile fullscreen media query is missing");
   assert(/#jsu-wrapped \.jsuw-shell\s*\{[^}]*max-width:\s*100%;/.test(css), "mobile shell should fill the available embed width");
   assert(/#jsu-wrapped \.jsuw-story\s*\{[^}]*aspect-ratio:\s*auto;/.test(css), "mobile story should not be constrained to desktop aspect sizing");
-  assert(css.includes("height: calc(100svh - 16px);"), "mobile story should use small-viewport height for fullscreen feel");
-  assert(/#jsu-wrapped \.jsuw-shell--loading \.jsuw-loading\s*\{[^}]*height:\s*calc\(100svh - 16px\);/.test(mobileBody), "mobile loading state should reserve fullscreen story height before data renders");
+  assert(css.includes("height: calc(100svh - 16px);"), "mobile story should keep a small-viewport height fallback");
+  assert(css.includes("height: calc(100dvh - 16px);"), "mobile story should use dynamic viewport height once available");
+  assert(/#jsu-wrapped \.jsuw-shell--loading \.jsuw-loading\s*\{[^}]*height:\s*calc\(100svh - 16px\);/.test(mobileBody), "mobile loading state should keep a small-viewport height fallback before data renders");
+  assert(/#jsu-wrapped \.jsuw-shell--loading \.jsuw-loading\s*\{[^}]*height:\s*calc\(100dvh - 16px\);/.test(mobileBody), "mobile loading state should use dynamic viewport height before data renders");
   assert(/#jsu-wrapped \.jsuw-card-count\s*\{[^}]*display:\s*none;/.test(mobileBody), "mobile story chrome should hide the count to avoid clipped sound/autoplay controls");
   assert(/#jsu-wrapped \.jsuw-nav-button--next\s*\{[^}]*min-width:\s*88px;/.test(mobileBody), "mobile story chrome should shrink the Next button to avoid clipped controls");
+  assert(mobileControlsBottom >= 24, `mobile story controls should sit above third-party floating widgets; bottom is ${mobileControlsBottom}`);
   assert(docs.includes("Mobile Fullscreen Contract"), "production docs missing mobile fullscreen contract");
+  assert(docs.includes("floating privacy/accessibility widgets"), "production docs should mention keeping controls clear of floating privacy/accessibility widgets");
 }
 
 function runBiggestCardMobileLayoutSmoke() {
@@ -2879,6 +2885,48 @@ function runRenderSmokeScriptSmoke() {
   assert(renderSmoke.probeTimeoutMs({ browser: "", timeoutMs: 30000 }) === 4000, "auto-discovered render smoke probes should keep the short local fallback timeout");
 }
 
+function runVisualReviewPacketSmoke() {
+  const scriptPath = "visual-review-packet.js";
+
+  assert(fs.existsSync(scriptPath), "visual review packet script is missing");
+
+  const visualReview = require("./visual-review-packet.js");
+  const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], {
+    encoding: "utf8"
+  });
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+  const checklist = loadText("docs/launch-checklist.md");
+  const audit = loadText("launch-audit.js");
+  const source = loadText(scriptPath);
+  const plan = visualReview.visualReviewPlan("https://ncsy.org/ncsy-wrapped/?chapter=baltimore");
+  const finalCardIndex = visualReview.finalCardIndex("https://ncsy.org/ncsy-wrapped/?chapter=baltimore");
+
+  assert(Array.isArray(plan) && plan.length >= 8, "visual review packet should plan multiple viewport captures");
+  assert(finalCardIndex === 13, `visual review packet should compute Baltimore's current final card as 13, got ${finalCardIndex}`);
+  assert(plan.some((item) => item.label === "chapter-cover-mobile" && item.url.includes("card=1")), "visual review plan should include the mobile cover card");
+  assert(plan.some((item) => item.label === "chapter-moments-mobile" && item.url.includes("card=4")), "visual review plan should include the mobile engagement/moments card");
+  assert(plan.some((item) => item.label === "chapter-final-mobile" && item.url.includes("card=13")), "visual review plan should include the actual mobile final card");
+  assert(plan.some((item) => item.label === "chapter-picker-desktop" && !item.url.includes("chapter=baltimore")), "visual review plan should include the desktop picker without a chapter param");
+  assert(dryRunOutput.includes("Visual review packet plan"), "visual review dry run should print a clear title");
+  assert(dryRunOutput.includes("chapter-cover-mobile"), "visual review dry run should include mobile cover capture");
+  assert(dryRunOutput.includes("chapter-final-desktop"), "visual review dry run should include desktop final capture");
+  assert(dryRunOutput.includes("qa-artifacts"), "visual review dry run should mention the ignored output folder");
+  assert(source.includes("Emulation.setDeviceMetricsOverride"), "visual review packet should use CDP viewport emulation for accurate mobile screenshots");
+  assert(source.includes("Page.captureScreenshot"), "visual review packet should capture screenshots through CDP");
+  assert(!source.includes("--screenshot="), "visual review packet should not rely on Chrome window-size screenshot mode");
+  assert(listed.includes("node --check visual-review-packet.js"), "production QA should syntax-check the visual review packet helper");
+  assert(readme.includes("node visual-review-packet.js"), "README should document the visual review packet command");
+  assert(docs.includes("node visual-review-packet.js"), "production docs should document the visual review packet command");
+  assert(checklist.includes("node visual-review-packet.js"), "launch checklist should include the visual review packet command");
+  assert(audit.includes("node visual-review-packet.js"), "launch audit should point human reviewers at the visual packet command");
+}
+
 function runWordPressRuntimeSmokeScriptSmoke() {
   const scriptPath = "wordpress-runtime-smoke.js";
 
@@ -3519,6 +3567,7 @@ function main() {
   runHostedSmokeScriptSmoke();
   runWordPressSmokeScriptSmoke();
   runRenderSmokeScriptSmoke();
+  runVisualReviewPacketSmoke();
   runWordPressRuntimeSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
