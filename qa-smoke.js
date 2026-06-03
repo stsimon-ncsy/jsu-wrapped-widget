@@ -2584,6 +2584,11 @@ function runWordPressSmokeScriptSmoke() {
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const staleInlineFixPacket = wordpressSmoke.formatFixPacket({
+    status: 200,
+    text: inlineGoodHtml.replace(inlineCss, staleInlineCss),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  }, staleInlineChromeReport);
   const directCtaFixPacket = wordpressSmoke.formatFixPacket({
     status: 200,
     text: goodHtml
@@ -2717,12 +2722,17 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("Gravity Forms handles only the final CTA/contact capture"), "WordPress fix packet should explain the Gravity Forms scope");
   assert(fixPacket.includes("not the staff-builder submission intake flow"), "WordPress fix packet should distinguish the public CTA form from the staff builder intake form");
   assert(fixPacket.includes("A nonzero exit in fix-packet mode means the live page is still stale"), "WordPress fix packet should explain why fix-packet mode can exit nonzero");
+  assert(fixPacket.includes("Use the hosted-mode block below if this WordPress page is meant to load CSS/JS from GitHub Pages"), "WordPress hosted-mode fix packet should lead with the hosted-mode recommendation when inline CSS is not stale");
+  assert(staleInlineFixPacket.includes("Recommended update for this report:"), "WordPress stale-inline fix packet should include a report-specific recommendation");
+  assert(staleInlineFixPacket.includes("Paste the full self-contained inline block from"), "WordPress stale-inline fix packet should lead with the full inline block path");
+  assert(staleInlineFixPacket.includes("wordpress-inline-embed.html"), "WordPress stale-inline fix packet should name the full inline embed file");
+  assert(staleInlineFixPacket.includes("Do not use the hosted-mode snippet as the fix for this current stale-inline failure"), "WordPress stale-inline fix packet should warn that hosted snippets do not fix stale Brizy inline CSS");
   assert(fixPacket.includes("If the live page has inline CSS ordering errors, paste the full current wordpress-inline-embed.html block"), "WordPress fix packet should lead stale inline-CSS fixes to the full inline block");
   assert(fixPacket.includes("Replacing only the #jsu-wrapped tag updates data/cache attributes but does not move stale inline CSS"), "WordPress fix packet should warn that widget-tag replacement does not fix stale inline CSS order");
   assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
   assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
-  assert(fixPacket.includes("Copy-ready WordPress HTML block:"), "WordPress fix packet should include one paste-ready HTML block");
+  assert(fixPacket.includes("Hosted-mode copy-ready HTML block:"), "WordPress fix packet should include one paste-ready hosted-mode HTML block");
   assert(fixPacket.includes(hostedCssTag + "\n" + '<div id="jsu-wrapped"'), "WordPress fix packet should put the stylesheet and widget tag together in the paste-ready HTML block");
   assert(fixPacket.includes("</div>\n" + hostedJsTag), "WordPress fix packet should put the widget script after the widget tag in the paste-ready HTML block");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");

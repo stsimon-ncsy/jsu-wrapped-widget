@@ -1,3 +1,5 @@
+const path = require("path");
+
 const DEFAULT_URL = "https://ncsy.org/ncsy-wrapped/?chapter=baltimore";
 const DEFAULT_TIMEOUT_MS = 15000;
 const RELEASE_TOKEN = "jsuw-prod-20260603a";
@@ -12,6 +14,7 @@ const WIDGET_JS_TAG = '<script src="' + HOSTED_ASSET_BASE + 'jsu-wrapped.js?v=' 
 const SOCIAL_IMAGE_URL = HOSTED_ASSET_BASE + "assets/wrapped-social-preview.png";
 const SOCIAL_IMAGE_WIDTH = "1200";
 const SOCIAL_IMAGE_HEIGHT = "630";
+const FULL_INLINE_EMBED_PATH = path.resolve(__dirname, "wordpress-inline-embed.html");
 
 function headerValue(headers, name) {
   const source = headers || {};
@@ -847,6 +850,7 @@ function formatFixPacket(page, report, options) {
   const directCtaHref = settings.ctaHref && isSafeCtaHref(settings.ctaHref) && !hasCtaUrlPayload(settings.ctaHref) ? settings.ctaHref : "";
   const suggestedTag = suggestedWidgetTag(html, settings);
   const copyReadyHtmlBlock = [WIDGET_CSS_TAG, suggestedTag, WIDGET_JS_TAG].join("\n");
+  const needsFullInlineBlock = validationReport.errors.some((error) => /inline CSS|static loading shell|floating-widget clearance|fullscreen first paint/i.test(error));
   const recommendedContextFields = "wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url";
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
   const followUpCommand = directCtaHref
@@ -883,12 +887,20 @@ function formatFixPacket(page, report, options) {
     "",
     `URL: ${url}`,
     "",
+    "Recommended update for this report:",
+    needsFullInlineBlock
+      ? `Paste the full self-contained inline block from ${FULL_INLINE_EMBED_PATH} into the Brizy HTML block.`
+      : "Use the hosted-mode block below if this WordPress page is meant to load CSS/JS from GitHub Pages.",
+    needsFullInlineBlock
+      ? "Do not use the hosted-mode snippet as the fix for this current stale-inline failure; it will not replace stale inline CSS already stored in Brizy."
+      : "If this is a self-contained Brizy inline page instead, paste the full current wordpress-inline-embed.html block.",
+    "",
     "Live update choices:",
     "If the live page has inline CSS ordering errors, paste the full current wordpress-inline-embed.html block.",
     "Replacing only the #jsu-wrapped tag updates data/cache attributes but does not move stale inline CSS.",
     "Use the hosted block below only when the WordPress block is meant to load CSS/JS from GitHub Pages instead of the full self-contained inline file.",
     "",
-    "Copy-ready WordPress HTML block:",
+    "Hosted-mode copy-ready HTML block:",
     copyReadyHtmlBlock,
     "",
     "Replace #jsu-wrapped with:",
