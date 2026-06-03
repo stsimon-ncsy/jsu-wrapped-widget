@@ -473,6 +473,39 @@ function runEntryPageSocialMetadataSmoke() {
   });
 }
 
+function runLaunchAuditSmoke() {
+  const scriptPath = "launch-audit.js";
+  const readme = loadText("README.md");
+  const checklist = loadText("docs/launch-checklist.md");
+  const productionDocs = loadText("docs/production-readiness.md");
+
+  assert(fs.existsSync(scriptPath), "launch audit script is missing");
+
+  const output = childProcess.execFileSync(process.execPath, [scriptPath], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+
+  assert(output.includes("JSU/NCSY Wrapped launch audit"), "launch audit should print a clear title");
+  assert(output.includes("Automated local gates"), "launch audit should list automated local gates");
+  assert(output.includes("node check-production.js"), "launch audit should include the production check command");
+  assert(output.includes("Post-deploy and live gates"), "launch audit should list live gates");
+  assert(output.includes("node hosted-smoke.js"), "launch audit should include hosted smoke");
+  assert(output.includes("node wordpress-smoke.js --url \"https://ncsy.org/ncsy-wrapped/?chapter=baltimore\""), "launch audit should include WordPress shell smoke");
+  assert(output.includes("node wordpress-runtime-smoke.js --url \"https://ncsy.org/ncsy-wrapped/?chapter=baltimore\""), "launch audit should include WordPress runtime smoke");
+  assert(output.includes("Manual external confirmations"), "launch audit should list manual confirmations");
+  assert(output.includes("GA4 DebugView") && output.includes("G-Y3LLF5KQ23"), "launch audit should call out GA4 DebugView for the wrapped property");
+  assert(output.includes("Gravity Forms") && output.includes("test submission"), "launch audit should call out real Gravity Forms submission confirmation");
+  assert(output.includes("mobile and desktop visual review"), "launch audit should call out human visual review");
+  assert(output.includes("Latest commit"), "launch audit should report the current commit when available");
+  assert(output.includes("Working tree"), "launch audit should report working tree state");
+  assert(output.includes("This command does not replace manual launch approval"), "launch audit should not overclaim launch readiness");
+  assert(readme.includes("node launch-audit.js"), "README should document the launch audit command");
+  assert(checklist.includes("node launch-audit.js"), "launch checklist should document the launch audit command");
+  assert(productionDocs.includes("node launch-audit.js"), "production docs should document the launch audit command");
+}
+
 function runShareGeneratorCleanupSmoke() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-"));
   const unsafeRoot = fs.mkdtempSync(path.join(os.tmpdir(), "jsuw-share-unsafe-"));
@@ -3457,6 +3490,7 @@ function main() {
   runPageMetadataSmoke();
   runStaticShareSmoke();
   runEntryPageSocialMetadataSmoke();
+  runLaunchAuditSmoke();
   runShareGeneratorCleanupSmoke();
   runAnalyticsSmoke();
   runFormPrefillSmoke();

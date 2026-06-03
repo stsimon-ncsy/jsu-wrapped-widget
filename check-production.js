@@ -15,6 +15,7 @@ const COMMANDS = [
   nodeCommand("--check", "wordpress-runtime-smoke.js"),
   nodeCommand("--check", "render-smoke.js"),
   nodeCommand("--check", "bump-cache-token.js"),
+  nodeCommand("--check", "launch-audit.js"),
   nodeCommand("--check", "qa-smoke.js"),
   nodeCommand("validate-wrapped-data.js"),
   nodeCommand("generate-share-pages.js"),

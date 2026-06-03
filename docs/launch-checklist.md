@@ -8,6 +8,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm GitHub Pages is the static asset/data host unless the JSON/config/assets have intentionally moved to NCSY.org.
 - Confirm Gravity Forms handles only the final CTA/contact capture, not the main Wrapped data payload.
 - Run `node check-production.js` locally from the repo root.
+- Run `node launch-audit.js` to print the automated gates, live smoke commands, and manual confirmations for the current commit.
 - Confirm GitHub Actions QA is green for the latest pushed commit.
 - Confirm GitHub Pages deployment is green for the same commit.
 - Run `node hosted-smoke.js` after Pages finishes deploying.
