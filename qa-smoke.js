@@ -2811,6 +2811,78 @@ function runRenderSmokeScriptSmoke() {
   assert(renderSmoke.probeTimeoutMs({ browser: "", timeoutMs: 30000 }) === 4000, "auto-discovered render smoke probes should keep the short local fallback timeout");
 }
 
+function runWordPressRuntimeSmokeScriptSmoke() {
+  const scriptPath = "wordpress-runtime-smoke.js";
+
+  assert(fs.existsSync(scriptPath), "live WordPress runtime smoke script is missing");
+
+  const runtimeSmoke = require("./wordpress-runtime-smoke.js");
+  const goodReport = runtimeSmoke.validateRuntimeResult({
+    analyticsEvents: [
+      { event: "jsu_wrapped_story_view", chapter_slug: "baltimore", scope_type: "chapter" },
+      { event: "jsu_wrapped_card_view", card_id: "cover", chapter_slug: "baltimore", scope_type: "chapter" },
+      { event: "jsu_wrapped_card_engagement", action: "cta_open", chapter_slug: "baltimore", scope_type: "chapter" }
+    ],
+    cta: {
+      open: true,
+      values: {
+        wrapped_chapter: "Baltimore",
+        wrapped_chapter_slug: "baltimore",
+        wrapped_region: "Atlantic Seaboard",
+        wrapped_scope: "chapter",
+        wrapped_slug: "baltimore",
+        wrapped_name: "Baltimore",
+        wrapped_year: "2025-2026",
+        wrapped_url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+      }
+    },
+    layout: {
+      hasBrokenText: false,
+      horizontalOverflow: false,
+      rootHeight: 820,
+      viewportHeight: 844,
+      viewportWidth: 390
+    }
+  });
+  const badReport = runtimeSmoke.validateRuntimeResult({
+    analyticsEvents: [{ event: "jsu_wrapped_story_view", chapter_slug: "baltimore" }],
+    cta: { open: false, values: {} },
+    layout: {
+      hasBrokenText: true,
+      horizontalOverflow: true,
+      rootHeight: 240,
+      viewportHeight: 844,
+      viewportWidth: 390
+    }
+  });
+  const dryRunOutput = childProcess.execFileSync(process.execPath, [scriptPath, "--dry-run"], {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+  const listed = childProcess.execFileSync(process.execPath, ["check-production.js", "--list"], {
+    encoding: "utf8"
+  });
+  const readme = loadText("README.md");
+  const docs = loadText("docs/production-readiness.md");
+  const checklist = loadText("docs/launch-checklist.md");
+
+  assert(goodReport.ok, `runtime smoke validator rejected good runtime result: ${goodReport.errors.join("; ")}`);
+  assert(!badReport.ok, "runtime smoke validator should reject broken live runtime results");
+  assert(badReport.errors.some((error) => error.includes("mobile story height")), "runtime smoke validator should catch short first-load/mobile story height");
+  assert(badReport.errors.some((error) => error.includes("horizontal overflow")), "runtime smoke validator should catch mobile horizontal overflow");
+  assert(badReport.errors.some((error) => error.includes("analytics event")), "runtime smoke validator should catch missing analytics event context");
+  assert(badReport.errors.some((error) => error.includes("CTA form")), "runtime smoke validator should catch unopened or unpopulated CTA forms");
+  assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "runtime smoke dry run should show the default live WordPress URL");
+  assert(dryRunOutput.includes("mobile runtime"), "runtime smoke dry run should describe the mobile runtime check");
+  assert(listed.includes("node --check wordpress-runtime-smoke.js"), "production QA should syntax-check the live WordPress runtime smoke helper");
+  assert(readme.includes("node wordpress-runtime-smoke.js"), "README should document the live WordPress runtime smoke");
+  assert(docs.includes("node wordpress-runtime-smoke.js"), "production docs should document the live WordPress runtime smoke");
+  assert(checklist.includes("node wordpress-runtime-smoke.js"), "launch checklist should include the live WordPress runtime smoke");
+  assert(typeof runtimeSmoke.runRuntimeSmoke === "function", "runtime smoke should expose runRuntimeSmoke for direct verification");
+  assert(typeof runtimeSmoke.validateRuntimeResult === "function", "runtime smoke should expose validateRuntimeResult for smoke coverage");
+}
+
 function runReadmeSmoke() {
   const path = "README.md";
 
@@ -3349,6 +3421,7 @@ function main() {
   runHostedSmokeScriptSmoke();
   runWordPressSmokeScriptSmoke();
   runRenderSmokeScriptSmoke();
+  runWordPressRuntimeSmokeScriptSmoke();
   runReadmeSmoke();
   runStaffPlaybookSmoke();
   runLaunchChecklistDocSmoke();

@@ -12,6 +12,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm GitHub Pages deployment is green for the same commit.
 - Run `node hosted-smoke.js` after Pages finishes deploying.
 - After the WordPress page is published, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"`.
+- After the WordPress shell smoke passes, run `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` from a machine with Chrome or Edge to verify live mobile rendering, analytics `dataLayer` context, and embedded Gravity Forms CTA prefill.
 - Confirm the shared cache token is current across README snippets, `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `cta-link-smoke.html`, `analytics-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, and hosted JSON/CSS/JS URLs.
 - If you changed JS, CSS, data, config, or share pages for reviewers, run `node bump-cache-token.js jsuw-prod-YYYYMMDDx`, then rerun `node check-production.js`.
 
@@ -29,6 +30,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm the page does not add theme CSS that clips the mobile story viewport.
 - Confirm privacy/cookie links are present through the site wrapper, Osano, or the page footer plan.
 - Open the WordPress page on mobile and desktop and verify the story fills the mobile viewport cleanly.
+- Use `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` as the repeatable browser check for the mobile viewport, final CTA, form prefill, and analytics event context.
 
 ## Gravity Forms
 

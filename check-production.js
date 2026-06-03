@@ -12,6 +12,7 @@ const COMMANDS = [
   nodeCommand("--check", "review-builder-submissions.js"),
   nodeCommand("--check", "hosted-smoke.js"),
   nodeCommand("--check", "wordpress-smoke.js"),
+  nodeCommand("--check", "wordpress-runtime-smoke.js"),
   nodeCommand("--check", "render-smoke.js"),
   nodeCommand("--check", "bump-cache-token.js"),
   nodeCommand("--check", "qa-smoke.js"),

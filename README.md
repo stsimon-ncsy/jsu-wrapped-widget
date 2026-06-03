@@ -138,6 +138,14 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 
 That check verifies the WordPress page has the widget container, hosted or inline widget CSS/JS, hosted JSON/config URLs, generated share-page base, final-card CTA target or URL, matching Gravity Forms/context panel when `data-cta-target` is used, privacy/cookie affordance, and crawler-readable JSU/NCSY Wrapped title, meta description, `og:description`, `og:site_name`, canonical/Open Graph URL, and campaign image metadata. Yoast/Open Graph output is accepted as the primary social preview source; Twitter-specific tags such as `twitter:image:alt` and image alt fields are recommended but not required when the Open Graph preview is complete.
 
+For a live browser runtime check of the published WordPress page, run:
+
+```bash
+node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+```
+
+That command launches Chrome or Edge against the live page in a mobile viewport, waits for the widget to render, advances to the final CTA, and confirms mobile/full-height runtime layout, JSU/NCSY `dataLayer` event context, and embedded Gravity Forms CTA prefill. It is intentionally separate from `node check-production.js` because it needs the live WordPress page, network access, and a local browser.
+
 If the live WordPress page is stale, print one compact copy-ready update packet:
 
 ```bash
