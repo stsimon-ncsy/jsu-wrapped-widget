@@ -2362,13 +2362,22 @@ function runWordPressSmokeScriptSmoke() {
       .replace("jsu-wrapped.js?v=jsuw-prod-20260603a", "jsu-wrapped.js"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
-  const inlineCss = '<style>#jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; }</style>';
+  const inlineCss = '<style>#jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; } @media (max-width: 600px) { #jsu-wrapped .jsuw-story { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-shell--loading .jsuw-loading { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-controls { right: 58px; } }</style>';
+  const staleInlineCss = inlineCss
+    .replace("height: calc(100dvh - 16px);", "")
+    .replace("height: calc(100dvh - 16px);", "")
+    .replace("right: 58px;", "right: 14px;");
   const inlineJs = '<script>(function (root, factory) { window.JSUWrapped = {}; })();</script>';
   const inlineGoodHtml = goodHtml
     .replace(hostedCssTag, inlineCss)
     .replace(hostedJsTag, inlineJs)
     .replace("</head><body>", '</head><body><div id="jsu-wrapped-wordpress-shell">')
     .replace(ctaPanelHtml, ctaPanelHtml + "</div>");
+  const staleInlineChromeReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: inlineGoodHtml.replace(inlineCss, staleInlineCss),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const missingHostGtmReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: inlineGoodHtml.replace(hostGtmHtml, ""),
@@ -2645,6 +2654,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingWidgetAssetsReport.fixes.some((fix) => fix.includes("jsu-wrapped.js")), "WordPress smoke should suggest adding the widget script");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("stylesheet") && error.includes("cache token")), "WordPress smoke should reject stale widget stylesheet URLs");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("script") && error.includes("cache token")), "WordPress smoke should reject stale widget script URLs");
+  assert(!staleInlineChromeReport.ok && staleInlineChromeReport.errors.some((error) => error.includes("mobile fullscreen") && error.includes("floating-widget clearance")), "WordPress smoke should reject stale inline mobile chrome CSS");
+  assert(staleInlineChromeReport.fixes.some((fix) => fix.includes("wordpress-inline-embed.html") && fix.includes("dynamic viewport height")), "WordPress smoke should suggest the full inline block for stale mobile chrome CSS");
   assert(!missingHostGtmReport.ok && missingHostGtmReport.errors.some((error) => error.includes("GTM") && error.includes("analytics")), "WordPress smoke should reject no-header pages without the host GTM container");
   assert(missingHostGtmReport.fixes.some((fix) => fix.includes("GTM-MLW344")), "WordPress smoke should suggest the existing NCSY GTM container");
   assert(!missingStaticLoadingReport.ok && missingStaticLoadingReport.errors.some((error) => error.includes("static loading shell")), "WordPress smoke should reject inline pages without the static first-paint loading shell");

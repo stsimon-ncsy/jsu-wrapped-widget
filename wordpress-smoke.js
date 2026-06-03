@@ -426,6 +426,20 @@ function inlineWidgetStyleIndex(html) {
   return -1;
 }
 
+function inlineWidgetStyleText(html) {
+  const source = String(html || "");
+  const pattern = /<style\b[^>]*>([\s\S]*?)<\/style>/ig;
+  let match;
+
+  while ((match = pattern.exec(source))) {
+    if (/#jsu-wrapped/i.test(match[1]) && /\.jsuw-shell/i.test(match[1])) {
+      return match[1];
+    }
+  }
+
+  return "";
+}
+
 function osanoScriptIndex(html) {
   const match = String(html || "").match(/<script\b[^>]*\bsrc\s*=\s*['"][^'"]*cmp\.osano\.com[^'"]*['"][^>]*>/i);
 
@@ -563,6 +577,7 @@ function validateWordPressPage(page, options) {
   const stylesheetUrls = hostedAssetUrls(html, "jsu-wrapped.css", "href");
   const scriptUrls = hostedAssetUrls(html, "jsu-wrapped.js", "src");
   const inlineStyleIndex = inlineWidgetStyleIndex(html);
+  const inlineStyleText = inlineWidgetStyleText(html);
   const shellIndex = tagIndexWithId(html, "jsu-wrapped-wordpress-shell");
   const osanoIndex = osanoScriptIndex(html);
   const inlineShell = hasInlineWidgetStyles(html) || hasInlineWidgetScript(html) || shellIndex !== -1;
@@ -583,6 +598,11 @@ function validateWordPressPage(page, options) {
   if (inlineStyleIndex !== -1 && osanoIndex !== -1 && inlineStyleIndex > osanoIndex) {
     errors.push("WordPress inline CSS loads after Osano, which can delay fullscreen first paint");
     addUniqueFix(fixes, "Move the inline <style> block above #jsu-wrapped-wordpress-shell and before the Osano script, or paste the current wordpress-inline-embed.html block.");
+  }
+
+  if (inlineStyleText && (!/height:\s*calc\(100dvh - 16px\);/.test(inlineStyleText) || !/right:\s*58px;/.test(inlineStyleText))) {
+    errors.push("WordPress inline CSS is missing the current mobile fullscreen and floating-widget clearance rules");
+    addUniqueFix(fixes, "Paste the current wordpress-inline-embed.html block so the mobile story uses dynamic viewport height and clears floating privacy/accessibility widgets.");
   }
 
   if (inlineShell && !hasHostAnalyticsLoader(html)) {
