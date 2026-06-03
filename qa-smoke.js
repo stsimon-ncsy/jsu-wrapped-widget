@@ -2232,6 +2232,8 @@ function runWordPressSmokeScriptSmoke() {
   const canonicalUrlTag = '<link rel="canonical" href="' + socialUrl + '">';
   const ogUrlTag = '<meta property="og:url" content="' + socialUrl + '">';
   const twitterUrlTag = '<meta name="twitter:url" content="' + socialUrl + '">';
+  const hostGtmHtml = '<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var j=d.createElement(s);j.src="https://www.googletagmanager.com/gtm.js?id="+i;d.head.appendChild(j);})(window,document,"script","dataLayer","GTM-MLW344");</script>';
+  const staticLoadingHtml = '<div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
   const minimalCtaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_region"><input name="wrapped_url"></form></section>';
   const ctaPanelHtml = '<section id="jsuw-wrapped-interest"><form class="gform_wrapper"><input name="wrapped_chapter"><input name="wrapped_chapter_slug"><input name="wrapped_region"><input name="wrapped_scope"><input name="wrapped_slug"><input name="wrapped_name"><input name="wrapped_variant"><input name="wrapped_year"><input name="wrapped_url"></form></section>';
   const shortcodeCtaPanelHtml = '<section id="jsuw-wrapped-interest"><div class="jsuw-form-card">[gravityform id="255" title="false" description="false" ajax="true"]</div></section>';
@@ -2273,6 +2275,7 @@ function runWordPressSmokeScriptSmoke() {
     canonicalUrlTag,
     ogUrlTag,
     twitterUrlTag,
+    hostGtmHtml,
     hostedCssTag,
     hostedJsTag,
     "</head><body>",
@@ -2281,7 +2284,9 @@ function runWordPressSmokeScriptSmoke() {
     ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"',
     ' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"',
     ' data-cta-label="Get involved next year"',
-    ' data-cta-target="#jsuw-wrapped-interest"></div>',
+    ' data-cta-target="#jsuw-wrapped-interest">',
+    staticLoadingHtml,
+    "</div>",
     ctaPanelHtml,
     '<a href="/privacy-policy/">Privacy Policy</a>',
     '<button onclick="window.Osano && window.Osano.cm.showDrawer()">Cookie Policy</button>',
@@ -2318,6 +2323,16 @@ function runWordPressSmokeScriptSmoke() {
     .replace(hostedJsTag, inlineJs)
     .replace("</head><body>", '</head><body><div id="jsu-wrapped-wordpress-shell">')
     .replace(ctaPanelHtml, ctaPanelHtml + "</div>");
+  const missingHostGtmReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: inlineGoodHtml.replace(hostGtmHtml, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const missingStaticLoadingReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: inlineGoodHtml.replace(staticLoadingHtml, ""),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
   const lateInlineCssReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: inlineGoodHtml
@@ -2584,6 +2599,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingWidgetAssetsReport.fixes.some((fix) => fix.includes("jsu-wrapped.js")), "WordPress smoke should suggest adding the widget script");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("stylesheet") && error.includes("cache token")), "WordPress smoke should reject stale widget stylesheet URLs");
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("script") && error.includes("cache token")), "WordPress smoke should reject stale widget script URLs");
+  assert(!missingHostGtmReport.ok && missingHostGtmReport.errors.some((error) => error.includes("GTM") && error.includes("analytics")), "WordPress smoke should reject no-header pages without the host GTM container");
+  assert(missingHostGtmReport.fixes.some((fix) => fix.includes("GTM-MLW344")), "WordPress smoke should suggest the existing NCSY GTM container");
+  assert(!missingStaticLoadingReport.ok && missingStaticLoadingReport.errors.some((error) => error.includes("static loading shell")), "WordPress smoke should reject inline pages without the static first-paint loading shell");
+  assert(missingStaticLoadingReport.fixes.some((fix) => fix.includes("wordpress-inline-embed.html")), "WordPress smoke should suggest the synced inline packet for a missing first-paint shell");
   assert(!lateInlineCssReport.ok && lateInlineCssReport.errors.some((error) => error.includes("inline CSS") && error.includes("first paint")), "WordPress smoke should reject inline CSS that loads after shell markup");
   assert(!lateInlineCssReport.ok && lateInlineCssReport.errors.some((error) => error.includes("Osano") && error.includes("first paint")), "WordPress smoke should reject inline CSS that loads after Osano");
   assert(lateInlineCssReport.fixes.some((fix) => fix.includes("Move the inline <style> block above #jsu-wrapped-wordpress-shell")), "WordPress smoke should suggest moving inline CSS before the shell");
@@ -2702,6 +2721,10 @@ function runWordPressSmokeScriptSmoke() {
   assert(docs.includes("node wordpress-smoke.js"), "production docs should document WordPress smoke checks");
   assert(docs.includes("docs/wordpress-launch-packet.md"), "production docs should link the checked-in WordPress launch packet");
   assert(checklist.includes("node wordpress-smoke.js"), "launch checklist should include WordPress smoke checks");
+  assert(readme.includes("static first-paint loading shell"), "README should document WordPress smoke first-paint shell checks");
+  assert(docs.includes("static first-paint loading shell"), "production docs should document WordPress smoke first-paint shell checks");
+  assert(readme.includes("host GTM/Google tag plumbing"), "README should document WordPress smoke host analytics checks");
+  assert(docs.includes("host GTM/Google tag plumbing"), "production docs should document WordPress smoke host analytics checks");
   assert(readme.includes("--fix-packet"), "README should document the WordPress fix-packet helper");
   assert(docs.includes("--fix-packet"), "production docs should document the WordPress fix-packet helper");
   assert(checklist.includes("--fix-packet"), "launch checklist should document the WordPress fix-packet helper");

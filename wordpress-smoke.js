@@ -432,6 +432,22 @@ function osanoScriptIndex(html) {
   return match && typeof match.index === "number" ? match.index : -1;
 }
 
+function hasHostAnalyticsLoader(html) {
+  return /\bGTM-[A-Z0-9]+\b/i.test(String(html || "")) || /googletagmanager\.com\/(?:gtm|gtag)\.js|google-analytics\.com/i.test(String(html || ""));
+}
+
+function hasStaticLoadingShell(html) {
+  const widgetStart = tagIndexWithId(html, "jsu-wrapped");
+
+  if (widgetStart === -1) {
+    return false;
+  }
+
+  const afterWidget = String(html || "").slice(widgetStart, widgetStart + 2200);
+
+  return /jsuw-shell\s+jsuw-shell--loading|jsuw-shell--loading\s+jsuw-shell/i.test(afterWidget) && /\brole\s*=\s*['"]status['"]/i.test(afterWidget);
+}
+
 function hasInlineWidgetStyles(html) {
   return inlineWidgetStyleIndex(html) !== -1;
 }
@@ -549,6 +565,7 @@ function validateWordPressPage(page, options) {
   const inlineStyleIndex = inlineWidgetStyleIndex(html);
   const shellIndex = tagIndexWithId(html, "jsu-wrapped-wordpress-shell");
   const osanoIndex = osanoScriptIndex(html);
+  const inlineShell = hasInlineWidgetStyles(html) || hasInlineWidgetScript(html) || shellIndex !== -1;
 
   if (!hasInlineWidgetStyles(html) && !stylesheetUrls.length) {
     errors.push("WordPress page missing widget stylesheet");
@@ -566,6 +583,16 @@ function validateWordPressPage(page, options) {
   if (inlineStyleIndex !== -1 && osanoIndex !== -1 && inlineStyleIndex > osanoIndex) {
     errors.push("WordPress inline CSS loads after Osano, which can delay fullscreen first paint");
     addUniqueFix(fixes, "Move the inline <style> block above #jsu-wrapped-wordpress-shell and before the Osano script, or paste the current wordpress-inline-embed.html block.");
+  }
+
+  if (inlineShell && !hasHostAnalyticsLoader(html)) {
+    errors.push("WordPress no-header shell is missing host GTM/Google analytics loader");
+    addUniqueFix(fixes, "Include the existing NCSY GTM container GTM-MLW344 in the no-header/no-footer page shell, or paste the current wordpress-inline-embed.html block.");
+  }
+
+  if (inlineShell && !hasStaticLoadingShell(html)) {
+    errors.push("WordPress inline page is missing the static loading shell for fullscreen first paint");
+    addUniqueFix(fixes, "Paste the current wordpress-inline-embed.html block so #jsu-wrapped includes the static jsuw-shell--loading placeholder before JavaScript runs.");
   }
 
   if (!hasInlineWidgetScript(html) && !scriptUrls.length) {
