@@ -1648,6 +1648,7 @@ function runInlineEmbedSmoke() {
   assert(shellCssBlock && /overflow-y:\s*auto;/.test(shellCssBlock[1]), "WordPress shell should scroll internally when the form panel is open");
   assert(stageCssBlock && /min-height:\s*100vh;/.test(stageCssBlock[1]), "WordPress page stage should include a 100vh fallback");
   assert(stageCssBlock && /min-height:\s*100dvh;/.test(stageCssBlock[1]), "WordPress page stage should use dynamic viewport height");
+  assert(stageCssBlock && /height:\s*100%;/.test(stageCssBlock[1]), "WordPress page stage should occupy the fixed shell on first paint");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-legal"), "WordPress shell CSS missing legal footer styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-panel"), "WordPress shell CSS missing Gravity Forms panel styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
@@ -1897,6 +1898,7 @@ function runMobileFullscreenLayoutSmoke() {
   assert(/#jsu-wrapped\s*\{/.test(css), "widget root CSS block is missing");
   assert(css.includes("overflow-x: hidden;"), "widget root should clip horizontal overflow inside the scoped container");
   assert(css.includes("@media (max-width: 600px)"), "mobile fullscreen media query is missing");
+  assert(/#jsu-wrapped\s*\{[^}]*padding:\s*0;/.test(mobileBody), "mobile widget root should avoid double-padding the fullscreen story surface");
   assert(/#jsu-wrapped \.jsuw-shell\s*\{[^}]*max-width:\s*100%;/.test(css), "mobile shell should fill the available embed width");
   assert(/#jsu-wrapped \.jsuw-story\s*\{[^}]*aspect-ratio:\s*auto;/.test(css), "mobile story should not be constrained to desktop aspect sizing");
   assert(css.includes("height: calc(100svh - 16px);"), "mobile story should keep a small-viewport height fallback");
