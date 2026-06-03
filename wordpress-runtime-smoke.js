@@ -12,7 +12,10 @@ const DEFAULT_VIEWPORT = { height: 844, width: 390 };
 const REQUIRED_ANALYTICS_EVENTS = [
   "jsu_wrapped_story_view",
   "jsu_wrapped_card_view",
-  "jsu_wrapped_card_engagement"
+  "jsu_wrapped_card_engagement",
+  "jsu_wrapped_share_click",
+  "jsu_wrapped_download_click",
+  "jsu_wrapped_cta_click"
 ];
 const REQUIRED_CTA_VALUES = [
   "wrapped_chapter",
@@ -351,9 +354,25 @@ function diagnosticSnapshotScript() {
   })()`;
 }
 
-function revealAndOpenCtaScript() {
+function exerciseFinalActionsScript() {
   return `(() => {
     const maxSteps = 24;
+    const results = {
+      ctaClicked: false,
+      downloadClicked: false,
+      shareClicked: false
+    };
+
+    if (!window.__jsuwRuntimeSmokeDownloadGuard) {
+      window.__jsuwRuntimeSmokeDownloadGuard = true;
+      const originalClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () {
+        if (this.download) {
+          return undefined;
+        }
+        return originalClick.call(this);
+      };
+    }
 
     function clickNext() {
       const next = document.querySelector('[data-jsuw-action="next"]');
@@ -364,22 +383,41 @@ function revealAndOpenCtaScript() {
       return false;
     }
 
+    function finalActionsReady() {
+      return document.querySelector('[data-jsuw-action="share"]') &&
+        document.querySelector('[data-jsuw-action="download"]') &&
+        document.querySelector('[data-jsuw-action="cta"]');
+    }
+
+    function clickAction(action) {
+      const button = document.querySelector('[data-jsuw-action="' + action + '"]');
+      if (!button) {
+        return false;
+      }
+      button.click();
+      return true;
+    }
+
     return new Promise((resolve) => {
       let step = 0;
       const timer = setInterval(() => {
-        const cta = document.querySelector('[data-jsuw-action="cta"]');
-
-        if (cta) {
+        if (finalActionsReady()) {
           clearInterval(timer);
-          cta.click();
-          setTimeout(() => resolve(true), 650);
+          results.shareClicked = clickAction('share');
+          setTimeout(() => {
+            results.downloadClicked = clickAction('download');
+            setTimeout(() => {
+              results.ctaClicked = clickAction('cta');
+              setTimeout(() => resolve(results), 750);
+            }, 250);
+          }, 250);
           return;
         }
 
         step += 1;
         if (step > maxSteps || !clickNext()) {
           clearInterval(timer);
-          resolve(false);
+          resolve(results);
         }
       }, 140);
     });
@@ -458,11 +496,12 @@ async function collectRuntimeResult(cdp, url, settings) {
   }
 
   const snapshot = await evaluate(cdp, runtimeSnapshotScript());
-  const ctaClicked = await evaluate(cdp, revealAndOpenCtaScript());
-  const cta = ctaClicked ? await evaluate(cdp, ctaSnapshotScript()) : { open: false, values: {} };
+  const actionResults = await evaluate(cdp, exerciseFinalActionsScript());
+  const cta = actionResults && actionResults.ctaClicked ? await evaluate(cdp, ctaSnapshotScript()) : { open: false, values: {} };
   const afterCta = await evaluate(cdp, runtimeSnapshotScript());
 
   return Object.assign({}, afterCta, {
+    actionResults,
     cta,
     layout: Object.assign({}, snapshot.layout, afterCta.layout)
   });
@@ -475,6 +514,7 @@ function hasAnalyticsContext(event) {
 function validateRuntimeResult(result) {
   const errors = [];
   const report = result || {};
+  const actionResults = report.actionResults || {};
   const layout = report.layout || {};
   const cta = report.cta || {};
   const ctaValues = cta.values || {};
@@ -510,6 +550,18 @@ function validateRuntimeResult(result) {
 
   if (!cta.open) {
     errors.push("CTA form did not open");
+  }
+
+  if (!actionResults.shareClicked) {
+    errors.push("Share button was not exercised on the final card");
+  }
+
+  if (!actionResults.downloadClicked) {
+    errors.push("Download button was not exercised on the final card");
+  }
+
+  if (!actionResults.ctaClicked) {
+    errors.push("CTA button was not exercised on the final card");
   }
 
   REQUIRED_CTA_VALUES.forEach((name) => {
@@ -671,7 +723,7 @@ async function main() {
   if (settings.dryRun) {
     console.log("WordPress runtime smoke plan:");
     console.log(`- mobile runtime: ${withRuntimeProbe(settings.url)} @ ${settings.viewport.width}x${settings.viewport.height}`);
-    console.log("- checks: mobile height/no overflow, JSU/NCSY analytics dataLayer context, embedded Gravity Forms CTA open/prefill");
+    console.log("- checks: mobile height/no overflow, JSU/NCSY analytics dataLayer context, final-card share/download/CTA actions, embedded Gravity Forms CTA open/prefill");
     return;
   }
 

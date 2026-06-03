@@ -144,7 +144,7 @@ For a live browser runtime check of the published WordPress page, run:
 node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 ```
 
-That command launches Chrome or Edge against the live page in a mobile viewport, waits for the widget to render, advances to the final CTA, and confirms mobile/full-height runtime layout, JSU/NCSY `dataLayer` event context, and embedded Gravity Forms CTA prefill. It is intentionally separate from `node check-production.js` because it needs the live WordPress page, network access, and a local browser.
+That command launches Chrome or Edge against the live page in a mobile viewport, waits for the widget to render, advances to the final card, clicks Share, Download, and the CTA, and confirms mobile/full-height runtime layout, JSU/NCSY `dataLayer` event context, and embedded Gravity Forms CTA prefill. It is intentionally separate from `node check-production.js` because it needs the live WordPress page, network access, and a local browser.
 
 If the live WordPress page is stale, print one compact copy-ready update packet:
 

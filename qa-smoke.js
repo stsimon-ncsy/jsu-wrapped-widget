@@ -2818,10 +2818,18 @@ function runWordPressRuntimeSmokeScriptSmoke() {
 
   const runtimeSmoke = require("./wordpress-runtime-smoke.js");
   const goodReport = runtimeSmoke.validateRuntimeResult({
+    actionResults: {
+      ctaClicked: true,
+      downloadClicked: true,
+      shareClicked: true
+    },
     analyticsEvents: [
       { event: "jsu_wrapped_story_view", chapter_slug: "baltimore", scope_type: "chapter" },
       { event: "jsu_wrapped_card_view", card_id: "cover", chapter_slug: "baltimore", scope_type: "chapter" },
-      { event: "jsu_wrapped_card_engagement", action: "cta_open", chapter_slug: "baltimore", scope_type: "chapter" }
+      { event: "jsu_wrapped_card_engagement", action: "cta_open", chapter_slug: "baltimore", scope_type: "chapter" },
+      { event: "jsu_wrapped_share_click", chapter_slug: "baltimore", scope_type: "chapter" },
+      { event: "jsu_wrapped_download_click", chapter_slug: "baltimore", scope_type: "chapter" },
+      { event: "jsu_wrapped_cta_click", chapter_slug: "baltimore", scope_type: "chapter" }
     ],
     cta: {
       open: true,
@@ -2845,6 +2853,11 @@ function runWordPressRuntimeSmokeScriptSmoke() {
     }
   });
   const badReport = runtimeSmoke.validateRuntimeResult({
+    actionResults: {
+      ctaClicked: false,
+      downloadClicked: false,
+      shareClicked: false
+    },
     analyticsEvents: [{ event: "jsu_wrapped_story_view", chapter_slug: "baltimore" }],
     cta: { open: false, values: {} },
     layout: {
@@ -2873,8 +2886,11 @@ function runWordPressRuntimeSmokeScriptSmoke() {
   assert(badReport.errors.some((error) => error.includes("horizontal overflow")), "runtime smoke validator should catch mobile horizontal overflow");
   assert(badReport.errors.some((error) => error.includes("analytics event")), "runtime smoke validator should catch missing analytics event context");
   assert(badReport.errors.some((error) => error.includes("CTA form")), "runtime smoke validator should catch unopened or unpopulated CTA forms");
+  assert(badReport.errors.some((error) => error.includes("Share button")), "runtime smoke validator should catch untested final-card share actions");
+  assert(badReport.errors.some((error) => error.includes("Download button")), "runtime smoke validator should catch untested final-card download actions");
   assert(dryRunOutput.includes("https://ncsy.org/ncsy-wrapped/?chapter=baltimore"), "runtime smoke dry run should show the default live WordPress URL");
   assert(dryRunOutput.includes("mobile runtime"), "runtime smoke dry run should describe the mobile runtime check");
+  assert(dryRunOutput.includes("share/download"), "runtime smoke dry run should describe final-card share/download coverage");
   assert(listed.includes("node --check wordpress-runtime-smoke.js"), "production QA should syntax-check the live WordPress runtime smoke helper");
   assert(readme.includes("node wordpress-runtime-smoke.js"), "README should document the live WordPress runtime smoke");
   assert(docs.includes("node wordpress-runtime-smoke.js"), "production docs should document the live WordPress runtime smoke");
