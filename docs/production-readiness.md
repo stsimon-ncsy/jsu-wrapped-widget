@@ -24,6 +24,8 @@ After the WordPress page is pasted and published, run `node wordpress-smoke.js -
 
 If that live check reports stale WordPress markup, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet`. The fix packet prints one compact copy-ready block with the hosted CSS link, current `#jsu-wrapped` tag, and hosted JS script together, plus the exact page/social title, suggested canonical/social URLs, meta description, Open Graph identity, campaign image metadata, optional Twitter/card metadata, optional image alt metadata, and the follow-up smoke command.
 
+If the stale live check mentions inline CSS ordering, paste the full current `wordpress-inline-embed.html` block instead of changing only the widget tag. Replacing only `#jsu-wrapped` updates data/cache attributes, but it cannot move stale inline CSS above the WordPress shell.
+
 A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the live WordPress shell smoke.
 
 The same current Baltimore launch values are checked in at `docs/wordpress-launch-packet.md` for a stable copy/paste handoff.

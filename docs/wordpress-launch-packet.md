@@ -84,3 +84,5 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 ```
 
 A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the follow-up verification command above.
+
+If the live check mentions inline CSS ordering, paste the full current `wordpress-inline-embed.html` block. Replacing only the `#jsu-wrapped` tag updates data/cache attributes, but it does not move stale inline CSS above the shell.

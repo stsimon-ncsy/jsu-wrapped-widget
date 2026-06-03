@@ -146,6 +146,8 @@ node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
 
 A nonzero `--fix-packet` exit means the live page is still stale after the packet was generated. Apply the packet, then rerun the live WordPress shell smoke.
 
+If the smoke mentions inline CSS ordering, paste the full current `wordpress-inline-embed.html` block. Replacing only the `#jsu-wrapped` tag updates data/cache attributes, but it does not move stale inline CSS above the shell.
+
 If the final CTA should link to a separate Gravity Forms page instead of an embedded same-page panel, include the clean form URL:
 
 ```bash

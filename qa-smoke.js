@@ -2625,6 +2625,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("Gravity Forms handles only the final CTA/contact capture"), "WordPress fix packet should explain the Gravity Forms scope");
   assert(fixPacket.includes("not the staff-builder submission intake flow"), "WordPress fix packet should distinguish the public CTA form from the staff builder intake form");
   assert(fixPacket.includes("A nonzero exit in fix-packet mode means the live page is still stale"), "WordPress fix packet should explain why fix-packet mode can exit nonzero");
+  assert(fixPacket.includes("If the live page has inline CSS ordering errors, paste the full current wordpress-inline-embed.html block"), "WordPress fix packet should lead stale inline-CSS fixes to the full inline block");
+  assert(fixPacket.includes("Replacing only the #jsu-wrapped tag updates data/cache attributes but does not move stale inline CSS"), "WordPress fix packet should warn that widget-tag replacement does not fix stale inline CSS order");
   assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
   assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");

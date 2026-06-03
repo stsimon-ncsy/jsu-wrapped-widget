@@ -22,6 +22,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm JSON/config/share assets are loading from GitHub Pages or another public static host.
 - Confirm hosted widget CSS/JS or the self-contained inline embed is present and current.
 - If the live shell is stale, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet` and apply the copy-ready WordPress HTML block plus metadata packet.
+- If the stale shell mentions inline CSS ordering, paste the full current `wordpress-inline-embed.html` block; replacing only `#jsu-wrapped` does not move stale inline CSS above the shell.
 - Treat a nonzero `--fix-packet` exit as expected while the public page is still stale; apply the packet, then rerun the normal live smoke.
 - If the CTA should link to a separate Gravity Forms page, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --fix-packet --cta-href "https://ncsy.org/wrapped-interest/"` and apply the direct-CTA packet.
 - After the separate Gravity Forms page is published, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore" --cta-href "https://ncsy.org/wrapped-interest/" --check-cta-destination`.
