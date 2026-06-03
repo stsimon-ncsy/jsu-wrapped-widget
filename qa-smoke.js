@@ -461,10 +461,15 @@ function runStaticShareSmoke() {
 function runEntryPageSocialMetadataSmoke() {
   ["index.html", "embed-example.html"].forEach((file) => {
     const html = loadText(file);
+    const widgetStart = html.indexOf('<div id="jsu-wrapped"');
+    const scriptStart = html.indexOf('<script src="./jsu-wrapped.js');
+    const widgetMarkup = widgetStart >= 0 && scriptStart > widgetStart ? html.slice(widgetStart, scriptStart) : "";
 
     assert(html.includes('property="og:site_name" content="JSU/NCSY Wrapped"'), `${file} missing OG site name`);
     assert(html.includes('property="og:image:alt" content="JSU/NCSY Wrapped social preview"'), `${file} missing OG image alt text`);
     assert(html.includes('name="twitter:image:alt" content="JSU/NCSY Wrapped social preview"'), `${file} missing Twitter image alt text`);
+    assert(widgetMarkup.includes("jsuw-shell jsuw-shell--loading"), `${file} missing static widget loading shell for full-height first paint`);
+    assert(widgetMarkup.includes('role="status"'), `${file} static widget loading shell should expose status semantics`);
   });
 }
 
