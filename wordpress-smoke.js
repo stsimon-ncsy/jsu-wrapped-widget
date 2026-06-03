@@ -295,8 +295,25 @@ function normalizedUrl(value, base) {
   }
 }
 
+function normalizedSocialUrl(value, base) {
+  try {
+    const parsed = new URL(String(value || ""), String(base || DEFAULT_URL));
+    parsed.hash = "";
+
+    Array.from(parsed.searchParams.keys()).forEach((key) => {
+      if (/^(qa|deploy|retry|card|autoplay|duration|cache|cb|v|ver|_|preview|nocache)$/i.test(key) || /^utm_/i.test(key)) {
+        parsed.searchParams.delete(key);
+      }
+    });
+
+    return parsed.href;
+  } catch (error) {
+    return "";
+  }
+}
+
 function suggestedSocialUrl(page) {
-  return normalizedUrl(page && page.url || DEFAULT_URL, DEFAULT_URL) || DEFAULT_URL;
+  return normalizedSocialUrl(page && page.url || DEFAULT_URL, DEFAULT_URL) || DEFAULT_URL;
 }
 
 function matchesSocialUrl(value, expected) {
@@ -304,7 +321,7 @@ function matchesSocialUrl(value, expected) {
     return false;
   }
 
-  return normalizedUrl(value, expected) === normalizedUrl(expected, DEFAULT_URL);
+  return normalizedSocialUrl(value, expected) === normalizedSocialUrl(expected, DEFAULT_URL);
 }
 
 function hasReleaseToken(url) {

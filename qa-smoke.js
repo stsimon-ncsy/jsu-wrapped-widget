@@ -2440,6 +2440,11 @@ function runWordPressSmokeScriptSmoke() {
     text: goodHtml.replaceAll(socialUrl, "https://ncsy.org/ncsy-wrapped/"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
+  const qaParamSocialUrlReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: goodHtml,
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore&qa=post-update-20260603a"
+  });
   const yoastCloudinaryHtml = goodHtml
     .replace(ogTypeTag, '<meta property="og:type" content="article">')
     .replace(ogSiteNameTag, '<meta property="og:site_name" content="NCSY">')
@@ -2612,6 +2617,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(missingMetaDescriptionReport.fixes.some((fix) => fix.includes("meta description") && fix.includes(socialDescription)), "WordPress smoke should suggest chapter-specific plain meta description metadata");
   assert(!wrongSocialDescriptionReport.ok && wrongSocialDescriptionReport.errors.some((error) => error.includes("social description")), "WordPress smoke should reject privacy/cookie fallback social descriptions");
   assert(!wrongSocialUrlReport.ok && wrongSocialUrlReport.errors.some((error) => error.includes("chapter URL")), "WordPress smoke should reject generic URL metadata that drops the chapter parameter");
+  assert(qaParamSocialUrlReport.ok, `WordPress smoke should accept canonical/social URLs that omit operational QA params: ${qaParamSocialUrlReport.errors.join("; ")}`);
   assert(yoastCloudinaryReport.ok, `WordPress smoke should accept a Yoast OG preview with the Cloudinary campaign image: ${yoastCloudinaryReport.errors.join("; ")}`);
   assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("og:type")), "WordPress smoke should reject pages without OG type metadata");
   assert(!missingOpenGraphIdentityReport.ok && missingOpenGraphIdentityReport.errors.some((error) => error.includes("site name")), "WordPress smoke should reject pages without OG site name metadata");
