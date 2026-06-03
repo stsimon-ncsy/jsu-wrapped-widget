@@ -166,6 +166,10 @@ function hasUnrenderedGravityFormsShortcode(html) {
   return /\[gravityform\b[^\]]*\]/i.test(String(html || ""));
 }
 
+function hasCurrentInlineFirstPaintStageCss(cssText) {
+  return /#jsu-wrapped-wordpress-shell\s+\.jsuw-page-stage\s*\{[\s\S]*?height:\s*100%;/.test(String(cssText || ""));
+}
+
 function validateCtaDestinationPage(page) {
   const errors = [];
   const fixes = [];
@@ -606,6 +610,11 @@ function validateWordPressPage(page, options) {
   if (inlineStyleText && (!/height:\s*calc\(100dvh - 16px\);/.test(inlineStyleText) || !/right:\s*58px;/.test(inlineStyleText))) {
     errors.push("WordPress inline CSS is missing the current mobile fullscreen and floating-widget clearance rules");
     addUniqueFix(fixes, "Paste the current wordpress-inline-embed.html block so the mobile story uses dynamic viewport height and clears floating privacy/accessibility widgets.");
+  }
+
+  if (inlineStyleText && !hasCurrentInlineFirstPaintStageCss(inlineStyleText)) {
+    errors.push("WordPress inline CSS is missing the current first-paint stage height rule");
+    addUniqueFix(fixes, "Paste the current wordpress-inline-embed.html block so the shell stage preserves first-load height before JavaScript renders.");
   }
 
   if (inlineShell && !hasHostAnalyticsLoader(html)) {

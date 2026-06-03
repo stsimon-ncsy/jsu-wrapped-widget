@@ -2364,11 +2364,12 @@ function runWordPressSmokeScriptSmoke() {
       .replace("jsu-wrapped.js?v=jsuw-prod-20260603b", "jsu-wrapped.js"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
-  const inlineCss = '<style>#jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; } @media (max-width: 600px) { #jsu-wrapped .jsuw-story { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-shell--loading .jsuw-loading { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-controls { right: 58px; } }</style>';
+  const inlineCss = '<style>#jsu-wrapped-wordpress-shell .jsuw-page-stage { height: 100%; } #jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; } @media (max-width: 600px) { #jsu-wrapped .jsuw-story { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-shell--loading .jsuw-loading { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-controls { right: 58px; } }</style>';
   const staleInlineCss = inlineCss
     .replace("height: calc(100dvh - 16px);", "")
     .replace("height: calc(100dvh - 16px);", "")
     .replace("right: 58px;", "right: 14px;");
+  const staleInlineFirstPaintCss = inlineCss.replace("#jsu-wrapped-wordpress-shell .jsuw-page-stage { height: 100%; } ", "");
   const inlineJs = '<script>(function (root, factory) { window.JSUWrapped = {}; })();</script>';
   const inlineGoodHtml = goodHtml
     .replace(hostedCssTag, inlineCss)
@@ -2378,6 +2379,11 @@ function runWordPressSmokeScriptSmoke() {
   const staleInlineChromeReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: inlineGoodHtml.replace(inlineCss, staleInlineCss),
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const staleInlineFirstPaintReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: inlineGoodHtml.replace(inlineCss, staleInlineFirstPaintCss),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingHostGtmReport = wordpressSmoke.validateWordPressPage({
@@ -2663,6 +2669,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(!staleWidgetAssetsReport.ok && staleWidgetAssetsReport.errors.some((error) => error.includes("script") && error.includes("cache token")), "WordPress smoke should reject stale widget script URLs");
   assert(!staleInlineChromeReport.ok && staleInlineChromeReport.errors.some((error) => error.includes("mobile fullscreen") && error.includes("floating-widget clearance")), "WordPress smoke should reject stale inline mobile chrome CSS");
   assert(staleInlineChromeReport.fixes.some((fix) => fix.includes("wordpress-inline-embed.html") && fix.includes("dynamic viewport height")), "WordPress smoke should suggest the full inline block for stale mobile chrome CSS");
+  assert(!staleInlineFirstPaintReport.ok && staleInlineFirstPaintReport.errors.some((error) => error.includes("first-paint stage height")), "WordPress smoke should reject stale inline first-paint stage height CSS");
+  assert(staleInlineFirstPaintReport.fixes.some((fix) => fix.includes("wordpress-inline-embed.html") && fix.includes("first-load height")), "WordPress smoke should suggest the full inline block for stale first-paint height CSS");
   assert(!missingHostGtmReport.ok && missingHostGtmReport.errors.some((error) => error.includes("GTM") && error.includes("analytics")), "WordPress smoke should reject no-header pages without the host GTM container");
   assert(missingHostGtmReport.fixes.some((fix) => fix.includes("GTM-MLW344")), "WordPress smoke should suggest the existing NCSY GTM container");
   assert(!missingStaticLoadingReport.ok && missingStaticLoadingReport.errors.some((error) => error.includes("static loading shell")), "WordPress smoke should reject inline pages without the static first-paint loading shell");
