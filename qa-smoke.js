@@ -1584,6 +1584,8 @@ function runInlineEmbedSmoke() {
   const osanoStart = inline.indexOf("cmp.osano.com");
   const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
   const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
+  const shellCssBlock = css.match(/#jsu-wrapped-wordpress-shell\s*\{([^}]*)\}/m);
+  const stageCssBlock = css.match(/#jsu-wrapped-wordpress-shell \.jsuw-page-stage\s*\{([^}]*)\}/m);
   const formCardCssBlock = css.match(/#jsu-wrapped-wordpress-shell \.jsuw-form-card\s*\{([^}]*)\}/m);
 
   assert(inline.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress inline embed should keep the embedded Gravity Forms CTA target");
@@ -1594,6 +1596,13 @@ function runInlineEmbedSmoke() {
   assert(inline.includes('class="jsuw-context-fields"'), "WordPress inline embed missing Gravity Forms context field templates");
   assert(inline.includes('name="wrapped_chapter"'), "WordPress inline embed missing wrapped chapter context field");
   assert(inline.includes("function ensureContextFields"), "WordPress inline embed missing Gravity Forms context bridge");
+  assert(shellCssBlock && /position:\s*fixed;/.test(shellCssBlock[1]), "WordPress shell should be viewport-fixed for full-height first paint");
+  assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should pin to every viewport edge");
+  assert(shellCssBlock && /height:\s*100vh;/.test(shellCssBlock[1]), "WordPress shell should include a 100vh height fallback");
+  assert(shellCssBlock && /height:\s*100dvh;/.test(shellCssBlock[1]), "WordPress shell should use dynamic viewport height");
+  assert(shellCssBlock && /overflow-y:\s*auto;/.test(shellCssBlock[1]), "WordPress shell should scroll internally when the form panel is open");
+  assert(stageCssBlock && /min-height:\s*100vh;/.test(stageCssBlock[1]), "WordPress page stage should include a 100vh fallback");
+  assert(stageCssBlock && /min-height:\s*100dvh;/.test(stageCssBlock[1]), "WordPress page stage should use dynamic viewport height");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-legal"), "WordPress shell CSS missing legal footer styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-panel"), "WordPress shell CSS missing Gravity Forms panel styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
