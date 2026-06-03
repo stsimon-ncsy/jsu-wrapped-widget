@@ -4749,7 +4749,7 @@
       target.__jsuWrappedCleanup = null;
     }
 
-    target.innerHTML = '<div class="jsuw-shell"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
+    target.innerHTML = '<div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
 
     try {
       var assetBase = getAssetBase(target, settings);

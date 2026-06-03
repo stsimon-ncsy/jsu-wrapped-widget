@@ -1596,6 +1596,7 @@ function runInlineEmbedSmoke() {
   assert(inline.includes('class="jsuw-context-fields"'), "WordPress inline embed missing Gravity Forms context field templates");
   assert(inline.includes('name="wrapped_chapter"'), "WordPress inline embed missing wrapped chapter context field");
   assert(inline.includes("function ensureContextFields"), "WordPress inline embed missing Gravity Forms context bridge");
+  assert(renderer.includes("jsuw-shell jsuw-shell--loading"), "Widget renderer should mark the loading shell so first paint can reserve story height");
   assert(shellCssBlock && /position:\s*fixed;/.test(shellCssBlock[1]), "WordPress shell should be viewport-fixed for full-height first paint");
   assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should pin to every viewport edge");
   assert(shellCssBlock && /height:\s*100vh;/.test(shellCssBlock[1]), "WordPress shell should include a 100vh height fallback");
@@ -1611,6 +1612,7 @@ function runInlineEmbedSmoke() {
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-select-button"), "WordPress shell CSS missing custom Gravity Forms select button styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-select-menu"), "WordPress shell CSS missing custom Gravity Forms select menu styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-native-select-hidden"), "WordPress shell CSS missing hidden native select fallback styling");
+  assert(css.includes("#jsu-wrapped .jsuw-shell--loading .jsuw-loading"), "Widget CSS should style the initial loading state as a story surface");
   assert(formCardCssBlock && /overflow:\s*visible;/.test(formCardCssBlock[1]), "WordPress shell form card should not clip custom dropdown menus");
   assert(renderer.includes("function enhanceFormSelects"), "Widget renderer missing scoped Gravity Forms select enhancer");
   assert(renderer.includes("data-jsuw-select-enhanced"), "Widget renderer missing select enhancement guard attribute");
@@ -1850,6 +1852,7 @@ function runMobileFullscreenLayoutSmoke() {
   assert(/#jsu-wrapped \.jsuw-shell\s*\{[^}]*max-width:\s*100%;/.test(css), "mobile shell should fill the available embed width");
   assert(/#jsu-wrapped \.jsuw-story\s*\{[^}]*aspect-ratio:\s*auto;/.test(css), "mobile story should not be constrained to desktop aspect sizing");
   assert(css.includes("height: calc(100svh - 16px);"), "mobile story should use small-viewport height for fullscreen feel");
+  assert(/#jsu-wrapped \.jsuw-shell--loading \.jsuw-loading\s*\{[^}]*height:\s*calc\(100svh - 16px\);/.test(mobileBody), "mobile loading state should reserve fullscreen story height before data renders");
   assert(/#jsu-wrapped \.jsuw-card-count\s*\{[^}]*display:\s*none;/.test(mobileBody), "mobile story chrome should hide the count to avoid clipped sound/autoplay controls");
   assert(/#jsu-wrapped \.jsuw-nav-button--next\s*\{[^}]*min-width:\s*88px;/.test(mobileBody), "mobile story chrome should shrink the Next button to avoid clipped controls");
   assert(docs.includes("Mobile Fullscreen Contract"), "production docs missing mobile fullscreen contract");

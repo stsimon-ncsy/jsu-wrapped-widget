@@ -1586,11 +1586,20 @@
 
 #jsu-wrapped .jsuw-loading {
   align-items: center;
+  aspect-ratio: 9 / 16;
   display: flex;
   font-size: 1rem;
   font-weight: 900;
   justify-content: center;
+  min-height: min(680px, calc(100vh - 32px));
   text-align: center;
+  width: 100%;
+}
+
+@supports (height: 100svh) {
+  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    min-height: min(680px, calc(100svh - 32px));
+  }
 }
 
 #jsu-wrapped .jsuw-error .jsuw-headline {
@@ -4300,6 +4309,14 @@
     width: 100%;
   }
 
+  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    aspect-ratio: auto;
+    height: calc(100vh - 16px);
+    height: calc(100svh - 16px);
+    min-height: min(640px, calc(100svh - 16px));
+    padding: 24px;
+  }
+
   #jsu-wrapped .jsuw-card {
     padding: 0;
   }
@@ -4536,6 +4553,14 @@
     height: calc(100svh - 20px);
     min-height: min(720px, calc(100svh - 20px));
     width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    aspect-ratio: auto;
+    height: calc(100vh - 20px);
+    height: calc(100svh - 20px);
+    min-height: min(720px, calc(100svh - 20px));
+    padding: 28px;
   }
 
   #jsu-wrapped .jsuw-card {
@@ -9541,7 +9566,7 @@
       target.__jsuWrappedCleanup = null;
     }
 
-    target.innerHTML = '<div class="jsuw-shell"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
+    target.innerHTML = '<div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
 
     try {
       var assetBase = getAssetBase(target, settings);
