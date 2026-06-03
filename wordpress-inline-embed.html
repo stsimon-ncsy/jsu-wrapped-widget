@@ -6,20 +6,34 @@
     <div
       id="jsu-wrapped"
       data-year="2026"
-      data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260602a"
-      data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"
-      data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260602a"
+      data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a"
+      data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"
+      data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260603a"
       data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
       data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
       data-analytics="true"
       data-cta-label="Get involved next year"
-      data-cta-href="https://ncsy.org/contact/"
+      data-cta-target="#jsuw-wrapped-interest"
     ></div>
-    <section class="jsuw-form-panel" hidden aria-hidden="true">
+    <section id="jsuw-wrapped-interest" class="jsuw-form-panel" hidden aria-hidden="true">
       <div class="jsuw-form-card">
-        <h2>Build next year&apos;s story</h2>
-        <p>A staff member can follow up with the right chapter context attached.</p>
-        <a class="jsuw-form-link" href="/contact/">Contact NCSY</a>
+        <h2>Build next year's story</h2>
+        <p>Tell us how you want to get involved with JSU/NCSY next year.</p>
+        <div class="jsuw-context-fields" hidden aria-hidden="true">
+          <input type="hidden" name="wrapped_chapter" data-jsuw-prefill="chapter_name">
+          <input type="hidden" name="wrapped_chapter_slug" data-jsuw-prefill="chapter_slug">
+          <input type="hidden" name="wrapped_region" data-jsuw-prefill="region_name">
+          <input type="hidden" name="wrapped_scope" data-jsuw-prefill="scope_type">
+          <input type="hidden" name="wrapped_slug" data-jsuw-prefill="scope_slug">
+          <input type="hidden" name="wrapped_name" data-jsuw-prefill="scope_name">
+          <input type="hidden" name="wrapped_variant" data-jsuw-prefill="variant_slug">
+          <input type="hidden" name="wrapped_year" data-jsuw-prefill="year_label">
+          <input type="hidden" name="wrapped_url" data-jsuw-prefill="wrapped_url">
+        </div>
+        <!-- If this is pasted into a Custom HTML block, WordPress may not render the shortcode.
+             Prefer a Shortcode block, Gravity Forms block, or template-rendered shortcode wrapped
+             by #jsuw-wrapped-interest for the live page. -->
+        [gravityform id="255" title="false" description="false" ajax="true"]
       </div>
     </section>
     <nav class="jsuw-legal" aria-label="Wrapped policies">
@@ -35,6 +49,285 @@
 <script src="https://cmp.osano.com/AzyvxUSByGm4feKh/463f49f9-a424-47f3-993c-20ff791192be/osano.js"></script>
 
 <style>
+#jsu-wrapped-wordpress-shell {
+  --jsuw-shell-bg: #07051f;
+  --jsuw-shell-ink: #ffffff;
+  --jsuw-shell-muted: rgba(255, 255, 255, 0.68);
+  --jsuw-shell-line: rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(0, 194, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(255, 46, 147, 0.2), transparent 28%),
+    linear-gradient(145deg, #07051f 0%, #19093d 48%, #0a0624 100%);
+  color: var(--jsuw-shell-ink);
+  font-family: "DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  min-height: 100svh;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell *,
+#jsu-wrapped-wordpress-shell *::before,
+#jsu-wrapped-wordpress-shell *::after {
+  box-sizing: border-box;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-page-stage {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  min-height: 100svh;
+  padding: clamp(10px, 2.4vw, 24px) 12px 16px;
+}
+
+#jsu-wrapped-wordpress-shell #jsu-wrapped {
+  flex: 0 1 auto;
+  max-width: min(100%, 430px);
+  min-height: auto;
+  padding: 0;
+  width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal {
+  align-items: center;
+  color: var(--jsuw-shell-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 4px 8px;
+  justify-content: center;
+  line-height: 1.35;
+  margin: 0 auto;
+  max-width: min(100%, 430px);
+  padding: 0 8px 4px;
+  text-align: center;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal a,
+#jsu-wrapped-wordpress-shell .jsuw-legal button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-legal a:hover,
+#jsu-wrapped-wordpress-shell .jsuw-legal button:hover,
+#jsu-wrapped-wordpress-shell .jsuw-legal a:focus-visible,
+#jsu-wrapped-wordpress-shell .jsuw-legal button:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-panel[hidden],
+#jsu-wrapped-wordpress-shell .jsuw-context-fields {
+  display: none !important;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-panel {
+  color: var(--jsuw-shell-ink);
+  margin: clamp(14px, 3vw, 28px) auto 0;
+  max-width: min(100%, 560px);
+  padding: 0 10px 18px;
+  width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card {
+  background: rgba(12, 8, 42, 0.9);
+  border: 1px solid var(--jsuw-shell-line);
+  border-radius: 24px;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+  padding: clamp(20px, 4vw, 30px);
+  position: relative;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card::before {
+  background:
+    linear-gradient(90deg, #00c2ff, #ff2e93, #ffb627),
+    rgba(255, 255, 255, 0.18);
+  content: "";
+  height: 5px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card h2 {
+  color: #ffffff;
+  font-family: "Bricolage Grotesque", "Arial Black", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  font-size: clamp(1.45rem, 4.8vw, 2.1rem);
+  line-height: 0.98;
+  margin: 0 0 8px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card p {
+  color: var(--jsuw-shell-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 0 0 18px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_wrapper,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_wrapper.gravity-theme {
+  color: #ffffff;
+  margin: 0;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_wrapper label,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_wrapper legend,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform-field-label {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
+#jsu-wrapped-wordpress-shell .jsuw-form-card textarea,
+#jsu-wrapped-wordpress-shell .jsuw-form-card select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  color: #ffffff;
+  font: inherit;
+  min-height: 46px;
+  outline: none;
+  padding: 11px 13px;
+  width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card select,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gfield_select {
+  appearance: none;
+  background-color: rgba(255, 255, 255, 0.12);
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23fff35e' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 13px center;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  color: #ffffff;
+  cursor: pointer;
+  padding-right: 44px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card select option,
+#jsu-wrapped-wordpress-shell .jsuw-form-card select optgroup {
+  background: #16072f;
+  color: #ffffff;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card select:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card select::-ms-expand {
+  display: none;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container {
+  color: #ffffff;
+  font: inherit;
+  width: 100% !important;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container--default .select2-selection--single,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container-single .chosen-single {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  box-shadow: none;
+  color: #ffffff;
+  display: flex;
+  min-height: 46px;
+  padding: 0 42px 0 13px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container--default .select2-selection--single .select2-selection__rendered,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container-single .chosen-single span {
+  color: #ffffff;
+  line-height: 1.2;
+  padding: 0;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container--default .select2-selection--single .select2-selection__arrow,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container-single .chosen-single div {
+  height: 100%;
+  right: 10px;
+  top: 0;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-dropdown,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container .chosen-drop {
+  background: #16072f;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-results__option,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container .chosen-results li {
+  color: #ffffff;
+  padding: 10px 12px;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-results__option--highlighted,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .chosen-container .chosen-results li.highlighted {
+  background: #ffb627;
+  color: #170526;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card input::placeholder,
+#jsu-wrapped-wordpress-shell .jsuw-form-card textarea::placeholder {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card input:focus,
+#jsu-wrapped-wordpress-shell .jsuw-form-card textarea:focus,
+#jsu-wrapped-wordpress-shell .jsuw-form-card select:focus {
+  border-color: rgba(255, 182, 39, 0.88);
+  box-shadow: 0 0 0 3px rgba(255, 182, 39, 0.18);
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card input[type="submit"],
+#jsu-wrapped-wordpress-shell .jsuw-form-card button[type="submit"],
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_button {
+  appearance: none;
+  background: linear-gradient(135deg, #fff35e 0%, #ffb627 46%, #ff6b4a 100%);
+  border: 0;
+  border-radius: 999px;
+  color: #170526;
+  cursor: pointer;
+  font: 900 0.95rem/1 "DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  min-height: 46px;
+  padding: 13px 22px;
+  text-transform: none;
+}
+
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_footer,
+#jsu-wrapped-wordpress-shell .jsuw-form-card .gform_page_footer {
+  margin-block-start: 18px;
+  padding: 0;
+}
+
+@media (min-width: 761px) {
+  #jsu-wrapped-wordpress-shell .jsuw-page-stage {
+    padding-bottom: 22px;
+    padding-top: 22px;
+  }
+}
+
 #jsu-wrapped {
   --jsuw-ink: #ffffff;
   --jsuw-ink-soft: rgba(255, 255, 255, 0.78);
@@ -4289,6 +4582,72 @@
       openCookiePreferences(event);
     }
   });
+})();
+
+(function () {
+  var FIELD_SELECTOR = ".jsuw-context-fields input[name]";
+
+  function selectorEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return window.CSS.escape(value);
+    }
+
+    return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  }
+
+  function ensureContextFields(panel) {
+    if (!panel) {
+      return;
+    }
+
+    var form = panel.querySelector("form");
+    var templates = panel.querySelectorAll(FIELD_SELECTOR);
+
+    if (!form || !templates.length) {
+      return;
+    }
+
+    Array.prototype.forEach.call(templates, function (template) {
+      var name = template.getAttribute("name");
+
+      if (!name || form.querySelector('[name="' + selectorEscape(name) + '"]')) {
+        return;
+      }
+
+      var field = document.createElement("input");
+      field.type = "hidden";
+      field.name = name;
+      field.setAttribute("data-jsuw-prefill", template.getAttribute("data-jsuw-prefill") || "");
+      form.appendChild(field);
+    });
+  }
+
+  function installFormContextBridge() {
+    var panel = document.querySelector("#jsuw-wrapped-interest");
+
+    if (!panel || !window.MutationObserver) {
+      ensureContextFields(panel);
+      return;
+    }
+
+    ensureContextFields(panel);
+
+    var observer = new MutationObserver(function () {
+      ensureContextFields(panel);
+    });
+
+    observer.observe(panel, {
+      attributes: true,
+      childList: true,
+      subtree: true
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", installFormContextBridge, { once: true });
+  } else {
+    installFormContextBridge();
+  }
 })();
 
 (function (root, factory) {

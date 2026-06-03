@@ -1583,6 +1583,19 @@ function runInlineEmbedSmoke() {
   const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
   const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
 
+  assert(inline.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress inline embed should keep the embedded Gravity Forms CTA target");
+  assert(!inline.includes('data-cta-href="https://ncsy.org/contact/"'), "WordPress inline embed should not replace the embedded Gravity Forms CTA with the generic contact page");
+  assert(inline.includes('id="jsuw-wrapped-interest"'), "WordPress inline embed missing Gravity Forms panel target");
+  assert(/\[gravityform\b[^\]]*\]/i.test(inline), "WordPress inline embed missing Gravity Forms shortcode panel");
+  assert(inline.includes('class="jsuw-legal"'), "WordPress inline embed missing scoped legal footer");
+  assert(inline.includes('class="jsuw-context-fields"'), "WordPress inline embed missing Gravity Forms context field templates");
+  assert(inline.includes('name="wrapped_chapter"'), "WordPress inline embed missing wrapped chapter context field");
+  assert(inline.includes("function ensureContextFields"), "WordPress inline embed missing Gravity Forms context bridge");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-legal"), "WordPress shell CSS missing legal footer styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-panel"), "WordPress shell CSS missing Gravity Forms panel styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card select option"), "WordPress shell CSS missing native Gravity Forms dropdown option styling");
+  assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container"), "WordPress shell CSS missing enhanced Gravity Forms dropdown styling");
   assert(styleStart >= 0 && styleEnd > styleStart, "WordPress embed missing top-level style block");
   assert(scriptStart > styleEnd, "WordPress embed missing inline script after styles");
   assert(embeddedCss === css, "WordPress inline CSS is not synced with jsu-wrapped.css");
@@ -1593,7 +1606,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html", "cta-prefill-smoke.html", "cta-link-smoke.html", "analytics-smoke.html", "layout-smoke.html"];
-  const releaseToken = "jsuw-prod-20260602a";
+  const releaseToken = "jsuw-prod-20260603a";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const builderJs = loadText("wrapped-builder.js");
@@ -1648,12 +1661,12 @@ function runCacheTokenBumpSmoke() {
   assert(fs.existsSync(scriptPath), "cache-token bump helper is missing");
 
   const bump = require("./bump-cache-token.js");
-  const sample = "one?v=jsuw-prod-20260602a two?v=jsuw-prod-20260602a placeholder=jsuw-prod-YYYYMMDDx";
-  const result = bump.replaceCacheTokenInText(sample, "jsuw-prod-20260602a");
+  const sample = "one?v=jsuw-prod-20260603a two?v=jsuw-prod-20260603a placeholder=jsuw-prod-YYYYMMDDx";
+  const result = bump.replaceCacheTokenInText(sample, "jsuw-prod-20260603a");
 
   assert(result.count === 2, `cache-token helper replaced ${result.count} tokens instead of 2`);
-  assert(result.text === "one?v=jsuw-prod-20260602a two?v=jsuw-prod-20260602a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
-  assert(bump.validateToken("jsuw-prod-20260602a") === "jsuw-prod-20260602a", "cache-token helper should accept production token format");
+  assert(result.text === "one?v=jsuw-prod-20260603a two?v=jsuw-prod-20260603a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
+  assert(bump.validateToken("jsuw-prod-20260603a") === "jsuw-prod-20260603a", "cache-token helper should accept production token format");
   assert(bump.FILES.includes("cta-prefill-smoke.html"), "cache-token helper should update the CTA prefill smoke page");
   assert(bump.FILES.includes("cta-link-smoke.html"), "cache-token helper should update the CTA link smoke page");
   assert(bump.FILES.includes("analytics-smoke.html"), "cache-token helper should update the analytics smoke page");
@@ -1736,6 +1749,7 @@ function runCssIsolationSmoke() {
   const docs = loadText("docs/production-readiness.md");
   const allowedTopLevel = [
     "#jsu-wrapped",
+    "#jsu-wrapped-wordpress-shell",
     ":root #jsu-wrapped"
   ];
   const violations = [];
@@ -1922,7 +1936,7 @@ function runHostedSmokeScriptSmoke() {
   const goodAssets = {
     "": {
       status: 200,
-      text: '<div id="jsu-wrapped" data-share-base="./share/"></div><script src="./jsu-wrapped.js?v=jsuw-prod-20260602a"></script>'
+      text: '<div id="jsu-wrapped" data-share-base="./share/"></div><script src="./jsu-wrapped.js?v=jsuw-prod-20260603a"></script>'
     },
     "builder.html": {
       status: 200,
@@ -1962,7 +1976,7 @@ function runHostedSmokeScriptSmoke() {
     },
     "wordpress-inline-embed.html": {
       status: 200,
-      text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260602a"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
+      text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
     },
     "sample-wrapped-2026.json": {
       headers: {
@@ -2164,8 +2178,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fs.existsSync(scriptPath), "WordPress smoke script is missing");
 
   const wordpressSmoke = require("./wordpress-smoke.js");
-  const hostedCssTag = '<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260602a">';
-  const hostedJsTag = '<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260602a"></script>';
+  const hostedCssTag = '<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260603a">';
+  const hostedJsTag = '<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260603a"></script>';
   const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
   const ogTypeTag = '<meta property="og:type" content="website">';
   const ogSiteNameTag = '<meta property="og:site_name" content="JSU/NCSY Wrapped">';
@@ -2231,8 +2245,8 @@ function runWordPressSmokeScriptSmoke() {
     hostedJsTag,
     "</head><body>",
     '<div id="jsu-wrapped"',
-    ' data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260602a"',
-    ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"',
+    ' data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a"',
+    ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"',
     ' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"',
     ' data-cta-label="Get involved next year"',
     ' data-cta-target="#jsuw-wrapped-interest"></div>',
@@ -2261,8 +2275,8 @@ function runWordPressSmokeScriptSmoke() {
   const staleWidgetAssetsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace("jsu-wrapped.css?v=jsuw-prod-20260602a", "jsu-wrapped.css")
-      .replace("jsu-wrapped.js?v=jsuw-prod-20260602a", "jsu-wrapped.js"),
+      .replace("jsu-wrapped.css?v=jsuw-prod-20260603a", "jsu-wrapped.css")
+      .replace("jsu-wrapped.js?v=jsuw-prod-20260603a", "jsu-wrapped.js"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingPanelReport = wordpressSmoke.validateWordPressPage({
@@ -2288,7 +2302,7 @@ function runWordPressSmokeScriptSmoke() {
   const missingHostedAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2298,7 +2312,7 @@ function runWordPressSmokeScriptSmoke() {
   const directCtaHrefAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: directCtaHrefHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2319,7 +2333,7 @@ function runWordPressSmokeScriptSmoke() {
   const unsafeCtaHrefStaleAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', "")
       .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="javascript:alert(1)"')
       .replace(ctaPanelHtml, ""),
@@ -2428,7 +2442,7 @@ function runWordPressSmokeScriptSmoke() {
     status: 200,
     text: goodHtml
       .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2436,7 +2450,7 @@ function runWordPressSmokeScriptSmoke() {
     status: 200,
     text: goodHtml
       .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   }, null, {
@@ -2456,7 +2470,7 @@ function runWordPressSmokeScriptSmoke() {
   });
   const staleDataUrlReport = wordpressSmoke.validateWordPressPage({
     status: 200,
-    text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260602a", "sample-wrapped-2026.json"),
+    text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260603a", "sample-wrapped-2026.json"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingPrivacyReport = wordpressSmoke.validateWordPressPage({
@@ -2571,9 +2585,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
   assert(directCtaFixPacket.includes("Direct Gravity Forms CTA URL: https://ncsy.org/wrapped-interest/"), "WordPress fix packet should label the direct Gravity Forms CTA URL");
   assert(directCtaFixPacket.includes("Add these hidden/context fields on the destination form page"), "WordPress fix packet should clarify that direct CTA context fields belong on the destination form page");
-  assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"'), "WordPress fix packet should include the config source");
-  assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget stylesheet");
-  assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260602a"), "WordPress fix packet should include the hosted widget script");
+  assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"'), "WordPress fix packet should include the config source");
+  assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260603a"), "WordPress fix packet should include the hosted widget stylesheet");
+  assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260603a"), "WordPress fix packet should include the hosted widget script");
   assert(fixPacket.includes("og:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image URL");
   assert(fixPacket.includes("og:image:secure_url: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image secure URL");
   assert(fixPacket.includes("twitter:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign twitter:image URL");
@@ -2593,7 +2607,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
   assert(launchPacket.includes("WordPress Wrapped Launch Packet"), "repo should include a checked-in WordPress launch packet");
-  assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a"'), "checked-in WordPress launch packet should include the current config source");
+  assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"'), "checked-in WordPress launch packet should include the current config source");
   assert(launchPacket.includes("JSU/NCSY Wrapped - Baltimore"), "checked-in WordPress launch packet should include the exact Baltimore title");
   assert(launchPacket.includes("A failed live smoke after generating this packet means the public page still needs this packet applied"), "checked-in WordPress launch packet should explain that stale live-page failure is expected before application");
   assert(launchPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "checked-in WordPress launch packet should include the follow-up verification command");

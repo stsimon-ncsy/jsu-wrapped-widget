@@ -15,9 +15,9 @@ Production hosting map:
 Paste this into the page body where the Wrapped widget should appear.
 
 ```html
-<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260602a">
-<div id="jsu-wrapped" data-year="2026" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260602a" data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260602a" data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260602a" data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/" data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/" data-analytics="true" data-cta-label="Get involved next year" data-cta-target="#jsuw-wrapped-interest"></div>
-<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260602a"></script>
+<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260603a">
+<div id="jsu-wrapped" data-year="2026" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a" data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a" data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260603a" data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/" data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/" data-analytics="true" data-cta-label="Get involved next year" data-cta-target="#jsuw-wrapped-interest"></div>
+<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260603a"></script>
 ```
 
 Do not paste separate CSS/JS tags a second time if you use the block above.
