@@ -12,7 +12,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm GitHub Pages deployment is green for the same commit.
 - Run `node hosted-smoke.js` after Pages finishes deploying.
 - After the WordPress page is published, run `node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"`.
-- After the WordPress shell smoke passes, run `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` from a machine with Chrome or Edge to verify live mobile rendering, analytics `dataLayer` context, and embedded Gravity Forms CTA prefill.
+- After the WordPress shell smoke passes, run `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` from a machine with Chrome or Edge to verify live mobile rendering, host GTM/Google tag plumbing, analytics `dataLayer` context, final-card actions, and embedded Gravity Forms CTA prefill.
 - Confirm the shared cache token is current across README snippets, `index.html`, `embed-example.html`, `builder.html`, `cta-prefill-smoke.html`, `cta-link-smoke.html`, `analytics-smoke.html`, `wrapped-builder.js`, `wordpress-inline-embed.html`, and hosted JSON/CSS/JS URLs.
 - If you changed JS, CSS, data, config, or share pages for reviewers, run `node bump-cache-token.js jsuw-prod-YYYYMMDDx`, then rerun `node check-production.js`.
 
@@ -30,7 +30,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 - Confirm the page does not add theme CSS that clips the mobile story viewport.
 - Confirm privacy/cookie links are present through the site wrapper, Osano, or the page footer plan.
 - Open the WordPress page on mobile and desktop and verify the story fills the mobile viewport cleanly.
-- Use `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` as the repeatable browser check for the mobile viewport, final CTA, form prefill, and analytics event context.
+- Use `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` as the repeatable browser check for the mobile viewport, final-card actions, form prefill, host analytics tag plumbing, and analytics event context.
 
 ## Gravity Forms
 
@@ -43,6 +43,7 @@ Use this as the final go/no-go checklist before sending Wrapped links beyond the
 ## Analytics
 
 - Confirm GTM or the Google tag is installed by the host site, not by the widget.
+- Use `node wordpress-runtime-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"` to confirm the live page exposes either GTM or Google tag plumbing plus a ready `dataLayer`.
 - In GTM Preview, confirm `jsu_wrapped_story_view`, `jsu_wrapped_card_view`, and `jsu_wrapped_card_engagement` fire.
 - In GA4 DebugView, confirm events arrive for property `G-Y3LLF5KQ23`.
 - Confirm custom dimensions/metrics from `analytics-gtm-setup.md` are registered or queued for reporting.

@@ -334,6 +334,27 @@ function runtimeSnapshotScript() {
   })()`;
 }
 
+function hostAnalyticsSnapshotScript() {
+  return `(() => {
+    const scripts = Array.from(document.scripts || []).map((script) => ({
+      src: script.src || '',
+      text: script.textContent || ''
+    }));
+    const tagSources = scripts
+      .map((script) => script.src)
+      .filter((src) => /googletagmanager\\.com|google-analytics\\.com|gtag/i.test(src));
+    const combined = scripts.map((script) => script.src + '\\n' + script.text).join('\\n');
+    const dataLayerReady = Array.isArray(window.dataLayer);
+
+    return {
+      dataLayerReady,
+      googleTagInstalled: /googletagmanager\\.com\\/gtag\\/js|\\bgtag\\s*\\(|\\bG-[A-Z0-9]+\\b/i.test(combined),
+      gtmInstalled: /googletagmanager\\.com\\/gtm\\.js|\\bGTM-[A-Z0-9]+\\b/i.test(combined) || !!window.google_tag_manager,
+      tagSources
+    };
+  })()`;
+}
+
 function diagnosticSnapshotScript() {
   return `(() => {
     const root = document.querySelector('#jsu-wrapped');
@@ -495,6 +516,7 @@ async function collectRuntimeResult(cdp, url, settings) {
     throw new Error(`${error.message}; diagnostics=${JSON.stringify(diagnostics)}`);
   }
 
+  const hostAnalytics = await evaluate(cdp, hostAnalyticsSnapshotScript());
   const snapshot = await evaluate(cdp, runtimeSnapshotScript());
   const actionResults = await evaluate(cdp, exerciseFinalActionsScript());
   const cta = actionResults && actionResults.ctaClicked ? await evaluate(cdp, ctaSnapshotScript()) : { open: false, values: {} };
@@ -503,6 +525,7 @@ async function collectRuntimeResult(cdp, url, settings) {
   return Object.assign({}, afterCta, {
     actionResults,
     cta,
+    hostAnalytics,
     layout: Object.assign({}, snapshot.layout, afterCta.layout)
   });
 }
@@ -519,6 +542,7 @@ function validateRuntimeResult(result) {
   const cta = report.cta || {};
   const ctaValues = cta.values || {};
   const events = report.analyticsEvents || [];
+  const hostAnalytics = report.hostAnalytics || {};
   const eventNames = new Set(events.map((event) => event && event.event).filter(Boolean));
   const minStoryHeight = Math.min(Number(layout.viewportHeight) * 0.9, Number(layout.viewportHeight) - 24);
 
@@ -547,6 +571,14 @@ function validateRuntimeResult(result) {
       errors.push(`analytics event ${name} is missing chapter/scope context`);
     }
   });
+
+  if (!hostAnalytics.dataLayerReady) {
+    errors.push("host analytics dataLayer is not ready");
+  }
+
+  if (!hostAnalytics.googleTagInstalled && !hostAnalytics.gtmInstalled) {
+    errors.push("host analytics Google tag or GTM container is missing");
+  }
 
   if (!cta.open) {
     errors.push("CTA form did not open");
@@ -723,7 +755,7 @@ async function main() {
   if (settings.dryRun) {
     console.log("WordPress runtime smoke plan:");
     console.log(`- mobile runtime: ${withRuntimeProbe(settings.url)} @ ${settings.viewport.width}x${settings.viewport.height}`);
-    console.log("- checks: mobile height/no overflow, JSU/NCSY analytics dataLayer context, final-card share/download/CTA actions, embedded Gravity Forms CTA open/prefill");
+    console.log("- checks: mobile height/no overflow, host GTM/Google tag plumbing, JSU/NCSY analytics dataLayer context, final-card share/download/CTA actions, embedded Gravity Forms CTA open/prefill");
     return;
   }
 

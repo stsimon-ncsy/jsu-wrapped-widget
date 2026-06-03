@@ -1581,7 +1581,9 @@ function runInlineEmbedSmoke() {
   const rendererStart = inline.indexOf(marker);
   const rendererEnd = inline.lastIndexOf("</script>");
   const shellStart = inline.indexOf('<div id="jsu-wrapped-wordpress-shell">');
+  const gtmStart = inline.indexOf("GTM-MLW344");
   const osanoStart = inline.indexOf("cmp.osano.com");
+  const shellMarkup = shellStart >= 0 && osanoStart > shellStart ? inline.slice(shellStart, osanoStart) : "";
   const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
   const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
   const shellCssBlock = css.match(/#jsu-wrapped-wordpress-shell\s*\{([^}]*)\}/m);
@@ -1595,8 +1597,12 @@ function runInlineEmbedSmoke() {
   assert(inline.includes('class="jsuw-legal"'), "WordPress inline embed missing scoped legal footer");
   assert(inline.includes('class="jsuw-context-fields"'), "WordPress inline embed missing Gravity Forms context field templates");
   assert(inline.includes('name="wrapped_chapter"'), "WordPress inline embed missing wrapped chapter context field");
+  assert(inline.includes("GTM-MLW344"), "WordPress inline embed should include the NCSY host GTM container for the no-header page");
+  assert(inline.includes("googletagmanager.com/gtm.js"), "WordPress inline embed should load the NCSY host GTM script");
   assert(inline.includes("function ensureContextFields"), "WordPress inline embed missing Gravity Forms context bridge");
   assert(renderer.includes("jsuw-shell jsuw-shell--loading"), "Widget renderer should mark the loading shell so first paint can reserve story height");
+  assert(shellMarkup.includes("jsuw-shell jsuw-shell--loading"), "WordPress inline embed should include a static loading shell for full-height first paint");
+  assert(shellMarkup.includes('role="status"'), "WordPress static loading shell should expose status semantics");
   assert(shellCssBlock && /position:\s*fixed;/.test(shellCssBlock[1]), "WordPress shell should be viewport-fixed for full-height first paint");
   assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should pin to every viewport edge");
   assert(shellCssBlock && /height:\s*100vh;/.test(shellCssBlock[1]), "WordPress shell should include a 100vh height fallback");
@@ -1620,12 +1626,13 @@ function runInlineEmbedSmoke() {
   assert(styleStart >= 0 && styleEnd > styleStart, "WordPress embed missing top-level style block");
   assert(shellStart > -1, "WordPress embed missing WordPress shell wrapper");
   assert(styleStart < shellStart, "WordPress inline CSS should load before shell markup to prevent a short first paint");
+  assert(gtmStart > styleEnd && gtmStart < shellStart, "WordPress inline GTM loader should run after CSS and before the shell markup");
   assert(osanoStart === -1 || styleStart < osanoStart, "WordPress inline CSS should load before the external Osano script");
   assert(scriptStart > styleEnd, "WordPress embed missing inline script after styles");
   assert(embeddedCss === css, "WordPress inline CSS is not synced with jsu-wrapped.css");
   assert(rendererStart >= 0, "WordPress embed missing inline renderer");
   assert(embeddedRenderer === renderer, "WordPress inline renderer is not synced with jsu-wrapped.js");
-  assert((inline.match(/<script>/g) || []).length === 1, "WordPress embed should have one inline script block");
+  assert((inline.match(/<script>/g) || []).length === 2, "WordPress embed should have the GTM loader plus the inline widget script");
 }
 
 function runAssetVersionSmoke() {
@@ -2844,6 +2851,12 @@ function runWordPressRuntimeSmokeScriptSmoke() {
         wrapped_url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
       }
     },
+    hostAnalytics: {
+      dataLayerReady: true,
+      googleTagInstalled: true,
+      gtmInstalled: false,
+      tagSources: ["https://www.googletagmanager.com/gtag/js?id=G-Y3LLF5KQ23"]
+    },
     layout: {
       hasBrokenText: false,
       horizontalOverflow: false,
@@ -2860,6 +2873,12 @@ function runWordPressRuntimeSmokeScriptSmoke() {
     },
     analyticsEvents: [{ event: "jsu_wrapped_story_view", chapter_slug: "baltimore" }],
     cta: { open: false, values: {} },
+    hostAnalytics: {
+      dataLayerReady: false,
+      googleTagInstalled: false,
+      gtmInstalled: false,
+      tagSources: []
+    },
     layout: {
       hasBrokenText: true,
       horizontalOverflow: true,
@@ -2885,6 +2904,7 @@ function runWordPressRuntimeSmokeScriptSmoke() {
   assert(badReport.errors.some((error) => error.includes("mobile story height")), "runtime smoke validator should catch short first-load/mobile story height");
   assert(badReport.errors.some((error) => error.includes("horizontal overflow")), "runtime smoke validator should catch mobile horizontal overflow");
   assert(badReport.errors.some((error) => error.includes("analytics event")), "runtime smoke validator should catch missing analytics event context");
+  assert(badReport.errors.some((error) => error.includes("host analytics")), "runtime smoke validator should catch missing host analytics plumbing");
   assert(badReport.errors.some((error) => error.includes("CTA form")), "runtime smoke validator should catch unopened or unpopulated CTA forms");
   assert(badReport.errors.some((error) => error.includes("Share button")), "runtime smoke validator should catch untested final-card share actions");
   assert(badReport.errors.some((error) => error.includes("Download button")), "runtime smoke validator should catch untested final-card download actions");

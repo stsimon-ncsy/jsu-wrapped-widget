@@ -4661,6 +4661,21 @@
 }
 </style>
 
+<!-- Existing NCSY host GTM container for no-header/no-footer Wrapped pages. -->
+<script>
+(function(w,d,s,l,i){
+  w[l]=w[l]||[];
+  w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});
+  var f=d.getElementsByTagName(s)[0];
+  var j=d.createElement(s);
+  var dl=l!=="dataLayer"?"&l="+l:"";
+  j.async=true;
+  j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;
+  f.parentNode.insertBefore(j,f);
+})(window,document,"script","dataLayer","GTM-MLW344");
+</script>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MLW344" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
 <div id="jsu-wrapped-wordpress-shell">
   <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">
     <div
@@ -4674,7 +4689,11 @@
       data-analytics="true"
       data-cta-label="Get involved next year"
       data-cta-target="#jsuw-wrapped-interest"
-    ></div>
+    >
+      <div class="jsuw-shell jsuw-shell--loading">
+        <section class="jsuw-loading" role="status">Loading JSU Wrapped...</section>
+      </div>
+    </div>
     <section id="jsuw-wrapped-interest" class="jsuw-form-panel" hidden aria-hidden="true">
       <div class="jsuw-form-card">
         <h2>Build next year's story</h2>

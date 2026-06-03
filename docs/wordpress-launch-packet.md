@@ -7,6 +7,7 @@ Production hosting map:
 - NCSY.org is the canonical public Wrapped page.
 - GitHub Pages is the static asset/data host for widget files, JSON/config, share pages, and images unless those move to NCSY.org.
 - Gravity Forms handles only the final CTA/contact capture.
+- The no-header/no-footer page shell should include the existing NCSY GTM container `GTM-MLW344`; otherwise widget `dataLayer` events have no host analytics loader.
 - The public CTA form is not the staff-builder submission intake flow; builder submissions use a separate review form or email handoff.
 - A failed live smoke after generating this packet means the public page still needs this packet applied, not that this packet is invalid.
 
@@ -15,6 +16,10 @@ Production hosting map:
 Paste this into the page body where the Wrapped widget should appear.
 
 ```html
+<!-- Include the existing NCSY GTM container on no-header/no-footer Wrapped pages. -->
+<script>
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0];var j=d.createElement(s);var dl=l!=="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-MLW344");
+</script>
 <link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260603a">
 <div id="jsu-wrapped" data-year="2026" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a" data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a" data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260603a" data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/" data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/" data-analytics="true" data-cta-label="Get involved next year" data-cta-target="#jsuw-wrapped-interest"></div>
 <script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260603a"></script>

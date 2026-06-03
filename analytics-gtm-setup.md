@@ -4,6 +4,11 @@ The widget emits privacy-safe `dataLayer` events. It does not load Google Tag
 Manager or GA4 itself, so the host site should install GTM or a Google tag in
 the surrounding theme.
 
+For the no-header/no-footer Wrapped WordPress page, include the existing NCSY
+host container `GTM-MLW344` in the page shell. The normal NCSY theme loads this
+container, but the stripped Wrapped template can omit it unless the inline
+handoff includes it.
+
 GA4 property / measurement ID:
 
 ```text
