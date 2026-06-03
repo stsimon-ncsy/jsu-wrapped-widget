@@ -1580,6 +1580,8 @@ function runInlineEmbedSmoke() {
   const scriptStart = inline.indexOf("<script>", styleEnd);
   const rendererStart = inline.indexOf(marker);
   const rendererEnd = inline.lastIndexOf("</script>");
+  const shellStart = inline.indexOf('<div id="jsu-wrapped-wordpress-shell">');
+  const osanoStart = inline.indexOf("cmp.osano.com");
   const embeddedCss = styleStart >= 0 && styleEnd > styleStart ? inline.slice(styleStart + "<style>".length, styleEnd).trim() : "";
   const embeddedRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? inline.slice(rendererStart, rendererEnd).trim() : "";
   const formCardCssBlock = css.match(/#jsu-wrapped-wordpress-shell \.jsuw-form-card\s*\{([^}]*)\}/m);
@@ -1605,6 +1607,9 @@ function runInlineEmbedSmoke() {
   assert(renderer.includes("data-jsuw-select-enhanced"), "Widget renderer missing select enhancement guard attribute");
   assert(renderer.includes("jsuw-select-option--selected"), "Widget renderer missing custom selected option state");
   assert(styleStart >= 0 && styleEnd > styleStart, "WordPress embed missing top-level style block");
+  assert(shellStart > -1, "WordPress embed missing WordPress shell wrapper");
+  assert(styleStart < shellStart, "WordPress inline CSS should load before shell markup to prevent a short first paint");
+  assert(osanoStart === -1 || styleStart < osanoStart, "WordPress inline CSS should load before the external Osano script");
   assert(scriptStart > styleEnd, "WordPress embed missing inline script after styles");
   assert(embeddedCss === css, "WordPress inline CSS is not synced with jsu-wrapped.css");
   assert(rendererStart >= 0, "WordPress embed missing inline renderer");
