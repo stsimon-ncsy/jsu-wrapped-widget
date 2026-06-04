@@ -1,6 +1,20 @@
 <!-- JSU/NCSY Wrapped inline WordPress embed.
      Paste into the no-header/no-footer WordPress template.
      CSS and JS are inline; JSON and logo assets load from GitHub Pages. -->
+<script>
+(function(w,d,s,l,i){
+  w[l]=w[l]||[];
+  w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});
+  var f=d.getElementsByTagName(s)[0];
+  var j=d.createElement(s);
+  var dl=l!=="dataLayer"?"&l="+l:"";
+  j.async=true;
+  j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;
+  f.parentNode.insertBefore(j,f);
+})(window,document,"script","dataLayer","GTM-MLW344");
+</script>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MLW344" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
 <div id="jsu-wrapped-wordpress-shell">
   <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">
     <div
@@ -14,7 +28,11 @@
       data-analytics="true"
       data-cta-label="Get involved next year"
       data-cta-target="#jsuw-wrapped-interest"
-    ></div>
+    >
+      <div class="jsuw-shell jsuw-shell--loading">
+        <section class="jsuw-loading" role="status">Loading JSU Wrapped...</section>
+      </div>
+    </div>
     <section id="jsuw-wrapped-interest" class="jsuw-form-panel" hidden aria-hidden="true">
       <div class="jsuw-form-card">
         <h2>Build next year's story</h2>
@@ -1500,6 +1518,12 @@
   text-align: center;
 }
 
+#jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+  aspect-ratio: 9 / 16;
+  min-height: 0;
+  width: 100%;
+}
+
 #jsu-wrapped .jsuw-error .jsuw-headline {
   font-size: 2rem;
 }
@@ -1577,11 +1601,10 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: -6px 0 20px;
-  max-height: 138px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   padding: 2px 2px 6px;
   position: relative;
-  scrollbar-width: thin;
   z-index: 1;
 }
 
@@ -3940,7 +3963,7 @@
   #jsu-wrapped .jsuw-region-selector {
     gap: 7px;
     margin-bottom: 16px;
-    max-height: 116px;
+    max-height: none;
   }
 
   #jsu-wrapped .jsuw-region-pill {
@@ -4207,6 +4230,11 @@
     width: 100%;
   }
 
+  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    height: calc(100svh - 16px);
+    min-height: min(640px, calc(100svh - 16px));
+  }
+
   #jsu-wrapped .jsuw-card {
     padding: 0;
   }
@@ -4443,6 +4471,11 @@
     height: calc(100svh - 20px);
     min-height: min(720px, calc(100svh - 20px));
     width: 100%;
+  }
+
+  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    height: calc(100svh - 20px);
+    min-height: min(720px, calc(100svh - 20px));
   }
 
   #jsu-wrapped .jsuw-card {

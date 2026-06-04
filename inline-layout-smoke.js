@@ -371,6 +371,7 @@ async function measureLayout(cdp, url, viewport, timeoutMs) {
         shellClientHeight: shell ? shell.clientHeight : 0,
         shellClientWidth: shell ? shell.clientWidth : 0,
         shellOverflowY: shellStyle ? shellStyle.overflowY : "",
+        shellPosition: shellStyle ? shellStyle.position : "",
         shellRect,
         shellScrollHeight: shell ? shell.scrollHeight : 0,
         shellScrollWidth: shell ? shell.scrollWidth : 0,
@@ -390,16 +391,8 @@ function validateMeasurement(label, measurement) {
     errors.push(`${label} has horizontal overflow (${measurement.maxScrollWidth}px > ${measurement.viewportWidth}px)`);
   }
 
-  if (measurement.documentVerticalOverflow) {
-    errors.push(`${label} document has vertical overflow before CTA form opens`);
-  }
-
-  if (measurement.shellOverflowY !== "hidden") {
-    errors.push(`${label} shell overflow-y is ${measurement.shellOverflowY}, expected hidden before CTA form opens`);
-  }
-
-  if (measurement.shellScrollHeight > measurement.shellClientHeight + 2) {
-    errors.push(`${label} shell scroll height exceeds client height before CTA form opens (${measurement.shellScrollHeight}px > ${measurement.shellClientHeight}px)`);
+  if (measurement.shellPosition === "fixed") {
+    errors.push(`${label} shell is fixed-position and can block the surrounding WordPress page from scrolling`);
   }
 
   if (measurement.storyTouchesLegal) {
