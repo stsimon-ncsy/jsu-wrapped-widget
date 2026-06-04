@@ -1610,6 +1610,7 @@ function runFallbackSvgSmoke(records, config) {
 
 function runInlineEmbedSmoke() {
   const inline = loadText("wordpress-inline-embed.html");
+  const brizyHosted = loadText("wordpress-brizy-hosted-embed.html");
   const css = loadText("jsu-wrapped.css").trim();
   const renderer = loadText("jsu-wrapped.js").trim();
   const marker = "(function (root, factory) {";
@@ -1645,13 +1646,25 @@ function runInlineEmbedSmoke() {
   assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should pin to every viewport edge");
   assert(shellCssBlock && /height:\s*100vh;/.test(shellCssBlock[1]), "WordPress shell should include a 100vh height fallback");
   assert(shellCssBlock && /height:\s*100dvh;/.test(shellCssBlock[1]), "WordPress shell should use dynamic viewport height");
-  assert(shellCssBlock && /overflow-y:\s*auto;/.test(shellCssBlock[1]), "WordPress shell should scroll internally when the form panel is open");
+  assert(shellCssBlock && /overflow-y:\s*hidden(?:\s*!important)?;/.test(shellCssBlock[1]), "WordPress shell should not show story-state vertical scrollbars");
+  assert(shellCssBlock && /width:\s*100%;/.test(shellCssBlock[1]), "WordPress shell should avoid 100vw scrollbar overflow");
+  assert(shellCssBlock && !/width:\s*100vw;/.test(shellCssBlock[1]), "WordPress shell should not use 100vw because scrollbar gutters can create horizontal overflow");
   assert(stageCssBlock && /min-height:\s*100vh;/.test(stageCssBlock[1]), "WordPress page stage should include a 100vh fallback");
   assert(stageCssBlock && /min-height:\s*100dvh;/.test(stageCssBlock[1]), "WordPress page stage should use dynamic viewport height");
   assert(stageCssBlock && /height:\s*100%;/.test(stageCssBlock[1]), "WordPress page stage should occupy the fixed shell on first paint");
+  assert(stageCssBlock && /overflow:\s*hidden(?:\s*!important)?;/.test(stageCssBlock[1]), "WordPress page stage should clip the story state instead of creating scrollbars");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-legal"), "WordPress shell CSS missing legal footer styling");
+  assert(/#jsu-wrapped-wordpress-shell \.jsuw-legal\s*\{[^}]*position:\s*absolute;/m.test(css), "WordPress legal footer should be removed from story height flow");
+  assert(css.includes("--jsuw-wp-story-reserve"), "WordPress shell CSS should reserve compact space for the legal footer");
+  assert(css.includes("calc((100dvh - var(--jsuw-wp-story-reserve)) * 0.5625)"), "WordPress desktop shell should shrink the phone frame to the available viewport height");
+  assert(css.includes("height: calc(100dvh - var(--jsuw-wp-story-reserve));"), "WordPress mobile story should fit within the fixed shell plus legal footer reserve");
+  assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-form-active"), "WordPress shell CSS should restore internal scrolling when the CTA form opens");
+  assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped"), "WordPress shell CSS should release widget-root overflow when the CTA form opens");
+  assert(css.includes("overflow: hidden;"), "WordPress shell CSS should prevent widget-root story-state scrollbars");
+  assert(renderer.includes("classList.add(\"jsuw-form-active\")"), "Widget renderer should mark the WordPress shell when the CTA form opens");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-panel"), "WordPress shell CSS missing Gravity Forms panel styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
+  assert(/#jsu-wrapped \.jsuw-region-selector\s*\{[^}]*overflow:\s*visible;[^}]*max-height:\s*none;/m.test(css) || /#jsu-wrapped \.jsuw-region-selector\s*\{[^}]*max-height:\s*none;[^}]*overflow:\s*visible;/m.test(css), "Picker region selector should wrap without becoming a scrollbar field");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card select option"), "WordPress shell CSS missing native Gravity Forms dropdown option styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container"), "WordPress shell CSS missing enhanced Gravity Forms dropdown styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-select-button"), "WordPress shell CSS missing custom Gravity Forms select button styling");
@@ -1672,6 +1685,15 @@ function runInlineEmbedSmoke() {
   assert(rendererStart >= 0, "WordPress embed missing inline renderer");
   assert(embeddedRenderer === renderer, "WordPress inline renderer is not synced with jsu-wrapped.js");
   assert((inline.match(/<script>/g) || []).length === 2, "WordPress embed should have the GTM loader plus the inline widget script");
+  assert(brizyHosted.length < 12000, "Compact Brizy hosted embed should stay small enough for fragile Brizy paste fields");
+  assert(brizyHosted.includes("#jsu-wrapped-wordpress-shell"), "Compact Brizy hosted embed should include the fullscreen WordPress shell");
+  assert(brizyHosted.includes("overflow-y:hidden"), "Compact Brizy hosted embed should hide story-state vertical scrollbars");
+  assert(brizyHosted.includes("overflow:hidden!important;padding:0;width:100%"), "Compact Brizy hosted embed should prevent widget-root story-state scrollbars");
+  assert(brizyHosted.includes("jsuw-form-active #jsu-wrapped"), "Compact Brizy hosted embed should release widget-root overflow when the CTA form opens");
+  assert(brizyHosted.includes("jsu-wrapped.css?v=jsuw-prod-20260603b"), "Compact Brizy hosted embed should load the hosted widget stylesheet");
+  assert(brizyHosted.includes("jsu-wrapped.js?v=jsuw-prod-20260603b"), "Compact Brizy hosted embed should load the hosted widget script");
+  assert(brizyHosted.includes('id="jsu-wrapped"'), "Compact Brizy hosted embed should include the widget root");
+  assert(brizyHosted.includes("jsuw-shell--loading"), "Compact Brizy hosted embed should include the static loading shell");
 }
 
 function runAssetVersionSmoke() {
@@ -2597,6 +2619,26 @@ function runWordPressSmokeScriptSmoke() {
     text: inlineGoodHtml.replace(inlineCss, staleInlineCss),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   }, staleInlineChromeReport);
+  const truncatedBrizyInlineHtml = [
+    "<html><head><title>JSU/NCSY Wrapped - Baltimore</title></head><body>",
+    '<div class="brz-embed-content"><div>',
+    "<style>",
+    "#jsu-wrapped-wordpress-shell { overflow-y: hidden; position: fixed; width: 100%; }",
+    "#jsu-wrapped-wordpress-shell .jsuw-form-card select,",
+    "#jsu-wrapped-wordpress-shell .jsuw-form-card .gfield_select {",
+    "</div></body></html></style></div></div>",
+    "</body></html>"
+  ].join("");
+  const truncatedBrizyReport = wordpressSmoke.validateWordPressPage({
+    status: 200,
+    text: truncatedBrizyInlineHtml,
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  });
+  const truncatedBrizyFixPacket = wordpressSmoke.formatFixPacket({
+    status: 200,
+    text: truncatedBrizyInlineHtml,
+    url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
+  }, truncatedBrizyReport);
   const directCtaFixPacket = wordpressSmoke.formatFixPacket({
     status: 200,
     text: goodHtml
@@ -2737,14 +2779,21 @@ function runWordPressSmokeScriptSmoke() {
   assert(staleInlineFixPacket.includes("Paste the full self-contained inline block from"), "WordPress stale-inline fix packet should lead with the full inline block path");
   assert(staleInlineFixPacket.includes("wordpress-inline-embed.html"), "WordPress stale-inline fix packet should name the full inline embed file");
   assert(staleInlineFixPacket.includes("Do not use the hosted-mode snippet as the fix for this current stale-inline failure"), "WordPress stale-inline fix packet should warn that hosted snippets do not fix stale Brizy inline CSS");
+  assert(!truncatedBrizyReport.ok && truncatedBrizyReport.errors.some((error) => error.includes("widget container")), "WordPress smoke should reject truncated Brizy inline embeds without the widget root");
+  assert(truncatedBrizyFixPacket.includes("Brizy embed was clipped before the widget root/script"), "WordPress truncated-Brizy fix packet should identify the clipped inline paste");
+  assert(truncatedBrizyFixPacket.includes("Use the hosted-mode block below"), "WordPress truncated-Brizy fix packet should lead with hosted mode");
+  assert(truncatedBrizyFixPacket.includes("Do not paste the 300 KB self-contained inline block"), "WordPress truncated-Brizy fix packet should warn against repeating the oversized inline paste");
+  assert(!truncatedBrizyFixPacket.includes("Do not use the hosted-mode snippet as the fix for this current stale-inline failure"), "WordPress truncated-Brizy fix packet should not discourage hosted mode");
   assert(fixPacket.includes("If the live page has inline CSS ordering errors, paste the full current wordpress-inline-embed.html block"), "WordPress fix packet should lead stale inline-CSS fixes to the full inline block");
   assert(fixPacket.includes("Replacing only the #jsu-wrapped tag updates data/cache attributes but does not move stale inline CSS"), "WordPress fix packet should warn that widget-tag replacement does not fix stale inline CSS order");
   assert(fixPacket.includes("Embedded Gravity Forms CTA setup"), "WordPress fix packet should include embedded Gravity Forms setup guidance");
   assert(fixPacket.includes("Do not rely on a [gravityform] shortcode inside a Custom HTML block"), "WordPress fix packet should warn about unrendered shortcodes in Custom HTML blocks");
   assert(fixPacket.includes("Replace #jsu-wrapped with:"), "WordPress fix packet should identify the widget tag replacement");
-  assert(fixPacket.includes("Hosted-mode copy-ready HTML block:"), "WordPress fix packet should include one paste-ready hosted-mode HTML block");
-  assert(fixPacket.includes(hostedCssTag + "\n" + '<div id="jsu-wrapped"'), "WordPress fix packet should put the stylesheet and widget tag together in the paste-ready HTML block");
-  assert(fixPacket.includes("</div>\n" + hostedJsTag), "WordPress fix packet should put the widget script after the widget tag in the paste-ready HTML block");
+  assert(fixPacket.includes("Compact Brizy hosted-mode copy-ready HTML block:"), "WordPress fix packet should include one paste-ready compact Brizy hosted-mode HTML block");
+  assert(fixPacket.includes("#jsu-wrapped-wordpress-shell"), "WordPress fix packet compact block should include the fullscreen shell CSS");
+  assert(fixPacket.includes(hostedCssTag), "WordPress fix packet should include the stylesheet in the compact Brizy block");
+  assert(fixPacket.includes('<div id="jsu-wrapped-wordpress-shell">'), "WordPress fix packet should wrap the widget in the WordPress shell");
+  assert(fixPacket.includes("</div>\n" + hostedJsTag), "WordPress fix packet should put the widget script after the compact Brizy shell");
   assert(directCtaFixPacket.includes('data-cta-href="https://ncsy.org/wrapped-interest/"'), "WordPress fix packet should support a direct Gravity Forms CTA URL option");
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
   assert(directCtaFixPacket.includes("Direct Gravity Forms CTA URL: https://ncsy.org/wrapped-interest/"), "WordPress fix packet should label the direct Gravity Forms CTA URL");

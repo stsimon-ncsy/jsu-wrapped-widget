@@ -16,6 +16,43 @@ const SOCIAL_IMAGE_WIDTH = "1200";
 const SOCIAL_IMAGE_HEIGHT = "630";
 const FULL_INLINE_EMBED_PATH = path.resolve(__dirname, "wordpress-inline-embed.html");
 
+function hostedShellCss() {
+  return [
+    "<style>",
+    "#jsu-wrapped-wordpress-shell{--jsuw-shell-muted:rgba(255,255,255,.68);--jsuw-wp-stage-pad:clamp(6px,1.2vw,12px);--jsuw-wp-legal-space:calc(26px + env(safe-area-inset-bottom,0px));--jsuw-wp-story-reserve:calc((var(--jsuw-wp-stage-pad)*2) + var(--jsuw-wp-legal-space));background:radial-gradient(circle at 12% 12%,rgba(0,194,255,.22),transparent 30%),radial-gradient(circle at 82% 18%,rgba(255,46,147,.2),transparent 28%),linear-gradient(145deg,#07051f 0%,#19093d 48%,#0a0624 100%);color:#fff;font-family:\"DM Sans\",ui-rounded,\"Segoe UI\",system-ui,sans-serif;height:100vh;height:100dvh;inset:0;min-height:100vh;min-height:100dvh;overflow-x:hidden;overflow-y:hidden!important;overscroll-behavior:contain;position:fixed;width:100%}",
+    "#jsu-wrapped-wordpress-shell.jsuw-form-active{overflow-y:auto!important}",
+    "#jsu-wrapped-wordpress-shell *,#jsu-wrapped-wordpress-shell *:before,#jsu-wrapped-wordpress-shell *:after{box-sizing:border-box}",
+    "#jsu-wrapped-wordpress-shell .jsuw-page-stage{align-items:center;display:flex;flex-direction:column;gap:12px;height:100%;justify-content:center;min-height:100vh;min-height:100dvh;overflow:hidden;padding:var(--jsuw-wp-stage-pad) 10px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));width:100%}",
+    "#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-page-stage{height:auto;justify-content:flex-start;min-height:100vh;min-height:100dvh;overflow:visible}",
+    "#jsu-wrapped-wordpress-shell #jsu-wrapped{flex:0 1 auto;max-width:min(100%,430px);min-height:0;overflow:hidden!important;padding:0;width:100%}",
+    "#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped{overflow:visible!important}",
+    "#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error){max-width:min(430px,calc(100vw - 24px),calc((100dvh - var(--jsuw-wp-story-reserve))*.5625))}",
+    "#jsu-wrapped-wordpress-shell .jsuw-legal{align-items:center;bottom:max(4px,env(safe-area-inset-bottom,0px));color:var(--jsuw-shell-muted);display:flex;flex-wrap:wrap;font-size:12px;gap:4px 8px;justify-content:center;left:8px;line-height:1.35;margin:0 auto;padding:0 8px;position:absolute;right:8px;text-align:center;z-index:20}",
+    "#jsu-wrapped-wordpress-shell .jsuw-legal a,#jsu-wrapped-wordpress-shell .jsuw-legal button{appearance:none;background:transparent;border:0;color:inherit;cursor:pointer;font:inherit;margin:0;padding:0;text-decoration:none}",
+    "#jsu-wrapped-wordpress-shell .jsuw-form-panel[hidden],#jsu-wrapped-wordpress-shell .jsuw-context-fields{display:none!important}",
+    "#jsu-wrapped-wordpress-shell .jsuw-form-panel{color:#fff;margin:clamp(14px,3vw,28px) auto 0;max-width:min(100%,560px);padding:0 10px 18px;width:100%}",
+    "#jsu-wrapped-wordpress-shell .jsuw-form-card{background:rgba(12,8,42,.9);border:1px solid rgba(255,255,255,.18);border-radius:24px;box-shadow:0 22px 70px rgba(0,0,0,.32);overflow:visible;padding:clamp(20px,4vw,30px)}",
+    "@media(max-width:760px){#jsu-wrapped-wordpress-shell{--jsuw-wp-stage-pad:6px;--jsuw-wp-legal-space:calc(24px + env(safe-area-inset-bottom,0px))}#jsu-wrapped-wordpress-shell .jsuw-page-stage{padding:var(--jsuw-wp-stage-pad) 6px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space))}#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error){max-width:100%;width:100%}#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-story,#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell--loading .jsuw-loading{height:calc(100dvh - var(--jsuw-wp-story-reserve));min-height:0}#jsu-wrapped-wordpress-shell .jsuw-legal{font-size:11px;gap:3px 7px}}",
+    "</style>"
+  ].join("\n");
+}
+
+function hostedShellBlock(widgetTag) {
+  const tag = widgetTag || suggestedWidgetTag("", {});
+
+  return [
+    hostedShellCss(),
+    WIDGET_CSS_TAG,
+    '<div id="jsu-wrapped-wordpress-shell">',
+    '  <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">',
+    '    ' + tag.replace("></div>", '><div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div></div>'),
+    '    <nav class="jsuw-legal" aria-label="Wrapped policies"><a href="/privacy-policy/">Privacy Policy</a><span>|</span><a href="/standards/">Behavioral Standards</a><span>|</span><button type="button" data-jsuw-cookie-preferences data-fallback-href="/privacy-policy/">Cookie Policy</button></nav>',
+    "  </main>",
+    "</div>",
+    WIDGET_JS_TAG
+  ].join("\n");
+}
+
 function headerValue(headers, name) {
   const source = headers || {};
   const target = String(name || "").toLowerCase();
@@ -168,6 +205,14 @@ function hasUnrenderedGravityFormsShortcode(html) {
 
 function hasCurrentInlineFirstPaintStageCss(cssText) {
   return /#jsu-wrapped-wordpress-shell\s+\.jsuw-page-stage\s*\{[\s\S]*?height:\s*100%;/.test(String(cssText || ""));
+}
+
+function hasTruncatedInlineEmbed(html) {
+  const source = String(html || "");
+
+  return source.includes("#jsu-wrapped-wordpress-shell") &&
+    !hasId(source, "jsu-wrapped") &&
+    !hasInlineWidgetScript(source);
 }
 
 function validateCtaDestinationPage(page) {
@@ -607,7 +652,7 @@ function validateWordPressPage(page, options) {
     addUniqueFix(fixes, "Move the inline <style> block above #jsu-wrapped-wordpress-shell and before the Osano script, or paste the current wordpress-inline-embed.html block.");
   }
 
-  if (inlineStyleText && (!/height:\s*calc\(100dvh - 16px\);/.test(inlineStyleText) || !/right:\s*58px;/.test(inlineStyleText))) {
+  if (inlineStyleText && !stylesheetUrls.length && (!/height:\s*calc\(100dvh - 16px\);/.test(inlineStyleText) || !/right:\s*58px;/.test(inlineStyleText))) {
     errors.push("WordPress inline CSS is missing the current mobile fullscreen and floating-widget clearance rules");
     addUniqueFix(fixes, "Paste the current wordpress-inline-embed.html block so the mobile story uses dynamic viewport height and clears floating privacy/accessibility widgets.");
   }
@@ -858,8 +903,9 @@ function formatFixPacket(page, report, options) {
   const ctaTarget = attrValue(html, "data-cta-target");
   const directCtaHref = settings.ctaHref && isSafeCtaHref(settings.ctaHref) && !hasCtaUrlPayload(settings.ctaHref) ? settings.ctaHref : "";
   const suggestedTag = suggestedWidgetTag(html, settings);
-  const copyReadyHtmlBlock = [WIDGET_CSS_TAG, suggestedTag, WIDGET_JS_TAG].join("\n");
+  const copyReadyHtmlBlock = hostedShellBlock(suggestedTag);
   const needsFullInlineBlock = validationReport.errors.some((error) => /inline CSS|static loading shell|floating-widget clearance|fullscreen first paint/i.test(error));
+  const truncatedInlineEmbed = hasTruncatedInlineEmbed(html);
   const recommendedContextFields = "wrapped_chapter, wrapped_chapter_slug, wrapped_region, wrapped_scope, wrapped_slug, wrapped_name, wrapped_variant, wrapped_year, wrapped_url";
   const missingContextFields = ctaTarget ? missingCtaContextFields(embeddedCtaPanelHtml(html, ctaTarget)) : [];
   const followUpCommand = directCtaHref
@@ -897,10 +943,14 @@ function formatFixPacket(page, report, options) {
     `URL: ${url}`,
     "",
     "Recommended update for this report:",
-    needsFullInlineBlock
+    truncatedInlineEmbed
+      ? "Use the hosted-mode block below. Chrome shows this Brizy embed was clipped before the widget root/script, so another full inline paste is likely to fail the same way."
+      : needsFullInlineBlock
       ? `Paste the full self-contained inline block from ${FULL_INLINE_EMBED_PATH} into the Brizy HTML block.`
       : "Use the hosted-mode block below if this WordPress page is meant to load CSS/JS from GitHub Pages.",
-    needsFullInlineBlock
+    truncatedInlineEmbed
+      ? "Do not paste the 300 KB self-contained inline block into this Brizy Embed Code field; use hosted CSS/JS or a template-level embed instead."
+      : needsFullInlineBlock
       ? "Do not use the hosted-mode snippet as the fix for this current stale-inline failure; it will not replace stale inline CSS already stored in Brizy."
       : "If this is a self-contained Brizy inline page instead, paste the full current wordpress-inline-embed.html block.",
     "",
@@ -909,7 +959,7 @@ function formatFixPacket(page, report, options) {
     "Replacing only the #jsu-wrapped tag updates data/cache attributes but does not move stale inline CSS.",
     "Use the hosted block below only when the WordPress block is meant to load CSS/JS from GitHub Pages instead of the full self-contained inline file.",
     "",
-    "Hosted-mode copy-ready HTML block:",
+    "Compact Brizy hosted-mode copy-ready HTML block:",
     copyReadyHtmlBlock,
     "",
     "Replace #jsu-wrapped with:",
@@ -918,7 +968,7 @@ function formatFixPacket(page, report, options) {
     "Hosted CSS/JS assets:",
     WIDGET_CSS_TAG,
     WIDGET_JS_TAG,
-    "Do not paste these a second time if you use the copy-ready WordPress HTML block above. Skip hosted assets entirely only if you paste the full self-contained wordpress-inline-embed.html block.",
+    "Do not paste these a second time if you use the copy-ready Brizy block above. Skip hosted assets entirely only if you paste the full self-contained wordpress-inline-embed.html block.",
     "",
     `Page/social title: ${socialTitle}`,
     "",

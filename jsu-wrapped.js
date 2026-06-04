@@ -4098,6 +4098,15 @@
       panel.removeAttribute("hidden");
       panel.classList.add("jsuw-form-panel--open");
       panel.setAttribute("aria-hidden", "false");
+
+      if (typeof panel.closest === "function") {
+        var wordpressShell = panel.closest("#jsu-wrapped-wordpress-shell");
+
+        if (wordpressShell) {
+          wordpressShell.classList.add("jsuw-form-active");
+        }
+      }
+
       prefillFormPanel(panel, state);
       enhanceFormSelects(panel);
 

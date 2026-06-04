@@ -3,6 +3,9 @@
   --jsuw-shell-ink: #ffffff;
   --jsuw-shell-muted: rgba(255, 255, 255, 0.68);
   --jsuw-shell-line: rgba(255, 255, 255, 0.18);
+  --jsuw-wp-stage-pad: clamp(6px, 1.2vw, 12px);
+  --jsuw-wp-legal-space: calc(26px + env(safe-area-inset-bottom, 0px));
+  --jsuw-wp-story-reserve: calc((var(--jsuw-wp-stage-pad) * 2) + var(--jsuw-wp-legal-space));
   background:
     radial-gradient(circle at 12% 12%, rgba(0, 194, 255, 0.22), transparent 30%),
     radial-gradient(circle at 82% 18%, rgba(255, 46, 147, 0.2), transparent 28%),
@@ -15,10 +18,14 @@
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden !important;
   overscroll-behavior: contain;
   position: fixed;
-  width: 100vw;
+  width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell.jsuw-form-active {
+  overflow-y: auto !important;
 }
 
 #jsu-wrapped-wordpress-shell *,
@@ -36,16 +43,36 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: clamp(10px, 2.4vw, 24px) 12px 16px;
+  overflow: hidden !important;
+  padding: var(--jsuw-wp-stage-pad) 10px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
   width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-page-stage {
+  height: auto;
+  justify-content: flex-start;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: visible;
 }
 
 #jsu-wrapped-wordpress-shell #jsu-wrapped {
   flex: 0 1 auto;
   max-width: min(100%, 430px);
-  min-height: auto;
+  min-height: 0;
+  overflow: hidden !important;
   padding: 0;
   width: 100%;
+}
+
+#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped {
+  overflow: visible !important;
+}
+
+#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
+  max-width: min(430px, calc(100vw - 24px), calc((100vh - var(--jsuw-wp-story-reserve)) * 0.5625));
+  max-width: min(430px, calc(100vw - 24px), calc((100svh - var(--jsuw-wp-story-reserve)) * 0.5625));
+  max-width: min(430px, calc(100vw - 24px), calc((100dvh - var(--jsuw-wp-story-reserve)) * 0.5625));
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-legal {
@@ -58,9 +85,14 @@
   justify-content: center;
   line-height: 1.35;
   margin: 0 auto;
-  max-width: min(100%, 430px);
-  padding: 0 8px 4px;
+  max-width: none;
+  padding: 0 8px;
+  position: absolute;
+  bottom: max(4px, env(safe-area-inset-bottom, 0px));
+  left: 8px;
+  right: 8px;
   text-align: center;
+  z-index: 20;
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-legal a,
@@ -412,8 +444,37 @@
 
 @media (min-width: 761px) {
   #jsu-wrapped-wordpress-shell .jsuw-page-stage {
-    padding-bottom: 22px;
-    padding-top: 22px;
+    padding-bottom: calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
+    padding-top: var(--jsuw-wp-stage-pad);
+  }
+}
+
+@media (max-width: 760px) {
+  #jsu-wrapped-wordpress-shell {
+    --jsuw-wp-stage-pad: 6px;
+    --jsuw-wp-legal-space: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #jsu-wrapped-wordpress-shell .jsuw-page-stage {
+    padding: var(--jsuw-wp-stage-pad) 6px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
+  }
+
+  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-story,
+  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
+    height: calc(100vh - var(--jsuw-wp-story-reserve));
+    height: calc(100svh - var(--jsuw-wp-story-reserve));
+    height: calc(100dvh - var(--jsuw-wp-story-reserve));
+    min-height: 0;
+  }
+
+  #jsu-wrapped-wordpress-shell .jsuw-legal {
+    font-size: 11px;
+    gap: 3px 7px;
   }
 }
 
@@ -1675,11 +1736,10 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: -6px 0 20px;
-  max-height: 138px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   padding: 2px 2px 6px;
   position: relative;
-  scrollbar-width: thin;
   z-index: 1;
 }
 
