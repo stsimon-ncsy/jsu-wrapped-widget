@@ -1,6 +1,52 @@
 <!-- JSU/NCSY Wrapped inline WordPress embed.
      Paste into the no-header/no-footer WordPress template.
      CSS and JS are inline; JSON and logo assets load from GitHub Pages. -->
+<div id="jsu-wrapped-wordpress-shell">
+  <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">
+    <div
+      id="jsu-wrapped"
+      data-year="2026"
+      data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603a"
+      data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603a"
+      data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260603a"
+      data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
+      data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
+      data-analytics="true"
+      data-cta-label="Get involved next year"
+      data-cta-target="#jsuw-wrapped-interest"
+    ></div>
+    <section id="jsuw-wrapped-interest" class="jsuw-form-panel" hidden aria-hidden="true">
+      <div class="jsuw-form-card">
+        <h2>Build next year's story</h2>
+        <p>Tell us how you want to get involved with JSU/NCSY next year.</p>
+        <div class="jsuw-context-fields" hidden aria-hidden="true">
+          <input type="hidden" name="wrapped_chapter" data-jsuw-prefill="chapter_name">
+          <input type="hidden" name="wrapped_chapter_slug" data-jsuw-prefill="chapter_slug">
+          <input type="hidden" name="wrapped_region" data-jsuw-prefill="region_name">
+          <input type="hidden" name="wrapped_scope" data-jsuw-prefill="scope_type">
+          <input type="hidden" name="wrapped_slug" data-jsuw-prefill="scope_slug">
+          <input type="hidden" name="wrapped_name" data-jsuw-prefill="scope_name">
+          <input type="hidden" name="wrapped_variant" data-jsuw-prefill="variant_slug">
+          <input type="hidden" name="wrapped_year" data-jsuw-prefill="year_label">
+          <input type="hidden" name="wrapped_url" data-jsuw-prefill="wrapped_url">
+        </div>
+        <!-- If this is pasted into a Custom HTML block, WordPress may not render the shortcode.
+             Prefer a Shortcode block, Gravity Forms block, or template-rendered shortcode wrapped
+             by #jsuw-wrapped-interest for the live page. -->
+        [gravityform id="255" title="false" description="false" ajax="true"]
+      </div>
+    </section>
+    <nav class="jsuw-legal" aria-label="Wrapped policies">
+      <a href="/privacy-policy/">Privacy Policy</a>
+      <span>|</span>
+      <a href="/standards/">Behavioral Standards</a>
+      <span>|</span>
+      <button type="button" data-jsuw-cookie-preferences data-fallback-href="/privacy-policy/">Cookie Policy</button>
+    </nav>
+  </main>
+</div>
+
+<script src="https://cmp.osano.com/AzyvxUSByGm4feKh/463f49f9-a424-47f3-993c-20ff791192be/osano.js"></script>
 
 <style>
 #jsu-wrapped-wordpress-shell {
@@ -8,29 +54,15 @@
   --jsuw-shell-ink: #ffffff;
   --jsuw-shell-muted: rgba(255, 255, 255, 0.68);
   --jsuw-shell-line: rgba(255, 255, 255, 0.18);
-  --jsuw-wp-stage-pad: clamp(6px, 1.2vw, 12px);
-  --jsuw-wp-legal-space: calc(26px + env(safe-area-inset-bottom, 0px));
-  --jsuw-wp-story-reserve: calc((var(--jsuw-wp-stage-pad) * 2) + var(--jsuw-wp-legal-space));
   background:
     radial-gradient(circle at 12% 12%, rgba(0, 194, 255, 0.22), transparent 30%),
     radial-gradient(circle at 82% 18%, rgba(255, 46, 147, 0.2), transparent 28%),
     linear-gradient(145deg, #07051f 0%, #19093d 48%, #0a0624 100%);
   color: var(--jsuw-shell-ink);
   font-family: "DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
-  height: 100vh;
-  height: 100dvh;
-  inset: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh;
   overflow-x: hidden;
-  overflow-y: hidden !important;
-  overscroll-behavior: contain;
-  position: fixed;
   width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell.jsuw-form-active {
-  overflow-y: auto !important;
 }
 
 #jsu-wrapped-wordpress-shell *,
@@ -44,40 +76,17 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
   justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden !important;
-  padding: var(--jsuw-wp-stage-pad) 10px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
-  width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-page-stage {
-  height: auto;
-  justify-content: flex-start;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: visible;
+  min-height: 100svh;
+  padding: clamp(10px, 2.4vw, 24px) 12px 16px;
 }
 
 #jsu-wrapped-wordpress-shell #jsu-wrapped {
   flex: 0 1 auto;
   max-width: min(100%, 430px);
-  min-height: 0;
-  overflow: hidden !important;
+  min-height: auto;
   padding: 0;
   width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped {
-  overflow: visible !important;
-}
-
-#jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
-  max-width: min(430px, calc(100vw - 24px), calc((100vh - var(--jsuw-wp-story-reserve)) * 0.5625));
-  max-width: min(430px, calc(100vw - 24px), calc((100svh - var(--jsuw-wp-story-reserve)) * 0.5625));
-  max-width: min(430px, calc(100vw - 24px), calc((100dvh - var(--jsuw-wp-story-reserve)) * 0.5625));
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-legal {
@@ -90,14 +99,9 @@
   justify-content: center;
   line-height: 1.35;
   margin: 0 auto;
-  max-width: none;
-  padding: 0 8px;
-  position: absolute;
-  bottom: max(4px, env(safe-area-inset-bottom, 0px));
-  left: 8px;
-  right: 8px;
+  max-width: min(100%, 430px);
+  padding: 0 8px 4px;
   text-align: center;
-  z-index: 20;
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-legal a,
@@ -140,7 +144,7 @@
   border: 1px solid var(--jsuw-shell-line);
   border-radius: 24px;
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
-  overflow: visible;
+  overflow: hidden;
   padding: clamp(20px, 4vw, 30px);
   position: relative;
 }
@@ -149,7 +153,6 @@
   background:
     linear-gradient(90deg, #00c2ff, #ff2e93, #ffb627),
     rgba(255, 255, 255, 0.18);
-  border-radius: 24px 24px 0 0;
   content: "";
   height: 5px;
   left: 0;
@@ -227,135 +230,6 @@
 
 #jsu-wrapped-wordpress-shell .jsuw-form-card select::-ms-expand {
   display: none;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-shell {
-  position: relative;
-  width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-native-select-hidden {
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  height: 1px !important;
-  left: 0;
-  opacity: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  position: absolute !important;
-  top: 0;
-  white-space: nowrap !important;
-  width: 1px !important;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-button {
-  align-items: center;
-  appearance: none;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08)),
-    rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 14px;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  font: inherit;
-  justify-content: space-between;
-  min-height: 46px;
-  padding: 11px 44px 11px 13px;
-  position: relative;
-  text-align: left;
-  width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-button::after {
-  background: linear-gradient(135deg, #fff35e, #ffb627);
-  clip-path: polygon(15% 30%, 50% 68%, 85% 30%, 100% 43%, 50% 90%, 0 43%);
-  content: "";
-  height: 14px;
-  position: absolute;
-  right: 14px;
-  top: calc(50% - 7px);
-  transition: transform 160ms ease;
-  width: 16px;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-shell[data-jsuw-select-open="true"] .jsuw-select-button::after {
-  transform: rotate(180deg);
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-button:focus-visible,
-#jsu-wrapped-wordpress-shell .jsuw-select-shell[data-jsuw-select-open="true"] .jsuw-select-button {
-  border-color: rgba(255, 182, 39, 0.88);
-  box-shadow: 0 0 0 3px rgba(255, 182, 39, 0.18);
-  outline: none;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-button-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-menu {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(0, 194, 255, 0.18), transparent 34%),
-    linear-gradient(145deg, #21074a 0%, #130529 100%);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 16px;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.42);
-  display: none;
-  left: 0;
-  list-style: none;
-  margin: 7px 0 0;
-  max-height: min(220px, 42vh);
-  overflow-y: auto;
-  padding: 6px;
-  position: absolute;
-  right: 0;
-  top: 100%;
-  z-index: 40;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-shell[data-jsuw-select-open="true"] .jsuw-select-menu {
-  display: block;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-option {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  border-radius: 11px;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  display: block;
-  font: 800 0.95rem/1.2 "DM Sans", ui-rounded, "Segoe UI", system-ui, sans-serif;
-  padding: 11px 12px;
-  text-align: left;
-  width: 100%;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-option:hover,
-#jsu-wrapped-wordpress-shell .jsuw-select-option:focus-visible {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  outline: none;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-option--selected {
-  background: linear-gradient(135deg, #fff35e 0%, #ffb627 48%, #ff6b4a 100%);
-  color: #170526;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-option--selected:hover,
-#jsu-wrapped-wordpress-shell .jsuw-select-option--selected:focus-visible {
-  background: linear-gradient(135deg, #fff35e 0%, #ffb627 48%, #ff6b4a 100%);
-  color: #170526;
-}
-
-#jsu-wrapped-wordpress-shell .jsuw-select-option:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 
 #jsu-wrapped-wordpress-shell .jsuw-form-card .select2-container,
@@ -449,37 +323,8 @@
 
 @media (min-width: 761px) {
   #jsu-wrapped-wordpress-shell .jsuw-page-stage {
-    padding-bottom: calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
-    padding-top: var(--jsuw-wp-stage-pad);
-  }
-}
-
-@media (max-width: 760px) {
-  #jsu-wrapped-wordpress-shell {
-    --jsuw-wp-stage-pad: 6px;
-    --jsuw-wp-legal-space: calc(24px + env(safe-area-inset-bottom, 0px));
-  }
-
-  #jsu-wrapped-wordpress-shell .jsuw-page-stage {
-    padding: var(--jsuw-wp-stage-pad) 6px calc(var(--jsuw-wp-stage-pad) + var(--jsuw-wp-legal-space));
-  }
-
-  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-story,
-  #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
-    height: calc(100vh - var(--jsuw-wp-story-reserve));
-    height: calc(100svh - var(--jsuw-wp-story-reserve));
-    height: calc(100dvh - var(--jsuw-wp-story-reserve));
-    min-height: 0;
-  }
-
-  #jsu-wrapped-wordpress-shell .jsuw-legal {
-    font-size: 11px;
-    gap: 3px 7px;
+    padding-bottom: 22px;
+    padding-top: 22px;
   }
 }
 
@@ -1648,20 +1493,11 @@
 
 #jsu-wrapped .jsuw-loading {
   align-items: center;
-  aspect-ratio: 9 / 16;
   display: flex;
   font-size: 1rem;
   font-weight: 900;
   justify-content: center;
-  min-height: min(680px, calc(100vh - 32px));
   text-align: center;
-  width: 100%;
-}
-
-@supports (height: 100svh) {
-  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
-    min-height: min(680px, calc(100svh - 32px));
-  }
 }
 
 #jsu-wrapped .jsuw-error .jsuw-headline {
@@ -1741,10 +1577,11 @@
   flex-wrap: wrap;
   gap: 8px;
   margin: -6px 0 20px;
-  max-height: none;
-  overflow: visible;
+  max-height: 138px;
+  overflow: auto;
   padding: 2px 2px 6px;
   position: relative;
+  scrollbar-width: thin;
   z-index: 1;
 }
 
@@ -4193,9 +4030,9 @@
   }
 
   #jsu-wrapped .jsuw-controls {
-    bottom: 28px;
+    bottom: 14px;
     left: 14px;
-    right: 58px;
+    right: 14px;
   }
 
   #jsu-wrapped .jsuw-nav-button {
@@ -4354,8 +4191,7 @@
     align-items: center;
     display: grid;
     min-height: 100svh;
-    min-height: 100dvh;
-    padding: 0;
+    padding: 8px;
   }
 
   #jsu-wrapped .jsuw-shell {
@@ -4366,20 +4202,9 @@
   #jsu-wrapped .jsuw-story {
     aspect-ratio: auto;
     border-radius: 28px;
-    height: calc(100vh - 16px);
     height: calc(100svh - 16px);
-    height: calc(100dvh - 16px);
     min-height: min(640px, calc(100svh - 16px));
     width: 100%;
-  }
-
-  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
-    aspect-ratio: auto;
-    height: calc(100vh - 16px);
-    height: calc(100svh - 16px);
-    height: calc(100dvh - 16px);
-    min-height: min(640px, calc(100svh - 16px));
-    padding: 24px;
   }
 
   #jsu-wrapped .jsuw-card {
@@ -4583,10 +4408,10 @@
   }
 
   #jsu-wrapped .jsuw-controls {
-    bottom: 28px;
+    bottom: 14px;
     gap: 8px;
     left: 14px;
-    right: 58px;
+    right: 14px;
   }
 
   #jsu-wrapped .jsuw-nav-button {
@@ -4605,7 +4430,6 @@
     align-items: center;
     display: grid;
     min-height: 100svh;
-    min-height: 100dvh;
     padding: 10px;
   }
 
@@ -4616,20 +4440,9 @@
 
   #jsu-wrapped .jsuw-story {
     aspect-ratio: auto;
-    height: calc(100vh - 20px);
     height: calc(100svh - 20px);
-    height: calc(100dvh - 20px);
     min-height: min(720px, calc(100svh - 20px));
     width: 100%;
-  }
-
-  #jsu-wrapped .jsuw-shell--loading .jsuw-loading {
-    aspect-ratio: auto;
-    height: calc(100vh - 20px);
-    height: calc(100svh - 20px);
-    height: calc(100dvh - 20px);
-    min-height: min(720px, calc(100svh - 20px));
-    padding: 28px;
   }
 
   #jsu-wrapped .jsuw-card {
@@ -4729,72 +4542,6 @@
   }
 }
 </style>
-
-<!-- Existing NCSY host GTM container for no-header/no-footer Wrapped pages. -->
-<script>
-(function(w,d,s,l,i){
-  w[l]=w[l]||[];
-  w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});
-  var f=d.getElementsByTagName(s)[0];
-  var j=d.createElement(s);
-  var dl=l!=="dataLayer"?"&l="+l:"";
-  j.async=true;
-  j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;
-  f.parentNode.insertBefore(j,f);
-})(window,document,"script","dataLayer","GTM-MLW344");
-</script>
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MLW344" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-
-<div id="jsu-wrapped-wordpress-shell">
-  <main class="jsuw-page-stage" aria-label="JSU/NCSY Wrapped">
-    <div
-      id="jsu-wrapped"
-      data-year="2026"
-      data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260603b"
-      data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260603b"
-      data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260603b"
-      data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/"
-      data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"
-      data-analytics="true"
-      data-cta-label="Get involved next year"
-      data-cta-target="#jsuw-wrapped-interest"
-    >
-      <div class="jsuw-shell jsuw-shell--loading">
-        <section class="jsuw-loading" role="status">Loading JSU Wrapped...</section>
-      </div>
-    </div>
-    <section id="jsuw-wrapped-interest" class="jsuw-form-panel" hidden aria-hidden="true">
-      <div class="jsuw-form-card">
-        <h2>Build next year's story</h2>
-        <p>Tell us how you want to get involved with JSU/NCSY next year.</p>
-        <div class="jsuw-context-fields" hidden aria-hidden="true">
-          <input type="hidden" name="wrapped_chapter" data-jsuw-prefill="chapter_name">
-          <input type="hidden" name="wrapped_chapter_slug" data-jsuw-prefill="chapter_slug">
-          <input type="hidden" name="wrapped_region" data-jsuw-prefill="region_name">
-          <input type="hidden" name="wrapped_scope" data-jsuw-prefill="scope_type">
-          <input type="hidden" name="wrapped_slug" data-jsuw-prefill="scope_slug">
-          <input type="hidden" name="wrapped_name" data-jsuw-prefill="scope_name">
-          <input type="hidden" name="wrapped_variant" data-jsuw-prefill="variant_slug">
-          <input type="hidden" name="wrapped_year" data-jsuw-prefill="year_label">
-          <input type="hidden" name="wrapped_url" data-jsuw-prefill="wrapped_url">
-        </div>
-        <!-- If this is pasted into a Custom HTML block, WordPress may not render the shortcode.
-             Prefer a Shortcode block, Gravity Forms block, or template-rendered shortcode wrapped
-             by #jsuw-wrapped-interest for the live page. -->
-        [gravityform id="255" title="false" description="false" ajax="true"]
-      </div>
-    </section>
-    <nav class="jsuw-legal" aria-label="Wrapped policies">
-      <a href="/privacy-policy/">Privacy Policy</a>
-      <span>|</span>
-      <a href="/standards/">Behavioral Standards</a>
-      <span>|</span>
-      <button type="button" data-jsuw-cookie-preferences data-fallback-href="/privacy-policy/">Cookie Policy</button>
-    </nav>
-  </main>
-</div>
-
-<script src="https://cmp.osano.com/AzyvxUSByGm4feKh/463f49f9-a424-47f3-993c-20ff791192be/osano.js"></script>
 
 <script>
 (function () {
@@ -4924,7 +4671,6 @@
   var SCRIPT_SRC = SCRIPT_ELEMENT ? SCRIPT_ELEMENT.src : "";
   var DEFAULT_AUTOPLAY_DELAY = 5200;
   var SOCIAL_IMAGE_URL = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
-  var customSelectCounter = 0;
 
   function hasValue(value) {
     return value !== null && value !== undefined && String(value).trim() !== "";
@@ -5623,334 +5369,7 @@
       }
     });
 
-    syncEnhancedSelects(panel);
-
     return filled;
-  }
-
-  function customSelectId() {
-    customSelectCounter += 1;
-    return "jsuw-select-" + customSelectCounter;
-  }
-
-  function selectLabel(select) {
-    var label = select && select.getAttribute && select.getAttribute("aria-label");
-
-    if (hasValue(label)) {
-      return label;
-    }
-
-    if (select && select.labels && select.labels.length) {
-      label = Array.prototype.map.call(select.labels, function (item) {
-        return item.textContent;
-      }).filter(Boolean).join(" ");
-
-      if (hasValue(label)) {
-        return label;
-      }
-    }
-
-    if (select && select.id && root.document && typeof root.document.querySelector === "function") {
-      try {
-        label = root.document.querySelector('label[for="' + selectorEscape(select.id) + '"]');
-      } catch (error) {
-        label = null;
-      }
-
-      if (label && hasValue(label.textContent)) {
-        return label.textContent;
-      }
-    }
-
-    if (select && typeof select.closest === "function") {
-      var wrapper = select.closest(".gfield");
-      var fieldLabel = wrapper && wrapper.querySelector ? wrapper.querySelector(".gfield_label, .gform-field-label, legend") : null;
-
-      if (fieldLabel && hasValue(fieldLabel.textContent)) {
-        return fieldLabel.textContent;
-      }
-    }
-
-    return "Choose an option";
-  }
-
-  function optionLabel(option) {
-    return hasValue(option && option.textContent) ? option.textContent.trim() : String(option && option.value || "");
-  }
-
-  function setSelectValue(select, value) {
-    if (!select) {
-      return;
-    }
-
-    select.value = value;
-
-    try {
-      select.dispatchEvent(new root.Event("input", { bubbles: true }));
-      select.dispatchEvent(new root.Event("change", { bubbles: true }));
-    } catch (error) {}
-  }
-
-  function closeCustomSelect(shell) {
-    if (!shell) {
-      return;
-    }
-
-    shell.removeAttribute("data-jsuw-select-open");
-
-    var button = shell.querySelector && shell.querySelector(".jsuw-select-button");
-
-    if (button) {
-      button.setAttribute("aria-expanded", "false");
-    }
-  }
-
-  function closeOtherCustomSelects(doc, currentShell) {
-    if (!doc || typeof doc.querySelectorAll !== "function") {
-      return;
-    }
-
-    Array.prototype.forEach.call(doc.querySelectorAll("#jsu-wrapped-wordpress-shell .jsuw-select-shell[data-jsuw-select-open='true']"), function (shell) {
-      if (shell !== currentShell) {
-        closeCustomSelect(shell);
-      }
-    });
-  }
-
-  function syncEnhancedSelect(shell) {
-    if (!shell || !shell.querySelector) {
-      return;
-    }
-
-    var select = shell.querySelector("select[data-jsuw-select-enhanced]");
-    var text = shell.querySelector(".jsuw-select-button-text");
-    var selectedOption = select && select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
-    var selectedValue = select ? select.value : "";
-
-    if (text) {
-      text.textContent = optionLabel(selectedOption);
-    }
-
-    Array.prototype.forEach.call(shell.querySelectorAll(".jsuw-select-option"), function (button) {
-      var isSelected = button.getAttribute("data-jsuw-select-value") === selectedValue;
-
-      button.classList.toggle("jsuw-select-option--selected", isSelected);
-      button.setAttribute("aria-selected", isSelected ? "true" : "false");
-    });
-  }
-
-  function syncEnhancedSelects(panel) {
-    if (!panel || typeof panel.querySelectorAll !== "function") {
-      return;
-    }
-
-    Array.prototype.forEach.call(panel.querySelectorAll(".jsuw-select-shell"), syncEnhancedSelect);
-  }
-
-  function focusCustomSelectOption(shell, direction) {
-    if (!shell || !shell.querySelectorAll) {
-      return;
-    }
-
-    var options = Array.prototype.filter.call(shell.querySelectorAll(".jsuw-select-option"), function (item) {
-      return !item.disabled;
-    });
-    var selected = shell.querySelector(".jsuw-select-option--selected:not(:disabled)");
-    var target = selected || options[0];
-
-    if (direction === "last") {
-      target = options[options.length - 1] || target;
-    }
-
-    if (target && typeof target.focus === "function") {
-      target.focus();
-    }
-  }
-
-  function openCustomSelect(shell) {
-    if (!shell || !root.document) {
-      return;
-    }
-
-    closeOtherCustomSelects(root.document, shell);
-    shell.setAttribute("data-jsuw-select-open", "true");
-
-    var button = shell.querySelector && shell.querySelector(".jsuw-select-button");
-
-    if (button) {
-      button.setAttribute("aria-expanded", "true");
-    }
-
-    syncEnhancedSelect(shell);
-  }
-
-  function installCustomSelectDocumentHandlers(doc) {
-    if (!doc || doc.__jsuwSelectHandlersInstalled) {
-      return;
-    }
-
-    doc.__jsuwSelectHandlersInstalled = true;
-
-    doc.addEventListener("click", function (event) {
-      var target = event && event.target;
-
-      if (target && typeof target.closest === "function" && target.closest("#jsu-wrapped-wordpress-shell .jsuw-select-shell")) {
-        return;
-      }
-
-      closeOtherCustomSelects(doc, null);
-    });
-
-    doc.addEventListener("keydown", function (event) {
-      if (event && event.key === "Escape") {
-        closeOtherCustomSelects(doc, null);
-      }
-    });
-  }
-
-  function enhanceFormSelects(panel) {
-    if (!panel || !root.document || typeof panel.querySelectorAll !== "function") {
-      return 0;
-    }
-
-    var enhanced = 0;
-
-    installCustomSelectDocumentHandlers(root.document);
-
-    Array.prototype.forEach.call(panel.querySelectorAll("select:not([multiple])"), function (select) {
-      var className = select.getAttribute("class") || "";
-
-      if (
-        select.hasAttribute("data-jsuw-select-enhanced") ||
-        select.size > 1 ||
-        /select2-hidden-accessible|chosen-select/i.test(className) ||
-        typeof select.closest === "function" && select.closest(".jsuw-select-shell")
-      ) {
-        return;
-      }
-
-      var parent = select.parentNode;
-
-      if (!parent) {
-        return;
-      }
-
-      var shell = root.document.createElement("div");
-      var button = root.document.createElement("button");
-      var buttonText = root.document.createElement("span");
-      var menu = root.document.createElement("div");
-      var menuId = customSelectId();
-
-      shell.className = "jsuw-select-shell";
-      parent.insertBefore(shell, select);
-      shell.appendChild(select);
-
-      select.setAttribute("data-jsuw-select-enhanced", "true");
-      select.classList.add("jsuw-native-select-hidden");
-      select.setAttribute("tabindex", "-1");
-      select.setAttribute("aria-hidden", "true");
-
-      button.type = "button";
-      button.className = "jsuw-select-button";
-      button.setAttribute("aria-haspopup", "listbox");
-      button.setAttribute("aria-expanded", "false");
-      button.setAttribute("aria-controls", menuId);
-      button.setAttribute("aria-label", selectLabel(select));
-
-      buttonText.className = "jsuw-select-button-text";
-      button.appendChild(buttonText);
-
-      menu.className = "jsuw-select-menu";
-      menu.id = menuId;
-      menu.setAttribute("role", "listbox");
-      menu.setAttribute("aria-label", selectLabel(select));
-
-      Array.prototype.forEach.call(select.options, function (option) {
-        var optionButton = root.document.createElement("button");
-
-        optionButton.type = "button";
-        optionButton.className = "jsuw-select-option";
-        optionButton.textContent = optionLabel(option);
-        optionButton.setAttribute("role", "option");
-        optionButton.setAttribute("data-jsuw-select-value", option.value);
-
-        if (option.disabled) {
-          optionButton.disabled = true;
-        }
-
-        optionButton.addEventListener("click", function () {
-          if (option.disabled) {
-            return;
-          }
-
-          setSelectValue(select, option.value);
-          syncEnhancedSelect(shell);
-          closeCustomSelect(shell);
-          button.focus();
-        });
-
-        optionButton.addEventListener("keydown", function (event) {
-          var options = Array.prototype.filter.call(shell.querySelectorAll(".jsuw-select-option"), function (item) {
-            return !item.disabled;
-          });
-          var index = options.indexOf(optionButton);
-          var target = null;
-
-          if (event.key === "ArrowDown") {
-            target = options[Math.min(index + 1, options.length - 1)];
-          } else if (event.key === "ArrowUp") {
-            target = options[Math.max(index - 1, 0)];
-          } else if (event.key === "Home") {
-            target = options[0];
-          } else if (event.key === "End") {
-            target = options[options.length - 1];
-          } else if (event.key === "Escape") {
-            closeCustomSelect(shell);
-            button.focus();
-            event.preventDefault();
-            return;
-          } else if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            optionButton.click();
-            return;
-          }
-
-          if (target) {
-            event.preventDefault();
-            target.focus();
-          }
-        });
-
-        menu.appendChild(optionButton);
-      });
-
-      button.addEventListener("click", function () {
-        if (shell.hasAttribute("data-jsuw-select-open")) {
-          closeCustomSelect(shell);
-        } else {
-          openCustomSelect(shell);
-        }
-      });
-
-      button.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown" || event.key === "ArrowUp") {
-          event.preventDefault();
-          openCustomSelect(shell);
-          focusCustomSelectOption(shell, event.key === "ArrowUp" ? "last" : "first");
-        }
-      });
-
-      select.addEventListener("change", function () {
-        syncEnhancedSelect(shell);
-      });
-
-      shell.appendChild(button);
-      shell.appendChild(menu);
-      syncEnhancedSelect(shell);
-      enhanced += 1;
-    });
-
-    return enhanced;
   }
 
   function getBrandChoice(record) {
@@ -9003,23 +8422,11 @@
       panel.removeAttribute("hidden");
       panel.classList.add("jsuw-form-panel--open");
       panel.setAttribute("aria-hidden", "false");
-
-      if (typeof panel.closest === "function") {
-        var wordpressShell = panel.closest("#jsu-wrapped-wordpress-shell");
-
-        if (wordpressShell) {
-          wordpressShell.classList.add("jsuw-form-active");
-        }
-      }
-
       prefillFormPanel(panel, state);
-      enhanceFormSelects(panel);
 
       if (root.setTimeout) {
         root.setTimeout(function () {
           prefillFormPanel(panel, state);
-          enhanceFormSelects(panel);
-          syncEnhancedSelects(panel);
         }, 350);
       }
 
@@ -9031,7 +8438,7 @@
         panel.scrollIntoView();
       }
 
-      var focusTarget = panel.querySelector(".jsuw-select-button, input, textarea, button, a[href], [tabindex]:not([tabindex='-1']), select:not(.jsuw-native-select-hidden)");
+      var focusTarget = panel.querySelector("input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])");
 
       if (focusTarget && typeof focusTarget.focus === "function") {
         try {
@@ -9663,7 +9070,7 @@
       target.__jsuWrappedCleanup = null;
     }
 
-    target.innerHTML = '<div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
+    target.innerHTML = '<div class="jsuw-shell"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
 
     try {
       var assetBase = getAssetBase(target, settings);
@@ -9863,7 +9270,6 @@
     buildTeenUrl: buildTeenUrl,
     createFormPrefillContext: createFormPrefillContext,
     createCtaPrefillUrl: createCtaPrefillUrl,
-    enhanceFormSelects: enhanceFormSelects,
     createFallbackSvg: createFallbackSvg,
     getVariantSlug: getVariantSlug,
     getProgramSlug: getProgramSlug,
