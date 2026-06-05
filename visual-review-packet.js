@@ -567,9 +567,14 @@ module.exports = {
   CAPTURES,
   VIEWPORTS,
   browserArgs,
+  createPageCdp,
+  evaluate,
   finalCardIndex,
+  launchBrowser,
   parseArgs,
   runVisualReviewPacket,
+  stopBrowser,
+  waitFor,
   visualReviewPlan,
   withCaptureParams
 };

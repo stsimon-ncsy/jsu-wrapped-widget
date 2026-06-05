@@ -257,10 +257,27 @@ function runTeenRuntimeSmoke() {
     ctaTarget: "#jsuw-wrapped-interest"
   });
   const share = cards.find((card) => card.theme === "teen-share");
+  const shareHtml = api.renderCardBody(share);
+  const placeholderPickerHtml = api.renderChapterPickerMarkup({
+    records: [{ chapter_slug: "las-vegas", chapter_name: "Las Vegas", region_name: "West Coast" }],
+    teenRecords: [{
+      teen_slug: "west-coast-junior-03",
+      teen_name: "Rivka B.",
+      chapter_name: "Las Vegas",
+      school_name: "your school",
+      events_attended: 12
+    }],
+    url: "https://example.org/wrapped/?show_teens=1"
+  });
 
   assert(!source.includes("Teen test version"), "teen renderer should not show retired test-version badge copy");
+  assert(!source.includes("Proof of concept"), "teen renderer should not expose proof-of-concept copy");
+  assert(!source.includes("teen-test"), "teen renderer should not keep teen-test fallbacks");
   assert(share && share.cta && share.cta.label === "Get involved next year", "teen share card should carry configured CTA label");
   assert(share && share.cta && share.cta.target === "#jsuw-wrapped-interest", "teen share card should carry configured CTA target");
+  assert(shareHtml.indexOf("Get involved next year") < shareHtml.indexOf("Share this recap"), "teen CTA should appear before share/download actions");
+  assert(placeholderPickerHtml.includes("Rivka B."), "teen picker should render records with missing school");
+  assert(!placeholderPickerHtml.includes("your school"), "teen picker should suppress placeholder school copy");
 }
 
 function runSampleVariantSmoke(records, config) {
@@ -340,9 +357,9 @@ function runPageMetadataSmoke() {
   const teenMetadata = api.createPageMetadata({
     experienceMode: "teen",
     record: {
-      teen_slug: "maya-test",
-      teen_name: "Maya",
-      chapter_name: "Northwood JSU",
+      teen_slug: "west-coast-junior-01",
+      teen_name: "Leah Y.",
+      chapter_name: "Las Vegas",
       year_label: "2025-2026"
     }
   });
@@ -351,8 +368,9 @@ function runPageMetadataSmoke() {
   assert(jsuMetadata.title === "JSU/NCSY Wrapped - Greater Washington", `JSU metadata title mismatch: ${jsuMetadata.title}`);
   assert(ncsyMetadata.description.includes("Baltimore Wrapped"), "metadata description missing chapter name");
   assert(ncsyMetadata.image && ncsyMetadata.image.includes("wrapped-social-preview.png"), "metadata image missing social preview");
-  assert(teenMetadata.title === "JSU/NCSY Wrapped - Teen Test Version", `teen metadata title mismatch: ${teenMetadata.title}`);
-  assert(teenMetadata.description.includes("proof of concept"), "teen metadata description should label proof of concept");
+  assert(teenMetadata.title === "JSU/NCSY Wrapped - Leah Y.", `teen metadata title mismatch: ${teenMetadata.title}`);
+  assert(teenMetadata.description.includes("Leah Y.'s Teen Wrapped"), "teen metadata description should use launch-safe Teen Wrapped copy");
+  assert(!/test|proof/i.test(teenMetadata.title + " " + teenMetadata.description), "teen metadata should not expose test/proof language");
   assert(teenMetadata.robots === "noindex,nofollow", "teen metadata should be noindex");
 
   try {
@@ -360,9 +378,9 @@ function runPageMetadataSmoke() {
     api.applyPageMetadata({
       experienceMode: "teen",
       record: {
-        teen_slug: "maya-test",
-        teen_name: "Maya",
-        chapter_name: "Northwood JSU",
+        teen_slug: "west-coast-junior-01",
+        teen_name: "Leah Y.",
+        chapter_name: "Las Vegas",
         year_label: "2025-2026"
       }
     });
@@ -3469,6 +3487,16 @@ function runDataValidationSmoke(records, config) {
       events_attended: 5
     }
   ]);
+  const teenPlaceholderReport = dataValidator.validateTeenRecords([
+    {
+      teen_slug: "placeholder-school",
+      teen_name: "Ari A.",
+      chapter_name: "Las Vegas",
+      year_label: "2025-2026",
+      school_name: "your school",
+      events_attended: 5
+    }
+  ]);
   const typoConfigReport = dataValidator.validateConfig({
     version: 1,
     year: "2026",
@@ -3665,6 +3693,7 @@ function runDataValidationSmoke(records, config) {
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("teen_id")), "teen ids should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("email")), "teen emails should fail validation");
   assert(!teenPrivacyReport.ok && teenPrivacyReport.errors.some((error) => error.includes("emergency_phone")), "teen phone fields should fail validation");
+  assert(!teenPlaceholderReport.ok && teenPlaceholderReport.errors.some((error) => error.includes("placeholder public story text")), "teen placeholder public text should fail validation");
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.chaptrers")), "unknown top-level config keys should fail validation");
   assert(!typoConfigReport.ok && typoConfigReport.errors.some((error) => error.includes("config.defaults.ctaa_label")), "unknown config section keys should fail validation");
   assert(!typoRecordOverrideReport.ok && typoRecordOverrideReport.errors.some((error) => error.includes("record_overrides.unique_teeens")), "unknown record override keys should fail validation");

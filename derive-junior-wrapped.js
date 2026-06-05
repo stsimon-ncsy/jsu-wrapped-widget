@@ -82,8 +82,43 @@ function publicTeenName(firstName, lastName) {
   return initial ? `${first} ${initial}.` : first;
 }
 
+function cleanPublicLabel(value) {
+  const text = textValue(value)
+    .replace(/\s+/g, " ")
+    .replace(/\bJewniors\b/gi, "Juniors")
+    .trim();
+
+  if (!text || /^(your school|unknown|n\/a|na|none)$/i.test(text)) {
+    return "";
+  }
+
+  return text;
+}
+
 function formatNumber(value) {
   return new Intl.NumberFormat("en-US").format(Number(value) || 0);
+}
+
+function countPhrase(value, singular, plural) {
+  const count = Number(value) || 0;
+
+  if (count <= 0) {
+    return "";
+  }
+
+  return `${formatNumber(count)} ${count === 1 ? singular : plural}`;
+}
+
+function sentenceList(parts) {
+  if (parts.length <= 1) {
+    return parts.join("");
+  }
+
+  if (parts.length === 2) {
+    return `${parts[0]} and ${parts[1]}`;
+  }
+
+  return `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`;
 }
 
 function formatDateLabel(date) {
@@ -365,7 +400,7 @@ function summarizePerson(personRows, context) {
   });
 
   const primaryChapter = mostCommon(chapterCounts, textValue(first.chaptername));
-  const schoolName = mostCommon(schoolCounts, textValue(first.schoolname));
+  const schoolName = cleanPublicLabel(mostCommon(schoolCounts, textValue(first.schoolname)));
 
   sortedRows.forEach((row) => {
     if (textValue(row.chaptername) === primaryChapter) {
@@ -406,7 +441,7 @@ function summarizePerson(personRows, context) {
     chapter_name: primaryChapter,
     school_name: schoolName,
     events_attended: attendedEvents.size,
-    first_event_name: textValue(first.eventname),
+    first_event_name: cleanPublicLabel(first.eventname),
     first_event_date_label: formatDateLabel(rowDate(first)),
     first_event_location: primaryChapter,
     longest_streak: longestStreak,
@@ -429,10 +464,15 @@ function summarizePerson(personRows, context) {
 function reviewToTeenRecord(review, index, context) {
   const rank = index + 1;
   const chapterName = review.chapter_name || "Junior NCSY";
-  const schoolText = review.school_name || "your school";
+  const schoolText = cleanPublicLabel(review.school_name);
   const eventsText = formatNumber(review.events_attended);
   const streakText = formatNumber(review.longest_streak);
   const peerText = formatNumber(review.events_with_peers);
+  const depthParts = [
+    countPhrase(review.learning_sessions, "learning moment", "learning moments"),
+    countPhrase(review.shabbatons, "Shabbaton moment", "Shabbaton moments"),
+    countPhrase(review.leadership_moments, "leadership moment", "leadership moments")
+  ].filter(Boolean);
 
   return {
     school_year: context.yearLabel,
@@ -443,7 +483,7 @@ function reviewToTeenRecord(review, index, context) {
     chapter_slug: slugify(chapterName),
     chapter_name: chapterName,
     region_name: context.regionName,
-    school_name: schoolText,
+    school_name: schoolText || undefined,
     events_attended: review.events_attended,
     first_event_name: review.first_event_name,
     first_event_date_label: review.first_event_date_label,
@@ -461,7 +501,7 @@ function reviewToTeenRecord(review, index, context) {
     first_event_line: `${review.first_event_date_label} was your first Junior NCSY moment in this story.`,
     streak_line: `Your longest chapter-event streak reached ${streakText}. That is consistency in motion.`,
     vibe_line: `${review.top_vibe} was the lane you returned to most.`,
-    depth_line: `${formatNumber(review.learning_sessions)} learning moments, ${formatNumber(review.shabbatons)} Shabbaton moments, and ${formatNumber(review.leadership_moments)} leadership moments added depth to the year.`,
+    depth_line: depthParts.length ? `${sentenceList(depthParts)} added depth to the year.` : "You kept building your Junior NCSY story.",
     peer_line: `You shared ${peerText} of your events with other Junior NCSY teens.`,
     chapter_events_hosted: review.chapter_events_hosted,
     chapter_unique_teens: review.chapter_unique_teens,

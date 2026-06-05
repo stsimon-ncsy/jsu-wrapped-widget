@@ -16,6 +16,13 @@ const PAGE_CHECKS = [
     requiredText: ["Choose your chapter", "Choose a region", "Baltimore"]
   },
   {
+    forbiddenText: ["your school", "Teen test", "Proof of concept", "maya-test"],
+    label: "teen picker",
+    path: "/?show_teens=1&qa=render-smoke",
+    requiredSelectors: ['id="jsu-wrapped"', "jsuw-picker", "jsuw-teen-picker-link"],
+    requiredText: ["Find a Teen Wrapped story", "Leah Y.", "View"]
+  },
+  {
     label: "Baltimore story",
     path: "/?chapter=baltimore&qa=render-smoke",
     requiredSelectors: ['id="jsu-wrapped"', "jsuw-story"],
@@ -97,6 +104,12 @@ function validateRenderedDom(check) {
   (check.requiredText || []).forEach((text) => {
     if (!hasText(html, text)) {
       errors.push(`${label} missing text ${text}`);
+    }
+  });
+
+  (check.forbiddenText || []).forEach((text) => {
+    if (hasText(html, text)) {
+      errors.push(`${label} contains forbidden text ${text}`);
     }
   });
 
@@ -599,8 +612,11 @@ if (require.main === module) {
 
 module.exports = {
   browserDumpDomArgs,
+  closeServer,
+  createStaticServer,
   findBrowserCandidates,
   findBrowserExecutable,
+  listen,
   probeTimeoutMs,
   renderPlan,
   runRenderSmoke,

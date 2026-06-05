@@ -119,6 +119,39 @@
     return fallback || "";
   }
 
+  function normalizedPublicText(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function cleanPublicText(value, fallback) {
+    var text = asText(value, "").replace(/\s+/g, " ").replace(/\bJewniors\b/gi, "Juniors").trim();
+    var normalized = normalizedPublicText(text);
+
+    if (!normalized || ["n-a", "na", "none", "null", "placeholder", "tbd", "test", "todo", "undefined", "unknown", "your-school"].indexOf(normalized) !== -1) {
+      return fallback || "";
+    }
+
+    return text;
+  }
+
+  function isPositiveMetric(value) {
+    return hasValue(value) && numberValue(value) > 0;
+  }
+
+  function countPhrase(value, singular, plural) {
+    var count = numberValue(value);
+
+    if (count <= 0) {
+      return "";
+    }
+
+    return formatNumber(count) + " " + (count === 1 ? singular : plural);
+  }
+
   function formatNumber(value) {
     if (!hasValue(value)) {
       return "";
@@ -1370,9 +1403,18 @@
     var mode = asText(state && state.experienceMode, "chapter");
 
     if (mode === "teen") {
+      var teenName = cleanPublicText(record.teen_name || record.student_name || record.first_name, "Teen Wrapped");
+      var teenChapter = cleanPublicText(record.chapter_name, "");
+      var teenYear = cleanPublicText(record.year_label || record.school_year, "");
+      var teenDescription = [
+        teenName + "'s Teen Wrapped",
+        teenYear ? "for " + teenYear : "",
+        teenChapter ? "- " + teenChapter : ""
+      ].filter(Boolean).join(" ");
+
       return {
-        title: brandLabel + " - Teen Test Version",
-        description: "JSU/NCSY Wrapped teen mode is a proof of concept using sample test data only.",
+        title: brandLabel + " - " + teenName,
+        description: teenDescription,
         image: SOCIAL_IMAGE_URL,
         robots: "noindex,nofollow"
       };
@@ -1841,13 +1883,14 @@
     }
 
     function renderTeenPickerItem(record) {
-      var name = asText(record.teen_name || record.student_name || record.first_name, "Teen Wrapped");
-      var chapter = asText(record.chapter_name, "");
-      var school = asText(record.school_name, "");
+      var name = cleanPublicText(record.teen_name || record.student_name || record.first_name, "Teen Wrapped");
+      var chapter = cleanPublicText(record.chapter_name, "");
+      var school = cleanPublicText(record.school_name, "");
+      var meta = [chapter, school].filter(Boolean).join(" | ") || "Junior NCSY";
       var stats = [
         hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
         hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " streak" : "",
-        hasValue(record.persona) ? asText(record.persona) : ""
+        hasValue(record.persona) ? cleanPublicText(record.persona) : ""
       ].filter(Boolean).join(" | ");
 
       return [
@@ -1855,10 +1898,10 @@
         '<a class="jsuw-picker-item jsuw-teen-picker-link jsuw-picker-brand--' + escapeHtml(getBrandChoice(record)) + '" href="' + escapeHtml(buildTeenUrl(record, url)) + '">',
         '<span class="jsuw-picker-copy">',
         "<strong>" + escapeHtml(name) + "</strong>",
-        '<em>' + escapeHtml([chapter, school].filter(Boolean).join(" | ")) + "</em>",
-        stats ? "<span>" + escapeHtml(stats) + "</span>" : "",
+        '<em>' + escapeHtml(meta) + "</em>",
+        '<span>' + escapeHtml(stats || "Junior NCSY story") + "</span>",
         "</span>",
-        '<span class="jsuw-picker-arrow" aria-hidden="true">Open</span>',
+        '<span class="jsuw-picker-arrow" aria-hidden="true">View</span>',
         "</a>",
         "</article>"
       ].join("");
@@ -1937,20 +1980,22 @@
 
     var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
     var teenLinksHtml = showTeenLink && teenRecords.length ? [
-      '<section class="jsuw-picker-scope-stories jsuw-picker-teen-stories" aria-label="Teen Wrapped previews">',
-      "<h2>Teen Wrapped previews</h2>",
+      '<section class="jsuw-picker-scope-stories jsuw-picker-teen-stories" aria-label="Teen Wrapped stories">',
+      "<h2>Find a Teen Wrapped story</h2>",
       '<div class="jsuw-picker-scope-list">',
       teenRecords.map(renderTeenPickerItem).join(""),
       "</div>",
       "</section>"
     ].join("") : "";
+    var pickerTitle = showTeenLink ? "Find your Wrapped story" : "Choose your chapter";
+    var pickerSubtext = showTeenLink ? "Choose a region, open a chapter story, or find a Teen Wrapped link." : "Choose a region, then pick a chapter to open its Wrapped story.";
 
     return [
       '<div class="jsuw-shell jsuw-shell--picker">',
       '<section class="jsuw-picker" aria-labelledby="jsuw-picker-title">',
       '<div class="jsuw-picker-topline">JSU Wrapped | ' + escapeHtml(year) + "</div>",
-      '<h1 class="jsuw-picker-title" id="jsuw-picker-title">Choose your chapter</h1>',
-      '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
+      '<h1 class="jsuw-picker-title" id="jsuw-picker-title">' + escapeHtml(pickerTitle) + "</h1>",
+      '<p class="jsuw-picker-subtext">' + escapeHtml(pickerSubtext) + "</p>",
       regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
       scopedStoriesHtml,
       teenLinksHtml,
@@ -2825,11 +2870,14 @@
   }
 
   function createTeenCards(record, options) {
-    var teenName = asText(record.teen_name || record.student_name || record.first_name, "Maya");
-    var chapterName = asText(record.chapter_name, "Northwood JSU");
-    var yearLabel = asText(record.year_label || record.school_year, "2025-2026");
-    var regionName = asText(record.region_name, "Atlantic Seaboard");
-    var schoolName = asText(record.school_name, "Northwood High School");
+    record = record || {};
+
+    var teenName = cleanPublicText(record.teen_name || record.student_name || record.first_name, "Junior NCSY teen");
+    var chapterName = cleanPublicText(record.chapter_name, "Junior NCSY");
+    var yearLabel = cleanPublicText(record.year_label || record.school_year, "This year");
+    var regionName = cleanPublicText(record.region_name, "");
+    var schoolName = cleanPublicText(record.school_name, "");
+    var persona = cleanPublicText(record.persona, "");
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
     var logoUrl = getLogoAsset(brandChoice, assetBase);
@@ -2838,144 +2886,188 @@
       target: asText(options && options.ctaTarget, ""),
       href: asText(options && options.ctaHref, "")
     };
+    var cards = [];
     var connectorStats = [];
 
-    if (hasValue(record.friends_brought)) {
+    if (isPositiveMetric(record.friends_brought)) {
       connectorStats.push({ value: formatNumber(record.friends_brought), label: "friends brought" });
-    } else if (hasValue(record.events_with_peers)) {
+    } else if (isPositiveMetric(record.events_with_peers)) {
       connectorStats.push({ value: formatNumber(record.events_with_peers), label: "events with peers" });
     }
 
-    if (hasValue(record.schools_in_room)) {
-      connectorStats.push({ value: formatNumber(record.schools_in_room), label: "schools in your room" });
+    if (isPositiveMetric(record.schools_in_room)) {
+      connectorStats.push({ value: formatNumber(record.schools_in_room), label: "schools in the room" });
     }
 
-    var cards = [
-      {
-        type: "teen",
-        theme: "teen-cover",
-        eyebrow: "Proof of concept",
-        headline: teenName + ", your JSU year is wrapped",
-        displayHeadline: teenName + ",\nyour JSU\nyear is\nwrapped.",
-        teenName: teenName,
-        chapterName: chapterName,
-        schoolName: schoolName,
-        regionName: regionName,
-        yearLabel: yearLabel,
-        subtext: chapterName + " - " + regionName
-      },
-      {
+    cards.push({
+      type: "teen",
+      theme: "teen-cover",
+      eyebrow: "Your story",
+      headline: teenName + ", your Junior NCSY year is wrapped",
+      displayHeadline: teenName + ",\nyour Junior\nNCSY year\nis wrapped.",
+      teenName: teenName,
+      chapterName: chapterName,
+      schoolName: schoolName,
+      regionName: regionName,
+      yearLabel: yearLabel,
+      subtext: [chapterName, regionName].filter(Boolean).join(" - ") || "Junior NCSY"
+    });
+
+    if (hasValue(record.events_attended)) {
+      cards.push({
         type: "teen",
         theme: "teen-attendance",
-        eyebrow: "Chapter 01 - Attendance",
+        eyebrow: "Attendance",
         headline: "You showed up " + formatNumber(record.events_attended) + " times",
-        displayHeadline: "You showed\nup this many\ntimes.",
+        displayHeadline: "You showed\nup " + formatNumber(record.events_attended) + "\ntimes.",
         stat: formatNumber(record.events_attended),
         rawValue: numberValue(record.events_attended),
         statLabel: "events",
         subtext: asText(record.attendance_line, "From lunch clubs to BBQs, you made JSU part of your year.")
-      },
-      {
+      });
+    }
+
+    if (hasValue(record.first_event_name) || hasValue(record.first_event_date_label)) {
+      var firstEventName = cleanPublicText(record.first_event_name, "Your first Junior NCSY moment");
+
+      cards.push({
         type: "teen",
         theme: "teen-ticket",
-        eyebrow: "Chapter 02 - Origin",
-        headline: "It started with " + asText(record.first_event_name, "Fall Kickoff Lunch"),
-        eventName: asText(record.first_event_name, "Fall Kickoff Lunch"),
-        eventDate: asText(record.first_event_date_label, "Sep 18, 2025"),
-        eventLocation: asText(record.first_event_location || record.school_name, schoolName),
+        eyebrow: "First moment",
+        headline: "It started with " + firstEventName,
+        eventName: firstEventName,
+        eventDate: cleanPublicText(record.first_event_date_label, yearLabel),
+        eventLocation: cleanPublicText(record.first_event_location || record.school_name, chapterName),
         subtext: asText(record.first_event_line, "Your first JSU moment of the year. Then the momentum kept going.")
-      },
-      {
+      });
+    }
+
+    if (hasValue(record.longest_streak)) {
+      cards.push({
         type: "teen",
         theme: "teen-streak",
-        eyebrow: "Chapter 03 - Streak",
+        eyebrow: "Streak",
         headline: "Your longest streak hit " + formatNumber(record.longest_streak),
         displayHeadline: "Your longest\nstreak hit",
         stat: formatNumber(record.longest_streak),
         rawValue: numberValue(record.longest_streak),
         statLabel: "events in a row",
         subtext: asText(record.streak_line, "That's not just attendance. That's momentum.")
-      },
-      {
+      });
+    }
+
+    if (hasValue(record.top_vibe)) {
+      var vibe = cleanPublicText(record.top_vibe, "Jewish life");
+
+      cards.push({
         type: "teen",
         theme: "teen-vibe",
-        eyebrow: "Chapter 04 - Vibe",
-        headline: "Your top vibe was " + asText(record.top_vibe, "Social + Jewish Culture"),
-        vibe: asText(record.top_vibe, "Social + Jewish Culture"),
+        eyebrow: "Top vibe",
+        headline: "Your top vibe was " + vibe,
+        vibe: vibe,
         subtext: asText(record.vibe_line, "You kept showing up where friends, food, and Jewish life came together.")
-      },
-      {
+      });
+    }
+
+    if (persona || connectorStats.length) {
+      var personaLabel = persona || "Part of the crew";
+
+      cards.push({
         type: "teen",
         theme: "teen-connector",
-        eyebrow: "Chapter 05 - Persona",
-        headline: "You're " + asText(record.persona, "The Connector"),
-        persona: asText(record.persona, "The Connector"),
+        eyebrow: "Persona",
+        headline: "You're " + personaLabel,
+        persona: personaLabel,
         friendsBrought: formatNumber(record.friends_brought),
         connectorStats: connectorStats,
         schoolsInRoom: formatNumber(record.schools_in_room),
         subtext: asText(record.persona_line, "You helped turn events into community.")
-      },
-      {
+      });
+    }
+
+    var depthStats = [
+      isPositiveMetric(record.shabbatons) ? { value: formatNumber(record.shabbatons), label: numberValue(record.shabbatons) === 1 ? "Shabbaton moment" : "Shabbaton moments", note: "weekend energy" } : null,
+      isPositiveMetric(record.learning_sessions) ? { value: formatNumber(record.learning_sessions), label: numberValue(record.learning_sessions) === 1 ? "learning moment" : "learning moments", note: "sessions deep" } : null,
+      isPositiveMetric(record.leadership_moments) ? { value: formatNumber(record.leadership_moments), label: numberValue(record.leadership_moments) === 1 ? "leadership moment" : "leadership moments", note: "you helped lead" } : null
+    ].filter(Boolean);
+
+    if (depthStats.length) {
+      cards.push({
         type: "teen",
         theme: "teen-depth",
-        eyebrow: "Chapter 06 - Depth",
+        eyebrow: "Depth",
         headline: "You made room for deeper moments too",
         shabbatons: formatNumber(record.shabbatons),
         learningSessions: formatNumber(record.learning_sessions),
         leadershipMoments: formatNumber(record.leadership_moments),
+        depthStats: depthStats,
         subtext: asText(record.depth_line, "Shabbatons, learning, and leadership moments gave the year more depth.")
-      },
-      {
+      });
+    }
+
+    var chapterStats = [
+      isPositiveMetric(record.chapter_events_hosted) ? { value: formatNumber(record.chapter_events_hosted), label: "events hosted" } : null,
+      isPositiveMetric(record.chapter_unique_teens) ? { value: formatNumber(record.chapter_unique_teens), label: "unique teens" } : null,
+      isPositiveMetric(record.chapter_engagement_moments) ? { value: formatNumber(record.chapter_engagement_moments), label: "engagement moments" } : null,
+      isPositiveMetric(record.chapter_new_teens) ? { value: formatNumber(record.chapter_new_teens), label: "new this year" } : null
+    ].filter(Boolean);
+
+    if (chapterStats.length) {
+      cards.push({
         type: "teen",
         theme: "teen-chapter",
-        eyebrow: "Chapter 07 - Your club",
+        eyebrow: "Your chapter",
         headline: chapterName + " had a big year",
         chapterName: chapterName,
-        summaryStats: [
-          hasValue(record.chapter_events_hosted) ? { value: formatNumber(record.chapter_events_hosted), label: "events hosted" } : null,
-          hasValue(record.chapter_unique_teens) ? { value: formatNumber(record.chapter_unique_teens), label: "unique teens" } : null,
-          hasValue(record.chapter_engagement_moments) ? { value: formatNumber(record.chapter_engagement_moments), label: "engagement moments" } : null,
-          hasValue(record.chapter_new_teens) ? { value: formatNumber(record.chapter_new_teens), label: "new this year" } : null
-        ].filter(Boolean),
+        summaryStats: chapterStats,
         subtext: asText(record.chapter_line, chapterName + " turned events into belonging.")
-      },
-      {
+      });
+    }
+
+    var movementStats = [
+      isPositiveMetric(record.region_unique_teens) ? { value: formatNumber(record.region_unique_teens), label: "teens in the region" } : null,
+      isPositiveMetric(record.region_schools_represented) ? { value: formatNumber(record.region_schools_represented), label: "schools represented" } : null,
+      isPositiveMetric(record.national_engagement_moments) ? { value: formatNumber(record.national_engagement_moments) + "+", label: "national moments" } : null
+    ].filter(Boolean);
+
+    if (movementStats.length) {
+      cards.push({
         type: "teen",
         theme: "teen-movement",
-        eyebrow: "Chapter 08 - Zoom out",
+        eyebrow: "Zoom out",
         headline: "You were part of something much bigger",
-        stats: [
-          hasValue(record.region_unique_teens) ? { value: formatNumber(record.region_unique_teens), label: "teens in the region" } : null,
-          hasValue(record.region_schools_represented) ? { value: formatNumber(record.region_schools_represented), label: "schools represented" } : null,
-          hasValue(record.national_engagement_moments) ? { value: formatNumber(record.national_engagement_moments) + "+", label: "national moments" } : null
-        ].filter(Boolean),
+        stats: movementStats,
         subtext: asText(record.movement_line, "One club. One region. One national movement.")
-      },
-      {
-        type: "teen",
-        theme: "teen-share",
-        eyebrow: "Share card",
-        headline: teenName + "'s JSU Wrapped",
-        displayHeadline: teenName + "'s\nJSU\nWrapped",
-        teenName: teenName,
-        chapterName: chapterName,
-        yearLabel: yearLabel,
-        persona: asText(record.persona, "The Connector"),
-        subtext: [
-          hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
-          hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
-          hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : hasValue(record.events_with_peers) ? formatNumber(record.events_with_peers) + " events with peers" : "",
-          asText(record.persona, "The Connector") + " energy"
-        ].filter(Boolean).join(". ") + ".",
-        summaryStats: [
-          hasValue(record.events_attended) ? { value: formatNumber(record.events_attended), label: "events showed up to" } : null,
-          hasValue(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
-          hasValue(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : hasValue(record.events_with_peers) ? { value: formatNumber(record.events_with_peers), label: "events with peers" } : null,
-          hasValue(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in your room" } : null
-        ].filter(Boolean),
-        cta: hasValue(cta.label) && (hasValue(cta.target) || hasValue(cta.href)) ? cta : null
-      }
-    ];
+      });
+    }
+
+    var sharePersona = persona || "Junior NCSY energy";
+    var shareStats = [
+      isPositiveMetric(record.events_attended) ? { value: formatNumber(record.events_attended), label: "events showed up to" } : null,
+      isPositiveMetric(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
+      isPositiveMetric(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : isPositiveMetric(record.events_with_peers) ? { value: formatNumber(record.events_with_peers), label: "events with peers" } : null,
+      isPositiveMetric(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in the room" } : null
+    ].filter(Boolean);
+
+    cards.push({
+      type: "teen",
+      theme: "teen-share",
+      eyebrow: "Share card",
+      headline: teenName + "'s Junior NCSY Wrapped",
+      displayHeadline: teenName + "'s\nJunior NCSY\nWrapped",
+      teenName: teenName,
+      chapterName: chapterName,
+      yearLabel: yearLabel,
+      persona: sharePersona,
+      subtext: [
+        countPhrase(record.events_attended, "event", "events"),
+        isPositiveMetric(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
+        isPositiveMetric(record.friends_brought) ? countPhrase(record.friends_brought, "friend brought", "friends brought") : isPositiveMetric(record.events_with_peers) ? countPhrase(record.events_with_peers, "event with peers", "events with peers") : "",
+        sharePersona
+      ].filter(Boolean).join(". ") + ".",
+      summaryStats: shareStats,
+      cta: hasValue(cta.label) && (hasValue(cta.target) || hasValue(cta.href)) ? cta : null
+    });
 
     cards.forEach(function (card) {
       card.brandChoice = brandChoice;
@@ -3418,8 +3510,8 @@
       renderTeenTop(card),
       '<h2 class="jsuw-teen-title">It started<br>with...</h2>',
       '<div class="jsuw-teen-ticket">',
-      '<span>Admit one</span>',
-      '<strong>' + escapeHtml(card.eventName || "JSU Kickoff") + "</strong>",
+      '<span>First stop</span>',
+      '<strong>' + escapeHtml(card.eventName || "First Junior NCSY moment") + "</strong>",
       '<dl><div><dt>Date</dt><dd>' + escapeHtml(card.eventDate || "This year") + "</dd></div>",
       '<div><dt>Place</dt><dd>' + escapeHtml(card.eventLocation || "JSU") + "</dd></div></dl>",
       "</div>",
@@ -3438,31 +3530,34 @@
       '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
       '<div class="jsuw-teen-flame" aria-hidden="true"><span></span></div>',
       '<div class="jsuw-teen-streak-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + "</div>",
-      '<div class="jsuw-teen-check-row">' + Array.from({ length: count }).map(function () { return "<span>OK</span>"; }).join("") + "</div>",
+      '<div class="jsuw-teen-check-row" aria-hidden="true">' + Array.from({ length: count }).map(function () { return "<span></span>"; }).join("") + "</div>",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));
   }
 
   function renderTeenVibeBody(card) {
+    var chips = cleanPublicText(card.vibe, "").split(/\s*\+\s*|\s*,\s*/).filter(Boolean).slice(0, 3);
+
+    if (!chips.length) {
+      chips = ["Friends", "Jewish life", "Community"];
+    }
+
     return renderReferenceShell(card, [
       '<div class="jsuw-teen-scene jsuw-teen-vibe-scene">',
       renderTeenTop(card),
       '<h2 class="jsuw-teen-title">Your top<br>vibe was...</h2>',
-      '<div class="jsuw-teen-sticker-card"><em>#1 program type</em><strong>' + escapeHtml(card.vibe || "Social + Jewish Culture") + "</strong></div>",
-      '<div class="jsuw-teen-icon-row"><span>Bagels</span><span>Friends</span><span>Culture</span></div>',
+      '<div class="jsuw-teen-sticker-card"><em>#1 program type</em><strong>' + escapeHtml(card.vibe || "Jewish life") + "</strong></div>",
+      '<div class="jsuw-teen-icon-row">' + chips.map(function (chip) { return "<span>" + escapeHtml(chip) + "</span>"; }).join("") + "</div>",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));
   }
 
   function renderTeenConnectorBody(card) {
-    var stats = Array.isArray(card.connectorStats) && card.connectorStats.length ? card.connectorStats : [
-      { value: card.friendsBrought || "0", label: "friends brought" },
-      { value: card.schoolsInRoom || "0", label: "schools in your room" }
-    ];
+    var stats = Array.isArray(card.connectorStats) ? card.connectorStats : [];
     var statsHtml = stats.slice(0, 2).map(function (stat) {
-      return "<div><strong>" + escapeHtml(stat.value || "0") + "</strong><span>" + escapeHtml(stat.label || "") + "</span></div>";
+      return "<div><strong>" + escapeHtml(stat.value || "") + "</strong><span>" + escapeHtml(stat.label || "") + "</span></div>";
     }).join("");
 
     return renderReferenceShell(card, [
@@ -3470,22 +3565,23 @@
       renderTeenTop(card),
       '<h2 class="jsuw-teen-title">You\'re<br><span>' + escapeHtml(card.persona || "The Connector") + ".</span></h2>",
       '<div class="jsuw-teen-network" aria-hidden="true"><span class="jsuw-teen-node jsuw-teen-node--center">you</span><span></span><span></span><span></span><span></span><span></span></div>',
-      '<div class="jsuw-teen-mini-stats">' + statsHtml + "</div>",
+      statsHtml ? '<div class="jsuw-teen-mini-stats">' + statsHtml + "</div>" : "",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));
   }
 
   function renderTeenDepthBody(card) {
+    var stats = (card.depthStats || []).slice(0, 3).map(function (stat) {
+      return "<div><span>" + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong><em>" + escapeHtml(stat.note || "") + "</em></div>";
+    }).join("");
+
     return renderReferenceShell(card, [
       '<div class="jsuw-teen-scene jsuw-teen-depth-scene">',
       renderTeenTop(card),
       '<h2 class="jsuw-teen-title">You made room<br>for deeper<br>moments too.</h2>',
-      '<div class="jsuw-teen-split-stats">',
-      '<div><span>Shabbatons</span><strong>' + escapeHtml(card.shabbatons || "0") + "</strong><em>weekends away</em></div>",
-      '<div><span>Learning</span><strong>' + escapeHtml(card.learningSessions || "0") + "</strong><em>sessions deep</em></div>",
-      "</div>",
-      '<p class="jsuw-teen-copy">' + escapeHtml(card.leadershipMoments || "0") + " leadership moments too. " + escapeHtml(card.subtext || "") + "</p>",
+      '<div class="jsuw-teen-split-stats">' + stats + "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));
   }
@@ -3527,9 +3623,9 @@
       return '<div><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
     }).join("");
     var actionButtons = [
-      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share</button>',
-      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download</button>',
-      hasCta ? '<button class="jsuw-action-button jsuw-action-button--primary jsuw-action-button--cta" type="button" data-jsuw-action="cta" data-jsuw-cta-label="' + escapeHtml(card.cta.label) + '" data-jsuw-cta-target="' + escapeHtml(card.cta.target || "") + '" data-jsuw-cta-href="' + escapeHtml(card.cta.href || "") + '">' + escapeHtml(card.cta.label) + "</button>" : ""
+      hasCta ? '<button class="jsuw-action-button jsuw-action-button--primary jsuw-action-button--cta" type="button" data-jsuw-action="cta" data-jsuw-cta-label="' + escapeHtml(card.cta.label) + '" data-jsuw-cta-target="' + escapeHtml(card.cta.target || "") + '" data-jsuw-cta-href="' + escapeHtml(card.cta.href || "") + '">' + escapeHtml(card.cta.label) + "</button>" : "",
+      '<button class="jsuw-action-button' + (hasCta ? "" : " jsuw-action-button--primary") + '" type="button" data-jsuw-action="share">Share this recap</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>'
     ].filter(Boolean).join("");
 
     return renderReferenceShell(card, [
@@ -3541,7 +3637,7 @@
       '<p>' + escapeHtml(card.subtext || "") + "</p>",
       '<div class="jsuw-teen-share-stats">' + stats + "</div>",
       '<div class="jsuw-teen-share-persona">' + escapeHtml(card.persona || "The Connector") + "</div>",
-      '<footer>' + escapeHtml((card.teenName || "Maya") + " - " + (card.chapterName || "JSU") + " - " + (card.yearLabel || "This year")) + "</footer>",
+      '<footer>' + escapeHtml([card.teenName, card.chapterName, card.yearLabel].filter(hasValue).join(" - ")) + "</footer>",
       "</div>",
       '<div class="jsuw-final-actions' + (hasCta ? " jsuw-final-actions--with-cta" : "") + '">',
       actionButtons,
@@ -4315,10 +4411,10 @@
     var record = state.record;
 
     if (state && state.experienceMode === "teen") {
-      var teenName = asText(record.teen_name || record.student_name, "Maya");
+      var teenName = cleanPublicText(record.teen_name || record.student_name || record.first_name, "Junior NCSY teen");
 
       return [
-        teenName + "'s JSU Wrapped:",
+        teenName + "'s Junior NCSY Wrapped:",
         hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
         hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
         hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
@@ -4671,7 +4767,7 @@
     var isTeen = state && state.experienceMode === "teen";
     var scope = getStoryScope(record);
     var storyNoun = scope.noun;
-    var teenName = asText(record.teen_name || record.student_name || record.first_name, "Maya");
+    var teenName = cleanPublicText(record.teen_name || record.student_name || record.first_name, "Junior NCSY teen");
     var chapterName = isTeen ? teenName + "'s JSU" : asText(scope.name, "JSU Wrapped");
     var persona = isTeen ? asText(card.persona || record.persona, "JSU energy") : asText(card.persona || record.chapter_persona, "JSU energy");
     var year = asText(card.yearLabel || record.year_label || record.school_year, "This year");
@@ -4739,7 +4835,7 @@
 
   async function downloadRecap(container, state) {
     var scope = state && state.record ? getStoryScope(state.record) : null;
-    var filename = state && state.experienceMode === "teen" ? slugify(state.record.teen_slug || state.record.student_slug || state.record.teen_name || "teen-test") + "-teen-wrapped.svg" : slugify(scope && (scope.slug || scope.name) || state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
+    var filename = state && state.experienceMode === "teen" ? slugify(state.record.teen_slug || state.record.student_slug || state.record.teen_name || "junior-teen") + "-teen-wrapped.svg" : slugify(scope && (scope.slug || scope.name) || state.record.chapter_slug || state.record.chapter_name) + "-wrapped.svg";
     var card = container.querySelector("[data-jsuw-card]");
     var finalCard = getFinalCard(state);
 

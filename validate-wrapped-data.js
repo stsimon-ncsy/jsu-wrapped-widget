@@ -85,6 +85,9 @@ const PUBLIC_STORY_PLACEHOLDER_VALUES = new Set([
   "dummy-event",
   "lorem",
   "lorem-ipsum",
+  "n-a",
+  "na",
+  "none",
   "null",
   "placeholder",
   "sample",
@@ -94,7 +97,9 @@ const PUBLIC_STORY_PLACEHOLDER_VALUES = new Set([
   "test-chapter",
   "test-event",
   "todo",
-  "undefined"
+  "undefined",
+  "unknown",
+  "your-school"
 ]);
 
 const BRAND_LOGO_VALUES = new Set([
@@ -448,6 +453,16 @@ function validateTeenPrivacyFields(report, record, index) {
   });
 }
 
+function validateTeenPublicText(report, record, index) {
+  Object.keys(record).forEach((field) => {
+    const value = record[field];
+
+    if (typeof value === "string" && PUBLIC_STORY_PLACEHOLDER_VALUES.has(normalizePlaceholderValue(value))) {
+      addError(report, `teen records[${index}].${field} contains placeholder public story text`);
+    }
+  });
+}
+
 function validateChapterRecords(records) {
   const report = validateRecordsArray(records, "story records");
   const seen = {
@@ -521,6 +536,7 @@ function validateTeenRecords(records) {
     validateUniqueSlug(report, seen, record.teen_slug, "teen_slug", index);
     validateNumericFields(report, record, TEEN_NUMERIC_FIELDS, "teen records", index);
     validateTeenPrivacyFields(report, record, index);
+    validateTeenPublicText(report, record, index);
   });
 
   return report;
