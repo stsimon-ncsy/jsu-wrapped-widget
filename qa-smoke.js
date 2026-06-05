@@ -141,6 +141,22 @@ function runLayeredVariantSmoke() {
 
 function runPickerSmoke(records, config) {
   const baltimore = records.find((record) => record.chapter_slug === "baltimore");
+  const teenRecords = [
+    {
+      teen_slug: "west-coast-junior-01",
+      teen_name: "Leah Y.",
+      chapter_slug: "las-vegas",
+      chapter_name: "Las Vegas",
+      region_name: "West Coast"
+    },
+    {
+      teen_slug: "west-coast-junior-02",
+      teen_name: "Shir",
+      chapter_slug: "las-vegas",
+      chapter_name: "Las Vegas",
+      region_name: "West Coast"
+    }
+  ];
   const html = api.renderChapterPickerMarkup({
     records: [
       baltimore,
@@ -170,6 +186,7 @@ function runPickerSmoke(records, config) {
   });
   const explicitTeenHtml = api.renderChapterPickerMarkup({
     records: [baltimore],
+    teenRecords,
     config,
     url: "https://example.org/wrapped/?show_teens=1"
   });
@@ -183,7 +200,10 @@ function runPickerSmoke(records, config) {
   assert(html.includes("Shabbat Across JSU"), "picker should surface program story records");
   assert(html.includes("?scope=program&amp;program=shabbat"), "picker program story link mismatch");
   assert(!defaultTeenHtml.includes("jsuw-teen-test-link"), "picker should not expose teen records without an explicit preview parameter");
-  assert(explicitTeenHtml.includes("jsuw-teen-test-link"), "picker should expose teen preview link only with show_teens=1");
+  assert(explicitTeenHtml.includes("jsuw-teen-picker-link"), "picker should expose teen preview links only with show_teens=1");
+  assert(explicitTeenHtml.includes("west-coast-junior-01"), "picker should link to real Junior teen records");
+  assert(explicitTeenHtml.includes("Leah"), "picker should label real Junior teen records");
+  assert(!explicitTeenHtml.includes("maya-test"), "picker should not expose the retired Maya test record");
 }
 
 function runHiddenVariantSmoke() {
@@ -216,6 +236,31 @@ function runHiddenVariantSmoke() {
 
   assert(!html.includes("Hidden test"), "hidden variant appeared in picker");
   assert(cards.find((card) => card.id === "events").headline === "Hidden variant works", "hidden variant URL resolution failed");
+}
+
+function runTeenRuntimeSmoke() {
+  const source = loadText("jsu-wrapped.js");
+  const cards = api.createTeenCards({
+    teen_slug: "west-coast-junior-01",
+    teen_name: "Leah Y.",
+    chapter_slug: "las-vegas",
+    chapter_name: "Las Vegas",
+    region_name: "West Coast",
+    school_year: "2025-2026",
+    events_attended: 31,
+    longest_streak: 3,
+    events_with_peers: 31,
+    schools_in_room: 27,
+    persona: "The Teen Leader"
+  }, {
+    ctaLabel: "Get involved next year",
+    ctaTarget: "#jsuw-wrapped-interest"
+  });
+  const share = cards.find((card) => card.theme === "teen-share");
+
+  assert(!source.includes("Teen test version"), "teen renderer should not show retired test-version badge copy");
+  assert(share && share.cta && share.cta.label === "Get involved next year", "teen share card should carry configured CTA label");
+  assert(share && share.cta && share.cta.target === "#jsuw-wrapped-interest", "teen share card should carry configured CTA target");
 }
 
 function runSampleVariantSmoke(records, config) {
@@ -961,14 +1006,24 @@ function runBuilderFutureScopeSmoke() {
 
   assert(builderHtml.includes("data-builder-experience"), "builder should expose a chapter/teen experience selector");
   assert(builderHtml.includes("data-builder-teen"), "builder should expose a teen selector for teen Wrapped previews");
+  assert(builderHtml.includes("data-builder-teen-field hidden"), "builder should keep the teen selector hidden until teen mode is selected");
   assert(builderHtml.includes('<option value="program">Program default</option>'), "builder scope selector is missing program default option");
   assert(builderJs.includes("var TEEN_DATA_URL"), "builder should load the teen Wrapped data source");
   assert(builderJs.includes("teenRecords: []"), "builder state should keep teen records separate from chapter records");
   assert(builderJs.includes("function isTeenMode"), "builder should have a teen mode helper");
+  assert(builderJs.includes("function getFilteredTeenRecords"), "builder should filter teen records by selected region and chapter");
+  assert(builderJs.includes("teenField.hidden = !teenMode"), "builder should toggle the teen dropdown visibility by experience mode");
+  assert(!builderJs.includes("regionSelect.disabled = teenMode"), "builder should keep region active in teen mode for filtering");
+  assert(!builderJs.includes("chapterSelect.disabled = teenMode"), "builder should keep chapter active in teen mode for filtering");
   assert(builderJs.includes("window.JSUWrapped.createTeenCards(record"), "builder should build teen preview cards from teen data");
   assert(builderJs.includes('mode: "teen"'), "builder should initialize JSUWrapped teen previews in teen mode");
   assert(builderJs.includes("teenRecords: state.teenRecords"), "builder should pass teen records into the widget preview");
   assert(builderJs.includes("data-builder-teen-card"), "builder should render teen card rows for preview navigation");
+  assert(builderJs.includes("function renderTeenMetricEditor"), "builder should render teen stat correction controls");
+  assert(builderJs.includes("data-builder-teen-metric-field"), "builder should mark editable teen stat fields");
+  assert(builderJs.includes("function updateTeenMetricField"), "builder should update teen JSON stats from correction controls");
+  assert(builderJs.includes("data-builder-teen-text-field"), "builder should expose editable teen text fields such as display name");
+  assert(builderJs.includes("function updateTeenTextField"), "builder should update teen JSON text fields from correction controls");
   assert(builderJs.includes("function ensureProgramSection"), "builder is missing a program config section helper");
   assert(builderJs.includes("state.config.programs[slug]"), "builder does not write program scoped config");
   assert(builderJs.includes("function isChapterRecord"), "builder is missing a chapter-record filter");
@@ -2058,7 +2113,7 @@ function runHostedSmokeScriptSmoke() {
   const baltimoreStoryUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore";
   const goodTeenRecords = Array.from({ length: 30 }, (_, index) => ({
     teen_slug: index === 0 ? "west-coast-junior-01" : `west-coast-junior-${String(index + 1).padStart(2, "0")}`,
-    teen_name: index === 0 ? "Leah" : `Teen ${index + 1}`
+    teen_name: index === 0 ? "Leah Y." : `Teen ${index + 1}`
   }));
   const goodAssets = {
     "": {
@@ -3640,6 +3695,7 @@ function main() {
   runLayeredVariantSmoke();
   runPickerSmoke(records, config);
   runHiddenVariantSmoke();
+  runTeenRuntimeSmoke();
   runSampleVariantSmoke(records, config);
   runSampleConfigConsistencySmoke(records, config);
   runPageMetadataSmoke();

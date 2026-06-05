@@ -75,6 +75,13 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "") || "junior";
 }
 
+function publicTeenName(firstName, lastName) {
+  const first = textValue(firstName) || "Junior";
+  const initial = textValue(lastName).charAt(0).toUpperCase();
+
+  return initial ? `${first} ${initial}.` : first;
+}
+
 function formatNumber(value) {
   return new Intl.NumberFormat("en-US").format(Number(value) || 0);
 }
@@ -431,7 +438,7 @@ function reviewToTeenRecord(review, index, context) {
     school_year: context.yearLabel,
     year_label: context.yearLabel,
     teen_slug: `west-coast-junior-${String(rank).padStart(2, "0")}`,
-    teen_name: review.first_name,
+    teen_name: publicTeenName(review.first_name, review.last_name),
     brand_logo: DEFAULT_BRAND_LOGO,
     chapter_slug: slugify(chapterName),
     chapter_name: chapterName,

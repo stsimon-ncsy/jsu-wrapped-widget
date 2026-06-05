@@ -1718,7 +1718,7 @@
   }
 
   function buildTeenUrl(record, url) {
-    var slug = record && (record.teen_slug || record.student_slug || record.slug) || "maya-test";
+    var slug = record && (record.teen_slug || record.student_slug || record.slug) || "west-coast-junior-01";
     var href = url || (root && root.location && root.location.href) || "";
     var base = root && root.location && root.location.href || "https://example.org/";
 
@@ -1749,6 +1749,9 @@
     });
     var assetBase = settings.assetBase || "";
     var config = settings.config || {};
+    var teenRecords = Array.isArray(settings.teenRecords) ? settings.teenRecords.filter(function (record) {
+      return record && hasValue(record.teen_slug || record.student_slug || record.slug);
+    }) : [];
     var url = settings.url || (root && root.location && root.location.href) || "";
     var program = settings.program || getProgramSlug(url);
     var firstRecord = records[0] || {};
@@ -1837,6 +1840,30 @@
       ].join("");
     }
 
+    function renderTeenPickerItem(record) {
+      var name = asText(record.teen_name || record.student_name || record.first_name, "Teen Wrapped");
+      var chapter = asText(record.chapter_name, "");
+      var school = asText(record.school_name, "");
+      var stats = [
+        hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
+        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " streak" : "",
+        hasValue(record.persona) ? asText(record.persona) : ""
+      ].filter(Boolean).join(" | ");
+
+      return [
+        '<article class="jsuw-picker-entry">',
+        '<a class="jsuw-picker-item jsuw-teen-picker-link jsuw-picker-brand--' + escapeHtml(getBrandChoice(record)) + '" href="' + escapeHtml(buildTeenUrl(record, url)) + '">',
+        '<span class="jsuw-picker-copy">',
+        "<strong>" + escapeHtml(name) + "</strong>",
+        '<em>' + escapeHtml([chapter, school].filter(Boolean).join(" | ")) + "</em>",
+        stats ? "<span>" + escapeHtml(stats) + "</span>" : "",
+        "</span>",
+        '<span class="jsuw-picker-arrow" aria-hidden="true">Open</span>',
+        "</a>",
+        "</article>"
+      ].join("");
+    }
+
     var regionMap = {};
 
     records.forEach(function (record) {
@@ -1909,7 +1936,14 @@
     ].join("") : "";
 
     var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
-    var teenTestLink = showTeenLink ? buildTeenUrl({ teen_slug: "maya-test" }, url) : "";
+    var teenLinksHtml = showTeenLink && teenRecords.length ? [
+      '<section class="jsuw-picker-scope-stories jsuw-picker-teen-stories" aria-label="Teen Wrapped previews">',
+      "<h2>Teen Wrapped previews</h2>",
+      '<div class="jsuw-picker-scope-list">',
+      teenRecords.map(renderTeenPickerItem).join(""),
+      "</div>",
+      "</section>"
+    ].join("") : "";
 
     return [
       '<div class="jsuw-shell jsuw-shell--picker">',
@@ -1919,10 +1953,10 @@
       '<p class="jsuw-picker-subtext">Choose a region, then pick a chapter to open its Wrapped story.</p>',
       regionSelector ? '<nav class="jsuw-region-selector" aria-label="Choose a region">' + regionSelector + "</nav>" : "",
       scopedStoriesHtml,
+      teenLinksHtml,
       '<div class="jsuw-picker-list">',
       chapterHtml,
       "</div>",
-      showTeenLink ? '<a class="jsuw-teen-test-link" href="' + escapeHtml(teenTestLink) + '"><strong>Teen preview</strong><span>Hidden test view for teen Wrapped records</span></a>' : "",
       "</section>",
       "</div>"
     ].join("");
@@ -2799,6 +2833,11 @@
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
     var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var cta = {
+      label: asText(options && options.ctaLabel, ""),
+      target: asText(options && options.ctaTarget, ""),
+      href: asText(options && options.ctaHref, "")
+    };
     var connectorStats = [];
 
     if (hasValue(record.friends_brought)) {
@@ -2933,7 +2972,8 @@
           hasValue(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
           hasValue(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : hasValue(record.events_with_peers) ? { value: formatNumber(record.events_with_peers), label: "events with peers" } : null,
           hasValue(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in your room" } : null
-        ].filter(Boolean)
+        ].filter(Boolean),
+        cta: hasValue(cta.label) && (hasValue(cta.target) || hasValue(cta.href)) ? cta : null
       }
     ];
 
@@ -3342,7 +3382,7 @@
 
   function renderTeenTop(card) {
     return [
-      '<div class="jsuw-teen-proof">Teen test version</div>',
+      '<div class="jsuw-teen-proof">Teen Wrapped</div>',
       '<div class="jsuw-eyebrow">' + escapeHtml(card.eyebrow || "Teen Wrapped") + "</div>"
     ].join("");
   }
@@ -3482,24 +3522,29 @@
   }
 
   function renderTeenShareBody(card) {
+    var hasCta = card.cta && hasValue(card.cta.label) && (hasValue(card.cta.target) || hasValue(card.cta.href));
     var stats = (card.summaryStats || []).map(function (stat) {
       return '<div><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
     }).join("");
+    var actionButtons = [
+      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download</button>',
+      hasCta ? '<button class="jsuw-action-button jsuw-action-button--primary jsuw-action-button--cta" type="button" data-jsuw-action="cta" data-jsuw-cta-label="' + escapeHtml(card.cta.label) + '" data-jsuw-cta-target="' + escapeHtml(card.cta.target || "") + '" data-jsuw-cta-href="' + escapeHtml(card.cta.href || "") + '">' + escapeHtml(card.cta.label) + "</button>" : ""
+    ].filter(Boolean).join("");
 
     return renderReferenceShell(card, [
       '<div class="jsuw-teen-scene jsuw-teen-share-scene">',
       '<div class="jsuw-teen-share-poster">',
       renderBrandLockup(card),
-      '<div class="jsuw-teen-proof">Teen test version</div>',
+      '<div class="jsuw-teen-proof">Teen Wrapped</div>',
       '<h2>' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
       '<p>' + escapeHtml(card.subtext || "") + "</p>",
       '<div class="jsuw-teen-share-stats">' + stats + "</div>",
       '<div class="jsuw-teen-share-persona">' + escapeHtml(card.persona || "The Connector") + "</div>",
       '<footer>' + escapeHtml((card.teenName || "Maya") + " - " + (card.chapterName || "JSU") + " - " + (card.yearLabel || "This year")) + "</footer>",
       "</div>",
-      '<div class="jsuw-final-actions">',
-      '<button class="jsuw-action-button jsuw-action-button--primary" type="button" data-jsuw-action="share">Share</button>',
-      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download</button>',
+      '<div class="jsuw-final-actions' + (hasCta ? " jsuw-final-actions--with-cta" : "") + '">',
+      actionButtons,
       '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
       "</div>",
       "</div>"
@@ -4785,6 +4830,7 @@
     try {
       var assetBase = getAssetBase(target, settings);
       var experienceMode = getExperienceMode(settings.url, settings);
+      var ctaOptions = getCtaOptions(target, settings);
 
       if (experienceMode === "teen") {
         var teenDataUrl = settings.teenDataUrl || getTeenDataUrl(target);
@@ -4795,14 +4841,24 @@
         if (!teen) {
           renderError(
             target,
-            "We could not find that teen test record.",
-            "This proof-of-concept uses sample data only. Try the teen test link from the main page."
+            "We could not find that teen Wrapped record.",
+            "Try a teen link from the preview-enabled picker or ask your JSU or NCSY team for the right URL."
           );
           return null;
         }
 
+        var teenCtaOptions = {
+          label: ctaOptions.label,
+          target: ctaOptions.target,
+          href: ctaOptions.href
+        };
         var teenState = {
-          cards: createTeenCards(teen, { assetBase: assetBase }),
+          cards: createTeenCards(teen, {
+            assetBase: assetBase,
+            ctaLabel: teenCtaOptions.label,
+            ctaTarget: teenCtaOptions.target,
+            ctaHref: teenCtaOptions.href
+          }),
           record: teen,
           experienceMode: "teen",
           analyticsEnabled: getAnalyticsPreference(target, settings),
@@ -4836,11 +4892,22 @@
       var storyRequest = getStoryRequest(settings.url, settings);
       var variantSlug = settings.variant || getVariantSlug(settings.url);
       var programSlug = settings.program || getProgramSlug(settings.url);
-      var ctaOptions = getCtaOptions(target, settings);
 
       if (!storyRequest) {
+        var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(settings.url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
+        var pickerTeenRecords = [];
+
+        if (showTeenLink) {
+          try {
+            pickerTeenRecords = settings.teenRecords || await fetchRecords(settings.teenDataUrl || getTeenDataUrl(target));
+          } catch (error) {
+            pickerTeenRecords = [];
+          }
+        }
+
         renderChapterPicker(target, {
           records: records,
+          teenRecords: pickerTeenRecords,
           year: target.dataset && target.dataset.year,
           region: settings.region || getRegionParam(settings.url),
           program: programSlug,

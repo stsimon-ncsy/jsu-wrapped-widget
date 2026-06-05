@@ -74,8 +74,8 @@ const PAGE_CHECKS = [
   {
     label: "builder teen mode",
     path: "/builder.html?mode=teen&teen=west-coast-junior-01&qa=render-smoke",
-    requiredSelectors: ['id="wrapped-builder"', 'data-builder-teen-card="teen-cover"', 'data-builder-teen-card="teen-share"', "jsuw-story"],
-    requiredText: ["Teen Wrapped", "Leah", "Attendance", "generated Junior NCSY records"]
+    requiredSelectors: ['id="wrapped-builder"', 'data-builder-teen-card="teen-cover"', 'data-builder-teen-card="teen-share"', 'data-builder-teen-metric-field="events_attended"', 'data-builder-teen-metric-field="longest_streak"', "jsuw-story"],
+    requiredText: ["Teen Wrapped", "Leah", "Attendance", "Correct stats used on this screen"]
   }
 ];
 

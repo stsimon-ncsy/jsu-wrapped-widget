@@ -75,6 +75,31 @@
     movement: ["region_unique_teens", "region_schools_represented", "national_engagement_moments"],
     final: ["events_hosted", "unique_teens", "engagement_moments", "new_teens", "repeat_attendee_rate_label"]
   };
+  var TEEN_METRIC_FIELD_LABELS = {
+    events_attended: "Events attended",
+    longest_streak: "Longest streak",
+    events_with_peers: "Events with peers",
+    schools_in_room: "Schools in room",
+    shabbatons: "Shabbatons",
+    learning_sessions: "Learning sessions",
+    leadership_moments: "Leadership moments",
+    chapter_events_hosted: "Chapter events hosted",
+    chapter_unique_teens: "Chapter unique teens",
+    chapter_engagement_moments: "Chapter engagement moments",
+    chapter_new_teens: "Chapter new teens",
+    region_unique_teens: "Region unique teens",
+    region_schools_represented: "Region schools represented",
+    national_engagement_moments: "National engagement moments"
+  };
+  var TEEN_CARD_METRIC_FIELDS = {
+    "teen-attendance": ["events_attended"],
+    "teen-streak": ["longest_streak"],
+    "teen-connector": ["events_with_peers", "schools_in_room"],
+    "teen-depth": ["learning_sessions", "shabbatons", "leadership_moments"],
+    "teen-chapter": ["chapter_events_hosted", "chapter_unique_teens", "chapter_engagement_moments", "chapter_new_teens"],
+    "teen-movement": ["region_unique_teens", "region_schools_represented", "national_engagement_moments"],
+    "teen-share": ["events_attended", "longest_streak", "events_with_peers", "schools_in_room"]
+  };
   var CARD_TOKEN_FIELDS = {
     cover: ["chapter_name", "year_label", "region_name", "school_name"],
     events: ["events_hosted", "chapter_name"],
@@ -291,6 +316,44 @@
     })[0] || state.teenRecords[0] || null;
   }
 
+  function getFilteredTeenRecords() {
+    var region = getActiveRegion();
+
+    return state.teenRecords.filter(function (record) {
+      var regionMatches = !region || !state.regionSlug || slugify(record.region_name || "Other chapters") === region.slug;
+      var chapterMatches = !state.chapterSlug || record.chapter_slug === state.chapterSlug;
+
+      return regionMatches && chapterMatches;
+    });
+  }
+
+  function hasTeenRecordForChapter(record) {
+    return state.teenRecords.some(function (teen) {
+      return teen.chapter_slug === record.chapter_slug;
+    });
+  }
+
+  function getChapterOptionsForRegion(region) {
+    var records = region ? region.records.slice() : [];
+    var teenRecords = records.filter(hasTeenRecordForChapter);
+
+    return isTeenMode() && teenRecords.length ? teenRecords : records;
+  }
+
+  function syncFiltersToTeenRecord(record) {
+    if (!record) {
+      return;
+    }
+
+    if (hasValue(record.region_name)) {
+      state.regionSlug = slugify(record.region_name);
+    }
+
+    if (hasValue(record.chapter_slug)) {
+      state.chapterSlug = record.chapter_slug;
+    }
+  }
+
   function ensureRegionSection() {
     var region = getActiveRegion();
     var slug = region ? region.slug : state.regionSlug;
@@ -417,18 +480,15 @@
     var experienceSelect = $("[data-builder-experience]");
     var regionSelect = $("[data-builder-region]");
     var chapterSelect = $("[data-builder-chapter]");
+    var teenField = $("[data-builder-teen-field]");
     var teenSelect = $("[data-builder-teen]");
     var scopeSelect = $("[data-builder-scope]");
     var variantSelect = $("[data-builder-variant]");
     var teenMode = isTeenMode();
+    var chapterOptions;
+    var filteredTeenRecords;
     var baseSection;
     var variantKeys;
-
-    if (state.teenRecords.length && (!state.teenSlug || !state.teenRecords.some(function (record) {
-      return teenRecordSlug(record) === state.teenSlug;
-    }))) {
-      state.teenSlug = teenRecordSlug(state.teenRecords[0]);
-    }
 
     if (!state.regionSlug && region) {
       state.regionSlug = region.slug;
@@ -446,25 +506,45 @@
       regionSelect.innerHTML = regions.map(function (item) {
         return '<option value="' + escapeHtml(item.slug) + '"' + (item.slug === state.regionSlug ? " selected" : "") + ">" + escapeHtml(item.name) + " (" + item.records.length + ")</option>";
       }).join("");
-      regionSelect.disabled = teenMode;
+      regionSelect.disabled = false;
     }
 
     region = getActiveRegion() || regions[0];
+    chapterOptions = getChapterOptionsForRegion(region);
+
+    if (chapterOptions.length && !chapterOptions.some(function (record) {
+      return record.chapter_slug === state.chapterSlug;
+    })) {
+      state.chapterSlug = chapterOptions[0].chapter_slug;
+    }
+
     if (chapterSelect) {
-      chapterSelect.innerHTML = (region ? region.records : []).map(function (record) {
+      chapterSelect.innerHTML = chapterOptions.map(function (record) {
         return '<option value="' + escapeHtml(record.chapter_slug) + '"' + (record.chapter_slug === state.chapterSlug ? " selected" : "") + ">" + escapeHtml(record.chapter_name || record.chapter_slug) + "</option>";
       }).join("");
-      chapterSelect.disabled = teenMode;
+      chapterSelect.disabled = false;
+    }
+
+    filteredTeenRecords = getFilteredTeenRecords();
+
+    if (teenMode && filteredTeenRecords.length && (!state.teenSlug || !filteredTeenRecords.some(function (record) {
+      return teenRecordSlug(record) === state.teenSlug;
+    }))) {
+      state.teenSlug = teenRecordSlug(filteredTeenRecords[0]);
+    }
+
+    if (teenField) {
+      teenField.hidden = !teenMode;
     }
 
     if (teenSelect) {
-      teenSelect.innerHTML = state.teenRecords.map(function (record) {
+      teenSelect.innerHTML = filteredTeenRecords.map(function (record) {
         var slug = teenRecordSlug(record);
 
         return '<option value="' + escapeHtml(slug) + '"' + (slug === state.teenSlug ? " selected" : "") + ">" + escapeHtml(teenRecordLabel(record)) + "</option>";
       }).join("");
       teenSelect.value = state.teenSlug;
-      teenSelect.disabled = !teenMode || !state.teenRecords.length;
+      teenSelect.disabled = !teenMode || !filteredTeenRecords.length;
     }
 
     if (scopeSelect) {
@@ -949,6 +1029,7 @@
 
     if (teenSlug) {
       state.teenSlug = teenSlug;
+      syncFiltersToTeenRecord(getActiveTeenRecord());
     }
   }
 
@@ -1724,6 +1805,58 @@
     ].filter(hasValue)[0] || "Generated from teen attendance data.";
   }
 
+  function getTeenCardMetricFields(cardId) {
+    return (TEEN_CARD_METRIC_FIELDS[cardId] || []).filter(function (key, index, list) {
+      return TEEN_METRIC_FIELD_LABELS[key] && list.indexOf(key) === index;
+    });
+  }
+
+  function renderTeenMetricEditor(cardId, record) {
+    var keys = getTeenCardMetricFields(cardId);
+
+    if (!keys.length) {
+      return "";
+    }
+
+    return [
+      '<details class="builder-inline-metrics" open>',
+      "<summary>Correct stats used on this screen</summary>",
+      '<div class="builder-metric-grid">',
+      keys.map(function (key) {
+        var value = hasValue(record && record[key]) ? record[key] : "";
+
+        return [
+          '<label class="builder-metric-field">',
+          "<span>" + escapeHtml(TEEN_METRIC_FIELD_LABELS[key] || key) + "</span>",
+          '<input data-builder-teen-metric-field="' + escapeHtml(key) + '" value="' + escapeHtml(value) + '" placeholder="' + escapeHtml(hasValue(value) ? value : "not set") + '">',
+          "<em>Current: " + escapeHtml(hasValue(value) ? metricDisplayValue(record, key) || value : "not set") + "</em>",
+          "</label>"
+        ].join("");
+      }).join(""),
+      "</div>",
+      "</details>"
+    ].join("");
+  }
+
+  function renderTeenTextEditor(cardId, record) {
+    if (cardId !== "teen-cover") {
+      return "";
+    }
+
+    return [
+      '<details class="builder-inline-metrics" open>',
+      "<summary>Correct display text</summary>",
+      '<div class="builder-metric-grid">',
+      '<label class="builder-metric-field">',
+      "<span>Teen display name</span>",
+      '<input data-builder-teen-text-field="teen_name" value="' + escapeHtml(record && record.teen_name || "") + '" placeholder="First L.">',
+      "<em>Edit for privacy if needed.</em>",
+      "</label>",
+      "</div>",
+      "</details>"
+    ].join("");
+  }
+
   function renderTeenCardEditor() {
     var record = getActiveTeenRecord();
     var container = $("[data-builder-card-editor]");
@@ -1761,6 +1894,8 @@
         "<label>Eyebrow<input readonly value=\"" + escapeHtml(card.eyebrow || "") + "\"></label>",
         "<label>Generated detail<textarea readonly>" + escapeHtml(teenCardSummary(card)) + "</textarea></label>",
         "</div>",
+        renderTeenTextEditor(key, record),
+        renderTeenMetricEditor(key, record),
         "</article>"
       ].join("");
     }).join("");
@@ -1879,7 +2014,7 @@
     });
 
     if (isTeenMode()) {
-      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen Wrapped screens are generated from the teen data file. Change the source dataset or derivation script, then reload this builder.</p>';
+      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen Wrapped screens use generated card copy. Use the generated screen stat controls for numeric corrections; custom screens still belong to chapter stories.</p>';
       return;
     }
 
@@ -1929,7 +2064,7 @@
     }
 
     if (isTeenMode()) {
-      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen mode is read-only in the builder. The selected teen card set is generated directly from sample-teen-wrapped-2026.json.</p>';
+      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen stat edits update the selected record in the teen JSON export and the live preview.</p>';
       return;
     }
 
@@ -1981,7 +2116,7 @@
     if (isTeenMode()) {
       var teenRecord = getActiveTeenRecord();
       var teenWarnings = teenRecord
-        ? ["Teen preview is using generated Junior NCSY records. Editing happens in the derivation dataset, not in chapter config."]
+        ? ["Teen preview is using generated Junior NCSY records. Stat corrections here update the teen JSON export; source-data changes still belong in the derivation dataset."]
         : ["No teen Wrapped records are loaded. Check sample-teen-wrapped-2026.json."];
 
       $("[data-builder-warnings]").innerHTML = teenWarnings.map(function (warning, index) {
@@ -2248,6 +2383,54 @@
     renderAll();
   }
 
+  function updateTeenMetricField(field, event) {
+    var record = getActiveTeenRecord();
+    var key = field.getAttribute("data-builder-teen-metric-field");
+
+    if (!record || !key) {
+      return;
+    }
+
+    if (hasValue(field.value)) {
+      record[key] = coerceMetricValue(field.value, record[key]);
+    } else {
+      delete record[key];
+    }
+
+    if (event.type !== "input") {
+      renderCardEditor();
+    }
+
+    renderChangeSummary();
+    renderWarnings();
+    renderExport();
+    schedulePreview();
+  }
+
+  function updateTeenTextField(field, event) {
+    var record = getActiveTeenRecord();
+    var key = field.getAttribute("data-builder-teen-text-field");
+
+    if (!record || !key) {
+      return;
+    }
+
+    if (hasValue(field.value)) {
+      record[key] = field.value;
+    } else {
+      delete record[key];
+    }
+
+    if (event.type !== "input") {
+      renderCardEditor();
+    }
+
+    renderChangeSummary();
+    renderWarnings();
+    renderExport();
+    schedulePreview();
+  }
+
   function updateField(event) {
     var field = event.target;
     var section;
@@ -2259,6 +2442,16 @@
     }
 
     section = getActiveSection();
+
+    if (field.matches("[data-builder-teen-metric-field]")) {
+      updateTeenMetricField(field, event);
+      return;
+    }
+
+    if (field.matches("[data-builder-teen-text-field]")) {
+      updateTeenTextField(field, event);
+      return;
+    }
 
     if (field.matches("[data-builder-field]")) {
       var key = field.getAttribute("data-builder-field");
@@ -2391,12 +2584,16 @@
         if (!state.teenSlug && state.teenRecords[0]) {
           state.teenSlug = teenRecordSlug(state.teenRecords[0]);
         }
+        if (isTeenMode()) {
+          syncFiltersToTeenRecord(getActiveTeenRecord());
+        }
         renderAll();
         return;
       }
 
       if (target.matches("[data-builder-teen]")) {
         state.teenSlug = target.value;
+        syncFiltersToTeenRecord(getActiveTeenRecord());
         state.previewCardId = "teen-cover";
         renderAll();
         return;
@@ -2405,7 +2602,11 @@
       if (target.matches("[data-builder-region]")) {
         state.regionSlug = target.value;
         var region = getActiveRegion();
-        state.chapterSlug = region && region.records[0] ? region.records[0].chapter_slug : "";
+        var chapterRecords = getChapterOptionsForRegion(region);
+        state.chapterSlug = chapterRecords[0] ? chapterRecords[0].chapter_slug : "";
+        if (isTeenMode()) {
+          state.teenSlug = "";
+        }
         state.variantSlug = "";
         renderAll();
         return;
@@ -2413,6 +2614,9 @@
 
       if (target.matches("[data-builder-chapter]")) {
         state.chapterSlug = target.value;
+        if (isTeenMode()) {
+          state.teenSlug = "";
+        }
         state.variantSlug = "";
         renderAll();
         return;

@@ -39,14 +39,16 @@ function main() {
   assert.strictEqual(ariReview.shabbatons, 1);
   assert.strictEqual(ariReview.events_with_peers, 1);
 
-  const publicAri = result.teenRecords.find((record) => record.teen_name === "Ari");
+  const publicAri = result.teenRecords.find((record) => record.teen_name === "Ari A.");
   assert(publicAri, "Ari should have a public teen record");
+  assert.strictEqual(publicAri.teen_name, "Ari A.");
   assert.strictEqual(publicAri.teen_slug, "west-coast-junior-01");
   assert.strictEqual(publicAri.brand_logo, "ncsy");
   assert.strictEqual(publicAri.chapter_name, "Las Vegas");
   assert.strictEqual(publicAri.region_name, "West Coast");
   assert(!Object.prototype.hasOwnProperty.call(publicAri, "personid"), "public record must not include personid");
   assert(!Object.prototype.hasOwnProperty.call(publicAri, "last_name"), "public record must not include last name");
+  assert(!Object.prototype.hasOwnProperty.call(publicAri, "lastname"), "public record must not include raw lastname");
   assert(!Object.prototype.hasOwnProperty.call(publicAri, "friends_brought"), "public record must not invent friends_brought");
 
   const connectorCard = wrappedApi.createTeenCards(publicAri).find((card) => card.theme === "teen-connector");
