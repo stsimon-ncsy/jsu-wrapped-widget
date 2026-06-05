@@ -135,8 +135,12 @@ const ASSET_CHECKS = [
         return;
       }
 
-      if (!data.some((record) => record && record.teen_slug === "maya-test")) {
-        errors.push("teen data JSON missing Maya test record");
+      if (data.length !== 30) {
+        errors.push(`teen data JSON should include 30 Junior records, found ${data.length}`);
+      }
+
+      if (!data.some((record) => record && record.teen_slug === "west-coast-junior-01" && record.teen_name === "Leah")) {
+        errors.push("teen data JSON missing top West Coast Junior record");
       }
 
       data.forEach((record, index) => validateTeenProofOfConceptRecord(record, index, errors));

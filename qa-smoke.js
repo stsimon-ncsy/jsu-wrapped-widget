@@ -2056,6 +2056,10 @@ function runHostedSmokeScriptSmoke() {
   const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
   const baltimoreShareDescription = "Baltimore Wrapped for 2025-2026 - Atlantic Seaboard. 338 events. 533 teens. 2,232 engagement moments.";
   const baltimoreStoryUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore";
+  const goodTeenRecords = Array.from({ length: 30 }, (_, index) => ({
+    teen_slug: index === 0 ? "west-coast-junior-01" : `west-coast-junior-${String(index + 1).padStart(2, "0")}`,
+    teen_name: index === 0 ? "Leah" : `Teen ${index + 1}`
+  }));
   const goodAssets = {
     "": {
       status: 200,
@@ -2113,7 +2117,7 @@ function runHostedSmokeScriptSmoke() {
         "access-control-allow-origin": "*"
       },
       status: 200,
-      text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya" }])
+      text: JSON.stringify(goodTeenRecords)
     },
     "wrapped-config-2026.json": {
       headers: {
@@ -2207,7 +2211,7 @@ function runHostedSmokeScriptSmoke() {
   const privateTeenJsonAssets = Object.assign({}, goodAssets, {
     "sample-teen-wrapped-2026.json": {
       status: 200,
-      text: JSON.stringify([{ teen_slug: "maya-test", teen_name: "Maya", teen_id: "123", email: "maya@example.org" }])
+      text: JSON.stringify(goodTeenRecords.map((record, index) => index === 0 ? Object.assign({}, record, { teen_id: "123", email: "leah@example.org" }) : record))
     }
   });
   const externalWordPressInlineAssets = Object.assign({}, goodAssets, {
