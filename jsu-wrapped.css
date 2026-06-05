@@ -1,3 +1,13 @@
+html:has(#jsu-wrapped-wordpress-shell),
+body:has(#jsu-wrapped-wordpress-shell) {
+  margin: 0;
+  min-height: 100%;
+}
+
+body:has(#jsu-wrapped-wordpress-shell) {
+  overflow: hidden;
+}
+
 #jsu-wrapped-wordpress-shell {
   --jsuw-shell-bg: #07051f;
   --jsuw-shell-ink: #ffffff;
@@ -20,11 +30,12 @@
   overflow-x: hidden;
   overflow-y: hidden !important;
   overscroll-behavior: contain;
-  position: fixed;
+  position: relative;
   width: 100%;
 }
 
-#jsu-wrapped-wordpress-shell.jsuw-form-active {
+#jsu-wrapped-wordpress-shell.jsuw-form-active,
+#jsu-wrapped-wordpress-shell.jsuw-picker-active {
   overflow-y: auto !important;
 }
 
@@ -48,12 +59,13 @@
   width: 100%;
 }
 
-#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-page-stage {
+#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-page-stage,
+#jsu-wrapped-wordpress-shell.jsuw-picker-active .jsuw-page-stage {
   height: auto;
   justify-content: flex-start;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow: visible;
+  overflow: visible !important;
 }
 
 #jsu-wrapped-wordpress-shell #jsu-wrapped {
@@ -65,8 +77,13 @@
   width: 100%;
 }
 
-#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped {
+#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped,
+#jsu-wrapped-wordpress-shell.jsuw-picker-active #jsu-wrapped {
   overflow: visible !important;
+}
+
+#jsu-wrapped-wordpress-shell.jsuw-picker-active #jsu-wrapped {
+  max-width: min(100%, 720px);
 }
 
 #jsu-wrapped-wordpress-shell #jsu-wrapped .jsuw-shell:not(.jsuw-shell--picker):not(.jsuw-shell--error) {
@@ -1867,6 +1884,14 @@
   gap: 10px;
 }
 
+#jsu-wrapped .jsuw-teen-stories-empty {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1.3;
+  margin: 0;
+}
+
 #jsu-wrapped .jsuw-picker-scope-card {
   align-items: center;
   background:
@@ -2027,6 +2052,14 @@
 #jsu-wrapped .jsuw-picker-teen-stories .jsuw-picker-scope-list {
   align-items: stretch;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+#jsu-wrapped-wordpress-shell.jsuw-form-active .jsuw-legal,
+#jsu-wrapped-wordpress-shell.jsuw-picker-active .jsuw-legal {
+  bottom: auto;
+  left: auto;
+  position: static;
+  right: auto;
 }
 
 #jsu-wrapped .jsuw-picker-teen-stories {

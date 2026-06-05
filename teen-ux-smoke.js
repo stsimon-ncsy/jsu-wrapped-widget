@@ -110,6 +110,76 @@ async function checkTeenStory(cdp, baseUrl, viewport, errors, timeoutMs) {
   }
 }
 
+async function checkWordPressTeenPicker(cdp, baseUrl, viewport, errors, timeoutMs) {
+  await openPage(cdp, `${baseUrl}wordpress-inline-embed.html?show_teens=1&qa=teen-ux-smoke`, viewport, "document.querySelectorAll('#jsu-wrapped .jsuw-teen-picker-link').length >= 30", timeoutMs);
+
+  const initialReport = await visualReview.evaluate(cdp, `(() => {
+    const shell = document.getElementById("jsu-wrapped-wordpress-shell");
+    const stage = document.querySelector("#jsu-wrapped-wordpress-shell .jsuw-page-stage");
+    const shellStyle = shell ? getComputedStyle(shell) : null;
+    const stageStyle = stage ? getComputedStyle(stage) : null;
+    const activePill = document.querySelector("#jsu-wrapped .jsuw-region-pill--active span");
+    const teenLinks = document.querySelectorAll("#jsu-wrapped .jsuw-teen-picker-link");
+
+    return {
+      activeRegion: activePill ? activePill.textContent.trim() : "",
+      shellOverflowY: shellStyle ? shellStyle.overflowY : "",
+      shellPosition: shellStyle ? shellStyle.position : "",
+      shellScrollable: shell ? shell.scrollHeight > shell.clientHeight + 2 : false,
+      stageOverflowY: stageStyle ? stageStyle.overflowY : "",
+      teenCount: teenLinks.length
+    };
+  })()`);
+
+  if (initialReport.shellPosition === "fixed") {
+    addError(errors, `${viewport.name} WordPress teen picker shell is fixed, which can collapse Brizy preview height`);
+  }
+
+  if (initialReport.shellOverflowY !== "auto") {
+    addError(errors, `${viewport.name} WordPress teen picker shell overflow-y is ${initialReport.shellOverflowY}, expected auto`);
+  }
+
+  if (initialReport.stageOverflowY === "hidden") {
+    addError(errors, `${viewport.name} WordPress teen picker stage still clips overflow`);
+  }
+
+  if (!initialReport.shellScrollable && viewport.name === "mobile") {
+    addError(errors, `${viewport.name} WordPress teen picker shell is not scrollable`);
+  }
+
+  if (initialReport.activeRegion !== "West Coast") {
+    addError(errors, `${viewport.name} WordPress teen picker active region is ${initialReport.activeRegion || "missing"}, expected West Coast`);
+  }
+
+  if (initialReport.teenCount < 30) {
+    addError(errors, `${viewport.name} WordPress teen picker rendered ${initialReport.teenCount} West Coast teen links`);
+  }
+
+  await openPage(cdp, `${baseUrl}wordpress-inline-embed.html?show_teens=1&region=atlantic-seaboard&qa=teen-ux-smoke`, viewport, "!!document.querySelector('#jsu-wrapped .jsuw-picker')", timeoutMs);
+
+  const filteredReport = await visualReview.evaluate(cdp, `(() => {
+    const activePill = document.querySelector("#jsu-wrapped .jsuw-region-pill--active span");
+
+    return {
+      activeRegion: activePill ? activePill.textContent.trim() : "",
+      emptyText: (document.querySelector("#jsu-wrapped .jsuw-teen-stories-empty") || {}).textContent || "",
+      teenCount: document.querySelectorAll("#jsu-wrapped .jsuw-teen-picker-link").length
+    };
+  })()`);
+
+  if (filteredReport.activeRegion !== "Atlantic Seaboard") {
+    addError(errors, `${viewport.name} filtered WordPress teen picker active region is ${filteredReport.activeRegion || "missing"}, expected Atlantic Seaboard`);
+  }
+
+  if (filteredReport.teenCount !== 0) {
+    addError(errors, `${viewport.name} filtered WordPress teen picker still shows ${filteredReport.teenCount} teen links outside West Coast`);
+  }
+
+  if (!/No Teen Wrapped links/i.test(filteredReport.emptyText)) {
+    addError(errors, `${viewport.name} filtered WordPress teen picker missing empty-state copy`);
+  }
+}
+
 async function checkBuilder(cdp, baseUrl, errors, timeoutMs) {
   const viewport = { height: 900, name: "desktop", width: 1280 };
 
@@ -191,6 +261,7 @@ async function runTeenUxSmoke(settings) {
         for (const viewport of VIEWPORTS) {
           await checkTeenPicker(cdp, baseUrl, viewport, errors, options.timeoutMs);
           await checkTeenStory(cdp, baseUrl, viewport, errors, options.timeoutMs);
+          await checkWordPressTeenPicker(cdp, baseUrl, viewport, errors, options.timeoutMs);
         }
 
         await checkBuilder(cdp, baseUrl, errors, options.timeoutMs);

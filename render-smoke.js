@@ -240,6 +240,17 @@ function contentType(filePath) {
   return "application/octet-stream";
 }
 
+function localizeHostedAssetUrls(body) {
+  return String(body)
+    .replace(/data-source="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/sample-wrapped-2026\.json\?v=[^"]+"/g, 'data-source="/sample-wrapped-2026.json"')
+    .replace(/data-config-source="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/wrapped-config-2026\.json\?v=[^"]+"/g, 'data-config-source="/wrapped-config-2026.json"')
+    .replace(/data-teen-source="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/sample-teen-wrapped-2026\.json\?v=[^"]+"/g, 'data-teen-source="/sample-teen-wrapped-2026.json"')
+    .replace(/data-assets-base="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/assets\/"/g, 'data-assets-base="/assets/"')
+    .replace(/data-share-base="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/share\/"/g, 'data-share-base="/share/"')
+    .replace(/href="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/jsu-wrapped\.css\?v=[^"]+"/g, 'href="/jsu-wrapped.css"')
+    .replace(/src="https:\/\/stsimon-ncsy\.github\.io\/jsu-wrapped-widget\/jsu-wrapped\.js\?v=[^"]+"/g, 'src="/jsu-wrapped.js"');
+}
+
 function safeFilePath(root, requestUrl) {
   const parsed = new URL(requestUrl, "http://127.0.0.1");
   let pathname = decodeURIComponent(parsed.pathname);
@@ -274,6 +285,19 @@ function createStaticServer(root) {
       "cache-control": "no-store",
       "content-type": contentType(filePath)
     });
+
+    if (["wordpress-inline-embed.html", "wordpress-brizy-hosted-embed.html"].includes(path.basename(filePath))) {
+      fs.readFile(filePath, "utf8", (error, body) => {
+        if (error) {
+          response.end("");
+          return;
+        }
+
+        response.end(localizeHostedAssetUrls(body));
+      });
+      return;
+    }
+
     fs.createReadStream(filePath).pipe(response);
   });
 }

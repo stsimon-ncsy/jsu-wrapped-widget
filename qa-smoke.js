@@ -1736,8 +1736,8 @@ function runInlineEmbedSmoke() {
   assert(renderer.includes("jsuw-shell jsuw-shell--loading"), "Widget renderer should mark the loading shell so first paint can reserve story height");
   assert(shellMarkup.includes("jsuw-shell jsuw-shell--loading"), "WordPress inline embed should include a static loading shell for full-height first paint");
   assert(shellMarkup.includes('role="status"'), "WordPress static loading shell should expose status semantics");
-  assert(shellCssBlock && /position:\s*fixed;/.test(shellCssBlock[1]), "WordPress shell should be viewport-fixed for full-height first paint");
-  assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should pin to every viewport edge");
+  assert(shellCssBlock && /position:\s*relative;/.test(shellCssBlock[1]), "WordPress shell should stay in document flow so Brizy preview can measure it");
+  assert(shellCssBlock && /inset:\s*0;/.test(shellCssBlock[1]), "WordPress shell should keep zero inset offsets for the full-height stage");
   assert(shellCssBlock && /height:\s*100vh;/.test(shellCssBlock[1]), "WordPress shell should include a 100vh height fallback");
   assert(shellCssBlock && /height:\s*100dvh;/.test(shellCssBlock[1]), "WordPress shell should use dynamic viewport height");
   assert(shellCssBlock && /overflow-y:\s*hidden(?:\s*!important)?;/.test(shellCssBlock[1]), "WordPress shell should not show story-state vertical scrollbars");
@@ -1752,9 +1752,13 @@ function runInlineEmbedSmoke() {
   assert(css.includes("--jsuw-wp-story-reserve"), "WordPress shell CSS should reserve compact space for the legal footer");
   assert(css.includes("calc((100dvh - var(--jsuw-wp-story-reserve)) * 0.5625)"), "WordPress desktop shell should shrink the phone frame to the available viewport height");
   assert(css.includes("height: calc(100dvh - var(--jsuw-wp-story-reserve));"), "WordPress mobile story should fit within the fixed shell plus legal footer reserve");
+  assert(css.includes("body:has(#jsu-wrapped-wordpress-shell)"), "WordPress shell CSS should reset host body overflow only when the shell is present");
   assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-form-active"), "WordPress shell CSS should restore internal scrolling when the CTA form opens");
   assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-form-active #jsu-wrapped"), "WordPress shell CSS should release widget-root overflow when the CTA form opens");
+  assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-picker-active"), "WordPress shell CSS should restore internal scrolling for picker pages");
+  assert(css.includes("#jsu-wrapped-wordpress-shell.jsuw-picker-active #jsu-wrapped"), "WordPress shell CSS should release widget-root overflow for picker pages");
   assert(css.includes("overflow: hidden;"), "WordPress shell CSS should prevent widget-root story-state scrollbars");
+  assert(renderer.includes("function setWordPressShellMode"), "Widget renderer should mark the WordPress shell mode for loading, picker, story, and error states");
   assert(renderer.includes("classList.add(\"jsuw-form-active\")"), "Widget renderer should mark the WordPress shell when the CTA form opens");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-panel"), "WordPress shell CSS missing Gravity Forms panel styling");
   assert(css.includes("#jsu-wrapped-wordpress-shell .jsuw-form-card"), "WordPress shell CSS missing Gravity Forms card styling");
@@ -1936,6 +1940,8 @@ function runCssIsolationSmoke() {
   const allowedTopLevel = [
     "#jsu-wrapped",
     "#jsu-wrapped-wordpress-shell",
+    "html:has(#jsu-wrapped-wordpress-shell)",
+    "body:has(#jsu-wrapped-wordpress-shell)",
     ":root #jsu-wrapped"
   ];
   const violations = [];

@@ -1778,6 +1778,35 @@
     }
   }
 
+  function summarizeTeenRegions(teenRecords) {
+    var regions = {};
+
+    (teenRecords || []).forEach(function (record) {
+      var name = asText(record && record.region_name, "");
+      var slug = slugify(name);
+
+      if (!name || !slug) {
+        return;
+      }
+
+      if (!regions[slug]) {
+        regions[slug] = {
+          count: 0,
+          name: name,
+          slug: slug
+        };
+      }
+
+      regions[slug].count += 1;
+    });
+
+    return Object.keys(regions).map(function (slug) {
+      return regions[slug];
+    }).sort(function (a, b) {
+      return b.count - a.count || a.name.localeCompare(b.name);
+    });
+  }
+
   function renderChapterPickerMarkup(context) {
     var settings = context || {};
     var allRecords = Array.isArray(settings.records) ? settings.records.slice() : [];
@@ -1798,7 +1827,13 @@
     var program = settings.program || getProgramSlug(url);
     var firstRecord = records[0] || {};
     var year = asText(settings.year || firstRecord.year_label || firstRecord.school_year, "this year");
+    var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
+    var teenRegions = summarizeTeenRegions(teenRecords);
     var requestedRegion = asText(settings.region || getRegionParam(url), "");
+
+    if (showTeenLink && !requestedRegion && teenRegions.length === 1) {
+      requestedRegion = teenRegions[0].name;
+    }
 
     records.sort(function (a, b) {
       return chapterLabel(a).localeCompare(chapterLabel(b));
@@ -1919,6 +1954,14 @@
       regionMap[regionName].push(record);
     });
 
+    if (showTeenLink) {
+      teenRegions.forEach(function (region) {
+        if (!regionMap[region.name]) {
+          regionMap[region.name] = [];
+        }
+      });
+    }
+
     var regions = Object.keys(regionMap).sort().map(function (regionName) {
       return {
         name: regionName,
@@ -1930,6 +1973,24 @@
     var activeRegion = regions.filter(function (region) {
       return region.slug === requestedSlug || region.name.toLowerCase() === requestedRegion.toLowerCase();
     })[0] || regions[0] || null;
+    var activeRegionSlug = activeRegion ? activeRegion.slug : "";
+    var activeRegionName = activeRegion ? activeRegion.name : "";
+    var visibleTeenRecords = showTeenLink && activeRegionSlug ? teenRecords.filter(function (record) {
+      var teenRegion = asText(record && record.region_name, "");
+      var teenChapterSlug = asText(record && (record.chapter_slug || record.chapter_name), "");
+
+      if (teenRegion) {
+        return slugify(teenRegion) === activeRegionSlug;
+      }
+
+      if (!teenChapterSlug || !activeRegion || !activeRegion.chapters.length) {
+        return false;
+      }
+
+      return activeRegion.chapters.some(function (chapter) {
+        return slugify(chapter.chapter_slug || chapter.chapter_name) === slugify(teenChapterSlug);
+      });
+    }) : teenRecords;
     var regionSelector = regions.map(function (region) {
       var isActive = activeRegion && region.slug === activeRegion.slug;
       var countLabel = region.chapters.length === 1 ? "1" : String(region.chapters.length);
@@ -1978,13 +2039,15 @@
       "</section>"
     ].join("") : "";
 
-    var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
-    var teenLinksHtml = showTeenLink && teenRecords.length ? [
+    var teenListHtml = visibleTeenRecords.length ? [
+      '<div class="jsuw-picker-scope-list">',
+      visibleTeenRecords.map(renderTeenPickerItem).join(""),
+      "</div>"
+    ].join("") : '<p class="jsuw-teen-stories-empty">No Teen Wrapped links for ' + escapeHtml(activeRegionName || "this region") + " yet.</p>";
+    var teenLinksHtml = showTeenLink ? [
       '<section class="jsuw-picker-scope-stories jsuw-picker-teen-stories" aria-label="Teen Wrapped stories">',
       "<h2>Find a Teen Wrapped story</h2>",
-      '<div class="jsuw-picker-scope-list">',
-      teenRecords.map(renderTeenPickerItem).join(""),
-      "</div>",
+      teenListHtml,
       "</section>"
     ].join("") : "";
     var pickerTitle = showTeenLink ? "Find your Wrapped story" : "Choose your chapter";
@@ -2009,6 +2072,7 @@
 
   function renderChapterPicker(container, context) {
     container.innerHTML = renderChapterPickerMarkup(context);
+    setWordPressShellMode(container, "picker");
   }
 
   function cloneConfigValue(value) {
@@ -3811,6 +3875,23 @@
     return html.join("");
   }
 
+  function setWordPressShellMode(container, mode) {
+    var shell = container && typeof container.closest === "function" ? container.closest("#jsu-wrapped-wordpress-shell") : null;
+    var modes = ["loading", "picker", "story", "error"];
+
+    if (!shell || !shell.classList) {
+      return;
+    }
+
+    modes.forEach(function (name) {
+      shell.classList.remove("jsuw-" + name + "-active");
+    });
+
+    if (mode && modes.indexOf(mode) !== -1) {
+      shell.classList.add("jsuw-" + mode + "-active");
+    }
+  }
+
   function renderError(container, headline, message) {
     container.innerHTML = [
       '<div class="jsuw-shell jsuw-shell--error">',
@@ -3821,6 +3902,7 @@
       "</section>",
       "</div>"
     ].join("");
+    setWordPressShellMode(container, "error");
   }
 
   function setStatus(container, message) {
@@ -3876,6 +3958,7 @@
 
   function renderStory(container, state) {
     container.innerHTML = renderStoryMarkup(state);
+    setWordPressShellMode(container, "story");
   }
 
   function focusStory(container) {
@@ -4922,6 +5005,7 @@
     }
 
     target.innerHTML = '<div class="jsuw-shell jsuw-shell--loading"><section class="jsuw-loading" role="status">Loading JSU Wrapped...</section></div>';
+    setWordPressShellMode(target, "loading");
 
     try {
       var assetBase = getAssetBase(target, settings);
