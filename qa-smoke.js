@@ -163,6 +163,16 @@ function runPickerSmoke(records, config) {
     config,
     url: "https://example.org/wrapped/"
   });
+  const defaultTeenHtml = api.renderChapterPickerMarkup({
+    records: [baltimore],
+    config,
+    url: "https://example.org/wrapped/"
+  });
+  const explicitTeenHtml = api.renderChapterPickerMarkup({
+    records: [baltimore],
+    config,
+    url: "https://example.org/wrapped/?show_teens=1"
+  });
 
   assert(html.includes("variant=donor-recap"), "sample picker variant link missing");
   assert(html.includes("Donor recap"), "sample picker variant label missing");
@@ -172,6 +182,8 @@ function runPickerSmoke(records, config) {
   assert(html.includes("?scope=region&amp;region=atlantic-seaboard"), "picker region story link mismatch");
   assert(html.includes("Shabbat Across JSU"), "picker should surface program story records");
   assert(html.includes("?scope=program&amp;program=shabbat"), "picker program story link mismatch");
+  assert(!defaultTeenHtml.includes("jsuw-teen-test-link"), "picker should not expose teen records without an explicit preview parameter");
+  assert(explicitTeenHtml.includes("jsuw-teen-test-link"), "picker should expose teen preview link only with show_teens=1");
 }
 
 function runHiddenVariantSmoke() {
@@ -947,7 +959,16 @@ function runBuilderFutureScopeSmoke() {
   const builderHtml = loadText("builder.html");
   const builderJs = loadText("wrapped-builder.js");
 
+  assert(builderHtml.includes("data-builder-experience"), "builder should expose a chapter/teen experience selector");
+  assert(builderHtml.includes("data-builder-teen"), "builder should expose a teen selector for teen Wrapped previews");
   assert(builderHtml.includes('<option value="program">Program default</option>'), "builder scope selector is missing program default option");
+  assert(builderJs.includes("var TEEN_DATA_URL"), "builder should load the teen Wrapped data source");
+  assert(builderJs.includes("teenRecords: []"), "builder state should keep teen records separate from chapter records");
+  assert(builderJs.includes("function isTeenMode"), "builder should have a teen mode helper");
+  assert(builderJs.includes("window.JSUWrapped.createTeenCards(record"), "builder should build teen preview cards from teen data");
+  assert(builderJs.includes('mode: "teen"'), "builder should initialize JSUWrapped teen previews in teen mode");
+  assert(builderJs.includes("teenRecords: state.teenRecords"), "builder should pass teen records into the widget preview");
+  assert(builderJs.includes("data-builder-teen-card"), "builder should render teen card rows for preview navigation");
   assert(builderJs.includes("function ensureProgramSection"), "builder is missing a program config section helper");
   assert(builderJs.includes("state.config.programs[slug]"), "builder does not write program scoped config");
   assert(builderJs.includes("function isChapterRecord"), "builder is missing a chapter-record filter");

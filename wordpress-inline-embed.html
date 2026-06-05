@@ -4730,7 +4730,6 @@
 }
 </style>
 
-<!-- Existing NCSY host GTM container for no-header/no-footer Wrapped pages. -->
 <script>
 (function(w,d,s,l,i){
   w[l]=w[l]||[];
@@ -6813,7 +6812,8 @@
       "</section>"
     ].join("") : "";
 
-    var teenTestLink = buildTeenUrl({ teen_slug: "maya-test" }, url);
+    var showTeenLink = settings.showTeenLink === true || parseBooleanFlag(getSearchValue(url, ["show_teens", "showTeens", "teen_preview", "teenPreview"])) === true;
+    var teenTestLink = showTeenLink ? buildTeenUrl({ teen_slug: "maya-test" }, url) : "";
 
     return [
       '<div class="jsuw-shell jsuw-shell--picker">',
@@ -6826,7 +6826,7 @@
       '<div class="jsuw-picker-list">',
       chapterHtml,
       "</div>",
-      '<a class="jsuw-teen-test-link" href="' + escapeHtml(teenTestLink) + '"><strong>Teen test version</strong><span>Proof of concept using sample Maya data</span></a>',
+      showTeenLink ? '<a class="jsuw-teen-test-link" href="' + escapeHtml(teenTestLink) + '"><strong>Teen preview</strong><span>Hidden test view for teen Wrapped records</span></a>' : "",
       "</section>",
       "</div>"
     ].join("");
@@ -7703,6 +7703,18 @@
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
     var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var connectorStats = [];
+
+    if (hasValue(record.friends_brought)) {
+      connectorStats.push({ value: formatNumber(record.friends_brought), label: "friends brought" });
+    } else if (hasValue(record.events_with_peers)) {
+      connectorStats.push({ value: formatNumber(record.events_with_peers), label: "events with peers" });
+    }
+
+    if (hasValue(record.schools_in_room)) {
+      connectorStats.push({ value: formatNumber(record.schools_in_room), label: "schools in your room" });
+    }
+
     var cards = [
       {
         type: "teen",
@@ -7764,6 +7776,7 @@
         headline: "You're " + asText(record.persona, "The Connector"),
         persona: asText(record.persona, "The Connector"),
         friendsBrought: formatNumber(record.friends_brought),
+        connectorStats: connectorStats,
         schoolsInRoom: formatNumber(record.schools_in_room),
         subtext: asText(record.persona_line, "You helped turn events into community.")
       },
@@ -7816,13 +7829,13 @@
         subtext: [
           hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
           hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
-          hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
+          hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : hasValue(record.events_with_peers) ? formatNumber(record.events_with_peers) + " events with peers" : "",
           asText(record.persona, "The Connector") + " energy"
         ].filter(Boolean).join(". ") + ".",
         summaryStats: [
           hasValue(record.events_attended) ? { value: formatNumber(record.events_attended), label: "events showed up to" } : null,
           hasValue(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
-          hasValue(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : null,
+          hasValue(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : hasValue(record.events_with_peers) ? { value: formatNumber(record.events_with_peers), label: "events with peers" } : null,
           hasValue(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in your room" } : null
         ].filter(Boolean)
       }
@@ -8308,12 +8321,20 @@
   }
 
   function renderTeenConnectorBody(card) {
+    var stats = Array.isArray(card.connectorStats) && card.connectorStats.length ? card.connectorStats : [
+      { value: card.friendsBrought || "0", label: "friends brought" },
+      { value: card.schoolsInRoom || "0", label: "schools in your room" }
+    ];
+    var statsHtml = stats.slice(0, 2).map(function (stat) {
+      return "<div><strong>" + escapeHtml(stat.value || "0") + "</strong><span>" + escapeHtml(stat.label || "") + "</span></div>";
+    }).join("");
+
     return renderReferenceShell(card, [
       '<div class="jsuw-teen-scene jsuw-teen-connector-scene">',
       renderTeenTop(card),
       '<h2 class="jsuw-teen-title">You\'re<br><span>' + escapeHtml(card.persona || "The Connector") + ".</span></h2>",
       '<div class="jsuw-teen-network" aria-hidden="true"><span class="jsuw-teen-node jsuw-teen-node--center">you</span><span></span><span></span><span></span><span></span><span></span></div>',
-      '<div class="jsuw-teen-mini-stats"><div><strong>' + escapeHtml(card.friendsBrought || "0") + "</strong><span>friends brought</span></div><div><strong>" + escapeHtml(card.schoolsInRoom || "0") + "</strong><span>schools in your room</span></div></div>",
+      '<div class="jsuw-teen-mini-stats">' + statsHtml + "</div>",
       '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
       "</div>"
     ].join(""));

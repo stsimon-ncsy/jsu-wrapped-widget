@@ -33,6 +33,7 @@ const CHAPTER_NUMERIC_FIELDS = [
 const TEEN_NUMERIC_FIELDS = [
   "events_attended",
   "longest_streak",
+  "events_with_peers",
   "friends_brought",
   "schools_in_room",
   "shabbatons",

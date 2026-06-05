@@ -70,6 +70,12 @@ const PAGE_CHECKS = [
     path: "/builder.html?qa=render-smoke",
     requiredSelectors: ['id="wrapped-builder"', "builder-panel--preview"],
     requiredText: ["JSU/NCSY Wrapped customizer", "Send for review"]
+  },
+  {
+    label: "builder teen mode",
+    path: "/builder.html?mode=teen&teen=west-coast-junior-01&qa=render-smoke",
+    requiredSelectors: ['id="wrapped-builder"', 'data-builder-teen-card="teen-cover"', 'data-builder-teen-card="teen-share"', "jsuw-story"],
+    requiredText: ["Teen Wrapped", "Leah", "Attendance", "generated Junior NCSY records"]
   }
 ];
 
@@ -472,7 +478,9 @@ async function runRenderSmoke(settings) {
 
         for (const item of renderPlan(baseUrl)) {
           const html = await renderWithBrowser(browser, item.url, item.viewport, settings);
-          const pageCheck = PAGE_CHECKS.find((check) => item.label.indexOf(check.label) === 0);
+          const pageCheck = PAGE_CHECKS
+            .filter((check) => item.label.indexOf(check.label) === 0)
+            .sort((a, b) => b.label.length - a.label.length)[0];
           const report = validateRenderedDom(Object.assign({}, pageCheck, {
             html,
             label: item.label

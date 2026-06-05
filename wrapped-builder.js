@@ -2,6 +2,7 @@
   "use strict";
 
   var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260603b";
+  var TEEN_DATA_URL = "./sample-teen-wrapped-2026.json?v=jsuw-prod-20260603b";
   var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260603b";
   var MAX_MAILTO_URL_LENGTH = 7000;
   var CARD_IDS = [
@@ -31,6 +32,18 @@
     persona: "Chapter persona",
     movement: "Bigger movement",
     final: "Final share card"
+  };
+  var TEEN_CARD_LABELS = {
+    "teen-cover": "Cover",
+    "teen-attendance": "Attendance",
+    "teen-ticket": "First event",
+    "teen-streak": "Longest streak",
+    "teen-vibe": "Top vibe",
+    "teen-connector": "Persona",
+    "teen-depth": "Depth",
+    "teen-chapter": "Chapter context",
+    "teen-movement": "Movement",
+    "teen-share": "Share card"
   };
   var METRIC_FIELDS = [
     ["events_hosted", "Events hosted"],
@@ -77,9 +90,12 @@
 
   var state = {
     records: [],
+    teenRecords: [],
     config: null,
+    experienceMode: "chapter",
     regionSlug: "",
     chapterSlug: "",
+    teenSlug: "",
     scope: "chapter",
     variantSlug: "",
     previewCardId: "cover",
@@ -177,6 +193,32 @@
     return !hasValue(record.scope_type) || String(record.scope_type).trim().toLowerCase() === "chapter";
   }
 
+  function isTeenRecord(record) {
+    return !!(record && typeof record === "object" && !Array.isArray(record) && hasValue(teenRecordSlug(record)));
+  }
+
+  function isTeenMode() {
+    return state.experienceMode === "teen";
+  }
+
+  function teenRecordSlug(record) {
+    return String(record && (record.teen_slug || record.student_slug || record.slug) || "").trim();
+  }
+
+  function teenRecordLabel(record) {
+    var parts = [
+      record && (record.teen_name || record.student_name || record.first_name),
+      record && record.chapter_name,
+      record && record.school_name
+    ].filter(hasValue);
+
+    return parts.length ? parts.join(" - ") : teenRecordSlug(record) || "Teen Wrapped";
+  }
+
+  function cardPreviewKey(card) {
+    return card && (card.id || card.theme) || "";
+  }
+
   async function fetchJson(url) {
     var response = await fetch(url, { credentials: "same-origin" });
 
@@ -241,6 +283,12 @@
     return state.records.filter(function (record) {
       return record.chapter_slug === state.chapterSlug;
     })[0] || state.records[0] || null;
+  }
+
+  function getActiveTeenRecord() {
+    return state.teenRecords.filter(function (record) {
+      return teenRecordSlug(record) === state.teenSlug;
+    })[0] || state.teenRecords[0] || null;
   }
 
   function ensureRegionSection() {
@@ -366,12 +414,21 @@
   function renderSelectors() {
     var regions = getRegions();
     var region = getActiveRegion() || regions[0];
+    var experienceSelect = $("[data-builder-experience]");
     var regionSelect = $("[data-builder-region]");
     var chapterSelect = $("[data-builder-chapter]");
+    var teenSelect = $("[data-builder-teen]");
     var scopeSelect = $("[data-builder-scope]");
     var variantSelect = $("[data-builder-variant]");
+    var teenMode = isTeenMode();
     var baseSection;
     var variantKeys;
+
+    if (state.teenRecords.length && (!state.teenSlug || !state.teenRecords.some(function (record) {
+      return teenRecordSlug(record) === state.teenSlug;
+    }))) {
+      state.teenSlug = teenRecordSlug(state.teenRecords[0]);
+    }
 
     if (!state.regionSlug && region) {
       state.regionSlug = region.slug;
@@ -381,16 +438,39 @@
       state.chapterSlug = region.records[0].chapter_slug;
     }
 
-    regionSelect.innerHTML = regions.map(function (item) {
-      return '<option value="' + escapeHtml(item.slug) + '"' + (item.slug === state.regionSlug ? " selected" : "") + ">" + escapeHtml(item.name) + " (" + item.records.length + ")</option>";
-    }).join("");
+    if (experienceSelect) {
+      experienceSelect.value = state.experienceMode;
+    }
+
+    if (regionSelect) {
+      regionSelect.innerHTML = regions.map(function (item) {
+        return '<option value="' + escapeHtml(item.slug) + '"' + (item.slug === state.regionSlug ? " selected" : "") + ">" + escapeHtml(item.name) + " (" + item.records.length + ")</option>";
+      }).join("");
+      regionSelect.disabled = teenMode;
+    }
 
     region = getActiveRegion() || regions[0];
-    chapterSelect.innerHTML = (region ? region.records : []).map(function (record) {
-      return '<option value="' + escapeHtml(record.chapter_slug) + '"' + (record.chapter_slug === state.chapterSlug ? " selected" : "") + ">" + escapeHtml(record.chapter_name || record.chapter_slug) + "</option>";
-    }).join("");
+    if (chapterSelect) {
+      chapterSelect.innerHTML = (region ? region.records : []).map(function (record) {
+        return '<option value="' + escapeHtml(record.chapter_slug) + '"' + (record.chapter_slug === state.chapterSlug ? " selected" : "") + ">" + escapeHtml(record.chapter_name || record.chapter_slug) + "</option>";
+      }).join("");
+      chapterSelect.disabled = teenMode;
+    }
 
-    scopeSelect.value = state.scope;
+    if (teenSelect) {
+      teenSelect.innerHTML = state.teenRecords.map(function (record) {
+        var slug = teenRecordSlug(record);
+
+        return '<option value="' + escapeHtml(slug) + '"' + (slug === state.teenSlug ? " selected" : "") + ">" + escapeHtml(teenRecordLabel(record)) + "</option>";
+      }).join("");
+      teenSelect.value = state.teenSlug;
+      teenSelect.disabled = !teenMode || !state.teenRecords.length;
+    }
+
+    if (scopeSelect) {
+      scopeSelect.value = state.scope;
+      scopeSelect.disabled = teenMode;
+    }
 
     if (variantSelect) {
       baseSection = ensureBaseSection();
@@ -404,6 +484,7 @@
         return '<option value="' + escapeHtml(slug) + '"' + (slug === state.variantSlug ? " selected" : "") + ">" + escapeHtml(variantDisplayName(slug, baseSection.variants[slug])) + "</option>";
       })).join("");
       variantSelect.value = state.variantSlug;
+      variantSelect.disabled = teenMode;
     }
   }
 
@@ -411,6 +492,7 @@
     var section = getActiveSection();
 
     $all("[data-builder-field]").forEach(function (field) {
+      field.disabled = isTeenMode();
       field.value = section[field.getAttribute("data-builder-field")] || "";
     });
   }
@@ -830,6 +912,8 @@
   }
 
   function applyInitialSelectionFromUrl() {
+    var mode = searchParamValue(["mode", "view", "experience"]);
+    var teenSlug = searchParamValue(["teen", "student", "teen_slug", "teenSlug"]);
     var regionSlug = searchParamValue(["region", "region_slug", "regionSlug"]);
     var chapterSlug = searchParamValue(["chapter", "chapter_slug", "chapterSlug"]);
     var scope = searchParamValue(["scope", "edit_scope", "editScope"]);
@@ -856,6 +940,15 @@
 
     if (variantSlug) {
       state.variantSlug = variantSlug;
+    }
+
+    if (mode === "teen" || mode === "student" || teenSlug) {
+      state.experienceMode = "teen";
+      state.previewCardId = "teen-cover";
+    }
+
+    if (teenSlug) {
+      state.teenSlug = teenSlug;
     }
   }
 
@@ -1536,6 +1629,16 @@
   }
 
   function getCardsForRecord(record, options) {
+    if (isTeenMode()) {
+      if (!window.JSUWrapped || !window.JSUWrapped.createTeenCards || !record) {
+        return [];
+      }
+
+      return window.JSUWrapped.createTeenCards(record, {
+        assetBase: "./assets/"
+      });
+    }
+
     var storyConfig = getStoryConfig(record);
     var cardConfig = Object.assign({}, storyConfig);
 
@@ -1561,7 +1664,11 @@
     var output = {};
 
     (cards || []).forEach(function (card) {
-      output[card.id] = card;
+      var key = cardPreviewKey(card);
+
+      if (key) {
+        output[key] = card;
+      }
     });
 
     return output;
@@ -1599,7 +1706,74 @@
     });
   }
 
+  function teenCardSummary(card) {
+    var stats = (card && (card.summaryStats || card.stats || card.connectorStats) || []).map(function (item) {
+      return [item.value, item.label].filter(hasValue).join(" ");
+    }).filter(hasValue);
+
+    if (stats.length) {
+      return stats.join(" | ");
+    }
+
+    return [
+      card && card.stat ? [card.stat, card.statLabel].filter(hasValue).join(" ") : "",
+      card && card.eventName,
+      card && card.vibe,
+      card && card.persona,
+      card && card.subtext
+    ].filter(hasValue)[0] || "Generated from teen attendance data.";
+  }
+
+  function renderTeenCardEditor() {
+    var record = getActiveTeenRecord();
+    var container = $("[data-builder-card-editor]");
+    var cards;
+
+    if (!container) {
+      return;
+    }
+
+    if (!record) {
+      container.innerHTML = '<p class="builder-warning">No teen Wrapped records loaded. Check sample-teen-wrapped-2026.json and reload the builder.</p>';
+      return;
+    }
+
+    cards = getCardsForRecord(record, { generatedOnly: true });
+
+    if (cards.length && !cards.some(function (card) {
+      return cardPreviewKey(card) === state.previewCardId;
+    })) {
+      state.previewCardId = cardPreviewKey(cards[0]);
+    }
+
+    container.innerHTML = cards.map(function (card) {
+      var key = cardPreviewKey(card);
+      var label = TEEN_CARD_LABELS[key] || card.eyebrow || key;
+
+      return [
+        '<article class="builder-card-row builder-card-row--teen" data-builder-preview-card="' + escapeHtml(key) + '" data-builder-teen-card="' + escapeHtml(key) + '">',
+        "<header>",
+        "<strong>" + escapeHtml(label) + "</strong>",
+        '<span class="builder-toggle">Preview</span>',
+        "</header>",
+        '<div class="builder-card-fields builder-card-fields--readonly">',
+        "<label>Headline<input readonly value=\"" + escapeHtml(card.headline || card.displayHeadline || "") + "\"></label>",
+        "<label>Eyebrow<input readonly value=\"" + escapeHtml(card.eyebrow || "") + "\"></label>",
+        "<label>Generated detail<textarea readonly>" + escapeHtml(teenCardSummary(card)) + "</textarea></label>",
+        "</div>",
+        "</article>"
+      ].join("");
+    }).join("");
+
+    markPreviewRows();
+  }
+
   function renderCardEditor() {
+    if (isTeenMode()) {
+      renderTeenCardEditor();
+      return;
+    }
+
     var section = getActiveSection();
     var overrides = section.card_overrides || {};
     var record = getActiveRecord() || {};
@@ -1694,9 +1868,23 @@
   }
 
   function renderCustomCards() {
-    var section = getActiveSection();
-    var cards = ensureCustomCards(section);
     var container = $("[data-builder-custom-list]");
+    var addButtons = $all('[data-builder-action="add-text"], [data-builder-action="add-metric"], [data-builder-action="add-media"]');
+    var section;
+    var cards;
+
+    addButtons.forEach(function (button) {
+      button.disabled = isTeenMode();
+      button.setAttribute("aria-disabled", isTeenMode() ? "true" : "false");
+    });
+
+    if (isTeenMode()) {
+      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen Wrapped screens are generated from the teen data file. Change the source dataset or derivation script, then reload this builder.</p>';
+      return;
+    }
+
+    section = getActiveSection();
+    cards = ensureCustomCards(section);
 
     if (!cards.length) {
       container.innerHTML = '<p class="builder-warning builder-warning--ok">No custom screens yet. Add one when the local story needs a human touch.</p>';
@@ -1734,17 +1922,23 @@
   }
 
   function renderChangeSummary() {
-    var section = getActiveSection();
-    var record = getActiveRecord() || {};
-    var overrides = section.record_overrides && typeof section.record_overrides === "object" ? section.record_overrides : {};
     var container = $("[data-builder-change-summary]");
-    var keys = Object.keys(overrides).filter(function (key) {
-      return hasValue(overrides[key]);
-    });
 
     if (!container) {
       return;
     }
+
+    if (isTeenMode()) {
+      container.innerHTML = '<p class="builder-warning builder-warning--ok">Teen mode is read-only in the builder. The selected teen card set is generated directly from sample-teen-wrapped-2026.json.</p>';
+      return;
+    }
+
+    var section = getActiveSection();
+    var record = getActiveRecord() || {};
+    var overrides = section.record_overrides && typeof section.record_overrides === "object" ? section.record_overrides : {};
+    var keys = Object.keys(overrides).filter(function (key) {
+      return hasValue(overrides[key]);
+    });
 
     if (!keys.length) {
       container.innerHTML = '<p class="builder-warning builder-warning--ok">No stat corrections at this scope. Open a generated screen and correct only the stats that need a local adjustment.</p>';
@@ -1784,6 +1978,18 @@
   }
 
   function renderWarnings() {
+    if (isTeenMode()) {
+      var teenRecord = getActiveTeenRecord();
+      var teenWarnings = teenRecord
+        ? ["Teen preview is using generated Junior NCSY records. Editing happens in the derivation dataset, not in chapter config."]
+        : ["No teen Wrapped records are loaded. Check sample-teen-wrapped-2026.json."];
+
+      $("[data-builder-warnings]").innerHTML = teenWarnings.map(function (warning, index) {
+        return '<div class="builder-warning' + (!index && teenRecord ? " builder-warning--ok" : "") + '">' + escapeHtml(warning) + "</div>";
+      }).join("");
+      return;
+    }
+
     var record = getActiveRecord();
     var section = getActiveSection();
     var warnings = [];
@@ -1852,8 +2058,12 @@
     }).join("");
   }
 
+  function exportText() {
+    return JSON.stringify(isTeenMode() ? state.teenRecords : sanitizedConfigForExport(), null, 2);
+  }
+
   function renderExport() {
-    var json = JSON.stringify(sanitizedConfigForExport(), null, 2);
+    var json = exportText();
     var exportField = $("[data-builder-export]");
 
     exportField.value = json;
@@ -1878,9 +2088,27 @@
     return url.href;
   }
 
+  function buildTeenPreviewUrl(record) {
+    var base = window.location.origin + window.location.pathname.replace(/builder\.html$/, "");
+    var url = new URL(base || "./", window.location.href);
+
+    url.searchParams.set("mode", "teen");
+    url.searchParams.set("teen", teenRecordSlug(record));
+    url.searchParams.delete("chapter");
+    url.searchParams.delete("region");
+    url.searchParams.delete("scope");
+    url.searchParams.delete("program");
+    url.searchParams.delete("variant");
+    url.searchParams.delete("deploy");
+    url.searchParams.delete("retry");
+    url.searchParams.delete("qa");
+
+    return url.href;
+  }
+
   function renderPreview() {
     var preview = document.getElementById("jsu-wrapped");
-    var record = getActiveRecord();
+    var record = isTeenMode() ? getActiveTeenRecord() : getActiveRecord();
     var cards = getCardsForRecord(record);
     var previewIndex = 0;
 
@@ -1889,7 +2117,7 @@
     }
 
     cards.some(function (card, index) {
-      if (card.id === state.previewCardId) {
+      if (cardPreviewKey(card) === state.previewCardId) {
         previewIndex = index;
         return true;
       }
@@ -1897,8 +2125,29 @@
       return false;
     });
 
-    var previewUrl = buildPreviewUrl(record);
+    var previewUrl = isTeenMode() ? buildTeenPreviewUrl(record) : buildPreviewUrl(record);
     var previewLink = $("[data-builder-preview-link]");
+
+    if (isTeenMode()) {
+      $("[data-builder-preview-title]").textContent = teenRecordLabel(record) + " Wrapped";
+
+      if (previewLink) {
+        previewLink.href = previewUrl;
+      }
+
+      window.JSUWrapped.init(preview, {
+        mode: "teen",
+        teenRecords: state.teenRecords,
+        teen: teenRecordSlug(record),
+        url: previewUrl,
+        assetBase: "./assets/",
+        initialIndex: previewIndex,
+        autoplay: false,
+        analytics: false,
+        metadata: false
+      });
+      return;
+    }
 
     $("[data-builder-preview-title]").textContent = (record.chapter_name || record.chapter_slug) + (state.variantSlug ? " - " + variantDisplayName(state.variantSlug, ensureBaseSection().variants && ensureBaseSection().variants[state.variantSlug]) : "") + " Wrapped";
 
@@ -2136,6 +2385,23 @@
     document.addEventListener("change", function (event) {
       var target = event.target;
 
+      if (target.matches("[data-builder-experience]")) {
+        state.experienceMode = target.value === "teen" ? "teen" : "chapter";
+        state.previewCardId = isTeenMode() ? "teen-cover" : "cover";
+        if (!state.teenSlug && state.teenRecords[0]) {
+          state.teenSlug = teenRecordSlug(state.teenRecords[0]);
+        }
+        renderAll();
+        return;
+      }
+
+      if (target.matches("[data-builder-teen]")) {
+        state.teenSlug = target.value;
+        state.previewCardId = "teen-cover";
+        renderAll();
+        return;
+      }
+
       if (target.matches("[data-builder-region]")) {
         state.regionSlug = target.value;
         var region = getActiveRegion();
@@ -2225,7 +2491,7 @@
       } else if (action === "copy-pilot-link") {
         copyPilotBuilderLink();
       } else if (action === "copy-export") {
-        copyTextToClipboard(JSON.stringify(sanitizedConfigForExport(), null, 2)).catch(function () {});
+        copyTextToClipboard(exportText()).catch(function () {});
       }
     });
   }
@@ -2235,8 +2501,10 @@
 
     try {
       var rawRecords = await fetchJson(DATA_URL);
+      var rawTeenRecords = await fetchJson(TEEN_DATA_URL);
 
       state.records = rawRecords.filter(isChapterRecord);
+      state.teenRecords = Array.isArray(rawTeenRecords) ? rawTeenRecords.filter(isTeenRecord) : [];
       state.config = ensureConfigShape(await fetchJson(CONFIG_URL));
       bindEvents();
       populateReviewSetupFields();
