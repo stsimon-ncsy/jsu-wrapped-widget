@@ -107,6 +107,18 @@ const ASSET_CHECKS = [
     }
   },
   {
+    label: "Brizy hosted embed",
+    path: "wordpress-brizy-hosted-embed.html",
+    validate(text, errors) {
+      mustInclude(text, 'id="jsu-wrapped-wordpress-shell"', "Brizy hosted embed missing WordPress shell", errors);
+      mustInclude(text, 'id="jsu-wrapped"', "Brizy hosted embed missing widget container", errors);
+      mustInclude(text, "jsu-wrapped.css?v=", "Brizy hosted embed missing versioned hosted stylesheet", errors);
+      mustInclude(text, "jsu-wrapped.js?v=", "Brizy hosted embed missing versioned hosted script", errors);
+      mustInclude(text, "sample-wrapped-2026.json?v=", "Brizy hosted embed missing versioned remote chapter data URL", errors);
+      mustNotInclude(text, "jsuw-prod-20260603b", "Brizy hosted embed still uses the previous production cache token", errors);
+    }
+  },
+  {
     cors: true,
     label: "chapter data JSON",
     path: "sample-wrapped-2026.json",

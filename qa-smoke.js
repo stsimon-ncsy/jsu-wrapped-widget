@@ -2242,6 +2242,10 @@ function runHostedSmokeScriptSmoke() {
       status: 200,
       text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260609a"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
     },
+    "wordpress-brizy-hosted-embed.html": {
+      status: 200,
+      text: '<div id="jsu-wrapped-wordpress-shell"><div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260609a"></div></div><link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260609a"><script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260609a"></script>'
+    },
     "sample-wrapped-2026.json": {
       headers: {
         "access-control-allow-origin": "*"
@@ -2418,6 +2422,7 @@ function runHostedSmokeScriptSmoke() {
   assert(dryRunOutput.includes("https://example.org/wrapped/layout-smoke.html"), "hosted smoke dry run should list layout smoke page");
   assert(dryRunOutput.includes("https://example.org/wrapped/sample-teen-wrapped-2026.json"), "hosted smoke dry run should list teen data JSON");
   assert(dryRunOutput.includes("https://example.org/wrapped/wordpress-inline-embed.html"), "hosted smoke dry run should list WordPress inline handoff");
+  assert(dryRunOutput.includes("https://example.org/wrapped/wordpress-brizy-hosted-embed.html"), "hosted smoke dry run should list the Brizy hosted embed");
   assert(dryRunOutput.includes("https://example.org/wrapped/wrapped-builder.js"), "hosted smoke dry run should list builder script");
   assert(dryRunOutput.includes("https://example.org/wrapped/assets/wrapped-social-preview.png"), "hosted smoke dry run should list the social preview image");
   assert(dryRunOutput.includes("https://example.org/wrapped/share/baltimore/"), "hosted smoke dry run should list Baltimore share page");
