@@ -3,7 +3,7 @@ const path = require("path");
 const dataValidator = require("./validate-wrapped-data.js");
 
 const SUBMISSION_SCHEMA = "jsu-wrapped-builder-submission";
-const ALLOWED_ROOTS = ["defaults", "regions", "programs", "campaigns", "chapters"];
+const ALLOWED_ROOTS = ["defaults", "regions", "programs", "campaigns", "chapters", "national"];
 const BLOCKED_KEYS = ["__proto__", "constructor", "prototype"];
 const DEFAULT_STORY_DATA_PATH = "sample-wrapped-2026.json";
 const DEFAULT_TEEN_DATA_PATH = "sample-teen-wrapped-2026.json";
@@ -55,7 +55,7 @@ function assertSafeMergePath(mergePath) {
 function isBuilderGeneratedMergePath(mergePath) {
   const root = mergePath[0];
 
-  if (root === "defaults") {
+  if (root === "defaults" || root === "national") {
     return mergePath.length === 1 || (mergePath.length === 3 && mergePath[1] === "variants");
   }
 

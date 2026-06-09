@@ -228,6 +228,43 @@ async function checkBuilder(cdp, baseUrl, errors, timeoutMs) {
   if (teenReport.metricCount < 1 || teenReport.textFieldCount < 1) {
     addError(errors, "builder teen mode is missing teen stat/text controls");
   }
+
+  await openPage(cdp, `${baseUrl}builder.html?mode=national&scope=national&qa=teen-ux-smoke`, viewport, "!!document.querySelector('[data-builder-national-card=\"cover\"]') && !!document.querySelector('[data-builder-metric-field]')", timeoutMs);
+  const nationalReport = await visualReview.evaluate(cdp, `(() => {
+    const experience = document.querySelector("[data-builder-experience]");
+    const field = document.querySelector("[data-builder-teen-field]");
+    const previewLink = document.querySelector("[data-builder-preview-link]");
+    const title = document.querySelector("[data-builder-preview-title]");
+
+    return {
+      experienceValue: experience ? experience.value : "",
+      nationalCards: document.querySelectorAll("[data-builder-national-card]").length,
+      metricCount: document.querySelectorAll("[data-builder-metric-field]").length,
+      teenHidden: !!(field && field.hidden),
+      previewHref: previewLink ? previewLink.href : "",
+      title: title ? title.textContent.trim() : ""
+    };
+  })()`);
+
+  if (nationalReport.experienceValue !== "national") {
+    addError(errors, `builder national mode selected ${nationalReport.experienceValue || "nothing"} instead of national`);
+  }
+
+  if (!nationalReport.teenHidden) {
+    addError(errors, "builder shows teen dropdown in national mode");
+  }
+
+  if (nationalReport.nationalCards < 10 || nationalReport.metricCount < 1) {
+    addError(errors, "builder national mode is missing national card/stat controls");
+  }
+
+  if (!nationalReport.previewHref.includes("scope=national")) {
+    addError(errors, "builder national preview link does not target scope=national");
+  }
+
+  if (!/National|JSU\/NCSY/i.test(nationalReport.title)) {
+    addError(errors, "builder national preview title does not label the national story");
+  }
 }
 
 async function runTeenUxSmoke(settings) {

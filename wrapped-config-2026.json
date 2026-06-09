@@ -10,6 +10,20 @@
     "card_overrides": {},
     "custom_cards": []
   },
+  "national": {
+    "brand_logo": "jsu",
+    "palette": "electric",
+    "cta_label": "Request the impact report",
+    "cta_target": "#jsuw-wrapped-interest",
+    "card_overrides": {
+      "cover": {
+        "subtext": "One year of Jewish teen life, across every region we can see."
+      },
+      "final": {
+        "subtext": "Share the national story, then invite someone into the impact behind it."
+      }
+    }
+  },
   "regions": {
     "atlantic-seaboard": {
       "brand_logo": "ncsy",

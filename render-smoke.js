@@ -29,6 +29,12 @@ const PAGE_CHECKS = [
     requiredText: ["Baltimore", "your year is wrapped"]
   },
   {
+    label: "national story",
+    path: "/?scope=national&qa=render-smoke",
+    requiredSelectors: ['id="jsu-wrapped"', "jsuw-story", "jsuw-theme-national-cover"],
+    requiredText: ["movement", "wrapped", "JSU/NCSY"]
+  },
+  {
     label: "layout smoke",
     path: "/layout-smoke.html?chapter=baltimore&qa=render-smoke",
     requiredSelectors: ['data-layout-smoke="ok"', "jsuw-story", "layout_errors=none"],

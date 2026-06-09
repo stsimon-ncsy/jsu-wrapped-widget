@@ -27,7 +27,16 @@ const CHAPTER_NUMERIC_FIELDS = [
   "region_schools_represented",
   "national_engagement_moments",
   "national_programs_hosted",
-  "national_teens_reached"
+  "national_teens_reached",
+  "national_schools_represented",
+  "national_regions_count",
+  "national_chapters_count",
+  "national_learning_sessions",
+  "national_shabbatons",
+  "national_new_teens",
+  "first_time_teens",
+  "national_immersive_teens",
+  "national_destinations"
 ];
 
 const TEEN_NUMERIC_FIELDS = [
@@ -123,7 +132,15 @@ const STORY_CARD_IDS = new Set([
   "biggest",
   "persona",
   "movement",
-  "final"
+  "final",
+  "national-teens",
+  "national-programs",
+  "national-moments",
+  "national-footprint",
+  "national-immersive",
+  "national-regions",
+  "national-growth",
+  "national-why"
 ]);
 
 const PROTECTED_STORY_CARD_IDS = new Set([
@@ -156,7 +173,8 @@ const CONFIG_TOP_LEVEL_KEYS = new Set([
   "regions",
   "programs",
   "campaigns",
-  "chapters"
+  "chapters",
+  "national"
 ]);
 
 const CONFIG_SECTION_KEYS = new Set([
@@ -345,6 +363,10 @@ function normalizeScopeType(value) {
     return "program";
   }
 
+  if (normalized === "national" || normalized === "nationwide" || normalized === "org" || normalized === "organization" || normalized === "movement") {
+    return "national";
+  }
+
   return "";
 }
 
@@ -356,6 +378,10 @@ function getRecordScopeType(record) {
   }
 
   if (!hasValue(record.chapter_slug) && !hasValue(record.chapter_name)) {
+    if (hasValue(record.national_teens_reached) || hasValue(record.national_programs_hosted) || hasValue(record.national_regions_count)) {
+      return "national";
+    }
+
     if (hasValue(record.program_slug) || hasValue(record.program_name) || hasValue(record.campaign_slug) || hasValue(record.campaign_name)) {
       return "program";
     }
@@ -377,6 +403,10 @@ function getRecordScopeSlug(record, type) {
     return record.scope_slug || record.program_slug || record.campaign_slug || record.program_name || record.campaign_name || record.scope_name || record.top_program_type;
   }
 
+  if (type === "national") {
+    return record.scope_slug || record.national_slug || record.organization_slug || "national";
+  }
+
   return record.chapter_slug || record.scope_slug;
 }
 
@@ -387,6 +417,10 @@ function getRecordScopeName(record, type) {
 
   if (type === "program") {
     return record.scope_name || record.program_name || record.campaign_name || record.chapter_name || record.top_program_type;
+  }
+
+  if (type === "national") {
+    return record.scope_name || record.national_name || record.organization_name || "JSU/NCSY";
   }
 
   return record.chapter_name || record.scope_name;
@@ -468,7 +502,8 @@ function validateChapterRecords(records) {
   const seen = {
     chapter: {},
     region: {},
-    program: {}
+    program: {},
+    national: {}
   };
 
   if (!report.ok) {
@@ -487,7 +522,7 @@ function validateChapterRecords(records) {
     const scopeName = getRecordScopeName(record, type);
 
     if (hasValue(explicitScope) && !normalizeScopeType(explicitScope)) {
-      addError(report, `story records[${index}].scope_type must be chapter, region, or program`);
+      addError(report, `story records[${index}].scope_type must be chapter, region, program, or national`);
     }
 
     if (type === "chapter") {
@@ -694,7 +729,23 @@ function createStoryRecordFieldSet(chapterRecords) {
     "most_active_month",
     "top_program_type",
     "chapter_persona",
-    "chapter_line"
+    "chapter_line",
+    "national_name",
+    "national_slug",
+    "organization_name",
+    "organization_slug",
+    "growth_rate_label",
+    "growth_label",
+    "year_over_year_growth_label",
+    "growth_series",
+    "growthSeries",
+    "growth_line",
+    "impact_line",
+    "program_breakdown",
+    "program_type_breakdown",
+    "impact_tags",
+    "region_breakdown",
+    "regions"
   ]));
 
   (chapterRecords || []).forEach((record) => {
@@ -957,6 +1008,14 @@ function validateConfig(config, chapterRecords) {
 
     validateConfigSection(report, config.campaigns[slug], `config campaign "${slug}"`, storyRecordFields);
   });
+
+  if (config.national !== undefined) {
+    if (!config.national || typeof config.national !== "object" || Array.isArray(config.national)) {
+      addError(report, "config.national must be an object");
+    } else {
+      validateConfigSection(report, config.national, "config.national", storyRecordFields);
+    }
+  }
 
   return report;
 }

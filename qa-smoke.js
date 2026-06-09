@@ -174,6 +174,15 @@ function runPickerSmoke(records, config) {
         program_slug: "shabbat",
         program_name: "Shabbat Across JSU",
         year_label: "2025-2026"
+      },
+      {
+        scope_type: "national",
+        scope_slug: "national",
+        scope_name: "JSU/NCSY",
+        year_label: "2025-2026",
+        national_teens_reached: 33287,
+        national_programs_hosted: 13143,
+        national_regions_count: 11
       }
     ],
     config,
@@ -199,6 +208,9 @@ function runPickerSmoke(records, config) {
   assert(html.includes("?scope=region&amp;region=atlantic-seaboard"), "picker region story link mismatch");
   assert(html.includes("Shabbat Across JSU"), "picker should surface program story records");
   assert(html.includes("?scope=program&amp;program=shabbat"), "picker program story link mismatch");
+  assert(html.includes("National story"), "picker should label national story records");
+  assert(html.includes("JSU/NCSY"), "picker should surface national story records");
+  assert(html.includes("?scope=national"), "picker national story link mismatch");
   assert(!defaultTeenHtml.includes("jsuw-teen-test-link"), "picker should not expose teen records without an explicit preview parameter");
   assert(explicitTeenHtml.includes("jsuw-teen-picker-link"), "picker should expose teen preview links only with show_teens=1");
   assert(explicitTeenHtml.includes("west-coast-junior-01"), "picker should link to real Junior teen records");
@@ -278,6 +290,40 @@ function runTeenRuntimeSmoke() {
   assert(shareHtml.indexOf("Get involved next year") < shareHtml.indexOf("Share this recap"), "teen CTA should appear before share/download actions");
   assert(placeholderPickerHtml.includes("Rivka B."), "teen picker should render records with missing school");
   assert(!placeholderPickerHtml.includes("your school"), "teen picker should suppress placeholder school copy");
+}
+
+function runNationalStorySmoke(records) {
+  const nationalRecord = records.find((record) => api.getStoryScope(record).type === "national");
+  const request = api.getStoryRequest("https://example.org/wrapped/?scope=national");
+
+  assert(nationalRecord, "sample data should include a national Wrapped record");
+  assert(request && request.type === "national" && request.slug === "national", "scope=national should request the national story");
+  assert(api.findStoryRecord(records, request) === nationalRecord, "national story request should resolve the national record");
+
+  const cards = api.createCards(nationalRecord, {
+    ctaLabel: "Build next year's story",
+    ctaTarget: "#jsuw-wrapped-interest",
+    shareBase: "https://example.org/share/"
+  });
+  const themes = cards.map((card) => card.theme);
+  const regionCard = cards.find((card) => card.theme === "national-regions");
+  const mapHtml = api.renderCardBody(cards.find((card) => card.theme === "national-footprint"));
+  const shareHtml = api.renderCardBody(cards.find((card) => card.theme === "national-share"));
+  const shareUrl = api.createShareUrl({ record: nationalRecord, shareBase: "https://example.org/share/" }, "https://example.org/wrapped/?scope=national");
+
+  assert(themes[0] === "national-cover", "national story should start with the national cover");
+  assert(themes.includes("national-footprint"), "national story should include the rough map footprint card");
+  assert(themes.includes("national-regions"), "national story should include a region roll-up card");
+  assert(themes[themes.length - 1] === "national-share", "national story should end with the national share card");
+  assert(cards.length >= 10, `national story should render the full Claude-inspired card set, got ${cards.length}`);
+  assertNoBrokenText(cards);
+  assert(regionCard && regionCard.regions.length >= 10, "national region card should list every current region");
+  assert(regionCard.regions.some((region) => region.name === "Canada"), "national region card should include Canada");
+  assert(regionCard.regions.some((region) => region.name === "Israel"), "national region card should include Israel");
+  assert(regionCard.regions.some((region) => region.name === "Chile"), "national region card should include Chile");
+  assert(mapHtml.includes("jsuw-national-map"), "national footprint card should render a rough map surface");
+  assert(shareHtml.includes("Share this recap"), "national share card should keep the standard share CTA");
+  assert(shareUrl === "https://example.org/share/national/national/", `national share URL mismatch: ${shareUrl}`);
 }
 
 function runSampleVariantSmoke(records, config) {
@@ -3731,6 +3777,7 @@ function main() {
   runPickerSmoke(records, config);
   runHiddenVariantSmoke();
   runTeenRuntimeSmoke();
+  runNationalStorySmoke(records);
   runSampleVariantSmoke(records, config);
   runSampleConfigConsistencySmoke(records, config);
   runPageMetadataSmoke();

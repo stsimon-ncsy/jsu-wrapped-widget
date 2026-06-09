@@ -45,6 +45,30 @@
     "teen-movement": "Movement",
     "teen-share": "Share card"
   };
+  var NATIONAL_CARD_IDS = [
+    "cover",
+    "national-teens",
+    "national-programs",
+    "national-moments",
+    "national-footprint",
+    "national-immersive",
+    "national-regions",
+    "national-growth",
+    "national-why",
+    "final"
+  ];
+  var NATIONAL_CARD_LABELS = {
+    cover: "National cover",
+    "national-teens": "Teen reach",
+    "national-programs": "Programs hosted",
+    "national-moments": "Engagement moments",
+    "national-footprint": "Footprint map",
+    "national-immersive": "Depth and immersive",
+    "national-regions": "Region roll-up",
+    "national-growth": "Growth",
+    "national-why": "Why it matters",
+    final: "Share card"
+  };
   var METRIC_FIELDS = [
     ["events_hosted", "Events hosted"],
     ["unique_teens", "Unique teens"],
@@ -58,7 +82,18 @@
     ["shabbatons", "Shabbatons"],
     ["region_unique_teens", "Region teens reached"],
     ["region_schools_represented", "Region schools"],
-    ["national_engagement_moments", "National engagement moments"]
+    ["national_engagement_moments", "National engagement moments"],
+    ["national_teens_reached", "National teens reached"],
+    ["national_programs_hosted", "National programs hosted"],
+    ["national_schools_represented", "National schools represented"],
+    ["national_regions_count", "National regions"],
+    ["national_chapters_count", "National chapters"],
+    ["national_learning_sessions", "National learning sessions"],
+    ["national_shabbatons", "National Shabbatons"],
+    ["national_immersive_teens", "National immersive teens"],
+    ["national_destinations", "Immersive destinations"],
+    ["first_time_teens", "First-time teens"],
+    ["growth_rate_label", "Growth rate label"]
   ];
   var METRIC_FIELD_LABELS = METRIC_FIELDS.reduce(function (map, item) {
     map[item[0]] = item[1];
@@ -100,6 +135,16 @@
     "teen-movement": ["region_unique_teens", "region_schools_represented", "national_engagement_moments"],
     "teen-share": ["events_attended", "longest_streak", "events_with_peers", "schools_in_room"]
   };
+  var NATIONAL_CARD_METRIC_FIELDS = {
+    "national-teens": ["national_teens_reached", "first_time_teens"],
+    "national-programs": ["national_programs_hosted"],
+    "national-moments": ["national_engagement_moments"],
+    "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
+    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_destinations"],
+    "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
+    "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
+    final: ["national_teens_reached", "national_programs_hosted", "national_engagement_moments", "national_regions_count"]
+  };
   var CARD_TOKEN_FIELDS = {
     cover: ["chapter_name", "year_label", "region_name", "school_name"],
     events: ["events_hosted", "chapter_name"],
@@ -112,9 +157,23 @@
     movement: ["region_unique_teens", "region_schools_represented", "national_engagement_moments"],
     final: ["chapter_name", "year_label", "events_hosted", "unique_teens", "engagement_moments", "new_teens", "repeat_attendee_rate_label", "chapter_persona"]
   };
+  var NATIONAL_CARD_TOKEN_FIELDS = {
+    cover: ["scope_name", "national_name", "organization_name", "year_label"],
+    "national-teens": ["national_teens_reached", "first_time_teens"],
+    "national-programs": ["national_programs_hosted"],
+    "national-moments": ["national_engagement_moments"],
+    "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
+    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_destinations"],
+    "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
+    "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
+    "national-why": ["impact_line"],
+    final: ["scope_name", "national_teens_reached", "national_programs_hosted", "national_engagement_moments", "national_regions_count"]
+  };
 
   var state = {
+    storyRecords: [],
     records: [],
+    nationalRecords: [],
     teenRecords: [],
     config: null,
     experienceMode: "chapter",
@@ -226,6 +285,28 @@
     return state.experienceMode === "teen";
   }
 
+  function isNationalMode() {
+    return state.experienceMode === "national";
+  }
+
+  function storyScopeType(record) {
+    var explicit = String(record && (record.scope_type || record.scopeType || record.story_scope || record.entity_type) || "").trim().toLowerCase();
+
+    if (explicit) {
+      return explicit;
+    }
+
+    if (record && (hasValue(record.national_teens_reached) || hasValue(record.national_programs_hosted) || hasValue(record.national_regions_count))) {
+      return "national";
+    }
+
+    return "chapter";
+  }
+
+  function isNationalRecord(record) {
+    return !!(record && typeof record === "object" && !Array.isArray(record) && storyScopeType(record) === "national");
+  }
+
   function teenRecordSlug(record) {
     return String(record && (record.teen_slug || record.student_slug || record.slug) || "").trim();
   }
@@ -263,6 +344,7 @@
     next.regions = next.regions && typeof next.regions === "object" && !Array.isArray(next.regions) ? next.regions : {};
     next.programs = next.programs && typeof next.programs === "object" && !Array.isArray(next.programs) ? next.programs : {};
     next.chapters = next.chapters && typeof next.chapters === "object" && !Array.isArray(next.chapters) ? next.chapters : {};
+    next.national = next.national && typeof next.national === "object" && !Array.isArray(next.national) ? next.national : {};
 
     return next;
   }
@@ -314,6 +396,22 @@
     return state.teenRecords.filter(function (record) {
       return teenRecordSlug(record) === state.teenSlug;
     })[0] || state.teenRecords[0] || null;
+  }
+
+  function getActiveNationalRecord() {
+    return state.nationalRecords[0] || state.storyRecords.filter(isNationalRecord)[0] || null;
+  }
+
+  function getBuilderRecord() {
+    if (isTeenMode()) {
+      return getActiveTeenRecord();
+    }
+
+    if (isNationalMode()) {
+      return getActiveNationalRecord();
+    }
+
+    return getActiveRecord();
   }
 
   function getFilteredTeenRecords() {
@@ -379,7 +477,7 @@
   }
 
   function getActiveProgramSlug() {
-    var record = getActiveRecord() || {};
+    var record = getBuilderRecord() || {};
 
     return slugify(record.program_slug || record.program_name || record.campaign_slug || record.campaign_name || record.top_program_type || "");
   }
@@ -395,7 +493,16 @@
     return state.config.programs[slug];
   }
 
+  function ensureNationalSection() {
+    state.config.national = state.config.national && typeof state.config.national === "object" && !Array.isArray(state.config.national) ? state.config.national : {};
+    return state.config.national;
+  }
+
   function ensureBaseSection() {
+    if (isNationalMode() || state.scope === "national") {
+      return ensureNationalSection();
+    }
+
     if (state.scope === "region") {
       return ensureRegionSection();
     }
@@ -478,17 +585,26 @@
     var regions = getRegions();
     var region = getActiveRegion() || regions[0];
     var experienceSelect = $("[data-builder-experience]");
+    var regionField = $("[data-builder-region-field]");
     var regionSelect = $("[data-builder-region]");
+    var chapterField = $("[data-builder-chapter-field]");
     var chapterSelect = $("[data-builder-chapter]");
     var teenField = $("[data-builder-teen-field]");
     var teenSelect = $("[data-builder-teen]");
     var scopeSelect = $("[data-builder-scope]");
     var variantSelect = $("[data-builder-variant]");
     var teenMode = isTeenMode();
+    var nationalMode = isNationalMode();
     var chapterOptions;
     var filteredTeenRecords;
     var baseSection;
     var variantKeys;
+
+    if (nationalMode) {
+      state.scope = "national";
+    } else if (state.scope === "national") {
+      state.scope = "chapter";
+    }
 
     if (!state.regionSlug && region) {
       state.regionSlug = region.slug;
@@ -506,7 +622,11 @@
       regionSelect.innerHTML = regions.map(function (item) {
         return '<option value="' + escapeHtml(item.slug) + '"' + (item.slug === state.regionSlug ? " selected" : "") + ">" + escapeHtml(item.name) + " (" + item.records.length + ")</option>";
       }).join("");
-      regionSelect.disabled = false;
+      regionSelect.disabled = nationalMode;
+    }
+
+    if (regionField) {
+      regionField.hidden = nationalMode;
     }
 
     region = getActiveRegion() || regions[0];
@@ -522,7 +642,11 @@
       chapterSelect.innerHTML = chapterOptions.map(function (record) {
         return '<option value="' + escapeHtml(record.chapter_slug) + '"' + (record.chapter_slug === state.chapterSlug ? " selected" : "") + ">" + escapeHtml(record.chapter_name || record.chapter_slug) + "</option>";
       }).join("");
-      chapterSelect.disabled = false;
+      chapterSelect.disabled = nationalMode;
+    }
+
+    if (chapterField) {
+      chapterField.hidden = nationalMode;
     }
 
     filteredTeenRecords = getFilteredTeenRecords();
@@ -549,7 +673,7 @@
 
     if (scopeSelect) {
       scopeSelect.value = state.scope;
-      scopeSelect.disabled = teenMode;
+      scopeSelect.disabled = teenMode || nationalMode;
     }
 
     if (variantSelect) {
@@ -644,6 +768,7 @@
     var config = cloneConfigForExport(state.config || {});
 
     sanitizeConfigSectionForExport(config.defaults);
+    sanitizeConfigSectionForExport(config.national);
     ["regions", "programs", "campaigns", "chapters"].forEach(function (scopeKey) {
       Object.keys(config[scopeKey] || {}).forEach(function (slug) {
         sanitizeConfigSectionForExport(config[scopeKey][slug]);
@@ -654,7 +779,21 @@
   }
 
   function activeScopeTarget(record) {
-    var activeRecord = record || getActiveRecord() || {};
+    var activeRecord = record || getBuilderRecord() || {};
+
+    if (isNationalMode() || state.scope === "national") {
+      var nationalRecord = getActiveNationalRecord() || {};
+
+      return {
+        type: "national",
+        collection: "national",
+        slug: nationalRecord.scope_slug || nationalRecord.national_slug || "national",
+        label: nationalRecord.scope_name || nationalRecord.national_name || nationalRecord.organization_name || "JSU/NCSY",
+        mergePath: ["national"],
+        previewChapterSlug: "",
+        previewChapterName: ""
+      };
+    }
 
     if (state.scope === "region") {
       var region = getActiveRegion();
@@ -710,7 +849,7 @@
 
   function buildChangeSummary(section, record) {
     var source = section || {};
-    var activeRecord = record || getActiveRecord() || {};
+    var activeRecord = record || getBuilderRecord() || {};
     var changes = [];
     var overrides = source.record_overrides && typeof source.record_overrides === "object" ? source.record_overrides : {};
     var hidden = hiddenCards(source);
@@ -744,7 +883,7 @@
       changes.push({
         type: "hidden_screen",
         card_id: cardId,
-        label: CARD_LABELS[cardId] || cardId
+        label: (isNationalMode() ? NATIONAL_CARD_LABELS[cardId] : CARD_LABELS[cardId]) || cardId
       });
     });
 
@@ -757,7 +896,7 @@
         changes.push({
           type: "screen_rewrite",
           card_id: cardId,
-          label: CARD_LABELS[cardId] || cardId,
+          label: (isNationalMode() ? NATIONAL_CARD_LABELS[cardId] : CARD_LABELS[cardId]) || cardId,
           fields: fields
         });
       }
@@ -796,7 +935,7 @@
   }
 
   function buildSubmissionPayload() {
-    var record = getActiveRecord() || {};
+    var record = getBuilderRecord() || {};
     var section = getActiveSection();
     var target = activeScopeTarget(record);
     var mergePath = target.mergePath.slice();
@@ -1014,7 +1153,7 @@
       state.regionSlug = region ? region.slug : state.regionSlug;
     }
 
-    if (["chapter", "region", "program"].indexOf(scope) !== -1) {
+    if (["chapter", "region", "program", "national"].indexOf(scope) !== -1) {
       state.scope = scope;
     }
 
@@ -1025,6 +1164,14 @@
     if (mode === "teen" || mode === "student" || teenSlug) {
       state.experienceMode = "teen";
       state.previewCardId = "teen-cover";
+    }
+
+    if (mode === "national" || mode === "org" || mode === "organization" || scope === "national") {
+      state.experienceMode = "national";
+      state.scope = "national";
+      state.previewCardId = "cover";
+      state.chapterSlug = "";
+      state.regionSlug = "";
     }
 
     if (teenSlug) {
@@ -1374,8 +1521,19 @@
       "reviewForm"
     ]);
 
-    setSearchParamIfValue(url, "region", values.regionSlug);
-    setSearchParamIfValue(url, "chapter", values.chapterSlug);
+    if (values.mode && values.mode !== "chapter") {
+      url.searchParams.set("mode", values.mode);
+    } else {
+      url.searchParams.delete("mode");
+    }
+
+    if (scope === "national") {
+      url.searchParams.delete("region");
+      url.searchParams.delete("chapter");
+    } else {
+      setSearchParamIfValue(url, "region", values.regionSlug);
+      setSearchParamIfValue(url, "chapter", values.chapterSlug);
+    }
 
     if (scope && scope !== "chapter") {
       url.searchParams.set("scope", scope);
@@ -1399,6 +1557,7 @@
       regionSlug: state.regionSlug,
       reviewEmail: reviewEmailAddress(),
       reviewUrl: reviewFormUrl(),
+      mode: state.experienceMode,
       scope: state.scope,
       variantSlug: state.variantSlug
     });
@@ -1600,7 +1759,7 @@
       return "";
     }
 
-    if (key === "largest_event_name" || key === "repeat_attendee_rate_label" || key === "chapter_name" || key === "region_name" || key === "school_name" || key === "year_label" || key === "school_year" || key === "chapter_persona" || key === "chapter_line" || key === "top_program_type" || key === "most_active_month") {
+    if (key === "largest_event_name" || key === "repeat_attendee_rate_label" || key === "growth_rate_label" || key === "chapter_name" || key === "region_name" || key === "school_name" || key === "year_label" || key === "school_year" || key === "chapter_persona" || key === "chapter_line" || key === "top_program_type" || key === "most_active_month" || key === "scope_name" || key === "national_name" || key === "organization_name" || key === "impact_line") {
       return String(value).trim();
     }
 
@@ -1626,12 +1785,22 @@
   }
 
   function getCardMetricFields(cardId) {
+    if (isNationalMode()) {
+      return (NATIONAL_CARD_METRIC_FIELDS[cardId] || []).filter(function (key, index, list) {
+        return METRIC_FIELD_LABELS[key] && list.indexOf(key) === index;
+      });
+    }
+
     return (CARD_METRIC_FIELDS[cardId] || []).filter(function (key, index, list) {
       return METRIC_FIELD_LABELS[key] && list.indexOf(key) === index;
     });
   }
 
   function getCardTokenFields(cardId) {
+    if (isNationalMode()) {
+      return uniqueList((NATIONAL_CARD_TOKEN_FIELDS[cardId] || []).concat(["scope_name", "national_name", "year_label"]));
+    }
+
     return uniqueList((CARD_TOKEN_FIELDS[cardId] || []).concat(["chapter_name", "region_name", "year_label"]));
   }
 
@@ -1911,27 +2080,29 @@
 
     var section = getActiveSection();
     var overrides = section.card_overrides || {};
-    var record = getActiveRecord() || {};
+    var record = getBuilderRecord() || {};
     var metricOverrides = section.record_overrides && typeof section.record_overrides === "object" ? section.record_overrides : {};
     var hidden = hiddenCards(section);
     var container = $("[data-builder-card-editor]");
     var generatedCards = cardsById(getCardsForRecord(record, { generatedOnly: true }));
+    var cardIds = isNationalMode() ? NATIONAL_CARD_IDS : CARD_IDS;
+    var cardLabels = isNationalMode() ? NATIONAL_CARD_LABELS : CARD_LABELS;
 
-    container.innerHTML = CARD_IDS.map(function (cardId) {
+    container.innerHTML = cardIds.map(function (cardId) {
       var override = overrides[cardId] || {};
       var isHidden = hidden.indexOf(cardId) !== -1;
       var isProtected = isProtectedCard(cardId);
       var card = generatedCards[cardId] || {};
-      var copyField = cardId === "cover" ? "markerText" : "subtext";
-      var copyLabel = cardId === "cover" ? "Footer line" : "Subtext";
+      var copyField = cardId === "cover" && !isNationalMode() ? "markerText" : "subtext";
+      var copyLabel = cardId === "cover" && !isNationalMode() ? "Footer line" : "Subtext";
       var headline = hasValue(override.headline) ? tokenizeMetricText(override.headline, record, cardId) : cardFieldValue(card, "headline");
       var eyebrow = hasValue(override.eyebrow) ? tokenizeMetricText(override.eyebrow, record, cardId) : cardFieldValue(card, "eyebrow");
       var subtext = hasValue(override[copyField]) ? tokenizeMetricText(override[copyField], record, cardId) : cardFieldValue(card, copyField);
 
       return [
-        '<article class="builder-card-row" data-builder-preview-card="' + escapeHtml(cardId) + '">',
+        '<article class="builder-card-row" data-builder-preview-card="' + escapeHtml(cardId) + '"' + (isNationalMode() ? ' data-builder-national-card="' + escapeHtml(cardId) + '"' : "") + '>',
         '<header>',
-        '<strong>' + escapeHtml(CARD_LABELS[cardId]) + "</strong>",
+        '<strong>' + escapeHtml(cardLabels[cardId] || cardId) + "</strong>",
         '<label class="builder-toggle' + (isProtected ? " builder-toggle--locked" : "") + '"><input type="checkbox" data-builder-card-hidden="' + escapeHtml(cardId) + '"' + (isHidden ? " checked" : "") + (isProtected ? ' disabled aria-disabled="true" data-builder-card-protected="true"' : "") + "> " + (isProtected ? "Required" : "Hide") + "</label>",
         "</header>",
         '<div class="builder-card-fields">',
@@ -2069,7 +2240,7 @@
     }
 
     var section = getActiveSection();
-    var record = getActiveRecord() || {};
+    var record = getBuilderRecord() || {};
     var overrides = section.record_overrides && typeof section.record_overrides === "object" ? section.record_overrides : {};
     var keys = Object.keys(overrides).filter(function (key) {
       return hasValue(overrides[key]);
@@ -2125,7 +2296,7 @@
       return;
     }
 
-    var record = getActiveRecord();
+    var record = getBuilderRecord();
     var section = getActiveSection();
     var warnings = [];
     var effective = window.JSUWrapped && window.JSUWrapped.resolveStoryConfig ? window.JSUWrapped.resolveStoryConfig(state.config, record, { variant: state.variantSlug }) : section;
@@ -2209,7 +2380,17 @@
     var base = window.location.origin + window.location.pathname.replace(/builder\.html$/, "");
     var url = new URL(base || "./", window.location.href);
 
-    url.searchParams.set("chapter", record.chapter_slug);
+    if (isNationalMode()) {
+      url.searchParams.set("scope", "national");
+      url.searchParams.delete("chapter");
+      url.searchParams.delete("region");
+      url.searchParams.delete("program");
+      url.searchParams.delete("campaign");
+    } else {
+      url.searchParams.set("chapter", record.chapter_slug);
+      url.searchParams.delete("scope");
+    }
+
     url.searchParams.delete("deploy");
     url.searchParams.delete("retry");
     url.searchParams.delete("qa");
@@ -2243,7 +2424,7 @@
 
   function renderPreview() {
     var preview = document.getElementById("jsu-wrapped");
-    var record = isTeenMode() ? getActiveTeenRecord() : getActiveRecord();
+    var record = getBuilderRecord();
     var cards = getCardsForRecord(record);
     var previewIndex = 0;
 
@@ -2274,6 +2455,27 @@
         mode: "teen",
         teenRecords: state.teenRecords,
         teen: teenRecordSlug(record),
+        url: previewUrl,
+        assetBase: "./assets/",
+        initialIndex: previewIndex,
+        autoplay: false,
+        analytics: false,
+        metadata: false
+      });
+      return;
+    }
+
+    if (isNationalMode()) {
+      $("[data-builder-preview-title]").textContent = (record.scope_name || record.national_name || record.organization_name || "National") + " Wrapped";
+
+      if (previewLink) {
+        previewLink.href = previewUrl;
+      }
+
+      window.JSUWrapped.init(preview, {
+        records: state.storyRecords,
+        config: state.config,
+        scope: "national",
         url: previewUrl,
         assetBase: "./assets/",
         initialIndex: previewIndex,
@@ -2579,14 +2781,19 @@
       var target = event.target;
 
       if (target.matches("[data-builder-experience]")) {
-        state.experienceMode = target.value === "teen" ? "teen" : "chapter";
+        state.experienceMode = target.value === "teen" ? "teen" : target.value === "national" ? "national" : "chapter";
         state.previewCardId = isTeenMode() ? "teen-cover" : "cover";
+        state.scope = isNationalMode() ? "national" : state.scope === "national" ? "chapter" : state.scope;
         if (!state.teenSlug && state.teenRecords[0]) {
           state.teenSlug = teenRecordSlug(state.teenRecords[0]);
         }
         if (isTeenMode()) {
           syncFiltersToTeenRecord(getActiveTeenRecord());
+        } else if (isNationalMode()) {
+          state.regionSlug = "";
+          state.chapterSlug = "";
         }
+        state.variantSlug = "";
         renderAll();
         return;
       }
@@ -2624,6 +2831,10 @@
 
       if (target.matches("[data-builder-scope]")) {
         state.scope = target.value;
+        if (state.scope === "national") {
+          state.experienceMode = "national";
+          state.previewCardId = "cover";
+        }
         state.variantSlug = "";
         renderAll();
         return;
@@ -2707,7 +2918,11 @@
       var rawRecords = await fetchJson(DATA_URL);
       var rawTeenRecords = await fetchJson(TEEN_DATA_URL);
 
+      state.storyRecords = Array.isArray(rawRecords) ? rawRecords.filter(function (record) {
+        return record && typeof record === "object" && !Array.isArray(record);
+      }) : [];
       state.records = rawRecords.filter(isChapterRecord);
+      state.nationalRecords = state.storyRecords.filter(isNationalRecord);
       state.teenRecords = Array.isArray(rawTeenRecords) ? rawTeenRecords.filter(isTeenRecord) : [];
       state.config = ensureConfigShape(await fetchJson(CONFIG_URL));
       bindEvents();

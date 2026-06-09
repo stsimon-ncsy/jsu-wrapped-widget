@@ -382,6 +382,10 @@
       return "program";
     }
 
+    if (normalized === "national" || normalized === "nationwide" || normalized === "org" || normalized === "organization" || normalized === "movement") {
+      return "national";
+    }
+
     return "";
   }
 
@@ -392,6 +396,7 @@
     var requestedScope = normalizeScopeType(settings.scope || settings.scopeType || getScopeParam(href));
     var regionSlug = settings.region || settings.regionSlug || getRegionParam(href);
     var programSlug = settings.program || settings.programSlug || settings.campaign || getProgramSlug(href);
+    var nationalSlug = settings.national || settings.nationalSlug || getSearchValue(href, ["national", "org", "organization"]) || "national";
 
     if (hasValue(chapterSlug)) {
       return {
@@ -411,6 +416,13 @@
       return {
         type: "program",
         slug: String(programSlug).trim()
+      };
+    }
+
+    if (requestedScope === "national") {
+      return {
+        type: "national",
+        slug: String(nationalSlug).trim() || "national"
       };
     }
 
@@ -1521,7 +1533,9 @@
     if (!type) {
       var hasChapterIdentity = hasValue(source.chapter_slug) || hasValue(source.chapter_name);
 
-      if (!hasChapterIdentity && (hasValue(source.program_slug) || hasValue(source.program_name))) {
+      if (!hasChapterIdentity && (hasValue(source.national_teens_reached) || hasValue(source.national_programs_hosted) || hasValue(source.national_regions_count))) {
+        type = "national";
+      } else if (!hasChapterIdentity && (hasValue(source.program_slug) || hasValue(source.program_name))) {
         type = "program";
       } else if (!hasChapterIdentity && (hasValue(source.region_slug) || hasValue(source.region_name))) {
         type = "region";
@@ -1539,6 +1553,9 @@
     } else if (type === "program") {
       name = asText(source.scope_name || source.program_name || source.campaign_name || source.chapter_name || source.top_program_type, "JSU program");
       slug = asText(source.scope_slug || source.program_slug || source.campaign_slug || slugify(source.program_name || source.scope_name || source.top_program_type), "");
+    } else if (type === "national") {
+      name = asText(source.scope_name || source.national_name || source.organization_name || "JSU/NCSY", "JSU/NCSY");
+      slug = asText(source.scope_slug || source.national_slug || source.organization_slug || "national", "national");
     } else {
       name = asText(source.chapter_name || source.scope_name, asText(source.chapter_slug, "Your JSU chapter"));
       slug = asText(source.chapter_slug || source.scope_slug, "");
@@ -1548,7 +1565,7 @@
       type: type,
       slug: slug,
       name: name,
-      noun: type === "region" ? "region" : type === "program" ? "program" : "chapter"
+      noun: type === "region" ? "region" : type === "program" ? "program" : type === "national" ? "movement" : "chapter"
     };
   }
 
@@ -1576,6 +1593,15 @@
       record.campaign_name,
       record.top_program_type,
       record.scope_name
+    ] : requestedType === "national" ? [
+      scope.slug,
+      record.scope_slug,
+      record.national_slug,
+      record.organization_slug,
+      record.scope_name,
+      record.national_name,
+      record.organization_name,
+      "national"
     ] : [
       scope.slug,
       record.chapter_slug,
@@ -1719,7 +1745,7 @@
       return buildChapterUrl(record, url, variant);
     }
 
-    if (!hasValue(scope.slug) || ["region", "program"].indexOf(scope.type) === -1) {
+    if (!hasValue(scope.slug) || ["region", "program", "national"].indexOf(scope.type) === -1) {
       return href || "#";
     }
 
@@ -1731,11 +1757,16 @@
       parsed.searchParams.delete("region");
       parsed.searchParams.delete("program");
       parsed.searchParams.delete("campaign");
+      parsed.searchParams.delete("national");
+      parsed.searchParams.delete("org");
+      parsed.searchParams.delete("organization");
 
       if (scope.type === "region") {
         parsed.searchParams.set("region", String(scope.slug).trim());
-      } else {
+      } else if (scope.type === "program") {
         parsed.searchParams.set("program", String(scope.slug).trim());
+      } else if (String(scope.slug).trim() !== "national") {
+        parsed.searchParams.set("national", String(scope.slug).trim());
       }
 
       if (hasVariantArgument) {
@@ -1749,7 +1780,11 @@
       return parsed.href;
     } catch (error) {
       var bare = String(href || "").split("#")[0].split("?")[0] || "";
-      var query = "?scope=" + encodeURIComponent(scope.type) + (scope.type === "region" ? "&region=" : "&program=") + encodeURIComponent(String(scope.slug).trim());
+      var query = "?scope=" + encodeURIComponent(scope.type);
+
+      if (scope.type !== "national" || String(scope.slug).trim() !== "national") {
+        query += (scope.type === "region" ? "&region=" : scope.type === "program" ? "&program=" : "&national=") + encodeURIComponent(String(scope.slug).trim());
+      }
 
       if (hasVariantArgument && hasValue(variant)) {
         query += "&variant=" + encodeURIComponent(String(variant).trim());
@@ -1877,6 +1912,9 @@
 
     function scopedStatLine(record) {
       return [
+        hasValue(record.national_programs_hosted) ? formatNumber(record.national_programs_hosted) + " national programs" : "",
+        hasValue(record.national_teens_reached) ? formatNumber(record.national_teens_reached) + " teens reached" : "",
+        hasValue(record.national_regions_count) ? formatNumber(record.national_regions_count) + " regions" : "",
         hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " programs" : "",
         hasValue(record.unique_teens) ? formatNumber(record.unique_teens) + " teens" : "",
         hasValue(record.engagement_moments) ? formatNumber(record.engagement_moments) + " moments" : "",
@@ -1890,7 +1928,7 @@
       var brand = getBrandChoice(record);
       var logoUrl = getLogoAsset(brand, assetBase);
       var stats = scopedStatLine(record);
-      var label = scope.type === "region" ? "Region story" : "Program story";
+      var label = scope.type === "region" ? "Region story" : scope.type === "national" ? "National story" : "Program story";
       var variants = collectVariantEntries(config, record, { program: scope.type === "program" ? scope.slug : program });
       var variantLinks = variants.length ? [
         '<div class="jsuw-picker-variants" aria-label="' + escapeHtml(scope.name) + ' versions">',
@@ -2031,7 +2069,7 @@
     });
 
     var scopedStoriesHtml = scopedRecords.length ? [
-      '<section class="jsuw-picker-scope-stories" aria-label="Region and program Wrapped stories">',
+      '<section class="jsuw-picker-scope-stories" aria-label="National, region, and program Wrapped stories">',
       '<h2>Bigger stories</h2>',
       '<div class="jsuw-picker-scope-list">',
       scopedRecords.map(renderScopedStoryItem).join(""),
@@ -2266,6 +2304,8 @@
     var source = config && typeof config === "object" ? config : {};
     var settings = options || {};
     var programSlug = settings.program || settings.programSlug || settings.campaign || record && (record.program_slug || record.program_name || record.program_type || record.top_program_type);
+    var scope = getStoryScope(record);
+    var nationalEntry = scope.type === "national" ? source.national : null;
     var regionEntry = findConfigEntry(source.regions, [record && record.region_slug, record && record.region_name]);
     var programEntry = findConfigEntry(source.programs || source.campaigns, [programSlug]);
     var chapterEntry = findConfigEntry(source.chapters, [record && record.chapter_slug, record && record.chapter_name]);
@@ -2306,7 +2346,7 @@
       });
     }
 
-    [source.defaults, regionEntry, programEntry, chapterEntry].forEach(addVariants);
+    [source.defaults, nationalEntry, regionEntry, programEntry, chapterEntry].forEach(addVariants);
 
     return Object.keys(entries).sort(function (a, b) {
       return entries[a].label.localeCompare(entries[b].label);
@@ -2321,11 +2361,14 @@
     var settings = options || {};
     var variantSlug = settings.variant || settings.variantSlug || settings.version || "";
     var programSlug = settings.program || settings.programSlug || settings.campaign || record && (record.program_slug || record.program_name || record.program_type || record.top_program_type);
+    var scope = getStoryScope(record);
+    var nationalEntry = scope.type === "national" ? source.national : null;
     var regionEntry = findConfigEntry(source.regions, [record && record.region_slug, record && record.region_name]);
     var programEntry = findConfigEntry(source.programs || source.campaigns, [programSlug]);
     var chapterEntry = findConfigEntry(source.chapters, [record && record.chapter_slug, record && record.chapter_name]);
 
     mergeVariantSection(output, source.defaults, variantSlug);
+    mergeVariantSection(output, nationalEntry, variantSlug);
     mergeVariantSection(output, regionEntry, variantSlug);
     mergeVariantSection(output, programEntry, variantSlug);
     mergeVariantSection(output, chapterEntry, variantSlug);
@@ -2702,8 +2745,351 @@
     return filtered;
   }
 
+  function structuredList(value) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (typeof value === "string" && hasValue(value)) {
+      try {
+        var parsed = JSON.parse(value);
+
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    return [];
+  }
+
+  function nationalNumber(record, fields, fallback) {
+    for (var index = 0; index < fields.length; index += 1) {
+      var field = fields[index];
+
+      if (record && hasValue(record[field])) {
+        return numberValue(record[field], fallback || 0);
+      }
+    }
+
+    return fallback || 0;
+  }
+
+  function normalizeNationalBreakdown(value, labelKeys, valueKeys) {
+    return structuredList(value).map(function (entry) {
+      if (typeof entry === "string") {
+        return {
+          label: cleanPublicText(entry, entry),
+          value: 0
+        };
+      }
+
+      var source = entry && typeof entry === "object" ? entry : {};
+      var label = "";
+      var rawValue = "";
+
+      labelKeys.some(function (key) {
+        if (hasValue(source[key])) {
+          label = cleanPublicText(source[key], asText(source[key], ""));
+          return true;
+        }
+
+        return false;
+      });
+
+      valueKeys.some(function (key) {
+        if (hasValue(source[key])) {
+          rawValue = source[key];
+          return true;
+        }
+
+        return false;
+      });
+
+      return {
+        label: label,
+        value: numberValue(rawValue, 0),
+        raw: source
+      };
+    }).filter(function (entry) {
+      return hasValue(entry.label);
+    });
+  }
+
+  function nationalRegions(record) {
+    var fallbackCoords = [
+      [76, 36],
+      [13, 42],
+      [44, 18],
+      [62, 58],
+      [82, 46],
+      [50, 38],
+      [27, 58],
+      [64, 34],
+      [86, 29],
+      [63, 72],
+      [40, 86]
+    ];
+    var regions = normalizeNationalBreakdown(record && (record.region_breakdown || record.regions), ["name", "region_name", "scope_name", "label"], ["teens", "unique_teens", "region_unique_teens", "value"]);
+
+    return regions.map(function (region, index) {
+      var source = region.raw || {};
+      var coords = fallbackCoords[index % fallbackCoords.length];
+
+      return {
+        name: region.label,
+        slug: asText(source.slug || source.region_slug || slugify(region.label), ""),
+        teens: numberValue(source.teens || source.unique_teens || source.region_unique_teens || region.value, 0),
+        events: numberValue(source.events || source.events_hosted || source.region_events_hosted, 0),
+        engagementMoments: numberValue(source.engagement_moments || source.moments || source.region_engagement_moments, 0),
+        chapters: numberValue(source.chapters || source.chapter_count || source.chapters_count, 0),
+        schools: numberValue(source.schools || source.schools_represented || source.region_schools_represented, 0),
+        international: String(source.is_international || source.international || "").toLowerCase() === "true" || source.is_international === true || source.international === true,
+        mapX: Math.max(6, Math.min(94, numberValue(source.map_x || source.mapX || source.x, coords[0]))),
+        mapY: Math.max(8, Math.min(90, numberValue(source.map_y || source.mapY || source.y, coords[1])))
+      };
+    });
+  }
+
+  function nationalProgramBreakdown(record, totalPrograms) {
+    var breakdown = normalizeNationalBreakdown(record && (record.program_breakdown || record.program_type_breakdown), ["label", "program_type", "type", "name"], ["value", "events", "programs", "count"]);
+
+    if (breakdown.length) {
+      return breakdown;
+    }
+
+    var learning = nationalNumber(record, ["national_learning_sessions", "learning_sessions"], 0);
+    var shabbatons = nationalNumber(record, ["national_shabbatons", "shabbatons"], 0);
+    var other = Math.max(0, numberValue(totalPrograms) - learning - shabbatons);
+
+    return [
+      learning ? { label: "Learning", value: learning } : null,
+      shabbatons ? { label: "Shabbatons", value: shabbatons } : null,
+      other ? { label: "Other programs", value: other } : null
+    ].filter(Boolean);
+  }
+
+  function nationalGrowthSeries(record) {
+    var series = structuredList(record && (record.growth_series || record.growthSeries || record.yearly_growth || record.growth_by_year));
+    var cleaned = series.map(function (item, index) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      var label = asText(item.label || item.year_label || item.school_year || item.year || item.period, "");
+      var value = numberValue(item.value || item.teens || item.unique_teens || item.national_teens_reached || item.count, 0);
+
+      return {
+        label: label || "Year " + (index + 1),
+        value: value
+      };
+    }).filter(function (item) {
+      return item && hasValue(item.label) && item.value > 0;
+    }).slice(-7);
+    var max = cleaned.reduce(function (largest, item) {
+      return Math.max(largest, item.value);
+    }, 0);
+
+    return cleaned.map(function (item, index) {
+      return {
+        label: item.label,
+        value: item.value,
+        height: max ? Math.max(22, Math.round(item.value / max * 86)) : 36,
+        index: index
+      };
+    });
+  }
+
+  function createNationalCards(record, options) {
+    record = record || {};
+
+    var storyScope = getStoryScope(record);
+    var yearLabel = asText(record.year_label || record.school_year, "This year");
+    var movementName = asText(storyScope.name, "JSU/NCSY");
+    var brandChoice = getBrandChoice(record);
+    var assetBase = options && options.assetBase || "";
+    var logoUrl = getLogoAsset(brandChoice, assetBase);
+    var regions = nationalRegions(record);
+    var teens = nationalNumber(record, ["national_teens_reached", "unique_teens"], 0);
+    var programs = nationalNumber(record, ["national_programs_hosted", "events_hosted"], 0);
+    var moments = nationalNumber(record, ["national_engagement_moments", "engagement_moments"], 0);
+    var schools = nationalNumber(record, ["national_schools_represented", "schools_represented"], 0);
+    var regionCount = nationalNumber(record, ["national_regions_count", "regions_count"], regions.length);
+    var chapterCount = nationalNumber(record, ["national_chapters_count", "chapters_count"], 0);
+    var shabbatons = nationalNumber(record, ["national_shabbatons", "shabbatons"], 0);
+    var learningSessions = nationalNumber(record, ["national_learning_sessions", "learning_sessions"], 0);
+    var immersiveTeens = nationalNumber(record, ["national_immersive_teens", "immersive_teens"], 0);
+    var destinations = nationalNumber(record, ["national_destinations", "immersive_destinations", "destinations"], 0);
+    var firstTimeTeens = nationalNumber(record, ["first_time_teens", "national_new_teens", "new_teens"], 0);
+    var growthLabel = asText(record.growth_rate_label || record.year_over_year_growth_label || record.growth_label, "");
+    var growthSeries = nationalGrowthSeries(record);
+    var programBreakdown = nationalProgramBreakdown(record, programs);
+    var impactTags = structuredList(record.impact_tags).filter(hasValue).slice(0, 5);
+    var cta = {
+      label: asText(options && options.ctaLabel, ""),
+      target: asText(options && options.ctaTarget, ""),
+      href: asText(options && options.ctaHref, "")
+    };
+    var summaryStats = [
+      teens ? { value: formatNumber(teens), label: "teens reached" } : null,
+      programs ? { value: formatNumber(programs), label: "programs hosted" } : null,
+      moments ? { value: formatNumber(moments), label: "engagement moments" } : null,
+      regionCount ? { value: formatNumber(regionCount), label: "regions" } : null
+    ].filter(Boolean);
+    var cards = [
+      {
+        id: "cover",
+        type: "national",
+        theme: "national-cover",
+        eyebrow: "NATIONWIDE",
+        headline: "the movement wrapped.",
+        displayHeadline: "the\nmovement\nwrapped.",
+        coverBadge: "NATIONWIDE",
+        coverNote: "one year of Jewish teen life",
+        movementName: movementName,
+        yearLabel: yearLabel,
+        summaryStats: summaryStats,
+        subtext: "Every region. Every chapter. Every teen who helped build the year."
+      },
+      {
+        id: "national-teens",
+        type: "national",
+        theme: "national-teens",
+        eyebrow: "Teen reach",
+        headline: formatNumber(teens) + " teens found a Jewish moment this year",
+        displayHeadline: formatNumber(teens) + "\nteens reached.",
+        stat: formatNumber(teens),
+        rawValue: teens,
+        statLabel: "teens reached",
+        firstTimeTeens: firstTimeTeens,
+        subtext: firstTimeTeens ? formatNumber(firstTimeTeens) + " of those teens were first-time faces in this year's story." : "Each dot is a doorway into a bigger story."
+      },
+      {
+        id: "national-programs",
+        type: "national",
+        theme: "national-programs",
+        eyebrow: "Programs",
+        headline: formatNumber(programs) + " programs made the movement visible",
+        displayHeadline: formatNumber(programs) + "\nprograms hosted.",
+        stat: formatNumber(programs),
+        rawValue: programs,
+        statLabel: "programs",
+        breakdown: programBreakdown,
+        subtext: "Lunch clubs, learning, social events, Shabbatons, and everything in between."
+      },
+      {
+        id: "national-moments",
+        type: "national",
+        theme: "national-moments",
+        eyebrow: "Engagement",
+        headline: formatNumber(moments) + " moments of connection",
+        displayHeadline: "moments of\nconnection.",
+        stat: formatNumber(moments),
+        rawValue: moments,
+        statLabel: "moments",
+        subtext: "Every attendance row, conversation, and return visit adds up."
+      },
+      {
+        id: "national-footprint",
+        type: "national",
+        theme: "national-footprint",
+        eyebrow: "Footprint",
+        headline: "Coast to coast, plus the global story",
+        displayHeadline: "coast to coast,\nplus the global\nstory.",
+        regions: regions,
+        stats: [
+          schools ? { value: formatNumber(schools), label: "schools represented" } : null,
+          regionCount ? { value: formatNumber(regionCount), label: "regions" } : null,
+          chapterCount ? { value: formatNumber(chapterCount), label: "chapters" } : null
+        ].filter(Boolean),
+        subtext: "The map is intentionally rough: a quick national footprint, with international regions included."
+      },
+      {
+        id: "national-immersive",
+        type: "national",
+        theme: "national-immersive",
+        eyebrow: "Depth",
+        headline: "The deeper moments carried the year",
+        displayHeadline: "deeper\nmoments\ncarried\nthe year.",
+        stat: formatNumber(shabbatons || learningSessions || immersiveTeens),
+        stats: [
+          shabbatons ? { value: formatNumber(shabbatons), label: "Shabbaton moments" } : null,
+          learningSessions ? { value: formatNumber(learningSessions), label: "learning sessions" } : null,
+          immersiveTeens ? { value: formatNumber(immersiveTeens), label: "immersive teens" } : null,
+          destinations ? { value: formatNumber(destinations), label: "destinations" } : null
+        ].filter(Boolean),
+        subtext: "The year was not only bigger. It got deeper."
+      },
+      {
+        id: "national-regions",
+        type: "national",
+        theme: "national-regions",
+        eyebrow: "Regions",
+        headline: "Every region helped build the story",
+        displayHeadline: "every region\nhelped build\nthe story.",
+        regions: regions,
+        subtext: "Listed all together so national and international regions stay visible."
+      },
+      {
+        id: "national-growth",
+        type: "national",
+        theme: "national-growth",
+        eyebrow: "Growth",
+        headline: growthLabel ? "The movement grew " + growthLabel : "Momentum kept building all year",
+        displayHeadline: growthLabel ? "movement\ngrowth:\n" + growthLabel : "momentum\nkept\nbuilding.",
+        growthLabel: growthLabel,
+        growthSeries: growthSeries,
+        firstTimeTeens: firstTimeTeens,
+        stats: [
+          firstTimeTeens ? { value: formatNumber(firstTimeTeens), label: "first-time teens" } : null,
+          regionCount ? { value: formatNumber(regionCount), label: "regions in the story" } : null,
+          programs ? { value: formatNumber(programs), label: "program chances to show up" } : null
+        ].filter(Boolean),
+        subtext: asText(record.growth_line, "The most important growth is measured in teens who came closer.")
+      },
+      {
+        id: "national-why",
+        type: "national",
+        theme: "national-why",
+        eyebrow: "Why it matters",
+        headline: "Because every number has a name behind it",
+        displayHeadline: "every number\nhas a name\nbehind it.",
+        tags: impactTags.length ? impactTags : ["Belonging", "Identity", "Leadership", "Friendship", "Jewish life"],
+        subtext: asText(record.impact_line, "Wrapped is the recap. The real story is what teens carry forward.")
+      },
+      {
+        id: "final",
+        type: "national",
+        theme: "national-share",
+        eyebrow: "Ready to share",
+        headline: movementName + " Wrapped",
+        displayHeadline: movementName + "\nWrapped",
+        movementName: movementName,
+        yearLabel: yearLabel,
+        summaryStats: summaryStats,
+        persona: "One movement",
+        subtext: summaryStats.map(function (stat) {
+          return stat.value + " " + stat.label;
+        }).join(". ") + ".",
+        cta: hasValue(cta.label) && (hasValue(cta.target) || hasValue(cta.href)) ? cta : null
+      }
+    ];
+
+    cards.forEach(function (card) {
+      card.brandChoice = brandChoice;
+      card.logoUrl = logoUrl;
+    });
+
+    return applyStoryConfig(cards, record, options && options.storyConfig, options);
+  }
+
   function createCards(record, options) {
     var storyScope = getStoryScope(record);
+
+    if (storyScope.type === "national") {
+      return createNationalCards(record, options);
+    }
+
     var chapterName = asText(storyScope.name, "Your JSU chapter");
     var storyNoun = storyScope.noun;
     var yearLabel = asText(record.year_label || record.school_year, "This year");
@@ -3711,6 +4097,287 @@
     ].join(""));
   }
 
+  function renderNationalTop(card) {
+    return [
+      renderBrandLockup(card),
+      '<div class="jsuw-national-proof">National Wrapped</div>',
+      '<div class="jsuw-eyebrow">' + escapeHtml(card.eyebrow || "National Wrapped") + "</div>"
+    ].join("");
+  }
+
+  function renderNationalStats(stats, className) {
+    return '<div class="' + (className || "jsuw-national-stats") + '">' + (stats || []).map(function (stat, index) {
+      return '<div style="--i:' + index + '"><strong>' + escapeHtml(stat.value || "") + "</strong><span>" + escapeHtml(stat.label || "") + "</span></div>";
+    }).join("") + "</div>";
+  }
+
+  function renderNationalDots(card) {
+    var rawValue = numberValue(card.rawValue, 0);
+    var total = Math.max(72, Math.min(180, Math.round(rawValue / 220)));
+    var firstTime = numberValue(card.firstTimeTeens, 0);
+    var firstTimeVisible = rawValue > 0 ? Math.round(firstTime / rawValue * total) : 0;
+    var cutoff = Math.max(0, total - firstTimeVisible);
+
+    return '<div class="jsuw-national-dot-field" aria-hidden="true">' + Array.from({ length: total }).map(function (_, index) {
+      return '<span class="' + (index >= cutoff ? "jsuw-national-dot--new" : "") + '" style="--i:' + index + '"></span>';
+    }).join("") + "</div>";
+  }
+
+  function renderNationalBars(card) {
+    var breakdown = (card.breakdown || []).slice(0, 6);
+    var max = breakdown.reduce(function (value, item) {
+      return Math.max(value, numberValue(item.value, 0));
+    }, 0) || 1;
+
+    return '<div class="jsuw-national-bars">' + breakdown.map(function (item, index) {
+      var value = numberValue(item.value, 0);
+      var width = Math.max(6, Math.round(value / max * 100));
+
+      return [
+        '<div class="jsuw-national-bar" style="--i:' + index + ';--w:' + width + '%">',
+        '<span>' + escapeHtml(item.label || "Program") + "</span>",
+        '<strong>' + escapeHtml(formatNumber(value)) + "</strong>",
+        '<i aria-hidden="true"></i>',
+        "</div>"
+      ].join("");
+    }).join("") + "</div>";
+  }
+
+  function renderNationalMap(regions) {
+    var list = (regions || []).slice(0, 16);
+    var maxTeens = list.reduce(function (value, region) {
+      return Math.max(value, numberValue(region.teens, 0));
+    }, 0) || 1;
+    var bubbles = list.map(function (region, index) {
+      var radius = 2.6 + numberValue(region.teens, 0) / maxTeens * 3.8;
+      var x = numberValue(region.mapX, 50);
+      var y = numberValue(region.mapY, 42);
+
+      return [
+        '<g class="jsuw-national-map-region' + (region.international ? " jsuw-national-map-region--international" : "") + '" style="--i:' + index + '">',
+        '<circle cx="' + x + '" cy="' + y + '" r="' + radius.toFixed(2) + '"><title>' + escapeHtml(region.name + ": " + formatNumber(region.teens) + " teens") + "</title></circle>",
+        '<text x="' + Math.min(94, x + radius + 1).toFixed(2) + '" y="' + (y + 1.2).toFixed(2) + '">' + escapeHtml(region.name) + "</text>",
+        "</g>"
+      ].join("");
+    }).join("");
+
+    return [
+      '<svg class="jsuw-national-map" viewBox="0 0 100 92" role="img" aria-label="Rough national and international region map">',
+      '<path class="jsuw-national-map-land" d="M10 38 C17 28 31 21 45 25 C56 18 72 22 84 32 C91 39 88 53 78 58 C66 66 50 60 39 65 C24 71 11 60 10 38Z"></path>',
+      '<path class="jsuw-national-map-route" d="M13 43 C30 30 49 42 63 34 C76 26 82 35 88 44"></path>',
+      '<path class="jsuw-national-map-route jsuw-national-map-route--global" d="M38 82 C52 70 65 74 78 66"></path>',
+      bubbles,
+      "</svg>"
+    ].join("");
+  }
+
+  function renderNationalCoverBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-cover-scene">',
+      '<div class="jsuw-national-cover-badge">' + escapeHtml(card.coverBadge || card.eyebrow || "NATIONWIDE") + "</div>",
+      '<h2 class="jsuw-national-title jsuw-national-title--cover">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<p class="jsuw-national-cover-note">' + escapeHtml(card.coverNote || "") + "</p>",
+      renderNationalStats(card.summaryStats, "jsuw-national-stats jsuw-national-stats--cover"),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      '<footer>' + escapeHtml([card.movementName, card.yearLabel].filter(hasValue).join(" | ")) + "</footer>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalTeensBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-teens-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-national-big-stat">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--national") + '<span>' + escapeHtml(card.statLabel || "") + "</span></div>",
+      renderNationalDots(card),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalProgramsBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-programs-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      renderNationalBars(card),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalMomentsBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-moments-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-national-big-stat jsuw-national-big-stat--moments">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--national jsuw-reference-stat--national-wide") + '<span>' + escapeHtml(card.statLabel || "") + "</span></div>",
+      renderIndexedSpans("jsuw-national-waveform", 64, 64),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalFootprintBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-footprint-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      renderNationalMap(card.regions),
+      renderNationalStats(card.stats, "jsuw-national-stats jsuw-national-stats--footprint"),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalImmersiveBody(card) {
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-immersive-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-national-candles" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>',
+      renderNationalStats(card.stats, "jsuw-national-stats jsuw-national-stats--immersive"),
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalRegionsBody(card) {
+    var regions = (card.regions || []).map(function (region, index) {
+      return [
+        '<li style="--i:' + index + '">',
+        '<strong>' + escapeHtml(region.name) + "</strong>",
+        '<span>' + escapeHtml(formatNumber(region.teens)) + " teens</span>",
+        '<em>' + escapeHtml(formatNumber(region.events)) + " programs</em>",
+        region.international ? '<b>International</b>' : "",
+        "</li>"
+      ].join("");
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-regions-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<ol class="jsuw-national-region-list">' + regions + "</ol>",
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalGrowthBody(card) {
+    var stats = renderNationalStats(card.stats, "jsuw-national-stats jsuw-national-stats--growth");
+    var series = Array.isArray(card.growthSeries) ? card.growthSeries : [];
+    var steps = series.length ? series.map(function (item, index) {
+      var label = asText(item.label, "");
+      var shortLabel = label.indexOf("-") !== -1 ? label.split("-").pop() : label;
+      var height = Math.max(22, Math.min(92, numberValue(item.height, 36)));
+
+      return '<span style="--i:' + index + ';--h:' + height + 'px"><em>' + escapeHtml(shortLabel) + "</em></span>";
+    }).join("") : Array.from({ length: 7 }).map(function (_, index) {
+      return '<span style="--i:' + index + ';--h:' + (32 + index * 9) + 'px"></span>';
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-growth-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-national-growth-chart" aria-hidden="true">' + steps + "</div>",
+      stats,
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalWhyBody(card) {
+    var tags = (card.tags || []).map(function (tag, index) {
+      return '<span style="--i:' + index + '">' + escapeHtml(tag) + "</span>";
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-why-scene">',
+      renderNationalTop(card),
+      '<h2 class="jsuw-national-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-national-impact-tags">' + tags + "</div>",
+      '<p class="jsuw-national-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalShareBody(card) {
+    var hasCta = card.cta && hasValue(card.cta.label) && (hasValue(card.cta.target) || hasValue(card.cta.href));
+    var stats = (card.summaryStats || []).map(function (stat) {
+      return '<div><span>' + escapeHtml(stat.label) + "</span><strong>" + escapeHtml(stat.value) + "</strong></div>";
+    }).join("");
+    var actionButtons = [
+      hasCta ? '<button class="jsuw-action-button jsuw-action-button--primary jsuw-action-button--cta" type="button" data-jsuw-action="cta" data-jsuw-cta-label="' + escapeHtml(card.cta.label) + '" data-jsuw-cta-target="' + escapeHtml(card.cta.target || "") + '" data-jsuw-cta-href="' + escapeHtml(card.cta.href || "") + '">' + escapeHtml(card.cta.label) + "</button>" : "",
+      '<button class="jsuw-action-button' + (hasCta ? "" : " jsuw-action-button--primary") + '" type="button" data-jsuw-action="share">Share this recap</button>',
+      '<button class="jsuw-action-button" type="button" data-jsuw-action="download">Download image</button>'
+    ].filter(Boolean).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-national-scene jsuw-national-share-scene">',
+      '<div class="jsuw-national-share-poster">',
+      renderBrandLockup(card),
+      '<div class="jsuw-national-proof">National Wrapped</div>',
+      '<h2>' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<p>' + escapeHtml(card.subtext || "") + "</p>",
+      '<div class="jsuw-national-share-stats">' + stats + "</div>",
+      '<div class="jsuw-national-share-energy">' + escapeHtml(card.persona || "One movement") + "</div>",
+      '<footer>' + escapeHtml([card.movementName, card.yearLabel].filter(hasValue).join(" | ")) + "</footer>",
+      "</div>",
+      '<div class="jsuw-final-actions' + (hasCta ? " jsuw-final-actions--with-cta" : "") + '">',
+      actionButtons,
+      '<p class="jsuw-action-status" data-jsuw-status aria-live="polite"></p>',
+      "</div>",
+      "</div>"
+    ].join(""));
+  }
+
+  function renderNationalBody(card) {
+    if (card.theme === "national-cover") {
+      return renderNationalCoverBody(card);
+    }
+
+    if (card.theme === "national-teens") {
+      return renderNationalTeensBody(card);
+    }
+
+    if (card.theme === "national-programs") {
+      return renderNationalProgramsBody(card);
+    }
+
+    if (card.theme === "national-moments") {
+      return renderNationalMomentsBody(card);
+    }
+
+    if (card.theme === "national-footprint") {
+      return renderNationalFootprintBody(card);
+    }
+
+    if (card.theme === "national-immersive") {
+      return renderNationalImmersiveBody(card);
+    }
+
+    if (card.theme === "national-regions") {
+      return renderNationalRegionsBody(card);
+    }
+
+    if (card.theme === "national-growth") {
+      return renderNationalGrowthBody(card);
+    }
+
+    if (card.theme === "national-why") {
+      return renderNationalWhyBody(card);
+    }
+
+    if (card.theme === "national-share") {
+      return renderNationalShareBody(card);
+    }
+
+    return "";
+  }
+
   function renderTeenBody(card) {
     if (card.theme === "teen-cover") {
       return renderTeenCoverBody(card);
@@ -3756,6 +4423,10 @@
   }
 
   function renderCardBody(card) {
+    if (String(card.theme || "").indexOf("national-") === 0) {
+      return renderNationalBody(card);
+    }
+
     if (String(card.theme || "").indexOf("teen-") === 0) {
       return renderTeenBody(card);
     }
@@ -4508,6 +5179,16 @@
     var scope = getStoryScope(record);
     var chapterName = asText(scope.name, "Our JSU chapter");
 
+    if (scope.type === "national") {
+      return [
+        chapterName + " Wrapped:",
+        hasValue(record.national_programs_hosted) ? formatNumber(record.national_programs_hosted) + " programs" : "",
+        hasValue(record.national_teens_reached) ? formatNumber(record.national_teens_reached) + " teens reached" : "",
+        hasValue(record.national_engagement_moments) ? formatNumber(record.national_engagement_moments) + " engagement moments" : "",
+        hasValue(record.national_regions_count) ? formatNumber(record.national_regions_count) + " regions" : ""
+      ].filter(Boolean).join(" - ");
+    }
+
     return [
       chapterName + " Wrapped:",
       hasValue(record.events_hosted) ? formatNumber(record.events_hosted) + " events" : "",
@@ -4523,7 +5204,7 @@
     var scope = getStoryScope(record);
     var shareBase = asText(state && state.shareBase, "");
 
-    if (!shareBase || state && state.experienceMode === "teen" || ["chapter", "region", "program"].indexOf(scope.type) === -1 || !hasValue(scope.slug)) {
+    if (!shareBase || state && state.experienceMode === "teen" || ["chapter", "region", "program", "national"].indexOf(scope.type) === -1 || !hasValue(scope.slug)) {
       return fallback;
     }
 
@@ -4547,6 +5228,10 @@
             return;
           }
 
+          if ((key === "program" || key === "campaign") && scope.type === "national") {
+            return;
+          }
+
           var value = sourceParams.get(key);
 
           if (hasValue(value)) {
@@ -4554,12 +5239,12 @@
           }
         });
       } catch (sourceError) {
-        if (scope.type !== "program" && hasValue(state && state.programSlug)) {
+        if (scope.type !== "program" && scope.type !== "national" && hasValue(state && state.programSlug)) {
           shareUrl.searchParams.set("program", String(state.programSlug).trim());
         }
       }
 
-      if (scope.type !== "program" && !shareUrl.searchParams.has("program") && !shareUrl.searchParams.has("campaign") && hasValue(state && state.programSlug)) {
+      if (scope.type !== "program" && scope.type !== "national" && !shareUrl.searchParams.has("program") && !shareUrl.searchParams.has("campaign") && hasValue(state && state.programSlug)) {
         shareUrl.searchParams.set("program", String(state.programSlug).trim());
       }
 
@@ -4709,7 +5394,7 @@
     var cards = state && state.cards || [];
 
     for (var index = 0; index < cards.length; index += 1) {
-      if (cards[index] && cards[index].theme === "final") {
+      if (cards[index] && (cards[index].theme === "final" || cards[index].theme === "national-share" || cards[index].theme === "teen-share")) {
         return cards[index];
       }
     }

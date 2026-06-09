@@ -1,6 +1,6 @@
 # JSU/NCSY Wrapped
 
-Static, embeddable Wrapped-style stories for JSU/NCSY chapters, regions, programs, and a guarded teen proof of concept.
+Static, embeddable Wrapped-style stories for JSU/NCSY chapters, regions, programs, national rollups, and a guarded teen proof of concept.
 
 The production path is intentionally lightweight: no backend, no build step, and no login required for the public widget. GitHub Pages can host the static assets, while WordPress can embed the same widget on `ncsy.org`.
 
@@ -14,6 +14,7 @@ The production path is intentionally lightweight: no backend, no build step, and
 
 - GitHub Pages preview: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/`
 - Chapter story: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore`
+- National story: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/?scope=national`
 - Chapter variant: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/?chapter=baltimore&variant=donor-recap`
 - Builder: `https://stsimon-ncsy.github.io/jsu-wrapped-widget/builder.html`
 
@@ -29,9 +30,10 @@ The public widget is driven by these files:
 
 - `jsu-wrapped.js` - renderer, story logic, analytics hooks, share/download, CTA prefill
 - `jsu-wrapped.css` - scoped widget styles under `#jsu-wrapped`
-- `sample-wrapped-2026.json` - chapter, region, and program story data
+- `sample-wrapped-2026.json` - chapter, region, program, and national story data
 - `sample-teen-wrapped-2026.json` - teen proof-of-concept data
 - `wrapped-config-2026.json` - copy, brand, CTA, variant, and custom-screen overrides
+- `docs/national-sql-handoff-prompt.md` - schema-aware prompt for producing the national JSON record
 - `share/` - generated crawler-readable social preview pages
 - `wordpress-inline-embed.html` - self-contained WordPress handoff HTML
 

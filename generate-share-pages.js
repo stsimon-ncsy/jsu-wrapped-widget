@@ -41,7 +41,7 @@ function isChapterRecord(record) {
 function getShareScope(record) {
   var scope = api.getStoryScope(record);
 
-  if (!scope || ["chapter", "region", "program"].indexOf(scope.type) === -1 || !hasValue(scope.slug) || !hasValue(scope.name)) {
+  if (!scope || ["chapter", "region", "program", "national"].indexOf(scope.type) === -1 || !hasValue(scope.slug) || !hasValue(scope.name)) {
     return null;
   }
 
@@ -87,7 +87,10 @@ function storyUrlFor(record) {
     url.searchParams.set("chapter", scope.slug);
   } else {
     url.searchParams.set("scope", scope.type);
-    url.searchParams.set(scope.type, scope.slug);
+
+    if (scope.type !== "national" || scope.slug !== "national") {
+      url.searchParams.set(scope.type, scope.slug);
+    }
   }
 
   return url.href;
@@ -101,10 +104,13 @@ function descriptionFor(record) {
     hasValue(record.region_name) ? "- " + record.region_name : ""
   ].filter(Boolean);
   var stats = [
+    hasValue(record.national_programs_hosted) ? api.formatNumber(record.national_programs_hosted) + " programs" : "",
+    hasValue(record.national_teens_reached) ? api.formatNumber(record.national_teens_reached) + " teens reached" : "",
+    hasValue(record.national_engagement_moments) ? api.formatNumber(record.national_engagement_moments) + " engagement moments" : "",
     hasValue(record.events_hosted) ? api.formatNumber(record.events_hosted) + " events" : "",
     hasValue(record.unique_teens) ? api.formatNumber(record.unique_teens) + " teens" : "",
     hasValue(record.engagement_moments) ? api.formatNumber(record.engagement_moments) + " engagement moments" : ""
-  ].filter(Boolean);
+  ].filter(Boolean).slice(0, 3);
 
   return parts.join(" ") + (stats.length ? ". " + stats.join(". ") + "." : ".");
 }

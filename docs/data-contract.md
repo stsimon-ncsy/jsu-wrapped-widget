@@ -11,7 +11,7 @@ node check-production.js
 
 ## Files
 
-- `sample-wrapped-2026.json`: public chapter, region, and program story records.
+- `sample-wrapped-2026.json`: public chapter, region, program, and national story records.
 - `wrapped-config-2026.json`: copy, metric, brand, CTA, variant, and custom-screen overrides.
 - `sample-teen-wrapped-2026.json`: teen proof-of-concept records only. Do not use real teen-level data until consent and privacy review are complete.
 
@@ -48,19 +48,50 @@ Use `brand_logo` only when a story should force a logo. Accepted values are `jsu
 
 ## Region And Program Stories
 
-Standalone region or program Wrapped stories are first-class records in `sample-wrapped-2026.json`.
+Standalone region, program, or national Wrapped stories are first-class records in `sample-wrapped-2026.json`.
 
 Use:
 
-- `scope_type`: `chapter`, `region`, or `program`.
-- `scope_slug`: stable slug for the region or program story.
-- `scope_name`: display name for the region or program story.
+- `scope_type`: `chapter`, `region`, `program`, or `national`.
+- `scope_slug`: stable slug for the region, program, or national story.
+- `scope_name`: display name for the region, program, or national story.
 
-Do not fake a region or program story as a chapter record. Chapter-level records should keep using `chapter_slug` and `chapter_name`.
+Do not fake a region, program, or national story as a chapter record. Chapter-level records should keep using `chapter_slug` and `chapter_name`.
+
+## National Story
+
+The national story is a single `scope_type: "national"` record. Use `scope_slug: "national"` unless you are intentionally publishing multiple organization-level stories.
+
+Useful national metrics include:
+
+- `national_teens_reached`
+- `national_programs_hosted`
+- `national_engagement_moments`
+- `national_schools_represented`
+- `national_regions_count`
+- `national_chapters_count`
+- `national_learning_sessions`
+- `national_shabbatons`
+- `national_new_teens`
+- `first_time_teens`
+- `national_immersive_teens`
+- `national_destinations`
+- `growth_rate_label`
+- `growth_series`: optional array of `{ "year": "2025-2026", "value": 33287 }` rows for the growth card.
+
+Nested national arrays:
+
+- `program_breakdown`: array of `{ "label": "Learning", "value": 123 }` objects.
+- `region_breakdown`: array of `{ "name", "slug", "teens", "events", "engagement_moments", "chapters", "schools", "map_x", "map_y", "is_international" }` objects.
+- `impact_tags`: short public tags such as `Belonging`, `Identity`, `Leadership`, `Friendship`, and `Jewish life`.
+
+`map_x` and `map_y` are rough card coordinates, not geographic proof. They should be numbers from 0 to 100. Include international regions in `region_breakdown`; the renderer marks rows with `is_international: true`.
+
+See `docs/national-wrapped-sql.md` for the SQL handoff that builds this record from teen-event attendance rows.
 
 ## Config Overrides
 
-`wrapped-config-2026.json` can define defaults, region defaults, program defaults, campaign defaults, chapter overrides, and variants.
+`wrapped-config-2026.json` can define defaults, national defaults, region defaults, program defaults, campaign defaults, chapter overrides, and variants. National overrides live under the top-level `national` object.
 
 Common section keys:
 
@@ -91,6 +122,14 @@ Use generated card ids:
 - `persona`
 - `movement`
 - `final`
+- `national-teens`
+- `national-programs`
+- `national-moments`
+- `national-footprint`
+- `national-immersive`
+- `national-regions`
+- `national-growth`
+- `national-why`
 
 Supported copy fields include `eyebrow`, `headline`, `subtext`, `badge`, `markerText`, and `persona`.
 
