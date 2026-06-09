@@ -20,7 +20,6 @@ The cleanest source is a denormalized teen-event attendance row with event metad
   - `school_id`, `school_name`
   - `program_type` or `event_type`
   - `is_shabbaton`, `is_immersive`, `is_learning_session`
-  - `destination_name` or `venue_city` for immersive destination counts, if available
 
 To list every region, including international regions and quiet regions, also provide:
 
@@ -56,27 +55,66 @@ with params as (
 region_map as (
   select *
   from (values
-    ('tri-state', 76, 36),
     ('west-coast', 13, 42),
+    ('southern', 62, 62),
     ('canada', 44, 18),
-    ('southern', 62, 58),
+    ('ny-jsu', 83, 31),
+    ('tri-state', 76, 35),
     ('atlantic-seaboard', 82, 46),
-    ('midwest', 50, 38),
-    ('southwest', 27, 58),
-    ('central-east', 64, 34),
-    ('greater-boston', 86, 29),
-    ('israel', 63, 72),
-    ('chile', 40, 86)
+    ('midwest', 50, 39),
+    ('nj-jsu', 80, 39),
+    ('nj-ct-jsu', 80, 39),
+    ('southwest', 28, 59),
+    ('central-east', 64, 36),
+    ('greater-boston', 87, 28),
+    ('israel', 64, 74),
+    ('international', 42, 86)
   ) as m(region_slug, map_x, map_y)
 ),
 region_dim as (
   select
-    r.region_id,
-    coalesce(nullif(r.region_slug, ''), lower(regexp_replace(r.region_name, '[^a-zA-Z0-9]+', '-', 'g'))) as region_slug,
-    r.region_name,
-    coalesce(r.is_international, false) as is_international
-  from warehouse.dim_region r
-  where coalesce(r.is_active, true) = true
+    raw.region_id,
+    raw.region_slug,
+    raw.region_name,
+    raw.is_international,
+    case
+      when raw.region_slug in ('national', 'upstate-new-york', 'atlanta') then null
+      when raw.region_slug in ('nj-jsu', 'nj-ct-jsu') then 'nj-ct-jsu'
+      when raw.region_slug in ('chile', 'argentina', 'mexico', 'international') then 'international'
+      when raw.is_international = true and raw.region_slug <> 'israel' then 'international'
+      else raw.region_slug
+    end as display_region_slug,
+    case
+      when raw.region_slug in ('national', 'upstate-new-york', 'atlanta') then null
+      when raw.region_slug in ('nj-jsu', 'nj-ct-jsu') then 'NJ/CT JSU'
+      when raw.region_slug in ('chile', 'argentina', 'mexico', 'international') then 'International'
+      when raw.is_international = true and raw.region_slug <> 'israel' then 'International'
+      else raw.region_name
+    end as display_region_name,
+    case
+      when raw.region_slug = 'israel' then true
+      when raw.region_slug in ('chile', 'argentina', 'mexico', 'international') then true
+      when raw.is_international = true and raw.region_slug <> 'israel' then true
+      else false
+    end as display_is_international
+  from (
+    select
+      r.region_id,
+      coalesce(nullif(r.region_slug, ''), lower(regexp_replace(r.region_name, '[^a-zA-Z0-9]+', '-', 'g'))) as region_slug,
+      r.region_name,
+      coalesce(r.is_international, false) as is_international
+    from warehouse.dim_region r
+    where coalesce(r.is_active, true) = true
+  ) raw
+),
+region_display_dim as (
+  select
+    display_region_slug as region_slug,
+    min(display_region_name) as region_name,
+    bool_or(display_is_international) as is_international
+  from region_dim
+  where display_region_slug is not null
+  group by display_region_slug
 ),
 chapter_dim as (
   select
@@ -101,7 +139,6 @@ attendance_base as (
     nullif(ter.school_id, '') as school_id,
     nullif(ter.school_name, '') as school_name,
     coalesce(nullif(ter.program_type, ''), nullif(ter.event_type, ''), 'Other') as program_type,
-    coalesce(nullif(ter.destination_name, ''), nullif(ter.venue_city, '')) as destination_name,
     coalesce(ter.is_shabbaton, false) as is_shabbaton,
     coalesce(ter.is_immersive, false) as is_immersive,
     coalesce(ter.is_learning_session, false) as is_learning_session
@@ -130,7 +167,6 @@ dedup_attendance as (
     school_id,
     school_name,
     program_type,
-    destination_name,
     is_shabbaton,
     is_immersive,
     is_learning_session
@@ -168,7 +204,6 @@ current_events as (
     min(chapter_slug) as chapter_slug,
     min(chapter_name) as chapter_name,
     min(program_type) as program_type,
-    min(destination_name) as destination_name,
     bool_or(is_shabbaton) as is_shabbaton,
     bool_or(is_immersive) as is_immersive,
     bool_or(is_learning_session) as is_learning_session
@@ -181,24 +216,19 @@ national_rollup as (
     count(distinct ca.event_id) as national_programs_hosted,
     count(*) as national_engagement_moments,
     count(distinct coalesce(ca.school_id, ca.school_name)) filter (where coalesce(ca.school_id, ca.school_name) is not null) as national_schools_represented,
-    count(distinct rd.region_id) as national_regions_count,
-    count(distinct cd.chapter_id) as national_chapters_count,
+    (select count(*) from region_display_dim) as national_regions_count,
+    (select count(distinct chapter_id) from chapter_dim) as national_chapters_count,
     count(distinct ce.event_id) filter (where ce.is_learning_session or lower(ce.program_type) like '%learning%') as national_learning_sessions,
     count(distinct ce.event_id) filter (where ce.is_shabbaton or ce.is_immersive or lower(ce.program_type) like '%shabbaton%') as national_shabbatons,
-    count(distinct ce.destination_name) filter (
-      where ce.destination_name is not null
-        and (ce.is_shabbaton or ce.is_immersive or lower(ce.program_type) like '%shabbaton%')
-    ) as national_destinations,
     count(distinct ca.teen_id) filter (
       where tfs.first_seen_date >= (select start_date from params)
         and tfs.first_seen_date < (select end_date from params)
     ) as national_new_teens,
-    count(distinct ca.teen_id) filter (where ce.is_shabbaton or ce.is_immersive) as national_immersive_teens
+    count(distinct ca.teen_id) filter (where ce.is_shabbaton or ce.is_immersive) as national_immersive_teens,
+    (select count(distinct chapter_id) from chapter_dim) as national_depth_chapters
   from current_attendance ca
   left join current_events ce on ce.event_id = ca.event_id
   left join teen_first_seen tfs on tfs.teen_id = ca.teen_id
-  left join region_dim rd on rd.region_id = ca.region_id
-  left join chapter_dim cd on cd.chapter_id = ca.chapter_id
 ),
 growth as (
   select
@@ -266,20 +296,24 @@ program_breakdown as (
 ),
 region_activity as (
   select
-    ca.region_id,
+    rd.display_region_slug as region_slug,
     count(distinct ca.teen_id) as teens,
     count(distinct ca.event_id) as events,
     count(*) as engagement_moments,
     count(distinct coalesce(ca.school_id, ca.school_name)) filter (where coalesce(ca.school_id, ca.school_name) is not null) as schools
   from current_attendance ca
-  group by ca.region_id
+  join region_dim rd on rd.region_id = ca.region_id
+  where rd.display_region_slug is not null
+  group by rd.display_region_slug
 ),
 region_chapters as (
   select
-    cd.region_id,
+    rd.display_region_slug as region_slug,
     count(distinct cd.chapter_id) as chapters
   from chapter_dim cd
-  group by cd.region_id
+  join region_dim rd on rd.region_id = cd.region_id
+  where rd.display_region_slug is not null
+  group by rd.display_region_slug
 ),
 region_breakdown as (
   select jsonb_agg(
@@ -297,9 +331,9 @@ region_breakdown as (
     )
     order by coalesce(ra.teens, 0) desc, rd.region_name
   ) as region_breakdown
-  from region_dim rd
-  left join region_activity ra on ra.region_id = rd.region_id
-  left join region_chapters rc on rc.region_id = rd.region_id
+  from region_display_dim rd
+  left join region_activity ra on ra.region_slug = rd.region_slug
+  left join region_chapters rc on rc.region_slug = rd.region_slug
   left join region_map rm on rm.region_slug = rd.region_slug
 ),
 final_record as (
@@ -321,7 +355,7 @@ final_record as (
     'national_new_teens', nr.national_new_teens,
     'first_time_teens', nr.national_new_teens,
     'national_immersive_teens', nr.national_immersive_teens,
-    'national_destinations', nr.national_destinations,
+    'national_depth_chapters', nr.national_depth_chapters,
     'growth_rate_label', gl.growth_rate_label,
     'growth_series', gs.growth_series,
     'program_breakdown', pb.program_breakdown,
@@ -357,7 +391,7 @@ The final `wrapped_record` maps directly to the national renderer:
 - `national_new_teens`
 - `first_time_teens`
 - `national_immersive_teens`
-- `national_destinations`
+- `national_depth_chapters`: optional field for the depth card; usually the same as `national_chapters_count`.
 - `growth_rate_label`
 - `growth_series`: array of `{ "year", "value" }` rows.
 - `program_breakdown`: array of `{ "label", "value" }`.

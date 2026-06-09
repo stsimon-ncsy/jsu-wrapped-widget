@@ -307,9 +307,12 @@ function runNationalStorySmoke(records) {
   });
   const themes = cards.map((card) => card.theme);
   const regionCard = cards.find((card) => card.theme === "national-regions");
+  const immersiveCard = cards.find((card) => card.theme === "national-immersive");
   const mapHtml = api.renderCardBody(cards.find((card) => card.theme === "national-footprint"));
+  const immersiveHtml = api.renderCardBody(immersiveCard);
   const shareHtml = api.renderCardBody(cards.find((card) => card.theme === "national-share"));
   const shareUrl = api.createShareUrl({ record: nationalRecord, shareBase: "https://example.org/share/" }, "https://example.org/wrapped/?scope=national");
+  const regionNames = regionCard ? regionCard.regions.map((region) => region.name) : [];
 
   assert(themes[0] === "national-cover", "national story should start with the national cover");
   assert(themes.includes("national-footprint"), "national story should include the rough map footprint card");
@@ -320,7 +323,14 @@ function runNationalStorySmoke(records) {
   assert(regionCard && regionCard.regions.length >= 10, "national region card should list every current region");
   assert(regionCard.regions.some((region) => region.name === "Canada"), "national region card should include Canada");
   assert(regionCard.regions.some((region) => region.name === "Israel"), "national region card should include Israel");
-  assert(regionCard.regions.some((region) => region.name === "Chile"), "national region card should include Chile");
+  assert(regionNames.includes("NY JSU"), "national region card should include the separate NY JSU region");
+  assert(regionNames.includes("NJ/CT JSU"), "national region card should include the renamed NJ/CT JSU region");
+  assert(regionNames.includes("International"), "national region card should group smaller international regions");
+  assert(!regionNames.includes("National"), "national region card should not expose raw National as a region");
+  assert(!regionNames.includes("Chile"), "national region card should roll Chile into International");
+  assert(immersiveCard && immersiveCard.stats.some((stat) => stat.label === "active chapters"), "national depth card should use active chapters instead of an undefined destinations metric");
+  assert(!immersiveCard.stats.some((stat) => /destination/i.test(stat.label)), "national depth card should not show destinations");
+  assert(!/destinations/i.test(immersiveHtml), "national depth card markup should not show destinations");
   assert(mapHtml.includes("jsuw-national-map"), "national footprint card should render a rough map surface");
   assert(shareHtml.includes("Share this recap"), "national share card should keep the standard share CTA");
   assert(shareUrl === "https://example.org/share/national/national/", `national share URL mismatch: ${shareUrl}`);

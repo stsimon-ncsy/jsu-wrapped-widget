@@ -8560,7 +8560,7 @@ body:has(#jsu-wrapped-wordpress-shell) {
     var shabbatons = nationalNumber(record, ["national_shabbatons", "shabbatons"], 0);
     var learningSessions = nationalNumber(record, ["national_learning_sessions", "learning_sessions"], 0);
     var immersiveTeens = nationalNumber(record, ["national_immersive_teens", "immersive_teens"], 0);
-    var destinations = nationalNumber(record, ["national_destinations", "immersive_destinations", "destinations"], 0);
+    var depthChapters = nationalNumber(record, ["national_depth_chapters", "national_immersive_chapters", "national_chapters_count", "chapters_count"], chapterCount);
     var firstTimeTeens = nationalNumber(record, ["first_time_teens", "national_new_teens", "new_teens"], 0);
     var growthLabel = asText(record.growth_rate_label || record.year_over_year_growth_label || record.growth_label, "");
     var growthSeries = nationalGrowthSeries(record);
@@ -8652,12 +8652,12 @@ body:has(#jsu-wrapped-wordpress-shell) {
         eyebrow: "Depth",
         headline: "The deeper moments carried the year",
         displayHeadline: "deeper\nmoments\ncarried\nthe year.",
-        stat: formatNumber(shabbatons || learningSessions || immersiveTeens),
+        stat: formatNumber(immersiveTeens || learningSessions || shabbatons || depthChapters),
         stats: [
           shabbatons ? { value: formatNumber(shabbatons), label: "Shabbaton moments" } : null,
           learningSessions ? { value: formatNumber(learningSessions), label: "learning sessions" } : null,
           immersiveTeens ? { value: formatNumber(immersiveTeens), label: "immersive teens" } : null,
-          destinations ? { value: formatNumber(destinations), label: "destinations" } : null
+          depthChapters ? { value: formatNumber(depthChapters), label: "active chapters" } : null
         ].filter(Boolean),
         subtext: "The year was not only bigger. It got deeper."
       },

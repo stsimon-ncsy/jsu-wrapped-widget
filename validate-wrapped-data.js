@@ -36,7 +36,8 @@ const CHAPTER_NUMERIC_FIELDS = [
   "national_new_teens",
   "first_time_teens",
   "national_immersive_teens",
-  "national_destinations"
+  "national_depth_chapters",
+  "national_immersive_chapters"
 ];
 
 const TEEN_NUMERIC_FIELDS = [

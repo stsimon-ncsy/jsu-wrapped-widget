@@ -91,7 +91,7 @@
     ["national_learning_sessions", "National learning sessions"],
     ["national_shabbatons", "National Shabbatons"],
     ["national_immersive_teens", "National immersive teens"],
-    ["national_destinations", "Immersive destinations"],
+    ["national_depth_chapters", "Depth active chapters"],
     ["first_time_teens", "First-time teens"],
     ["growth_rate_label", "Growth rate label"]
   ];
@@ -140,7 +140,7 @@
     "national-programs": ["national_programs_hosted"],
     "national-moments": ["national_engagement_moments"],
     "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
-    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_destinations"],
+    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_depth_chapters", "national_chapters_count"],
     "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
     "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
     final: ["national_teens_reached", "national_programs_hosted", "national_engagement_moments", "national_regions_count"]
@@ -163,7 +163,7 @@
     "national-programs": ["national_programs_hosted"],
     "national-moments": ["national_engagement_moments"],
     "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
-    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_destinations"],
+    "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_depth_chapters", "national_chapters_count"],
     "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
     "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
     "national-why": ["impact_line"],

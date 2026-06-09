@@ -75,7 +75,7 @@ Useful national metrics include:
 - `national_new_teens`
 - `first_time_teens`
 - `national_immersive_teens`
-- `national_destinations`
+- `national_depth_chapters`: optional depth-card chapter count; when absent, the renderer uses `national_chapters_count`.
 - `growth_rate_label`
 - `growth_series`: optional array of `{ "year": "2025-2026", "value": 33287 }` rows for the growth card.
 
@@ -86,6 +86,8 @@ Nested national arrays:
 - `impact_tags`: short public tags such as `Belonging`, `Identity`, `Leadership`, `Friendship`, and `Jewish life`.
 
 `map_x` and `map_y` are rough card coordinates, not geographic proof. They should be numbers from 0 to 100. Include international regions in `region_breakdown`; the renderer marks rows with `is_international: true`.
+
+For the public national story, `region_breakdown` can be a curated display roll-up rather than a raw CRM region dump. Current national publishing rules keep `NY JSU` and `NJ/CT JSU` as separate regions, keep `Israel` visible, group small international rows under `International`, and avoid showing raw catch-all buckets such as `National` as regions.
 
 See `docs/national-wrapped-sql.md` for the SQL handoff that builds this record from teen-event attendance rows.
 

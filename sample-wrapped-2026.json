@@ -6,63 +6,211 @@
     "scope_slug": "national",
     "scope_name": "JSU/NCSY",
     "brand_logo": "ncsy",
-    "national_teens_reached": 33287,
-    "national_programs_hosted": 13143,
-    "national_engagement_moments": 158717,
-    "national_schools_represented": 1549,
-    "national_regions_count": 11,
-    "national_chapters_count": 92,
-    "national_learning_sessions": 4546,
-    "national_shabbatons": 502,
-    "national_immersive_teens": 1093,
-    "national_destinations": 18,
-    "national_new_teens": 20027,
-    "first_time_teens": 20027,
+    "national_teens_reached": 37915,
+    "national_programs_hosted": 11722,
+    "national_engagement_moments": 198110,
+    "national_schools_represented": 1638,
+    "national_regions_count": 13,
+    "national_chapters_count": 166,
+    "national_learning_sessions": 4858,
+    "national_shabbatons": 707,
+    "national_immersive_teens": 7837,
+    "national_new_teens": 22250,
+    "first_time_teens": 22250,
     "growth_rate_label": "18%",
     "growth_series": [
       {
         "year": "2021-2022",
-        "value": 18420
+        "value": 26333
       },
       {
         "year": "2022-2023",
-        "value": 22680
+        "value": 29875
       },
       {
         "year": "2023-2024",
-        "value": 26790
+        "value": 32998
       },
       {
         "year": "2024-2025",
-        "value": 28210
+        "value": 32257
       },
       {
         "year": "2025-2026",
-        "value": 33287
+        "value": 37915
       }
     ],
-    "growth_line": "The movement kept growing through first-time faces, repeat moments, and more chances to show up.",
-    "impact_line": "The recap is national, but the story is personal: teens finding belonging, identity, friendship, and Jewish life.",
     "program_breakdown": [
       {
-        "label": "Social + Jewish Culture",
-        "value": 8631
-      },
-      {
         "label": "Learning",
-        "value": 3335
-      },
-      {
-        "label": "Educational",
-        "value": 961
+        "value": 4858
       },
       {
         "label": "Recruitment",
-        "value": 174
+        "value": 4766
+      },
+      {
+        "label": "Educational",
+        "value": 910
       },
       {
         "label": "Shabbat / Immersive",
-        "value": 35
+        "value": 614
+      },
+      {
+        "label": "Leadership + Service",
+        "value": 531
+      },
+      {
+        "label": "Other",
+        "value": 43
+      }
+    ],
+    "region_breakdown": [
+      {
+        "name": "West Coast",
+        "slug": "west-coast",
+        "teens": 6426,
+        "events": 924,
+        "engagement_moments": 20708,
+        "chapters": 15,
+        "schools": 290,
+        "map_x": 13,
+        "map_y": 42
+      },
+      {
+        "name": "Southern",
+        "slug": "southern",
+        "teens": 6110,
+        "events": 2718,
+        "engagement_moments": 41760,
+        "chapters": 27,
+        "schools": 274,
+        "map_x": 62,
+        "map_y": 62
+      },
+      {
+        "name": "Canada",
+        "slug": "canada",
+        "teens": 6002,
+        "events": 1912,
+        "engagement_moments": 35342,
+        "chapters": 9,
+        "schools": 290,
+        "map_x": 44,
+        "map_y": 18
+      },
+      {
+        "name": "NY JSU",
+        "slug": "ny-jsu",
+        "teens": 3664,
+        "events": 1221,
+        "engagement_moments": 15433,
+        "chapters": 16,
+        "schools": 120,
+        "map_x": 83,
+        "map_y": 31
+      },
+      {
+        "name": "Tri-State",
+        "slug": "tri-state",
+        "teens": 3414,
+        "events": 346,
+        "engagement_moments": 10217,
+        "chapters": 26,
+        "schools": 299,
+        "map_x": 76,
+        "map_y": 35
+      },
+      {
+        "name": "Atlantic Seaboard",
+        "slug": "atlantic-seaboard",
+        "teens": 3405,
+        "events": 1138,
+        "engagement_moments": 23488,
+        "chapters": 13,
+        "schools": 106,
+        "map_x": 82,
+        "map_y": 48
+      },
+      {
+        "name": "Midwest",
+        "slug": "midwest",
+        "teens": 2805,
+        "events": 1467,
+        "engagement_moments": 17509,
+        "chapters": 15,
+        "schools": 183,
+        "map_x": 50,
+        "map_y": 39
+      },
+      {
+        "name": "NJ/CT JSU",
+        "slug": "nj-ct-jsu",
+        "teens": 2095,
+        "events": 635,
+        "engagement_moments": 8549,
+        "chapters": 16,
+        "schools": 82,
+        "map_x": 80,
+        "map_y": 39
+      },
+      {
+        "name": "Southwest",
+        "slug": "southwest",
+        "teens": 1732,
+        "events": 603,
+        "engagement_moments": 10839,
+        "chapters": 8,
+        "schools": 143,
+        "map_x": 28,
+        "map_y": 59
+      },
+      {
+        "name": "Central East",
+        "slug": "central-east",
+        "teens": 1390,
+        "events": 428,
+        "engagement_moments": 7902,
+        "chapters": 6,
+        "schools": 102,
+        "map_x": 64,
+        "map_y": 36
+      },
+      {
+        "name": "Greater Boston",
+        "slug": "greater-boston",
+        "teens": 640,
+        "events": 130,
+        "engagement_moments": 2803,
+        "chapters": 1,
+        "schools": 31,
+        "map_x": 87,
+        "map_y": 28
+      },
+      {
+        "name": "Israel",
+        "slug": "israel",
+        "teens": 510,
+        "events": 129,
+        "engagement_moments": 2204,
+        "chapters": 7,
+        "schools": 108,
+        "map_x": 64,
+        "map_y": 74,
+        "is_international": true
+      },
+      {
+        "name": "International",
+        "slug": "international",
+        "teens": 231,
+        "events": 68,
+        "engagement_moments": 1139,
+        "chapters": 5,
+        "schools": 2,
+        "map_x": 42,
+        "map_y": 86,
+        "is_international": true
       }
     ],
     "impact_tags": [
@@ -72,132 +220,9 @@
       "Friendship",
       "Jewish life"
     ],
-    "region_breakdown": [
-      {
-        "name": "Tri-State",
-        "slug": "tri-state",
-        "teens": 6846,
-        "events": 2462,
-        "engagement_moments": 27863,
-        "chapters": 24,
-        "schools": 240,
-        "map_x": 76,
-        "map_y": 36
-      },
-      {
-        "name": "West Coast",
-        "slug": "west-coast",
-        "teens": 6157,
-        "events": 1898,
-        "engagement_moments": 18154,
-        "chapters": 10,
-        "schools": 282,
-        "map_x": 13,
-        "map_y": 42
-      },
-      {
-        "name": "Canada",
-        "slug": "canada",
-        "teens": 5419,
-        "events": 2329,
-        "engagement_moments": 29176,
-        "chapters": 9,
-        "schools": 259,
-        "map_x": 44,
-        "map_y": 18,
-        "is_international": true
-      },
-      {
-        "name": "Southern",
-        "slug": "southern",
-        "teens": 4838,
-        "events": 1955,
-        "engagement_moments": 25729,
-        "chapters": 15,
-        "schools": 162,
-        "map_x": 62,
-        "map_y": 58
-      },
-      {
-        "name": "Atlantic Seaboard",
-        "slug": "atlantic-seaboard",
-        "teens": 3364,
-        "events": 1112,
-        "engagement_moments": 21593,
-        "chapters": 7,
-        "schools": 104,
-        "map_x": 82,
-        "map_y": 46
-      },
-      {
-        "name": "Midwest",
-        "slug": "midwest",
-        "teens": 2694,
-        "events": 1536,
-        "engagement_moments": 15940,
-        "chapters": 9,
-        "schools": 175,
-        "map_x": 50,
-        "map_y": 38
-      },
-      {
-        "name": "Southwest",
-        "slug": "southwest",
-        "teens": 1648,
-        "events": 727,
-        "engagement_moments": 9463,
-        "chapters": 6,
-        "schools": 140,
-        "map_x": 27,
-        "map_y": 58
-      },
-      {
-        "name": "Central East",
-        "slug": "central-east",
-        "teens": 1208,
-        "events": 490,
-        "engagement_moments": 6680,
-        "chapters": 5,
-        "schools": 80,
-        "map_x": 64,
-        "map_y": 34
-      },
-      {
-        "name": "Greater Boston",
-        "slug": "greater-boston",
-        "teens": 516,
-        "events": 157,
-        "engagement_moments": 1943,
-        "chapters": 1,
-        "schools": 20,
-        "map_x": 86,
-        "map_y": 29
-      },
-      {
-        "name": "Israel",
-        "slug": "israel",
-        "teens": 388,
-        "events": 130,
-        "engagement_moments": 1204,
-        "chapters": 5,
-        "schools": 86,
-        "map_x": 63,
-        "map_y": 72,
-        "is_international": true
-      },
-      {
-        "name": "Chile",
-        "slug": "chile",
-        "teens": 230,
-        "events": 340,
-        "engagement_moments": 966,
-        "chapters": 1,
-        "schools": 1,
-        "map_x": 40,
-        "map_y": 86,
-        "is_international": true
-      }
-    ]
+    "national_depth_chapters": 166,
+    "growth_line": "The movement kept growing through first-time faces, repeat moments, and more chances to show up.",
+    "impact_line": "The recap is national, but the story is personal: teens finding belonging, identity, friendship, and Jewish life."
   },
   {
     "school_year": "2025-2026",
