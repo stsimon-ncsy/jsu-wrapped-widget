@@ -11,6 +11,7 @@ const FILES = [
   "analytics-smoke.html",
   "layout-smoke.html",
   "wrapped-builder.js",
+  "wordpress-brizy-hosted-embed.html",
   "wordpress-inline-embed.html",
   "wordpress-smoke.js",
   "README.md",

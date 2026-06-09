@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260603b";
-  var TEEN_DATA_URL = "./sample-teen-wrapped-2026.json?v=jsuw-prod-20260603b";
-  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260603b";
+  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260609a";
+  var TEEN_DATA_URL = "./sample-teen-wrapped-2026.json?v=jsuw-prod-20260609a";
+  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260609a";
   var MAX_MAILTO_URL_LENGTH = 7000;
   var CARD_IDS = [
     "cover",
