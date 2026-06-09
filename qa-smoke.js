@@ -336,6 +336,44 @@ function runNationalStorySmoke(records) {
   assert(shareUrl === "https://example.org/share/national/national/", `national share URL mismatch: ${shareUrl}`);
 }
 
+function runPublishedRegionStorySmoke(records, config) {
+  const nationalRecord = records.find((record) => api.getStoryScope(record).type === "national");
+  const regionRecords = records.filter((record) => api.getStoryScope(record).type === "region");
+  const pickerHtml = api.renderChapterPickerMarkup({ records, config, url: "https://example.org/wrapped/" });
+  const westRequest = api.getStoryRequest("https://example.org/wrapped/?scope=region&region=west-coast");
+  const westCoast = api.findStoryRecord(records, westRequest);
+  const njCt = api.findStoryRecord(records, api.getStoryRequest("https://example.org/wrapped/?scope=region&region=nj-ct-jsu"));
+  const nyJsu = api.findStoryRecord(records, api.getStoryRequest("https://example.org/wrapped/?scope=region&region=ny-jsu"));
+  const cards = westCoast ? api.createCards(westCoast, {
+    ctaLabel: "Get involved next year",
+    ctaTarget: "#jsuw-wrapped-interest",
+    shareBase: "https://example.org/share/"
+  }) : [];
+  const final = cards.find((card) => card.id === "final");
+  const movement = cards.find((card) => card.id === "movement");
+  const shareUrl = westCoast ? api.createShareUrl({ record: westCoast, shareBase: "https://example.org/share/" }, "https://example.org/wrapped/?scope=region&region=west-coast") : "";
+
+  assert(nationalRecord && Array.isArray(nationalRecord.region_breakdown), "sample data should include national region breakdown before region stories");
+  assert(regionRecords.length === nationalRecord.region_breakdown.length, `sample data should include one region story per public region, got ${regionRecords.length}`);
+  assert(westCoast && westCoast.scope_name === "West Coast", "region story request should resolve West Coast");
+  assert(westCoast.unique_teens === 6426, "West Coast region story should use normalized teen reach");
+  assert(westCoast.events_hosted === 924, "West Coast region story should use normalized event count");
+  assert(westCoast.engagement_moments === 20708, "West Coast region story should use normalized engagement moments");
+  assert(westCoast.region_chapters_count === 15, "West Coast region story should expose chapter count");
+  assert(njCt && njCt.scope_name === "NJ/CT JSU", "region story request should resolve NJ/CT JSU");
+  assert(nyJsu && nyJsu.scope_name === "NY JSU", "region story request should resolve NY JSU");
+  assert(pickerHtml.includes("Bigger stories"), "homepage picker should expose scoped story discovery");
+  assert(pickerHtml.includes("Region story"), "homepage picker should label region story links");
+  assert(pickerHtml.includes("?scope=region&amp;region=west-coast"), "homepage picker should link to West Coast region story");
+  assert(pickerHtml.includes("?scope=region&amp;region=ny-jsu"), "homepage picker should link to NY JSU region story");
+  assert(pickerHtml.includes("?scope=region&amp;region=nj-ct-jsu"), "homepage picker should link to NJ/CT JSU region story");
+  assertNoBrokenText(cards);
+  assert(final && final.headline === "West Coast Wrapped", `West Coast final headline mismatch: ${final && final.headline}`);
+  assert(final.summaryStats.some((stat) => stat.label === "of us, one region"), "region final card should use region language");
+  assert(movement && movement.subtext === "One region. One national movement.", "region movement card should use region language");
+  assert(shareUrl === "https://example.org/share/region/west-coast/", `region share URL mismatch: ${shareUrl}`);
+}
+
 function runSampleVariantSmoke(records, config) {
   const record = records.find((item) => item.chapter_slug === "baltimore");
   const storyConfig = api.resolveStoryConfig(config, record, { variant: "donor-recap" });
@@ -541,7 +579,10 @@ function runStaticShareSmoke() {
     year_label: "2025-2026",
     events_hosted: 420,
     unique_teens: 2850,
-    engagement_moments: 9200
+    engagement_moments: 9200,
+    national_teens_reached: 37915,
+    national_programs_hosted: 11722,
+    national_engagement_moments: 198110
   });
   const programHtml = shareGenerator.sharePageHtml({
     scope_type: "program",
@@ -582,6 +623,8 @@ function runStaticShareSmoke() {
   assert(teenShareUrl === "https://example.org/wrapped/?mode=teen&teen=maya-test", `teen share URL should fall back to current URL: ${teenShareUrl}`);
   assert(shareGenerator.sharePagePath({ chapter_slug: "la--city", chapter_name: "LA - City" }) === "la--city/", "share page path should preserve existing chapter slug");
   assert(regionHtml.includes("<title>JSU/NCSY Wrapped - Atlantic Seaboard</title>"), "region share page title mismatch");
+  assert(regionHtml.includes("420 events. 2,850 teens. 9,200 engagement moments."), "region share page description should prefer region stats");
+  assert(!regionHtml.includes("37,915 teens reached"), "region share page description should not prefer national stats");
   assert(regionHtml.includes("/share/region/atlantic-seaboard/"), "region share page URL path mismatch");
   assert(regionHtml.includes("?scope=region&amp;region=atlantic-seaboard"), "region share page story redirect mismatch");
   assert(programHtml.includes("<title>JSU/NCSY Wrapped - Shabbat Across JSU</title>"), "program share page title mismatch");
@@ -3795,6 +3838,7 @@ function main() {
   runHiddenVariantSmoke();
   runTeenRuntimeSmoke();
   runNationalStorySmoke(records);
+  runPublishedRegionStorySmoke(records, config);
   runSampleVariantSmoke(records, config);
   runSampleConfigConsistencySmoke(records, config);
   runPageMetadataSmoke();

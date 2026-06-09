@@ -98,19 +98,22 @@ function storyUrlFor(record) {
 
 function descriptionFor(record) {
   var scope = getShareScope(record) || { name: record.chapter_name || "JSU", noun: "chapter" };
+  var localStats = [
+    hasValue(record.events_hosted) ? api.formatNumber(record.events_hosted) + " events" : "",
+    hasValue(record.unique_teens) ? api.formatNumber(record.unique_teens) + " teens" : "",
+    hasValue(record.engagement_moments) ? api.formatNumber(record.engagement_moments) + " engagement moments" : ""
+  ];
+  var nationalStats = [
+    hasValue(record.national_programs_hosted) ? api.formatNumber(record.national_programs_hosted) + " programs" : "",
+    hasValue(record.national_teens_reached) ? api.formatNumber(record.national_teens_reached) + " teens reached" : "",
+    hasValue(record.national_engagement_moments) ? api.formatNumber(record.national_engagement_moments) + " engagement moments" : ""
+  ];
   var parts = [
     scope.name + " Wrapped",
     hasValue(record.year_label || record.school_year) ? "for " + (record.year_label || record.school_year) : "",
     hasValue(record.region_name) ? "- " + record.region_name : ""
   ].filter(Boolean);
-  var stats = [
-    hasValue(record.national_programs_hosted) ? api.formatNumber(record.national_programs_hosted) + " programs" : "",
-    hasValue(record.national_teens_reached) ? api.formatNumber(record.national_teens_reached) + " teens reached" : "",
-    hasValue(record.national_engagement_moments) ? api.formatNumber(record.national_engagement_moments) + " engagement moments" : "",
-    hasValue(record.events_hosted) ? api.formatNumber(record.events_hosted) + " events" : "",
-    hasValue(record.unique_teens) ? api.formatNumber(record.unique_teens) + " teens" : "",
-    hasValue(record.engagement_moments) ? api.formatNumber(record.engagement_moments) + " engagement moments" : ""
-  ].filter(Boolean).slice(0, 3);
+  var stats = (scope.type === "national" ? nationalStats.concat(localStats) : localStats.concat(nationalStats)).filter(Boolean).slice(0, 3);
 
   return parts.join(" ") + (stats.length ? ". " + stats.join(". ") + "." : ".");
 }
