@@ -4054,6 +4054,10 @@ body:has(#jsu-wrapped-wordpress-shell) {
   padding-bottom: 136px;
 }
 
+#jsu-wrapped .jsuw-teen-share-scene--with-cta {
+  padding-bottom: 220px;
+}
+
 #jsu-wrapped .jsuw-teen-share-poster {
   background: rgba(21, 4, 40, 0.84);
   border: 2px solid rgba(255, 255, 255, 0.82);
@@ -4175,6 +4179,14 @@ body:has(#jsu-wrapped-wordpress-shell) {
   font-size: 0.72rem;
   grid-column: 1 / -1;
   min-height: 0.8em;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene .jsuw-action-status:empty {
+  display: none;
+}
+
+#jsu-wrapped .jsuw-teen-share-scene--with-cta .jsuw-final-actions {
+  bottom: 94px;
 }
 
 #jsu-wrapped .jsuw-theme-national-cover {
@@ -5144,6 +5156,14 @@ body:has(#jsu-wrapped-wordpress-shell) {
     bottom: 70px;
     left: 22px;
     right: 22px;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-scene--with-cta {
+    padding-bottom: 212px;
+  }
+
+  #jsu-wrapped .jsuw-teen-share-scene--with-cta .jsuw-final-actions {
+    bottom: 92px;
   }
 }
 
@@ -9806,7 +9826,7 @@ body:has(#jsu-wrapped-wordpress-shell) {
     ].filter(Boolean).join("");
 
     return renderReferenceShell(card, [
-      '<div class="jsuw-teen-scene jsuw-teen-share-scene">',
+      '<div class="jsuw-teen-scene jsuw-teen-share-scene' + (hasCta ? " jsuw-teen-share-scene--with-cta" : "") + '">',
       '<div class="jsuw-teen-share-poster">',
       renderBrandLockup(card),
       '<div class="jsuw-teen-proof">Teen Wrapped</div>',

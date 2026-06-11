@@ -4098,7 +4098,7 @@
     ].filter(Boolean).join("");
 
     return renderReferenceShell(card, [
-      '<div class="jsuw-teen-scene jsuw-teen-share-scene">',
+      '<div class="jsuw-teen-scene jsuw-teen-share-scene' + (hasCta ? " jsuw-teen-share-scene--with-cta" : "") + '">',
       '<div class="jsuw-teen-share-poster">',
       renderBrandLockup(card),
       '<div class="jsuw-teen-proof">Teen Wrapped</div>',

@@ -308,6 +308,7 @@ function runTeenRuntimeSmoke() {
   assert(!share.subtext.includes("event streak"), "teen share card should not summarize longest streak");
   assert(!shareHtml.includes("event streak"), "teen share HTML should not include longest-streak language");
   assert(shareHtml.indexOf("Get involved next year") < shareHtml.indexOf("Share this recap"), "teen CTA should appear before share/download actions");
+  assert(shareHtml.includes("jsuw-teen-share-scene--with-cta"), "teen share card should reserve extra layout space when a CTA is present");
   assert(placeholderPickerHtml.includes("Rivka B."), "teen picker should render records with missing school");
   assert(!placeholderPickerHtml.includes("streak"), "teen picker should not expose longest-streak language");
   assert(placeholderPickerHtml.includes("18 schools"), "teen picker should surface schools-in-room context");
