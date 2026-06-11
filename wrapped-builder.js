@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260609a";
-  var TEEN_DATA_URL = "./sample-teen-wrapped-2026.json?v=jsuw-prod-20260609a";
-  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260609a";
+  var DATA_URL = "./sample-wrapped-2026.json?v=jsuw-prod-20260610a";
+  var TEEN_DATA_URL = "./sample-teen-wrapped-2026.json?v=jsuw-prod-20260610a";
+  var CONFIG_URL = "./wrapped-config-2026.json?v=jsuw-prod-20260610a";
   var MAX_MAILTO_URL_LENGTH = 7000;
   var CARD_IDS = [
     "cover",
@@ -37,7 +37,7 @@
     "teen-cover": "Cover",
     "teen-attendance": "Attendance",
     "teen-ticket": "First event",
-    "teen-streak": "Longest streak",
+    "teen-schools": "Schools in room",
     "teen-vibe": "Top vibe",
     "teen-connector": "Persona",
     "teen-depth": "Depth",
@@ -112,11 +112,11 @@
   };
   var TEEN_METRIC_FIELD_LABELS = {
     events_attended: "Events attended",
-    longest_streak: "Longest streak",
     events_with_peers: "Events with peers",
     schools_in_room: "Schools in room",
     shabbatons: "Shabbatons",
     learning_sessions: "Learning sessions",
+    board_meetings_attended: "Board meetings attended",
     leadership_moments: "Leadership moments",
     chapter_events_hosted: "Chapter events hosted",
     chapter_unique_teens: "Chapter unique teens",
@@ -124,16 +124,18 @@
     chapter_new_teens: "Chapter new teens",
     region_unique_teens: "Region unique teens",
     region_schools_represented: "Region schools represented",
+    national_teens_reached: "National teens reached",
+    national_programs_hosted: "National programs hosted",
     national_engagement_moments: "National engagement moments"
   };
   var TEEN_CARD_METRIC_FIELDS = {
     "teen-attendance": ["events_attended"],
-    "teen-streak": ["longest_streak"],
+    "teen-schools": ["schools_in_room"],
     "teen-connector": ["events_with_peers", "schools_in_room"],
-    "teen-depth": ["learning_sessions", "shabbatons", "leadership_moments"],
+    "teen-depth": ["learning_sessions", "shabbatons", "board_meetings_attended", "leadership_moments"],
     "teen-chapter": ["chapter_events_hosted", "chapter_unique_teens", "chapter_engagement_moments", "chapter_new_teens"],
-    "teen-movement": ["region_unique_teens", "region_schools_represented", "national_engagement_moments"],
-    "teen-share": ["events_attended", "longest_streak", "events_with_peers", "schools_in_room"]
+    "teen-movement": ["region_unique_teens", "region_schools_represented", "national_teens_reached", "national_engagement_moments"],
+    "teen-share": ["events_attended", "events_with_peers", "schools_in_room"]
   };
   var NATIONAL_CARD_METRIC_FIELDS = {
     "national-teens": ["national_teens_reached", "first_time_teens"],

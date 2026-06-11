@@ -49,12 +49,16 @@ const TEEN_NUMERIC_FIELDS = [
   "shabbatons",
   "learning_sessions",
   "leadership_moments",
+  "board_meetings_attended",
   "chapter_events_hosted",
   "chapter_unique_teens",
   "chapter_engagement_moments",
   "chapter_new_teens",
   "region_unique_teens",
   "region_schools_represented",
+  "region_engagement_moments",
+  "national_teens_reached",
+  "national_programs_hosted",
   "national_engagement_moments"
 ];
 

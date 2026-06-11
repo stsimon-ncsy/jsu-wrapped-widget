@@ -91,6 +91,32 @@ For the public national story, `region_breakdown` can be a curated display roll-
 
 See `docs/national-wrapped-sql.md` for the SQL handoff that builds this record from teen-event attendance rows.
 
+## Teen Wrapped Records
+
+Teen records live in `sample-teen-wrapped-2026.json` and are privacy-limited public records. The renderer still tolerates older `longest_streak` values, but the teen experience no longer uses consecutive streak copy because not every teen has the same available event calendar.
+
+Useful teen metrics include:
+
+- `events_attended`
+- `events_with_peers`
+- `schools_in_room`: distinct schools represented across the teen's primary chapter events.
+- `board_meetings_attended`: count only events whose event name, program type, or category clearly labels the event as a board meeting.
+- `learning_sessions`
+- `shabbatons`
+- `leadership_moments`
+- `chapter_events_hosted`
+- `chapter_unique_teens`
+- `chapter_engagement_moments`
+- `chapter_new_teens`
+- `region_unique_teens`
+- `region_schools_represented`
+- `region_engagement_moments`
+- `national_teens_reached`
+- `national_programs_hosted`
+- `national_engagement_moments`
+
+Use the chapter metrics to describe the teen's actual local room, the region metrics to show the wider regional context, and the national metrics to show the full movement scale. Do not infer `friends_brought` unless the source data includes an inviter relationship.
+
 ## Config Overrides
 
 `wrapped-config-2026.json` can define defaults, national defaults, region defaults, program defaults, campaign defaults, chapter overrides, and variants. National overrides live under the top-level `national` object.

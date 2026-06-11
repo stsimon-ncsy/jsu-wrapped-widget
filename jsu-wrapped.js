@@ -1962,7 +1962,7 @@
       var meta = [chapter, school].filter(Boolean).join(" | ") || "Junior NCSY";
       var stats = [
         hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
-        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " streak" : "",
+        isPositiveMetric(record.schools_in_room) ? formatNumber(record.schools_in_room) + " schools" : "",
         hasValue(record.persona) ? cleanPublicText(record.persona) : ""
       ].filter(Boolean).join(" | ");
 
@@ -3392,17 +3392,17 @@
       });
     }
 
-    if (hasValue(record.longest_streak)) {
+    if (isPositiveMetric(record.schools_in_room)) {
       cards.push({
         type: "teen",
-        theme: "teen-streak",
-        eyebrow: "Streak",
-        headline: "Your longest streak hit " + formatNumber(record.longest_streak),
-        displayHeadline: "Your longest\nstreak hit",
-        stat: formatNumber(record.longest_streak),
-        rawValue: numberValue(record.longest_streak),
-        statLabel: "events in a row",
-        subtext: asText(record.streak_line, "That's not just attendance. That's momentum.")
+        theme: "teen-schools",
+        eyebrow: "The room",
+        headline: "You shared rooms with teens from " + formatNumber(record.schools_in_room) + " schools",
+        displayHeadline: "You shared\nrooms with\nteens from",
+        stat: formatNumber(record.schools_in_room),
+        rawValue: numberValue(record.schools_in_room),
+        statLabel: numberValue(record.schools_in_room) === 1 ? "school" : "schools",
+        subtext: asText(record.schools_line, "Every event put your chapter inside a wider Junior NCSY network.")
       });
     }
 
@@ -3438,6 +3438,7 @@
     var depthStats = [
       isPositiveMetric(record.shabbatons) ? { value: formatNumber(record.shabbatons), label: numberValue(record.shabbatons) === 1 ? "Shabbaton moment" : "Shabbaton moments", note: "weekend energy" } : null,
       isPositiveMetric(record.learning_sessions) ? { value: formatNumber(record.learning_sessions), label: numberValue(record.learning_sessions) === 1 ? "learning moment" : "learning moments", note: "sessions deep" } : null,
+      isPositiveMetric(record.board_meetings_attended) ? { value: formatNumber(record.board_meetings_attended), label: numberValue(record.board_meetings_attended) === 1 ? "board meeting" : "board meetings", note: "you helped steer the chapter" } : null,
       isPositiveMetric(record.leadership_moments) ? { value: formatNumber(record.leadership_moments), label: numberValue(record.leadership_moments) === 1 ? "leadership moment" : "leadership moments", note: "you helped lead" } : null
     ].filter(Boolean);
 
@@ -3450,6 +3451,7 @@
         shabbatons: formatNumber(record.shabbatons),
         learningSessions: formatNumber(record.learning_sessions),
         leadershipMoments: formatNumber(record.leadership_moments),
+        boardMeetingsAttended: formatNumber(record.board_meetings_attended),
         depthStats: depthStats,
         subtext: asText(record.depth_line, "Shabbatons, learning, and leadership moments gave the year more depth.")
       });
@@ -3475,9 +3477,10 @@
     }
 
     var movementStats = [
-      isPositiveMetric(record.region_unique_teens) ? { value: formatNumber(record.region_unique_teens), label: "teens in the region" } : null,
-      isPositiveMetric(record.region_schools_represented) ? { value: formatNumber(record.region_schools_represented), label: "schools represented" } : null,
-      isPositiveMetric(record.national_engagement_moments) ? { value: formatNumber(record.national_engagement_moments) + "+", label: "national moments" } : null
+      isPositiveMetric(record.region_unique_teens) ? { value: formatNumber(record.region_unique_teens), label: "teens across your region" } : null,
+      isPositiveMetric(record.region_schools_represented) ? { value: formatNumber(record.region_schools_represented), label: "regional schools represented" } : null,
+      isPositiveMetric(record.national_teens_reached) ? { value: formatNumber(record.national_teens_reached), label: "teens reached nationally" } : null,
+      isPositiveMetric(record.national_engagement_moments) ? { value: formatNumber(record.national_engagement_moments), label: "national engagement moments" } : null
     ].filter(Boolean);
 
     if (movementStats.length) {
@@ -3487,14 +3490,13 @@
         eyebrow: "Zoom out",
         headline: "You were part of something much bigger",
         stats: movementStats,
-        subtext: asText(record.movement_line, "One club. One region. One national movement.")
+        subtext: asText(record.movement_line, "Your chapter numbers are local. The region gets bigger. Nationally, the movement is massive.")
       });
     }
 
     var sharePersona = persona || "Junior NCSY energy";
     var shareStats = [
       isPositiveMetric(record.events_attended) ? { value: formatNumber(record.events_attended), label: "events showed up to" } : null,
-      isPositiveMetric(record.longest_streak) ? { value: formatNumber(record.longest_streak), label: "event streak" } : null,
       isPositiveMetric(record.friends_brought) ? { value: formatNumber(record.friends_brought), label: "friends brought" } : isPositiveMetric(record.events_with_peers) ? { value: formatNumber(record.events_with_peers), label: "events with peers" } : null,
       isPositiveMetric(record.schools_in_room) ? { value: formatNumber(record.schools_in_room), label: "schools in the room" } : null
     ].filter(Boolean);
@@ -3511,8 +3513,8 @@
       persona: sharePersona,
       subtext: [
         countPhrase(record.events_attended, "event", "events"),
-        isPositiveMetric(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
         isPositiveMetric(record.friends_brought) ? countPhrase(record.friends_brought, "friend brought", "friends brought") : isPositiveMetric(record.events_with_peers) ? countPhrase(record.events_with_peers, "event with peers", "events with peers") : "",
+        isPositiveMetric(record.schools_in_room) ? countPhrase(record.schools_in_room, "school in the room", "schools in the room") : "",
         sharePersona
       ].filter(Boolean).join(". ") + ".",
       summaryStats: shareStats,
@@ -3986,6 +3988,23 @@
     ].join(""));
   }
 
+  function renderTeenSchoolsBody(card) {
+    var count = Math.max(0, Math.min(numberValue(card.rawValue || card.stat), 10));
+    var schoolDots = Array.from({ length: count || 1 }).map(function (_, index) {
+      return '<span style="--i:' + index + '"></span>';
+    }).join("");
+
+    return renderReferenceShell(card, [
+      '<div class="jsuw-teen-scene jsuw-teen-schools-scene">',
+      renderTeenTop(card),
+      '<h2 class="jsuw-teen-title">' + htmlWithBreaks(card.displayHeadline || card.headline) + "</h2>",
+      '<div class="jsuw-teen-school-number">' + renderStatNumber(card, "jsuw-reference-stat jsuw-reference-stat--teen") + '<span>' + escapeHtml(card.statLabel || "schools") + "</span></div>",
+      '<div class="jsuw-teen-school-row" aria-hidden="true">' + schoolDots + "</div>",
+      '<p class="jsuw-teen-copy">' + escapeHtml(card.subtext || "") + "</p>",
+      "</div>"
+    ].join(""));
+  }
+
   function renderTeenVibeBody(card) {
     var chips = cleanPublicText(card.vibe, "").split(/\s*\+\s*|\s*,\s*/).filter(Boolean).slice(0, 3);
 
@@ -4393,6 +4412,10 @@
 
     if (card.theme === "teen-streak") {
       return renderTeenStreakBody(card);
+    }
+
+    if (card.theme === "teen-schools") {
+      return renderTeenSchoolsBody(card);
     }
 
     if (card.theme === "teen-vibe") {
@@ -5170,8 +5193,8 @@
       return [
         teenName + "'s Junior NCSY Wrapped:",
         hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
-        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
         hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
+        isPositiveMetric(record.schools_in_room) ? formatNumber(record.schools_in_room) + " schools in the room" : "",
         hasValue(record.persona) ? asText(record.persona) + " energy" : ""
       ].filter(Boolean).join(" - ");
     }
@@ -5442,8 +5465,8 @@
     if (isTeen) {
       var teenSummary = [
         hasValue(record.events_attended) ? formatNumber(record.events_attended) + " events" : "",
-        hasValue(record.longest_streak) ? formatNumber(record.longest_streak) + " event streak" : "",
-        hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : ""
+        hasValue(record.friends_brought) ? formatNumber(record.friends_brought) + " friends brought" : "",
+        isPositiveMetric(record.schools_in_room) ? formatNumber(record.schools_in_room) + " schools in the room" : ""
       ].filter(Boolean).join(". ");
 
       return card.subtext || (teenSummary ? teenSummary + "." : persona + " energy.");
@@ -5560,7 +5583,7 @@
     var footerTextY = hasCta ? 1822 : 1766;
     var stats = card.summaryStats || [
       hasValue(record.events_hosted || record.events_attended) ? { value: formatNumber(record.events_hosted || record.events_attended), label: isTeen ? "events showed up to" : "programs together" } : null,
-      hasValue(record.unique_teens || record.longest_streak) ? { value: formatNumber(record.unique_teens || record.longest_streak), label: isTeen ? "event streak" : "of us, one " + storyNoun } : null,
+      hasValue(record.unique_teens || record.schools_in_room) ? { value: formatNumber(record.unique_teens || record.schools_in_room), label: isTeen ? "schools in the room" : "of us, one " + storyNoun } : null,
       hasValue(record.engagement_moments || record.friends_brought) ? { value: formatNumber(record.engagement_moments || record.friends_brought), label: isTeen ? "friends brought" : "moments stacked up" } : null
     ].filter(Boolean);
     var statCount = Math.min(5, stats.length || 3);

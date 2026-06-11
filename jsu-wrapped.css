@@ -3290,6 +3290,14 @@ body:has(#jsu-wrapped-wordpress-shell) {
     linear-gradient(180deg, #150428 0%, #4b1272 52%, #ff2e93 100%);
 }
 
+#jsu-wrapped .jsuw-theme-teen-schools {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(183, 255, 49, 0.38) 0 70px, transparent 71px),
+    radial-gradient(circle at 82% 74%, rgba(255, 182, 39, 0.44) 0 84px, transparent 85px),
+    linear-gradient(150deg, #071b7a 0%, #00c2ff 48%, #b7ff31 100%);
+  color: #150428;
+}
+
 #jsu-wrapped .jsuw-theme-teen-vibe {
   background:
     radial-gradient(circle at 16% 80%, rgba(255, 255, 255, 0.34) 0 72px, transparent 73px),
@@ -3359,6 +3367,7 @@ body:has(#jsu-wrapped-wordpress-shell) {
 #jsu-wrapped .jsuw-reference-teen-attendance,
 #jsu-wrapped .jsuw-reference-teen-ticket,
 #jsu-wrapped .jsuw-reference-teen-streak,
+#jsu-wrapped .jsuw-reference-teen-schools,
 #jsu-wrapped .jsuw-reference-teen-vibe,
 #jsu-wrapped .jsuw-reference-teen-connector,
 #jsu-wrapped .jsuw-reference-teen-depth,
@@ -3714,6 +3723,64 @@ body:has(#jsu-wrapped-wordpress-shell) {
   margin-top: -2px;
   transform: rotate(42deg);
   width: 7px;
+}
+
+#jsu-wrapped .jsuw-teen-school-number {
+  align-items: center;
+  align-self: center;
+  background: rgba(255, 255, 255, 0.86);
+  border: 4px solid #150428;
+  border-radius: 18px;
+  box-shadow: 9px 9px 0 rgba(21, 4, 40, 0.2);
+  color: #150428;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -2px 0 4px;
+  min-width: 190px;
+  padding: 8px 18px 12px;
+  transform: rotate(-2deg);
+}
+
+#jsu-wrapped .jsuw-teen-school-number .jsuw-reference-stat--teen {
+  color: #150428;
+  line-height: 0.82;
+  text-shadow: 5px 5px 0 rgba(255, 182, 39, 0.62);
+}
+
+#jsu-wrapped .jsuw-teen-school-number > span {
+  font-size: 0.98rem;
+  font-weight: 1000;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-teen-school-row {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 4px auto 0;
+  max-width: 238px;
+  width: 82%;
+}
+
+#jsu-wrapped .jsuw-teen-school-row span {
+  aspect-ratio: 1;
+  animation: jsuw-pop-in 360ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: calc(var(--i) * 42ms);
+  background: #ff2e93;
+  border: 2px solid #150428;
+  border-radius: 7px;
+  box-shadow: 3px 3px 0 rgba(21, 4, 40, 0.18);
+}
+
+#jsu-wrapped .jsuw-teen-school-row span:nth-child(3n) {
+  background: #ffb627;
+}
+
+#jsu-wrapped .jsuw-teen-school-row span:nth-child(4n) {
+  background: #ffffff;
 }
 
 #jsu-wrapped .jsuw-teen-sticker-card {

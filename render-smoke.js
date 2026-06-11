@@ -87,7 +87,7 @@ const PAGE_CHECKS = [
   {
     label: "builder teen mode",
     path: "/builder.html?mode=teen&teen=west-coast-junior-01&qa=render-smoke",
-    requiredSelectors: ['id="wrapped-builder"', 'data-builder-teen-card="teen-cover"', 'data-builder-teen-card="teen-share"', 'data-builder-teen-metric-field="events_attended"', 'data-builder-teen-metric-field="longest_streak"', "jsuw-story"],
+    requiredSelectors: ['id="wrapped-builder"', 'data-builder-teen-card="teen-cover"', 'data-builder-teen-card="teen-share"', 'data-builder-teen-metric-field="events_attended"', 'data-builder-teen-metric-field="schools_in_room"', 'data-builder-teen-metric-field="board_meetings_attended"', "jsuw-story"],
     requiredText: ["Teen Wrapped", "Leah", "Attendance", "Correct stats used on this screen"]
   }
 ];

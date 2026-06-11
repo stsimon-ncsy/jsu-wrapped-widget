@@ -30,6 +30,10 @@ textarea {
   padding: 22px;
 }
 
+.wrapped-builder [hidden] {
+  display: none !important;
+}
+
 .builder-header {
   align-items: center;
   display: flex;

@@ -211,6 +211,26 @@ function topCategoryLabel(category, type) {
   return "Social + Community";
 }
 
+function isBoardMeetingEvent(row) {
+  const text = [
+    textValue(row.eventname),
+    textValue(row.programType),
+    textValue(row.programCategory)
+  ].join(" ").toLowerCase();
+
+  return /\bboard\b/.test(text) && /\b(meeting|meetings|mtg|mtgs)\b/.test(text);
+}
+
+function optionNumber(options, ...keys) {
+  for (const key of keys) {
+    if (hasValue(options[key])) {
+      return parseInteger(options[key]);
+    }
+  }
+
+  return undefined;
+}
+
 function derivePersona(stats) {
   if (stats.leadershipMoments > 0) {
     return "The Teen Leader";
@@ -368,6 +388,7 @@ function summarizePerson(personRows, context) {
   let learningSessions = 0;
   let shabbatons = 0;
   let leadershipMoments = 0;
+  let boardMeetingsAttended = 0;
   let recruitmentMoments = 0;
   let eventsWithPeers = 0;
 
@@ -392,6 +413,10 @@ function summarizePerson(personRows, context) {
 
     if (category.includes("leadership") || type.includes("leadership") || type.includes("board")) {
       leadershipMoments += 1;
+    }
+
+    if (isBoardMeetingEvent(row)) {
+      boardMeetingsAttended += 1;
     }
 
     if (category.includes("recruitment")) {
@@ -427,6 +452,7 @@ function summarizePerson(personRows, context) {
     learningSessions,
     shabbatons,
     leadershipMoments,
+    boardMeetingsAttended,
     recruitmentMoments,
     categoryVariety: categoryCounts.size
   };
@@ -453,6 +479,7 @@ function summarizePerson(personRows, context) {
     shabbatons,
     learning_sessions: learningSessions,
     leadership_moments: leadershipMoments,
+    board_meetings_attended: boardMeetingsAttended,
     persona,
     persona_line: personaLine(persona),
     chapter_events_hosted: chapterStats ? chapterStats.events.size : 0,
@@ -466,11 +493,11 @@ function reviewToTeenRecord(review, index, context) {
   const chapterName = review.chapter_name || "Junior NCSY";
   const schoolText = cleanPublicLabel(review.school_name);
   const eventsText = formatNumber(review.events_attended);
-  const streakText = formatNumber(review.longest_streak);
   const peerText = formatNumber(review.events_with_peers);
   const depthParts = [
     countPhrase(review.learning_sessions, "learning moment", "learning moments"),
     countPhrase(review.shabbatons, "Shabbaton moment", "Shabbaton moments"),
+    countPhrase(review.board_meetings_attended, "board meeting", "board meetings"),
     countPhrase(review.leadership_moments, "leadership moment", "leadership moments")
   ].filter(Boolean);
 
@@ -495,11 +522,11 @@ function reviewToTeenRecord(review, index, context) {
     shabbatons: review.shabbatons,
     learning_sessions: review.learning_sessions,
     leadership_moments: review.leadership_moments,
+    board_meetings_attended: review.board_meetings_attended,
     persona: review.persona,
     persona_line: review.persona_line,
     attendance_line: `${eventsText} Junior NCSY moments made this a year you kept coming back to.`,
     first_event_line: `${review.first_event_date_label} was your first Junior NCSY moment in this story.`,
-    streak_line: `Your longest chapter-event streak reached ${streakText}. That is consistency in motion.`,
     vibe_line: `${review.top_vibe} was the lane you returned to most.`,
     depth_line: depthParts.length ? `${sentenceList(depthParts)} added depth to the year.` : "You kept building your Junior NCSY story.",
     peer_line: `You shared ${peerText} of your events with other Junior NCSY teens.`,
@@ -509,7 +536,11 @@ function reviewToTeenRecord(review, index, context) {
     chapter_line: `${chapterName} gave Junior NCSY teens a year full of ways to show up.`,
     region_unique_teens: context.regionUniqueTeens,
     region_schools_represented: context.regionSchoolsRepresented,
-    movement_line: `One chapter. One West Coast region. One Junior NCSY story.`
+    region_engagement_moments: context.regionEngagementMoments,
+    national_teens_reached: context.nationalTeensReached,
+    national_programs_hosted: context.nationalProgramsHosted,
+    national_engagement_moments: context.nationalEngagementMoments,
+    movement_line: `Your chapter numbers are local. The region gets bigger. Nationally, the movement is massive.`
   };
 }
 
@@ -574,8 +605,12 @@ function deriveJuniorWrapped(rawRows, options = {}) {
     chapterStats: buildChapterStats(dedupedRows),
     eventAttendees: countPeerEvents(dedupedRows),
     regionName: options.regionName || DEFAULT_REGION_NAME,
-    regionSchoolsRepresented: regionSchools.size,
-    regionUniqueTeens: people.size,
+    regionEngagementMoments: optionNumber(options, "regionEngagementMoments", "region_engagement_moments"),
+    regionSchoolsRepresented: optionNumber(options, "regionSchoolsRepresented", "region_schools_represented") || regionSchools.size,
+    regionUniqueTeens: optionNumber(options, "regionUniqueTeens", "region_unique_teens") || people.size,
+    nationalTeensReached: optionNumber(options, "nationalTeensReached", "national_teens_reached"),
+    nationalProgramsHosted: optionNumber(options, "nationalProgramsHosted", "national_programs_hosted"),
+    nationalEngagementMoments: optionNumber(options, "nationalEngagementMoments", "national_engagement_moments"),
     yearLabel: options.yearLabel || DEFAULT_YEAR_LABEL
   };
 
