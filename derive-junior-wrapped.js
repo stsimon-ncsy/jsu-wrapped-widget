@@ -211,14 +211,22 @@ function topCategoryLabel(category, type) {
   return "Social + Community";
 }
 
-function isBoardMeetingEvent(row) {
-  const text = [
+function eventDescriptorText(row) {
+  return [
     textValue(row.eventname),
     textValue(row.programType),
     textValue(row.programCategory)
   ].join(" ").toLowerCase();
+}
+
+function isBoardMeetingEvent(row) {
+  const text = eventDescriptorText(row);
 
   return /\bboard\b/.test(text) && /\b(meeting|meetings|mtg|mtgs)\b/.test(text);
+}
+
+function isLeadershipEvent(row) {
+  return /\b(board|leader|leaders|leadership)\b/.test(eventDescriptorText(row));
 }
 
 function optionNumber(options, ...keys) {
@@ -411,7 +419,7 @@ function summarizePerson(personRows, context) {
       shabbatons += 1;
     }
 
-    if (category.includes("leadership") || type.includes("leadership") || type.includes("board")) {
+    if (isLeadershipEvent(row)) {
       leadershipMoments += 1;
     }
 

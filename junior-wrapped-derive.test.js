@@ -11,6 +11,8 @@ const FIXTURE = [
   "101\tAri\tAlpha\t2\tLearning Night\tLatte and Learning\tEducational\t2\t2025-09-08 18:00:00.000\tLas Vegas\tDesert Torah Academy\t8\t0",
   "202\tBea\tBeta\t1\tKickoff\tSocial Event\tRecruitment\t1\t2025-09-01 18:00:00.000\tLas Vegas\tDesert Torah Academy\t7\t0",
   "202\tBea\tBeta\t3\tBowling\tSocial Event\tRecruitment\t1\t2025-09-15 18:00:00.000\tLas Vegas\tDesert Torah Academy\t7\t0",
+  "202\tBea\tBeta\t9\tTeen Leader Huddle\tSocial Event\tRecruitment\t1\t2025-09-29 18:00:00.000\tLas Vegas\tDesert Torah Academy\t7\t0",
+  "202\tBea\tBeta\t10\tJunior Board Hangout\tSocial Event\tRecruitment\t1\t2025-10-06 18:00:00.000\tLas Vegas\tDesert Torah Academy\t7\t0",
   "101\tAri\tAlpha\t4\tShabbaton\tChapter Shabbaton\tShabbaton\t3\t2025-09-22 18:00:00.000\tLas Vegas\tDesert Torah Academy\t8\t0",
   "101\tAri\tAlpha\t8\tChapter Board Meeting\tBoard Meeting\tLeadership\t2\t2025-09-29 18:00:00.000\tLas Vegas\tDesert Torah Academy\t8\t0",
   "303\tCee\tGamma\t5\tGrade zero\tSocial Event\tRecruitment\t1\t2025-09-29 18:00:00.000\tLas Vegas\tDesert Torah Academy\t0\t1",
@@ -25,7 +27,7 @@ function main() {
     top: 10
   });
 
-  assert.strictEqual(result.summary.eligibleRows, 6);
+  assert.strictEqual(result.summary.eligibleRows, 8);
   assert.strictEqual(result.summary.excludedGradeZeroRows, 1);
   assert.strictEqual(result.summary.excludedGradeNinePlusRows, 1);
   assert.strictEqual(result.summary.excludedFutureRows, 1);
@@ -41,6 +43,12 @@ function main() {
   assert.strictEqual(ariReview.board_meetings_attended, 1);
   assert.strictEqual(ariReview.leadership_moments, 1);
   assert.strictEqual(ariReview.events_with_peers, 1);
+
+  const beaReview = result.reviewRecords.find((record) => record.source_personid === "202");
+  assert(beaReview, "Bea should be in the review records");
+  assert.strictEqual(beaReview.events_attended, 4);
+  assert.strictEqual(beaReview.board_meetings_attended, 0);
+  assert.strictEqual(beaReview.leadership_moments, 2);
 
   const publicAri = result.teenRecords.find((record) => record.teen_name === "Ari A.");
   assert(publicAri, "Ari should have a public teen record");
