@@ -1913,6 +1913,11 @@ function runInlineEmbedSmoke() {
   assert(brizyHosted.includes("jsu-wrapped.js?v=jsuw-prod-20260610a"), "Compact Brizy hosted embed should load the hosted widget script");
   assert(brizyHosted.includes('id="jsu-wrapped"'), "Compact Brizy hosted embed should include the widget root");
   assert(brizyHosted.includes("jsuw-shell--loading"), "Compact Brizy hosted embed should include the static loading shell");
+  assert(brizyHosted.includes('id="jsuw-wrapped-interest"'), "Compact Brizy hosted embed should include the embedded CTA panel target");
+  assert(/\[gravityform\b[^\]]*\]/i.test(brizyHosted), "Compact Brizy hosted embed should include the Gravity Forms shortcode panel");
+  assert(brizyHosted.includes('class="jsuw-context-fields"'), "Compact Brizy hosted embed should include Gravity Forms context field templates");
+  assert(brizyHosted.includes('name="wrapped_url"'), "Compact Brizy hosted embed should include the Wrapped URL context field");
+  assert(brizyHosted.includes("function ensureContextFields"), "Compact Brizy hosted embed should include the Gravity Forms context bridge");
 }
 
 function runAssetVersionSmoke() {
@@ -2309,7 +2314,7 @@ function runHostedSmokeScriptSmoke() {
     },
     "wordpress-brizy-hosted-embed.html": {
       status: 200,
-      text: '<div id="jsu-wrapped-wordpress-shell"><div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a"></div></div><link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260610a"><script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260610a"></script>'
+      text: '<div id="jsu-wrapped-wordpress-shell"><div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a"></div><section id="jsuw-wrapped-interest"><div class="jsuw-context-fields"><input name="wrapped_url"></div>[gravityform id="255"]</section></div><link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260610a"><script>function ensureContextFields(){}</script><script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260610a"></script>'
     },
     "sample-wrapped-2026.json": {
       headers: {

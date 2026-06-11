@@ -115,6 +115,10 @@ const ASSET_CHECKS = [
       mustInclude(text, "jsu-wrapped.css?v=", "Brizy hosted embed missing versioned hosted stylesheet", errors);
       mustInclude(text, "jsu-wrapped.js?v=", "Brizy hosted embed missing versioned hosted script", errors);
       mustInclude(text, "sample-wrapped-2026.json?v=", "Brizy hosted embed missing versioned remote chapter data URL", errors);
+      mustInclude(text, 'id="jsuw-wrapped-interest"', "Brizy hosted embed missing embedded CTA panel target", errors);
+      mustInclude(text, 'class="jsuw-context-fields"', "Brizy hosted embed missing Gravity Forms context field templates", errors);
+      mustInclude(text, 'name="wrapped_url"', "Brizy hosted embed missing Wrapped URL context field", errors);
+      mustInclude(text, "function ensureContextFields", "Brizy hosted embed missing Gravity Forms context bridge", errors);
       mustNotInclude(text, "jsuw-prod-20260603b", "Brizy hosted embed still uses the previous production cache token", errors);
     }
   },
