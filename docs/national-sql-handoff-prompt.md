@@ -32,13 +32,20 @@ Deduping:
 Program category mapping:
 Create a clean program_breakdown array grouped into public labels. Use actual local type values, but map them into a small readable set such as:
 - Social + Jewish Culture
-- Learning
+- Learning + Educational
 - Shabbat / Immersive
 - Leadership + Service
-- Recruitment
-- Educational
+- Community Building
+- JSU Clubs, if the source can reliably distinguish recurring club events from other community-building events
 - Other
-If exact mappings are ambiguous, include a short SQL comment listing the raw values and the mapping assumption.
+Combine Learning and Educational unless the raw schema proves they are meaningfully different in the public story. Rename Recruitment to Community Building. Use Shabbat / Immersive for Shabbos meals, Shabbatonim, retreats, conventions, and similar immersive experiences. If exact mappings are ambiguous, include a short SQL comment listing the raw values and the mapping assumption.
+
+Validation checks:
+- Validate `national_new_teens` / `first_time_teens` from all available historical attendance, not only the current-year extract. If full history is unavailable, return null for those fields and list that as a blocker.
+- Validate `national_shabbatons` by returning both the Shabbat / Immersive rollup and a raw-type drilldown for event types that matched Shabbos meals, Shabbatons, retreats, conventions, or immersive labels.
+- Validate `growth_rate_label` against the prior school year denominator and include the current/prior teen counts used to produce the percentage.
+- Validate `national_schools_represented` with a drilldown by region, including schools represented in Israel/international regions, blank school IDs/names, and the ratio of represented schools to active JSU club sites when the schema has a club-site dimension.
+- Flag school anomalies: schools attached to Israel or international rows, schools with missing IDs but repeated names, and school counts that appear materially higher than the active JSU club count.
 
 The wrapped_record JSON must include:
 - school_year: "2025-2026"
@@ -46,12 +53,15 @@ The wrapped_record JSON must include:
 - scope_type: "national"
 - scope_slug: "national"
 - scope_name: "JSU/NCSY"
-- brand_logo: "ncsy"
+- brand_logo: "both"
 - national_teens_reached: distinct teens attended in current year
 - national_programs_hosted: distinct attended events in current year
 - national_engagement_moments: deduped teen-event attendances in current year
 - national_schools_represented: distinct schools represented in current year
 - national_regions_count: active regions count, not only regions with attendance
+- national_states_count: distinct U.S. states represented by resolved school geography
+- national_provinces_count: distinct Canadian provinces/territories represented by resolved school geography
+- national_cities_count: distinct resolved school city + state/province pairs in the U.S. and Canada; directional only, not a precise chapter/city footprint
 - national_chapters_count: active chapters count, not only chapters with attendance
 - national_learning_sessions: distinct learning events in current year
 - national_shabbatons: distinct Shabbaton or immersive events in current year
@@ -61,8 +71,9 @@ The wrapped_record JSON must include:
 - first_time_teens: same value as national_new_teens
 - growth_rate_label: rounded percent change in national_teens_reached vs prior year, formatted like "18%"; null if prior year denominator is zero/missing
 - growth_series: JSON array of {"year":"2025-2026","value":33287} rows for each July-June school year from 2021-2022 through 2025-2026 or latest available
-- program_breakdown: JSON array of {"label":"Learning","value":123} ordered by value desc
-- region_breakdown: JSON array containing the public display regions with {"name","slug","teens","events","engagement_moments","chapters","schools","map_x","map_y","is_international"} ordered by teens desc then name
+- program_breakdown: JSON array of {"label":"Learning + Educational","value":123} ordered by value desc
+- region_breakdown: JSON array containing the public display regions with {"name","slug","teens","events","engagement_moments","chapters","schools","included_states","map_x","map_y","is_international"} ordered alphabetically by name for display. This remains the authoritative organizational breakdown.
+- state_breakdown: JSON array containing the school-representation footprint with {"country","state","name","schools","teens","events","engagement_moments"} for U.S. states and Canadian provinces/territories. Use country = "US" for U.S. states and country = "CA" for Canadian provinces/territories.
 - impact_tags: ["Belonging","Identity","Leadership","Friendship","Jewish life"]
 
 Public region display normalization:
@@ -74,6 +85,13 @@ Public region display normalization:
 - Do not expose raw catch-all buckets named National as regions.
 - If an inactive/zero-activity North American bucket exists only as a legacy CRM artifact, such as the Atlanta and Upstate New York rows in the reviewed export, leave it out of the public region_breakdown and list that assumption below the SQL.
 - Set national_regions_count to the count of displayed public rows after this normalization, not the raw CRM bucket count.
+
+School geography footprint:
+- Build `state_breakdown` from resolved school geography, preferably `ncsy.dbo.Schools.State` plus country/province/city fields, not from event venue location and not from chapter territory.
+- Include only U.S. states and Canadian provinces/territories in `state_breakdown`.
+- Keep Israel, Mexico, Chile, Argentina, and generic International in `region_breakdown`, not in `state_breakdown`.
+- State/province row metrics are footprint metrics and may not reconcile to national totals because unresolved school records are excluded.
+- Do not include state-level chapter counts until chapter geography has been reviewed separately.
 
 For map_x/map_y:
 - These are story-card display coordinates, not latitude/longitude.

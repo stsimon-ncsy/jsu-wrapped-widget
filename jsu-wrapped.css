@@ -1076,6 +1076,18 @@ body:has(#jsu-wrapped-wordpress-shell) {
   width: 54px;
 }
 
+#jsu-wrapped .jsuw-brand-lockup--both {
+  gap: 6px;
+}
+
+#jsu-wrapped .jsuw-brand-lockup--both .jsuw-brand-logo {
+  margin-right: -2px;
+}
+
+#jsu-wrapped .jsuw-brand-lockup--both .jsuw-brand-logo--jsu {
+  transform: rotate(3deg);
+}
+
 #jsu-wrapped .jsuw-brand-copy {
   color: currentColor;
   display: grid;
@@ -4568,55 +4580,6 @@ body:has(#jsu-wrapped-wordpress-shell) {
   width: var(--w);
 }
 
-#jsu-wrapped .jsuw-national-map {
-  background: rgba(255, 255, 255, 0.58);
-  border: 2px solid rgba(21, 4, 40, 0.7);
-  border-radius: 18px;
-  box-shadow: 5px 5px 0 rgba(21, 4, 40, 0.2);
-  display: block;
-  height: 172px;
-  margin: 2px 0 0;
-  width: 100%;
-}
-
-#jsu-wrapped .jsuw-national-map-land {
-  fill: rgba(21, 4, 40, 0.12);
-  stroke: rgba(21, 4, 40, 0.38);
-  stroke-width: 1.2;
-}
-
-#jsu-wrapped .jsuw-national-map-route {
-  fill: none;
-  stroke: rgba(106, 43, 255, 0.45);
-  stroke-dasharray: 3 3;
-  stroke-linecap: round;
-  stroke-width: 1.2;
-}
-
-#jsu-wrapped .jsuw-national-map-route--global {
-  stroke: rgba(255, 46, 147, 0.56);
-}
-
-#jsu-wrapped .jsuw-national-map-region circle {
-  fill: #ff2e93;
-  stroke: #150428;
-  stroke-width: 1.1;
-}
-
-#jsu-wrapped .jsuw-national-map-region--international circle {
-  fill: #ffb627;
-}
-
-#jsu-wrapped .jsuw-national-map-region text {
-  fill: #150428;
-  font-size: 3px;
-  font-weight: 900;
-  paint-order: stroke;
-  stroke: rgba(255, 255, 255, 0.88);
-  stroke-width: 0.8;
-}
-
-#jsu-wrapped .jsuw-national-stats--footprint,
 #jsu-wrapped .jsuw-national-stats--immersive,
 #jsu-wrapped .jsuw-national-stats--growth {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4626,10 +4589,139 @@ body:has(#jsu-wrapped-wordpress-shell) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-#jsu-wrapped .jsuw-national-stats--footprint strong,
 #jsu-wrapped .jsuw-national-stats--immersive strong,
 #jsu-wrapped .jsuw-national-stats--growth strong {
   font-size: 1.18rem;
+}
+
+#jsu-wrapped .jsuw-national-us-map-wrap {
+  background: rgba(255, 255, 255, 0.72);
+  border: 2px solid rgba(21, 4, 40, 0.72);
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 rgba(21, 4, 40, 0.2);
+  margin: 2px 0 0;
+  overflow: hidden;
+  padding: 7px 8px 6px;
+}
+
+#jsu-wrapped .jsuw-national-us-map {
+  display: block;
+  height: auto;
+  max-height: 218px;
+  overflow: visible;
+  width: 100%;
+}
+
+#jsu-wrapped .jsuw-us-state {
+  fill: rgba(21, 4, 40, 0.12);
+  stroke: #ffffff;
+  stroke-linejoin: round;
+  stroke-width: 1.35;
+  transition: fill 260ms ease, filter 260ms ease, opacity 260ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+#jsu-wrapped .jsuw-us-state--active {
+  animation: jsuw-pop-in 320ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: calc(var(--i) * 8ms);
+  fill: #ffb627;
+  filter: drop-shadow(0 5px 5px rgba(245, 158, 11, 0.22));
+  opacity: calc(0.72 + (var(--state-strength) * 0.28));
+}
+
+#jsu-wrapped .jsuw-us-inset-label {
+  fill: rgba(21, 4, 40, 0.56);
+  font-size: 14px;
+  font-weight: 1000;
+  text-anchor: middle;
+}
+
+#jsu-wrapped .jsuw-map-dot {
+  animation: jsuw-map-dot-in 620ms cubic-bezier(0.18, 0.9, 0.22, 1) both;
+  animation-delay: calc(120ms + var(--i) * 14ms);
+  fill: #150428;
+  stroke: #ffffff;
+  stroke-width: 1.6;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+#jsu-wrapped .jsuw-map-dot--pulse {
+  animation-name: jsuw-map-dot-in, jsuw-map-dot-pulse;
+  animation-delay: calc(120ms + var(--i) * 14ms), calc(740ms + var(--i) * 14ms);
+  animation-duration: 620ms, 1500ms;
+  animation-iteration-count: 1, infinite;
+}
+
+@keyframes jsuw-map-dot-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes jsuw-map-dot-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0 rgba(255, 182, 39, 0));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 182, 39, 0.9));
+  }
+}
+
+#jsu-wrapped .jsuw-national-footprint-cards {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 8px 0 0;
+}
+
+#jsu-wrapped .jsuw-national-footprint-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(21, 4, 40, 0.72);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 rgba(21, 4, 40, 0.18);
+  color: #150428;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+#jsu-wrapped .jsuw-national-footprint-card strong {
+  color: #6a2bff;
+  font-family: var(--jsuw-font-display);
+  font-size: 1.38rem;
+  font-weight: 1000;
+  line-height: 0.86;
+}
+
+#jsu-wrapped .jsuw-national-footprint-card span {
+  font-size: 0.57rem;
+  font-weight: 1000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#jsu-wrapped .jsuw-national-footprint-note {
+  color: rgba(21, 4, 40, 0.72);
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1.18;
+  margin: 7px 0 0;
+  text-align: center;
 }
 
 #jsu-wrapped .jsuw-national-candles {

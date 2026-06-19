@@ -11,9 +11,9 @@
     "custom_cards": []
   },
   "national": {
-    "brand_logo": "jsu",
+    "brand_logo": "both",
     "palette": "electric",
-    "cta_label": "Request the impact report",
+    "cta_label": "Join the Movement",
     "cta_target": "#jsuw-wrapped-interest",
     "card_overrides": {
       "cover": {

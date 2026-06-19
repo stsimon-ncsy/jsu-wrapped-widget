@@ -20,9 +20,9 @@ Paste this into the page body where the Wrapped widget should appear.
 <script>
 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0];var j=d.createElement(s);var dl=l!=="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-MLW344");
 </script>
-<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260610a">
-<div id="jsu-wrapped" data-year="2026" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a" data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a" data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260610a" data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/" data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/" data-analytics="true" data-cta-label="Get involved next year" data-cta-target="#jsuw-wrapped-interest"></div>
-<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260610a"></script>
+<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260619a">
+<div id="jsu-wrapped" data-year="2026" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a" data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a" data-teen-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-teen-wrapped-2026.json?v=jsuw-prod-20260619a" data-assets-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/" data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/" data-analytics="true" data-cta-label="Join the Movement" data-cta-target="#jsuw-wrapped-interest"></div>
+<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260619a"></script>
 ```
 
 Do not paste separate CSS/JS tags a second time if you use the block above.

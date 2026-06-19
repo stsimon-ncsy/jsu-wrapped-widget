@@ -6,6 +6,8 @@ If you are handing this to a schema-aware ChatGPT project, start with `docs/nati
 
 The widget expects one national JSON record in `sample-wrapped-2026.json`. The query below is written in PostgreSQL-style SQL because it can emit nested JSON arrays directly. If your warehouse is BigQuery or Snowflake, the CTEs and field names still apply; swap `jsonb_agg/jsonb_build_object` for the local JSON aggregate functions.
 
+Note: the current national footprint card uses `state_breakdown` from resolved school geography, not region map coordinates. If you reuse the query below, add the schema-aware school-geography CTE that outputs `national_states_count`, `national_provinces_count`, `national_cities_count`, and `state_breakdown`.
+
 ## Source Tables
 
 The cleanest source is a denormalized teen-event attendance row with event metadata attached:
@@ -210,6 +212,37 @@ current_events as (
   from current_attendance
   group by event_id
 ),
+categorized_events as (
+  select
+    ce.*,
+    case
+      when ce.is_learning_session
+        or lower(ce.program_type) in ('learning', 'educational', 'education')
+        or lower(ce.program_type) like '%learning%'
+        or lower(ce.program_type) like '%educat%'
+      then 'Learning + Educational'
+      when ce.is_shabbaton
+        or ce.is_immersive
+        or lower(ce.program_type) like '%shabb%'
+        or lower(ce.program_type) like '%retreat%'
+        or lower(ce.program_type) like '%convention%'
+        or lower(ce.program_type) like '%immersive%'
+      then 'Shabbat / Immersive'
+      when lower(ce.program_type) like '%club%'
+        or lower(ce.program_type) like '%jsu%'
+      then 'JSU Clubs'
+      when lower(ce.program_type) like '%recruit%'
+        or lower(ce.program_type) like '%outreach%'
+        or lower(ce.program_type) like '%community%'
+      then 'Community Building'
+      when lower(ce.program_type) like '%leadership%'
+        or lower(ce.program_type) like '%service%'
+      then 'Leadership + Service'
+      when nullif(ce.program_type, '') is null then 'Other'
+      else ce.program_type
+    end as public_program_label
+  from current_events ce
+),
 national_rollup as (
   select
     count(distinct ca.teen_id) as national_teens_reached,
@@ -281,17 +314,17 @@ growth_series as (
 program_breakdown as (
   select jsonb_agg(
     jsonb_build_object(
-      'label', program_type,
+      'label', public_program_label,
       'value', programs
     )
-    order by programs desc, program_type
+    order by programs desc, public_program_label
   ) as program_breakdown
   from (
     select
-      program_type,
+      public_program_label,
       count(distinct event_id) as programs
-    from current_events
-    group by program_type
+    from categorized_events
+    group by public_program_label
   ) p
 ),
 region_activity as (
@@ -329,7 +362,7 @@ region_breakdown as (
       'map_y', coalesce(rm.map_y, 50),
       'is_international', rd.is_international
     )
-    order by coalesce(ra.teens, 0) desc, rd.region_name
+    order by rd.region_name
   ) as region_breakdown
   from region_display_dim rd
   left join region_activity ra on ra.region_slug = rd.region_slug
@@ -343,7 +376,7 @@ final_record as (
     'scope_type', 'national',
     'scope_slug', 'national',
     'scope_name', 'JSU/NCSY',
-    'brand_logo', 'ncsy',
+    'brand_logo', 'both',
     'national_teens_reached', nr.national_teens_reached,
     'national_programs_hosted', nr.national_programs_hosted,
     'national_engagement_moments', nr.national_engagement_moments,
@@ -385,6 +418,9 @@ The final `wrapped_record` maps directly to the national renderer:
 - `national_engagement_moments`
 - `national_schools_represented`
 - `national_regions_count`
+- `national_states_count`
+- `national_provinces_count`
+- `national_cities_count`
 - `national_chapters_count`
 - `national_learning_sessions`
 - `national_shabbatons`
@@ -396,6 +432,7 @@ The final `wrapped_record` maps directly to the national renderer:
 - `growth_series`: array of `{ "year", "value" }` rows.
 - `program_breakdown`: array of `{ "label", "value" }`.
 - `region_breakdown`: array of `{ "name", "slug", "teens", "events", "engagement_moments", "chapters", "schools", "map_x", "map_y", "is_international" }`.
+- `state_breakdown`: array of `{ "country", "state", "name", "schools", "teens", "events", "engagement_moments" }` rows for the school-representation footprint map.
 - `impact_tags`: array of short public tags.
 
-The map coordinates are intentionally rough percentages for the story card. They are not meant to be geographic proof.
+Region map coordinates are legacy display hints. The current footprint visual should prefer `state_breakdown` and count fields from resolved school geography.

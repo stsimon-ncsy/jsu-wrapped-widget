@@ -324,18 +324,63 @@ function runNationalStorySmoke(records) {
   assert(api.findStoryRecord(records, request) === nationalRecord, "national story request should resolve the national record");
 
   const cards = api.createCards(nationalRecord, {
-    ctaLabel: "Build next year's story",
+    ctaLabel: "Join the Movement",
     ctaTarget: "#jsuw-wrapped-interest",
-    shareBase: "https://example.org/share/"
+    shareBase: "https://example.org/share/",
+    assetBase: "https://example.org/assets/"
   });
   const themes = cards.map((card) => card.theme);
+  const programCard = cards.find((card) => card.theme === "national-programs");
   const regionCard = cards.find((card) => card.theme === "national-regions");
   const immersiveCard = cards.find((card) => card.theme === "national-immersive");
+  const shareCard = cards.find((card) => card.theme === "national-share");
+  const coverHtml = api.renderCardBody(cards.find((card) => card.theme === "national-cover"));
+  const coverStoryHtml = api.renderStoryMarkup({
+    cards,
+    index: 0,
+    autoplayDelay: 4000,
+    autoplayEnabled: false,
+    soundEnabled: false
+  });
+  const programsHtml = api.renderCardBody(programCard);
   const mapHtml = api.renderCardBody(cards.find((card) => card.theme === "national-footprint"));
+  const regionHtml = api.renderCardBody(regionCard);
   const immersiveHtml = api.renderCardBody(immersiveCard);
-  const shareHtml = api.renderCardBody(cards.find((card) => card.theme === "national-share"));
+  const shareHtml = api.renderCardBody(shareCard);
+  const fallbackSvg = api.createFallbackSvg({ record: nationalRecord, cards, experienceMode: "chapter" }, {
+    ncsy: "data:image/png;base64,ncsy-test",
+    jsu: "data:image/png;base64,jsu-test"
+  });
+  const previousLocation = global.location;
+  const previousDocument = global.document;
+  global.location = { protocol: "file:" };
+  delete global.document;
+  const hostedFilePreviewDataUrl = api.getDataUrl({
+    dataset: {
+      source: "https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a"
+    }
+  });
+  global.document = {
+    getElementById(id) {
+      return ["jsuw-local-preview-records", "jsuw-local-preview-config"].includes(id) ? {} : null;
+    }
+  };
+  const embeddedFilePreviewDataUrl = api.getDataUrl({
+    dataset: {
+      source: "https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a"
+    }
+  });
+  const embeddedFilePreviewConfigUrl = api.getConfigUrl({
+    dataset: {
+      configSource: "https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"
+    }
+  });
+  global.location = previousLocation;
+  global.document = previousDocument;
   const shareUrl = api.createShareUrl({ record: nationalRecord, shareBase: "https://example.org/share/" }, "https://example.org/wrapped/?scope=national");
   const regionNames = regionCard ? regionCard.regions.map((region) => region.name) : [];
+  const sortedRegionNames = regionNames.slice().sort((a, b) => a.localeCompare(b));
+  const programLabels = programCard ? programCard.breakdown.map((item) => item.label) : [];
 
   assert(themes[0] === "national-cover", "national story should start with the national cover");
   assert(themes.includes("national-footprint"), "national story should include the rough map footprint card");
@@ -345,16 +390,52 @@ function runNationalStorySmoke(records) {
   assertNoBrokenText(cards);
   assert(regionCard && regionCard.regions.length >= 10, "national region card should list every current region");
   assert(regionCard.regions.some((region) => region.name === "Canada"), "national region card should include Canada");
-  assert(regionCard.regions.some((region) => region.name === "Israel"), "national region card should include Israel");
   assert(regionNames.includes("NY JSU"), "national region card should include the separate NY JSU region");
   assert(regionNames.includes("NJ/CT JSU"), "national region card should include the renamed NJ/CT JSU region");
-  assert(regionNames.includes("International"), "national region card should group smaller international regions");
+  assert(regionNames.includes("International"), "national region card should represent Israel and smaller international geographies through International");
+  assert(regionNames.join("|") === sortedRegionNames.join("|"), "national region card should list regions alphabetically");
   assert(!regionNames.includes("National"), "national region card should not expose raw National as a region");
   assert(!regionNames.includes("Chile"), "national region card should roll Chile into International");
+  assert(nationalRecord.brand_logo === "both", "national story sample should request the NCSY + JSU dual logo lockup");
+  assert((coverHtml.match(/ncsy-logo\.png/g) || []).length === 1, "national brand lockup should render the NCSY logo once");
+  assert((coverHtml.match(/jsu-logo\.png/g) || []).length === 1, "national brand lockup should render the JSU logo once");
+  assert((coverStoryHtml.match(/class="jsuw-brand-lockup /g) || []).length === 1, "national story frame should not duplicate the in-card brand lockup");
+  assert(!coverHtml.includes(">JSU</strong><em>Wrapped"), "national brand lockup should not read as standalone JSU Wrapped");
+  assert(fallbackSvg.includes("NCSY + JSU Wrapped"), "national fallback SVG should use the dual-brand wrapped label");
+  assert((fallbackSvg.match(/poster-logo-image/g) || []).length === 2, "national fallback SVG should include both logo images");
+  assert(!fallbackSvg.includes(">JSU Wrapped<"), "national fallback SVG should not read as standalone JSU Wrapped");
+  assert(programLabels.includes("Learning + Educational"), "national program labels should combine Learning and Educational");
+  assert(programLabels.includes("JSU Clubs"), "national program labels should include JSU Clubs from the updated national JSON");
+  assert(programLabels.includes("Community Building"), "national program labels should rename Recruitment");
+  assert(programLabels.includes("Shabbat / Immersive"), "national program labels should include the Shabbat and immersive category");
+  assert(!programLabels.includes("Learning"), "national program labels should not keep standalone Learning after combining categories");
+  assert(!programLabels.includes("Educational"), "national program labels should not keep standalone Educational after combining categories");
+  assert(!programLabels.includes("Recruitment"), "national program labels should not expose recruitment language");
+  assert(programsHtml.includes("Learning + Educational"), "national programs markup should show combined learning label");
+  assert(programsHtml.includes("Community Building"), "national programs markup should show audience-friendly recruitment label");
+  assert(shareCard && shareCard.cta && shareCard.cta.label === "Join the Movement", "national share card should use Join the Movement CTA");
   assert(immersiveCard && immersiveCard.stats.some((stat) => stat.label === "active chapters"), "national depth card should use active chapters instead of an undefined destinations metric");
   assert(!immersiveCard.stats.some((stat) => /destination/i.test(stat.label)), "national depth card should not show destinations");
   assert(!/destinations/i.test(immersiveHtml), "national depth card markup should not show destinations");
-  assert(mapHtml.includes("jsuw-national-map"), "national footprint card should render a rough map surface");
+  assert(hostedFilePreviewDataUrl === "https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a", `file preview without embedded JSON should keep the hosted data URL, got ${hostedFilePreviewDataUrl}`);
+  assert(embeddedFilePreviewDataUrl === "./sample-wrapped-2026.json?v=jsuw-prod-20260619a", `file preview with embedded JSON should load the local updated data JSON, got ${embeddedFilePreviewDataUrl}`);
+  assert(embeddedFilePreviewConfigUrl === "./wrapped-config-2026.json?v=jsuw-prod-20260619a", `file preview with embedded JSON should load the local updated config JSON, got ${embeddedFilePreviewConfigUrl}`);
+  assert(mapHtml.includes("jsuw-national-us-map"), "national footprint card should render a map-style SVG");
+  assert(mapHtml.includes('data-state="CA"') && mapHtml.includes('data-state="NY"'), "national footprint map should include real state path elements");
+  assert(mapHtml.includes("jsuw-us-state--active"), "national footprint map should highlight represented states");
+  assert(mapHtml.includes("jsuw-map-dot"), "national footprint map should animate approximate school dots");
+  assert(!mapHtml.includes('data-state="AK"') && !mapHtml.includes('data-state="HI"'), "national footprint map should omit Alaska and Hawaii to keep the lower-48 viewport focused");
+  assert((mapHtml.match(/Canadian provinces/g) || []).length === 1, "national footprint card should mention Canadian provinces only once");
+  assert(!mapHtml.includes("jsuw-national-map-callout"), "national footprint card should not show individual state-school count callouts");
+  assert(!mapHtml.includes("jsuw-national-us-tile-map"), "national footprint card should not render a tile-grid map");
+  assert(!mapHtml.includes("jsuw-national-map-land"), "national footprint card should not render the old blob map land path");
+  assert(mapHtml.includes("35") && mapHtml.includes("states"), "national footprint card should show represented US states");
+  assert(mapHtml.includes("13") && mapHtml.includes("regions"), "national footprint card should show public regions");
+  assert(mapHtml.includes("165") && mapHtml.includes("chapters"), "national footprint card should show national chapters");
+  assert(mapHtml.includes("Plus 5 Canadian provinces"), "national footprint card should mention Canadian provinces without putting them on the US map");
+  assert(mapHtml.includes('data-state="CA"') && mapHtml.includes('data-state="NY"') && !mapHtml.includes('data-state="ON"'), "national footprint map should focus on US state paths");
+  assert(!mapHtml.includes("school-representation") && !mapHtml.includes("school city pairs"), "national footprint card should avoid technical footprint copy");
+  assert(!regionHtml.includes("<b>International</b>"), "national region list should not show the yellow International tag");
   assert(shareHtml.includes("Share this recap"), "national share card should keep the standard share CTA");
   assert(shareUrl === "https://example.org/share/national/national/", `national share URL mismatch: ${shareUrl}`);
 }
@@ -1905,13 +1986,15 @@ function runInlineEmbedSmoke() {
   assert(rendererStart >= 0, "WordPress embed missing inline renderer");
   assert(embeddedRenderer === renderer, "WordPress inline renderer is not synced with jsu-wrapped.js");
   assert((inline.match(/<script>/g) || []).length === 2, "WordPress embed should have the GTM loader plus the inline widget script");
+  assert(!inline.includes('id="jsuw-local-preview-records"'), "Production WordPress inline embed should not include bulky local preview JSON");
   assert(brizyHosted.length < 12000, "Compact Brizy hosted embed should stay small enough for fragile Brizy paste fields");
   assert(brizyHosted.includes("#jsu-wrapped-wordpress-shell"), "Compact Brizy hosted embed should include the fullscreen WordPress shell");
-  assert(brizyHosted.includes("overflow-y:hidden"), "Compact Brizy hosted embed should hide story-state vertical scrollbars");
+  assert(!brizyHosted.includes("body:has(#jsu-wrapped-wordpress-shell){overflow:hidden}"), "Compact Brizy hosted embed should not lock the Brizy page body scroll");
+  assert(brizyHosted.includes("overflow-y:auto"), "Compact Brizy hosted embed should allow vertical scroll when Brizy constrains the viewport");
   assert(brizyHosted.includes("overflow:hidden!important;padding:0;width:100%"), "Compact Brizy hosted embed should prevent widget-root story-state scrollbars");
   assert(brizyHosted.includes("jsuw-form-active #jsu-wrapped"), "Compact Brizy hosted embed should release widget-root overflow when the CTA form opens");
-  assert(brizyHosted.includes("jsu-wrapped.css?v=jsuw-prod-20260610a"), "Compact Brizy hosted embed should load the hosted widget stylesheet");
-  assert(brizyHosted.includes("jsu-wrapped.js?v=jsuw-prod-20260610a"), "Compact Brizy hosted embed should load the hosted widget script");
+  assert(brizyHosted.includes("jsu-wrapped.css?v=jsuw-prod-20260619a"), "Compact Brizy hosted embed should load the hosted widget stylesheet");
+  assert(brizyHosted.includes("jsu-wrapped.js?v=jsuw-prod-20260619a"), "Compact Brizy hosted embed should load the hosted widget script");
   assert(brizyHosted.includes('id="jsu-wrapped"'), "Compact Brizy hosted embed should include the widget root");
   assert(brizyHosted.includes("jsuw-shell--loading"), "Compact Brizy hosted embed should include the static loading shell");
   assert(brizyHosted.includes('id="jsuw-wrapped-interest"'), "Compact Brizy hosted embed should include the embedded CTA panel target");
@@ -1923,7 +2006,7 @@ function runInlineEmbedSmoke() {
 
 function runAssetVersionSmoke() {
   const files = ["index.html", "embed-example.html", "builder.html", "cta-prefill-smoke.html", "cta-link-smoke.html", "analytics-smoke.html", "layout-smoke.html"];
-  const releaseToken = "jsuw-prod-20260610a";
+  const releaseToken = "jsuw-prod-20260619a";
   const assetPattern = /(?:href|src|data-source|data-config-source|data-teen-source)="\.\/(?:jsu-wrapped|wrapped-builder|sample-wrapped|sample-teen-wrapped|wrapped-config)[^"]+"/g;
   const inline = loadText("wordpress-inline-embed.html");
   const builderJs = loadText("wrapped-builder.js");
@@ -1979,12 +2062,12 @@ function runCacheTokenBumpSmoke() {
   assert(fs.existsSync(scriptPath), "cache-token bump helper is missing");
 
   const bump = require("./bump-cache-token.js");
-  const sample = "one?v=jsuw-prod-20260610a two?v=jsuw-prod-20260610a placeholder=jsuw-prod-YYYYMMDDx";
-  const result = bump.replaceCacheTokenInText(sample, "jsuw-prod-20260610a");
+  const sample = "one?v=jsuw-prod-20260619a two?v=jsuw-prod-20260619a placeholder=jsuw-prod-YYYYMMDDx";
+  const result = bump.replaceCacheTokenInText(sample, "jsuw-prod-20260619a");
 
   assert(result.count === 2, `cache-token helper replaced ${result.count} tokens instead of 2`);
-  assert(result.text === "one?v=jsuw-prod-20260610a two?v=jsuw-prod-20260610a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
-  assert(bump.validateToken("jsuw-prod-20260610a") === "jsuw-prod-20260610a", "cache-token helper should accept production token format");
+  assert(result.text === "one?v=jsuw-prod-20260619a two?v=jsuw-prod-20260619a placeholder=jsuw-prod-YYYYMMDDx", "cache-token helper did not replace every real token");
+  assert(bump.validateToken("jsuw-prod-20260619a") === "jsuw-prod-20260619a", "cache-token helper should accept production token format");
   assert(bump.FILES.includes("cta-prefill-smoke.html"), "cache-token helper should update the CTA prefill smoke page");
   assert(bump.FILES.includes("cta-link-smoke.html"), "cache-token helper should update the CTA link smoke page");
   assert(bump.FILES.includes("analytics-smoke.html"), "cache-token helper should update the analytics smoke page");
@@ -2271,7 +2354,7 @@ function runHostedSmokeScriptSmoke() {
   const goodAssets = {
     "": {
       status: 200,
-      text: '<div id="jsu-wrapped" data-share-base="./share/"></div><script src="./jsu-wrapped.js?v=jsuw-prod-20260610a"></script>'
+      text: '<div id="jsu-wrapped" data-share-base="./share/"></div><script src="./jsu-wrapped.js?v=jsuw-prod-20260619a"></script>'
     },
     "builder.html": {
       status: 200,
@@ -2311,11 +2394,11 @@ function runHostedSmokeScriptSmoke() {
     },
     "wordpress-inline-embed.html": {
       status: 200,
-      text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
+      text: '<div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a"></div><style>#jsu-wrapped { color: #fff; }</style><script>(function (root, factory) { window.JSUWrapped = {}; })();</script>'
     },
     "wordpress-brizy-hosted-embed.html": {
       status: 200,
-      text: '<div id="jsu-wrapped-wordpress-shell"><div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a"></div><section id="jsuw-wrapped-interest"><div class="jsuw-context-fields"><input name="wrapped_url"></div>[gravityform id="255"]</section></div><link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260610a"><script>function ensureContextFields(){}</script><script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260610a"></script>'
+      text: '<div id="jsu-wrapped-wordpress-shell"><div id="jsu-wrapped" data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a"></div><section id="jsuw-wrapped-interest"><div class="jsuw-context-fields"><input name="wrapped_url"></div>[gravityform id="255"]</section></div><link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260619a"><script>function ensureContextFields(){}</script><script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260619a"></script>'
     },
     "sample-wrapped-2026.json": {
       headers: {
@@ -2518,8 +2601,8 @@ function runWordPressSmokeScriptSmoke() {
   assert(fs.existsSync(scriptPath), "WordPress smoke script is missing");
 
   const wordpressSmoke = require("./wordpress-smoke.js");
-  const hostedCssTag = '<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260610a">';
-  const hostedJsTag = '<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260610a"></script>';
+  const hostedCssTag = '<link rel="stylesheet" href="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.css?v=jsuw-prod-20260619a">';
+  const hostedJsTag = '<script src="https://stsimon-ncsy.github.io/jsu-wrapped-widget/jsu-wrapped.js?v=jsuw-prod-20260619a"></script>';
   const socialImageUrl = "https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png";
   const ogTypeTag = '<meta property="og:type" content="website">';
   const ogSiteNameTag = '<meta property="og:site_name" content="JSU/NCSY Wrapped">';
@@ -2588,8 +2671,8 @@ function runWordPressSmokeScriptSmoke() {
     hostedJsTag,
     "</head><body>",
     '<div id="jsu-wrapped"',
-    ' data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260610a"',
-    ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"',
+    ' data-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/sample-wrapped-2026.json?v=jsuw-prod-20260619a"',
+    ' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"',
     ' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"',
     ' data-cta-label="Get involved next year"',
     ' data-cta-target="#jsuw-wrapped-interest">',
@@ -2620,8 +2703,8 @@ function runWordPressSmokeScriptSmoke() {
   const staleWidgetAssetsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace("jsu-wrapped.css?v=jsuw-prod-20260610a", "jsu-wrapped.css")
-      .replace("jsu-wrapped.js?v=jsuw-prod-20260610a", "jsu-wrapped.js"),
+      .replace("jsu-wrapped.css?v=jsuw-prod-20260619a", "jsu-wrapped.css")
+      .replace("jsu-wrapped.js?v=jsuw-prod-20260619a", "jsu-wrapped.js"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const inlineCss = '<style>#jsu-wrapped-wordpress-shell .jsuw-page-stage { height: 100%; } #jsu-wrapped { color: #fff; } #jsu-wrapped .jsuw-shell { max-width: 100%; } @media (max-width: 600px) { #jsu-wrapped .jsuw-story { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-shell--loading .jsuw-loading { height: calc(100vh - 16px); height: calc(100svh - 16px); height: calc(100dvh - 16px); } #jsu-wrapped .jsuw-controls { right: 58px; } }</style>';
@@ -2686,7 +2769,7 @@ function runWordPressSmokeScriptSmoke() {
   const missingHostedAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2696,7 +2779,7 @@ function runWordPressSmokeScriptSmoke() {
   const directCtaHrefAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: directCtaHrefHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2717,7 +2800,7 @@ function runWordPressSmokeScriptSmoke() {
   const unsafeCtaHrefStaleAttrsReport = wordpressSmoke.validateWordPressPage({
     status: 200,
     text: goodHtml
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', "")
       .replace(' data-cta-target="#jsuw-wrapped-interest"', ' data-cta-href="javascript:alert(1)"')
       .replace(ctaPanelHtml, ""),
@@ -2848,7 +2931,7 @@ function runWordPressSmokeScriptSmoke() {
     status: 200,
     text: goodHtml
       .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
@@ -2881,7 +2964,7 @@ function runWordPressSmokeScriptSmoke() {
     status: 200,
     text: goodHtml
       .replace(/JSU\/NCSY Wrapped - Baltimore/g, "NCSY Wrapped - Baltimore")
-      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"', "")
+      .replace(' data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"', "")
       .replace(' data-share-base="https://stsimon-ncsy.github.io/jsu-wrapped-widget/share/"', ""),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   }, null, {
@@ -2901,7 +2984,7 @@ function runWordPressSmokeScriptSmoke() {
   });
   const staleDataUrlReport = wordpressSmoke.validateWordPressPage({
     status: 200,
-    text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260610a", "sample-wrapped-2026.json"),
+    text: goodHtml.replace("sample-wrapped-2026.json?v=jsuw-prod-20260619a", "sample-wrapped-2026.json"),
     url: "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"
   });
   const missingPrivacyReport = wordpressSmoke.validateWordPressPage({
@@ -3036,9 +3119,9 @@ function runWordPressSmokeScriptSmoke() {
   assert(!directCtaFixPacket.includes('data-cta-target="#jsuw-wrapped-interest"'), "WordPress fix packet should not include an embedded CTA target when a direct Gravity Forms CTA URL is requested");
   assert(directCtaFixPacket.includes("Direct Gravity Forms CTA URL: https://ncsy.org/wrapped-interest/"), "WordPress fix packet should label the direct Gravity Forms CTA URL");
   assert(directCtaFixPacket.includes("Add these hidden/context fields on the destination form page"), "WordPress fix packet should clarify that direct CTA context fields belong on the destination form page");
-  assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"'), "WordPress fix packet should include the config source");
-  assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260610a"), "WordPress fix packet should include the hosted widget stylesheet");
-  assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260610a"), "WordPress fix packet should include the hosted widget script");
+  assert(fixPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"'), "WordPress fix packet should include the config source");
+  assert(fixPacket.includes("jsu-wrapped.css?v=jsuw-prod-20260619a"), "WordPress fix packet should include the hosted widget stylesheet");
+  assert(fixPacket.includes("jsu-wrapped.js?v=jsuw-prod-20260619a"), "WordPress fix packet should include the hosted widget script");
   assert(fixPacket.includes("og:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image URL");
   assert(fixPacket.includes("og:image:secure_url: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign og:image secure URL");
   assert(fixPacket.includes("twitter:image: https://stsimon-ncsy.github.io/jsu-wrapped-widget/assets/wrapped-social-preview.png"), "WordPress fix packet should include the campaign twitter:image URL");
@@ -3058,7 +3141,7 @@ function runWordPressSmokeScriptSmoke() {
   assert(fixPacket.includes("Page/social title: JSU/NCSY Wrapped - Baltimore"), "WordPress fix packet should include the exact title");
   assert(fixPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "WordPress fix packet should include the follow-up smoke command");
   assert(launchPacket.includes("WordPress Wrapped Launch Packet"), "repo should include a checked-in WordPress launch packet");
-  assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260610a"'), "checked-in WordPress launch packet should include the current config source");
+  assert(launchPacket.includes('data-config-source="https://stsimon-ncsy.github.io/jsu-wrapped-widget/wrapped-config-2026.json?v=jsuw-prod-20260619a"'), "checked-in WordPress launch packet should include the current config source");
   assert(launchPacket.includes("JSU/NCSY Wrapped - Baltimore"), "checked-in WordPress launch packet should include the exact Baltimore title");
   assert(launchPacket.includes("A failed live smoke after generating this packet means the public page still needs this packet applied"), "checked-in WordPress launch packet should explain that stale live-page failure is expected before application");
   assert(launchPacket.includes('node wordpress-smoke.js --url "https://ncsy.org/ncsy-wrapped/?chapter=baltimore"'), "checked-in WordPress launch packet should include the follow-up verification command");

@@ -30,6 +30,9 @@ const CHAPTER_NUMERIC_FIELDS = [
   "national_teens_reached",
   "national_schools_represented",
   "national_regions_count",
+  "national_states_count",
+  "national_provinces_count",
+  "national_cities_count",
   "national_chapters_count",
   "national_learning_sessions",
   "national_shabbatons",
@@ -117,6 +120,7 @@ const PUBLIC_STORY_PLACEHOLDER_VALUES = new Set([
 ]);
 
 const BRAND_LOGO_VALUES = new Set([
+  "both",
   "jsu",
   "ncsy"
 ]);
@@ -546,7 +550,7 @@ function validateChapterRecords(records) {
     validatePublicStoryText(report, record, index);
 
     if (hasValue(record.brand_logo) && !BRAND_LOGO_VALUES.has(String(record.brand_logo).trim().toLowerCase())) {
-      addError(report, `story records[${index}].brand_logo must be jsu or ncsy`);
+      addError(report, `story records[${index}].brand_logo must be both, jsu, or ncsy`);
     }
   });
 
@@ -750,6 +754,9 @@ function createStoryRecordFieldSet(chapterRecords) {
     "program_type_breakdown",
     "impact_tags",
     "region_breakdown",
+    "state_breakdown",
+    "stateBreakdown",
+    "school_states",
     "regions"
   ]));
 
@@ -781,7 +788,7 @@ function validateRecordOverrides(report, section, label, storyRecordFields) {
 
 function validateSectionDisplayValues(report, section, label) {
   if (hasValue(section.brand_logo) && !BRAND_LOGO_VALUES.has(String(section.brand_logo).trim().toLowerCase())) {
-    addError(report, `${label}.brand_logo must be jsu or ncsy`);
+    addError(report, `${label}.brand_logo must be both, jsu, or ncsy`);
   }
 
   [

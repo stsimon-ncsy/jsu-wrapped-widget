@@ -8,6 +8,8 @@ const STYLE_OPEN = "<style>";
 const STYLE_CLOSE = "</style>";
 const SCRIPT_OPEN = "<script>";
 const SCRIPT_CLOSE = "</script>";
+const LOCAL_PREVIEW_START = "<!-- JSU Wrapped local preview data: start -->";
+const LOCAL_PREVIEW_END = "<!-- JSU Wrapped local preview data: end -->";
 
 const inline = fs.readFileSync(INLINE_PATH, "utf8");
 const css = fs.readFileSync(CSS_PATH, "utf8").trim();
@@ -56,13 +58,14 @@ const shellMarkup = removeRanges(inline, [
   { start: scriptOpen, end: scriptClose + SCRIPT_CLOSE.length }
 ]);
 const [introComment, shellBody] = splitIntroComment(shellMarkup);
+const cleanShellBody = shellBody.replace(new RegExp("\\n*" + LOCAL_PREVIEW_START.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[\\s\\S]*?" + LOCAL_PREVIEW_END.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\n*", "g"), "\n\n").trim();
 
 const output = [
   introComment,
   "\n\n<style>\n",
   css,
   "\n</style>\n\n",
-  shellBody,
+  cleanShellBody,
   "\n\n<script>\n",
   cookieHelper,
   "\n\n",

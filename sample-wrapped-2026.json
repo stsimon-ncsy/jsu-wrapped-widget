@@ -5,212 +5,969 @@
     "scope_type": "national",
     "scope_slug": "national",
     "scope_name": "JSU/NCSY",
-    "brand_logo": "ncsy",
-    "national_teens_reached": 37915,
-    "national_programs_hosted": 11722,
-    "national_engagement_moments": 198110,
-    "national_schools_represented": 1638,
+    "brand_logo": "both",
+    "national_teens_reached": 38733,
+    "national_programs_hosted": 13780,
+    "national_engagement_moments": 217456,
+    "national_schools_represented": 1701,
     "national_regions_count": 13,
-    "national_chapters_count": 166,
-    "national_learning_sessions": 4858,
-    "national_shabbatons": 707,
-    "national_immersive_teens": 7837,
-    "national_new_teens": 22250,
-    "first_time_teens": 22250,
-    "growth_rate_label": "18%",
+    "national_chapters_count": 165,
+    "national_states_count": 35,
+    "national_provinces_count": 5,
+    "national_cities_count": 588,
+    "national_learning_sessions": 6831,
+    "national_shabbatons": 150,
+    "national_immersive_teens": 6222,
+    "national_depth_chapters": 165,
+    "national_new_teens": 20293,
+    "first_time_teens": 20293,
+    "growth_rate_label": "12%",
     "growth_series": [
       {
         "year": "2021-2022",
-        "value": 26333
+        "value": 27309
       },
       {
         "year": "2022-2023",
-        "value": 29875
+        "value": 30684
       },
       {
         "year": "2023-2024",
-        "value": 32998
+        "value": 34575
       },
       {
         "year": "2024-2025",
-        "value": 32257
+        "value": 34636
       },
       {
         "year": "2025-2026",
-        "value": 37915
+        "value": 38733
       }
     ],
     "program_breakdown": [
       {
-        "label": "Learning",
-        "value": 4858
+        "label": "Learning + Educational",
+        "value": 6831
       },
       {
-        "label": "Recruitment",
-        "value": 4766
+        "label": "JSU Clubs",
+        "value": 4527
       },
       {
-        "label": "Educational",
-        "value": 910
-      },
-      {
-        "label": "Shabbat / Immersive",
-        "value": 614
+        "label": "Community Building",
+        "value": 1250
       },
       {
         "label": "Leadership + Service",
-        "value": 531
+        "value": 729
       },
       {
-        "label": "Other",
-        "value": 43
+        "label": "Shabbat / Immersive",
+        "value": 443
       }
     ],
     "region_breakdown": [
       {
-        "name": "West Coast",
-        "slug": "west-coast",
-        "teens": 6426,
-        "events": 924,
-        "engagement_moments": 20708,
-        "chapters": 15,
-        "schools": 290,
-        "map_x": 13,
-        "map_y": 42
-      },
-      {
-        "name": "Southern",
-        "slug": "southern",
-        "teens": 6110,
-        "events": 2718,
-        "engagement_moments": 41760,
-        "chapters": 27,
-        "schools": 274,
-        "map_x": 62,
-        "map_y": 62
-      },
-      {
-        "name": "Canada",
-        "slug": "canada",
-        "teens": 6002,
-        "events": 1912,
-        "engagement_moments": 35342,
-        "chapters": 9,
-        "schools": 290,
-        "map_x": 44,
-        "map_y": 18
-      },
-      {
-        "name": "NY JSU",
-        "slug": "ny-jsu",
-        "teens": 3664,
-        "events": 1221,
-        "engagement_moments": 15433,
-        "chapters": 16,
-        "schools": 120,
-        "map_x": 83,
-        "map_y": 31
-      },
-      {
-        "name": "Tri-State",
-        "slug": "tri-state",
-        "teens": 3414,
-        "events": 346,
-        "engagement_moments": 10217,
-        "chapters": 26,
-        "schools": 299,
-        "map_x": 76,
-        "map_y": 35
+        "name": "Atlanta",
+        "slug": "atlanta",
+        "teens": 1311,
+        "events": 127,
+        "engagement_moments": 5620,
+        "chapters": 1,
+        "schools": 26,
+        "included_states": "GA",
+        "map_x": 65,
+        "map_y": 58,
+        "is_international": false
       },
       {
         "name": "Atlantic Seaboard",
         "slug": "atlantic-seaboard",
-        "teens": 3405,
-        "events": 1138,
-        "engagement_moments": 23488,
+        "teens": 3353,
+        "events": 1208,
+        "engagement_moments": 24062,
         "chapters": 13,
-        "schools": 106,
+        "schools": 105,
+        "included_states": "MD,NY,PA,VA,NJ,DC,DE",
         "map_x": 82,
-        "map_y": 48
+        "map_y": 46,
+        "is_international": false
       },
       {
-        "name": "Midwest",
-        "slug": "midwest",
-        "teens": 2805,
-        "events": 1467,
-        "engagement_moments": 17509,
-        "chapters": 15,
-        "schools": 183,
-        "map_x": 50,
-        "map_y": 39
-      },
-      {
-        "name": "NJ/CT JSU",
-        "slug": "nj-ct-jsu",
-        "teens": 2095,
-        "events": 635,
-        "engagement_moments": 8549,
-        "chapters": 16,
-        "schools": 82,
-        "map_x": 80,
-        "map_y": 39
-      },
-      {
-        "name": "Southwest",
-        "slug": "southwest",
-        "teens": 1732,
-        "events": 603,
-        "engagement_moments": 10839,
-        "chapters": 8,
-        "schools": 143,
-        "map_x": 28,
-        "map_y": 59
+        "name": "Canada",
+        "slug": "canada",
+        "teens": 6201,
+        "events": 2161,
+        "engagement_moments": 38655,
+        "chapters": 9,
+        "schools": 291,
+        "included_states": "AB,BC,ON,QC,MB",
+        "map_x": 44,
+        "map_y": 18,
+        "is_international": true
       },
       {
         "name": "Central East",
         "slug": "central-east",
-        "teens": 1390,
-        "events": 428,
-        "engagement_moments": 7902,
+        "teens": 1654,
+        "events": 589,
+        "engagement_moments": 10685,
         "chapters": 6,
-        "schools": 102,
+        "schools": 109,
+        "included_states": "MI,OH,PA,KY",
         "map_x": 64,
-        "map_y": 36
+        "map_y": 36,
+        "is_international": false
       },
       {
         "name": "Greater Boston",
         "slug": "greater-boston",
-        "teens": 640,
-        "events": 130,
-        "engagement_moments": 2803,
+        "teens": 637,
+        "events": 129,
+        "engagement_moments": 2914,
         "chapters": 1,
         "schools": 31,
+        "included_states": "MA",
         "map_x": 87,
-        "map_y": 28
-      },
-      {
-        "name": "Israel",
-        "slug": "israel",
-        "teens": 510,
-        "events": 129,
-        "engagement_moments": 2204,
-        "chapters": 7,
-        "schools": 108,
-        "map_x": 64,
-        "map_y": 74,
-        "is_international": true
+        "map_y": 28,
+        "is_international": false
       },
       {
         "name": "International",
         "slug": "international",
-        "teens": 231,
-        "events": 68,
-        "engagement_moments": 1139,
-        "chapters": 5,
-        "schools": 2,
+        "teens": 964,
+        "events": 252,
+        "engagement_moments": 4871,
+        "chapters": 12,
+        "schools": 119,
         "map_x": 42,
         "map_y": 86,
         "is_international": true
+      },
+      {
+        "name": "Midwest",
+        "slug": "midwest",
+        "teens": 2816,
+        "events": 1639,
+        "engagement_moments": 18027,
+        "chapters": 15,
+        "schools": 190,
+        "included_states": "AR,IL,IN,KS,MN,MO,TN,WI,NE,IA,KY",
+        "map_x": 50,
+        "map_y": 39,
+        "is_international": false
+      },
+      {
+        "name": "NJ/CT JSU",
+        "slug": "nj-ct-jsu",
+        "teens": 1915,
+        "events": 676,
+        "engagement_moments": 8391,
+        "chapters": 16,
+        "schools": 85,
+        "included_states": "NJ,CT,NY",
+        "map_x": 80,
+        "map_y": 39,
+        "is_international": false
+      },
+      {
+        "name": "NY JSU",
+        "slug": "ny-jsu",
+        "teens": 3369,
+        "events": 1243,
+        "engagement_moments": 14890,
+        "chapters": 16,
+        "schools": 121,
+        "included_states": "NY",
+        "map_x": 83,
+        "map_y": 31,
+        "is_international": false
+      },
+      {
+        "name": "Southern",
+        "slug": "southern",
+        "teens": 5933,
+        "events": 3272,
+        "engagement_moments": 46371,
+        "chapters": 27,
+        "schools": 320,
+        "included_states": "FL,TN,GA,AR,SC,NC",
+        "map_x": 62,
+        "map_y": 62,
+        "is_international": false
+      },
+      {
+        "name": "Southwest",
+        "slug": "southwest",
+        "teens": 1766,
+        "events": 706,
+        "engagement_moments": 11585,
+        "chapters": 8,
+        "schools": 145,
+        "included_states": "TX,CO,GA",
+        "map_x": 28,
+        "map_y": 59,
+        "is_international": false
+      },
+      {
+        "name": "Tri-State",
+        "slug": "tri-state",
+        "teens": 3403,
+        "events": 366,
+        "engagement_moments": 9959,
+        "chapters": 26,
+        "schools": 297,
+        "included_states": "NY,NJ,CT,RI",
+        "map_x": 76,
+        "map_y": 35,
+        "is_international": false
+      },
+      {
+        "name": "West Coast",
+        "slug": "west-coast",
+        "teens": 5902,
+        "events": 951,
+        "engagement_moments": 20037,
+        "chapters": 15,
+        "schools": 287,
+        "included_states": "AZ,CA,NV,OR,WA,UT",
+        "map_x": 13,
+        "map_y": 42,
+        "is_international": false
+      }
+    ],
+    "state_breakdown": [
+      {
+        "country": "CA",
+        "state": "AB",
+        "name": "Alberta",
+        "schools": 31,
+        "teens": 90,
+        "events": 71,
+        "engagement_moments": 347
+      },
+      {
+        "country": "CA",
+        "state": "BC",
+        "name": "British Columbia",
+        "schools": 38,
+        "teens": 188,
+        "events": 80,
+        "engagement_moments": 1367
+      },
+      {
+        "country": "CA",
+        "state": "MB",
+        "name": "Manitoba",
+        "schools": 6,
+        "teens": 9,
+        "events": 24,
+        "engagement_moments": 49
+      },
+      {
+        "country": "CA",
+        "state": "ON",
+        "name": "Ontario",
+        "schools": 169,
+        "teens": 4686,
+        "events": 2059,
+        "engagement_moments": 30790
+      },
+      {
+        "country": "CA",
+        "state": "QC",
+        "name": "Quebec",
+        "schools": 28,
+        "teens": 706,
+        "events": 219,
+        "engagement_moments": 2127
+      },
+      {
+        "country": "US",
+        "state": "AL",
+        "name": "Alabama",
+        "schools": 1,
+        "teens": 2,
+        "events": 22,
+        "engagement_moments": 26
+      },
+      {
+        "country": "US",
+        "state": "AR",
+        "name": "Arkansas",
+        "schools": 1,
+        "teens": 1,
+        "events": 8,
+        "engagement_moments": 8
+      },
+      {
+        "country": "US",
+        "state": "AZ",
+        "name": "Arizona",
+        "schools": 33,
+        "teens": 440,
+        "events": 125,
+        "engagement_moments": 1654
+      },
+      {
+        "country": "US",
+        "state": "CA",
+        "name": "California",
+        "schools": 156,
+        "teens": 3604,
+        "events": 698,
+        "engagement_moments": 11831
+      },
+      {
+        "country": "US",
+        "state": "CO",
+        "name": "Colorado",
+        "schools": 31,
+        "teens": 393,
+        "events": 209,
+        "engagement_moments": 3342
+      },
+      {
+        "country": "US",
+        "state": "CT",
+        "name": "Connecticut",
+        "schools": 23,
+        "teens": 230,
+        "events": 130,
+        "engagement_moments": 825
+      },
+      {
+        "country": "US",
+        "state": "DC",
+        "name": "District of Columbia",
+        "schools": 2,
+        "teens": 2,
+        "events": 3,
+        "engagement_moments": 3
+      },
+      {
+        "country": "US",
+        "state": "FL",
+        "name": "Florida",
+        "schools": 164,
+        "teens": 4997,
+        "events": 3141,
+        "engagement_moments": 39637
+      },
+      {
+        "country": "US",
+        "state": "GA",
+        "name": "Georgia",
+        "schools": 34,
+        "teens": 1537,
+        "events": 386,
+        "engagement_moments": 7047
+      },
+      {
+        "country": "US",
+        "state": "IL",
+        "name": "Illinois",
+        "schools": 77,
+        "teens": 1223,
+        "events": 648,
+        "engagement_moments": 5540
+      },
+      {
+        "country": "US",
+        "state": "IN",
+        "name": "Indiana",
+        "schools": 2,
+        "teens": 2,
+        "events": 3,
+        "engagement_moments": 3
+      },
+      {
+        "country": "US",
+        "state": "KS",
+        "name": "Kansas",
+        "schools": 21,
+        "teens": 172,
+        "events": 158,
+        "engagement_moments": 1125
+      },
+      {
+        "country": "US",
+        "state": "LA",
+        "name": "Louisiana",
+        "schools": 1,
+        "teens": 1,
+        "events": 1,
+        "engagement_moments": 1
+      },
+      {
+        "country": "US",
+        "state": "MA",
+        "name": "Massachusetts",
+        "schools": 28,
+        "teens": 603,
+        "events": 163,
+        "engagement_moments": 2898
+      },
+      {
+        "country": "US",
+        "state": "MD",
+        "name": "Maryland",
+        "schools": 59,
+        "teens": 2038,
+        "events": 762,
+        "engagement_moments": 17117
+      },
+      {
+        "country": "US",
+        "state": "MI",
+        "name": "Michigan",
+        "schools": 19,
+        "teens": 295,
+        "events": 165,
+        "engagement_moments": 2086
+      },
+      {
+        "country": "US",
+        "state": "MN",
+        "name": "Minnesota",
+        "schools": 37,
+        "teens": 494,
+        "events": 346,
+        "engagement_moments": 4082
+      },
+      {
+        "country": "US",
+        "state": "MO",
+        "name": "Missouri",
+        "schools": 28,
+        "teens": 619,
+        "events": 560,
+        "engagement_moments": 5683
+      },
+      {
+        "country": "US",
+        "state": "NC",
+        "name": "North Carolina",
+        "schools": 17,
+        "teens": 174,
+        "events": 67,
+        "engagement_moments": 352
+      },
+      {
+        "country": "US",
+        "state": "NE",
+        "name": "Nebraska",
+        "schools": 2,
+        "teens": 2,
+        "events": 4,
+        "engagement_moments": 4
+      },
+      {
+        "country": "US",
+        "state": "NH",
+        "name": "New Hampshire",
+        "schools": 1,
+        "teens": 1,
+        "events": 15,
+        "engagement_moments": 15
+      },
+      {
+        "country": "US",
+        "state": "NJ",
+        "name": "New Jersey",
+        "schools": 94,
+        "teens": 3072,
+        "events": 1156,
+        "engagement_moments": 14373
+      },
+      {
+        "country": "US",
+        "state": "NV",
+        "name": "Nevada",
+        "schools": 46,
+        "teens": 573,
+        "events": 196,
+        "engagement_moments": 2533
+      },
+      {
+        "country": "US",
+        "state": "NY",
+        "name": "New York",
+        "schools": 188,
+        "teens": 4298,
+        "events": 1770,
+        "engagement_moments": 18117
+      },
+      {
+        "country": "US",
+        "state": "OH",
+        "name": "Ohio",
+        "schools": 51,
+        "teens": 1128,
+        "events": 506,
+        "engagement_moments": 7670
+      },
+      {
+        "country": "US",
+        "state": "OR",
+        "name": "Oregon",
+        "schools": 36,
+        "teens": 824,
+        "events": 196,
+        "engagement_moments": 2790
+      },
+      {
+        "country": "US",
+        "state": "PA",
+        "name": "Pennsylvania",
+        "schools": 30,
+        "teens": 726,
+        "events": 463,
+        "engagement_moments": 3610
+      },
+      {
+        "country": "US",
+        "state": "RI",
+        "name": "Rhode Island",
+        "schools": 1,
+        "teens": 1,
+        "events": 2,
+        "engagement_moments": 2
+      },
+      {
+        "country": "US",
+        "state": "SC",
+        "name": "South Carolina",
+        "schools": 10,
+        "teens": 82,
+        "events": 86,
+        "engagement_moments": 301
+      },
+      {
+        "country": "US",
+        "state": "TN",
+        "name": "Tennessee",
+        "schools": 21,
+        "teens": 137,
+        "events": 87,
+        "engagement_moments": 494
+      },
+      {
+        "country": "US",
+        "state": "TX",
+        "name": "Texas",
+        "schools": 101,
+        "teens": 957,
+        "events": 577,
+        "engagement_moments": 7153
+      },
+      {
+        "country": "US",
+        "state": "UT",
+        "name": "Utah",
+        "schools": 4,
+        "teens": 12,
+        "events": 63,
+        "engagement_moments": 69
+      },
+      {
+        "country": "US",
+        "state": "VA",
+        "name": "Virginia",
+        "schools": 19,
+        "teens": 337,
+        "events": 176,
+        "engagement_moments": 1788
+      },
+      {
+        "country": "US",
+        "state": "WA",
+        "name": "Washington",
+        "schools": 13,
+        "teens": 166,
+        "events": 59,
+        "engagement_moments": 307
+      },
+      {
+        "country": "US",
+        "state": "WI",
+        "name": "Wisconsin",
+        "schools": 3,
+        "teens": 85,
+        "events": 35,
+        "engagement_moments": 414
+      }
+    ],
+    "school_states": [
+      {
+        "country": "US",
+        "state": "NY",
+        "schools": 181
+      },
+      {
+        "country": "CA",
+        "state": "ON",
+        "schools": 169
+      },
+      {
+        "country": "US",
+        "state": "CA",
+        "schools": 153
+      },
+      {
+        "country": "US",
+        "state": "FL",
+        "schools": 153
+      },
+      {
+        "country": "US",
+        "state": "TX",
+        "schools": 97
+      },
+      {
+        "country": "US",
+        "state": "NJ",
+        "schools": 93
+      },
+      {
+        "country": "US",
+        "state": "IL",
+        "schools": 77
+      },
+      {
+        "country": "US",
+        "state": "MD",
+        "schools": 57
+      },
+      {
+        "country": "US",
+        "state": "OH",
+        "schools": 48
+      },
+      {
+        "country": "US",
+        "state": "NV",
+        "schools": 44
+      },
+      {
+        "country": "CA",
+        "state": "BC",
+        "schools": 38
+      },
+      {
+        "country": "US",
+        "state": "MN",
+        "schools": 37
+      },
+      {
+        "country": "US",
+        "state": "OR",
+        "schools": 36
+      },
+      {
+        "country": "US",
+        "state": "AZ",
+        "schools": 33
+      },
+      {
+        "country": "US",
+        "state": "GA",
+        "schools": 32
+      },
+      {
+        "country": "CA",
+        "state": "AB",
+        "schools": 31
+      },
+      {
+        "country": "US",
+        "state": "PA",
+        "schools": 29
+      },
+      {
+        "country": "CA",
+        "state": "QC",
+        "schools": 28
+      },
+      {
+        "country": "IL",
+        "state": "ISRAEL",
+        "schools": 28
+      },
+      {
+        "country": "US",
+        "state": "CO",
+        "schools": 28
+      },
+      {
+        "country": "Israel",
+        "state": "ISRAEL",
+        "schools": 27
+      },
+      {
+        "country": "US",
+        "state": "MO",
+        "schools": 27
+      },
+      {
+        "country": "US",
+        "state": "MA",
+        "schools": 26
+      },
+      {
+        "country": "US",
+        "state": "CT",
+        "schools": 23
+      },
+      {
+        "country": "US",
+        "state": "KS",
+        "schools": 20
+      },
+      {
+        "country": "US",
+        "state": "TN",
+        "schools": 20
+      },
+      {
+        "country": "US",
+        "state": "MI",
+        "schools": 18
+      },
+      {
+        "country": "US",
+        "state": "VA",
+        "schools": 18
+      },
+      {
+        "country": "US",
+        "state": "NC",
+        "schools": 17
+      },
+      {
+        "country": "US",
+        "state": "WA",
+        "schools": 13
+      },
+      {
+        "country": "Unknown",
+        "state": "FL",
+        "schools": 11
+      },
+      {
+        "country": "US",
+        "state": "SC",
+        "schools": 10
+      },
+      {
+        "country": "Unknown",
+        "state": "NY",
+        "schools": 7
+      },
+      {
+        "country": "CA",
+        "state": "MB",
+        "schools": 6
+      },
+      {
+        "country": "Unknown",
+        "state": "TX",
+        "schools": 4
+      },
+      {
+        "country": "US",
+        "state": "UT",
+        "schools": 4
+      },
+      {
+        "country": "Unknown",
+        "state": "CA",
+        "schools": 3
+      },
+      {
+        "country": "Unknown",
+        "state": "CO",
+        "schools": 3
+      },
+      {
+        "country": "Unknown",
+        "state": "OH",
+        "schools": 3
+      },
+      {
+        "country": "Unknown",
+        "state": "Unknown",
+        "schools": 3
+      },
+      {
+        "country": "US",
+        "state": "WI",
+        "schools": 3
+      },
+      {
+        "country": "CL",
+        "state": "CHILE",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "BC",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "GA",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "MA",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "MD",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "NV",
+        "schools": 2
+      },
+      {
+        "country": "Unknown",
+        "state": "ON",
+        "schools": 2
+      },
+      {
+        "country": "US",
+        "state": "DC",
+        "schools": 2
+      },
+      {
+        "country": "US",
+        "state": "IN",
+        "schools": 2
+      },
+      {
+        "country": "US",
+        "state": "NE",
+        "schools": 2
+      },
+      {
+        "country": "Australia",
+        "state": "AUSTRALIA",
+        "schools": 1
+      },
+      {
+        "country": "IL",
+        "state": "JERSUALEM",
+        "schools": 1
+      },
+      {
+        "country": "IL",
+        "state": "JM",
+        "schools": 1
+      },
+      {
+        "country": "Israel",
+        "state": "MAKABIM-REUT",
+        "schools": 1
+      },
+      {
+        "country": "Israel",
+        "state": "OUTSIDE US/CANADA",
+        "schools": 1
+      },
+      {
+        "country": "Israel",
+        "state": "Unknown",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "ISRAEL",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "KS",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "MI",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "MO",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "NJ",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "PA",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "QC",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "TN",
+        "schools": 1
+      },
+      {
+        "country": "Unknown",
+        "state": "VA",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "AL",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "AR",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "LA",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "NEWJERSEY",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "NH",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "OHIO",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "ON",
+        "schools": 1
+      },
+      {
+        "country": "US",
+        "state": "RI",
+        "schools": 1
       }
     ],
     "impact_tags": [
@@ -219,10 +976,7 @@
       "Leadership",
       "Friendship",
       "Jewish life"
-    ],
-    "national_depth_chapters": 166,
-    "growth_line": "The movement kept growing through first-time faces, repeat moments, and more chances to show up.",
-    "impact_line": "The recap is national, but the story is personal: teens finding belonging, identity, friendship, and Jewish life."
+    ]
   },
   {
     "school_year": "2025-2026",

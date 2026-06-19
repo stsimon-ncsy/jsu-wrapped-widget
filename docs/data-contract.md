@@ -44,7 +44,7 @@ Useful metrics include:
 
 Optional values can be omitted. The renderer skips cards that need missing values, such as the biggest-event card when `largest_event_name` or `largest_event_attendance` is not present.
 
-Use `brand_logo` only when a story should force a logo. Accepted values are `jsu` and `ncsy`.
+Use `brand_logo` only when a story should force a logo. Accepted values are `jsu`, `ncsy`, and `both`.
 
 ## Region And Program Stories
 
@@ -69,6 +69,9 @@ Useful national metrics include:
 - `national_engagement_moments`
 - `national_schools_represented`
 - `national_regions_count`
+- `national_states_count`
+- `national_provinces_count`
+- `national_cities_count`
 - `national_chapters_count`
 - `national_learning_sessions`
 - `national_shabbatons`
@@ -81,13 +84,16 @@ Useful national metrics include:
 
 Nested national arrays:
 
-- `program_breakdown`: array of `{ "label": "Learning", "value": 123 }` objects.
+- `program_breakdown`: array of `{ "label": "Learning + Educational", "value": 123 }` objects. Public labels should combine equivalent CRM categories when the distinction is not meaningful to the Wrapped audience. Current national labels combine `Learning` and `Educational`, rename `Recruitment` to `Community Building`, and use `Shabbat / Immersive` for Shabbos meals, Shabbatonim, and immersive experiences.
 - `region_breakdown`: array of `{ "name", "slug", "teens", "events", "engagement_moments", "chapters", "schools", "map_x", "map_y", "is_international" }` objects.
+- `state_breakdown`: array of `{ "country", "state", "name", "schools", "teens", "events", "engagement_moments" }` objects for the school-representation footprint map. Use `country: "US"` for U.S. states and `country: "CA"` for Canadian provinces or territories.
 - `impact_tags`: short public tags such as `Belonging`, `Identity`, `Leadership`, `Friendship`, and `Jewish life`.
 
 `map_x` and `map_y` are rough card coordinates, not geographic proof. They should be numbers from 0 to 100. Include international regions in `region_breakdown`; the renderer marks rows with `is_international: true`.
 
 For the public national story, `region_breakdown` can be a curated display roll-up rather than a raw CRM region dump. Current national publishing rules keep `NY JSU` and `NJ/CT JSU` as separate regions, keep `Israel` visible, group small international rows under `International`, and avoid showing raw catch-all buckets such as `National` as regions.
+
+`state_breakdown` is not the official organizational breakdown and should not be treated as a state-level operating report. It is a school-representation footprint based on resolved school geography, not event venue location or chapter territory. State/province totals may not reconcile to national totals because some teens have no resolved school record or no usable school geography. `national_states_count` counts only U.S. states represented by resolved school geography; `national_provinces_count` counts only Canadian provinces/territories; `national_cities_count` counts distinct resolved school city plus state/province pairs in the U.S. and Canada and is directional rather than a precise chapter/city footprint.
 
 See `docs/national-wrapped-sql.md` for the SQL handoff that builds this record from teen-event attendance rows.
 
@@ -123,7 +129,7 @@ Use the chapter metrics to describe the teen's actual local room, the region met
 
 Common section keys:
 
-- `brand_logo`: `jsu` or `ncsy`.
+- `brand_logo`: `jsu`, `ncsy`, or `both`.
 - `palette`: `electric`, `purple-gold`, or `sunset`.
 - `cta_label`: final-card button label.
 - `cta_target` or `ctaTarget`: embedded form panel selector, such as `#jsuw-wrapped-interest`.
