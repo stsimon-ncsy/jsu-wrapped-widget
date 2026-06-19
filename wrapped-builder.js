@@ -62,9 +62,9 @@
     "national-teens": "Teen reach",
     "national-programs": "Programs hosted",
     "national-moments": "Engagement moments",
-    "national-footprint": "Footprint map",
+    "national-footprint": "States, provinces, chapters",
     "national-immersive": "Depth and immersive",
-    "national-regions": "Region roll-up",
+    "national-regions": "States and chapters",
     "national-growth": "Growth",
     "national-why": "Why it matters",
     final: "Share card"
@@ -86,6 +86,9 @@
     ["national_teens_reached", "National teens reached"],
     ["national_programs_hosted", "National programs hosted"],
     ["national_schools_represented", "National schools represented"],
+    ["national_states_count", "National states"],
+    ["national_provinces_count", "National provinces"],
+    ["national_cities_count", "National cities"],
     ["national_regions_count", "National regions"],
     ["national_chapters_count", "National chapters"],
     ["national_learning_sessions", "National learning sessions"],
@@ -141,9 +144,9 @@
     "national-teens": ["national_teens_reached", "first_time_teens"],
     "national-programs": ["national_programs_hosted"],
     "national-moments": ["national_engagement_moments"],
-    "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
+    "national-footprint": ["national_states_count", "national_provinces_count", "national_cities_count", "national_chapters_count"],
     "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_depth_chapters", "national_chapters_count"],
-    "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
+    "national-regions": ["national_regions_count", "national_chapters_count", "national_states_count"],
     "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
     final: ["national_teens_reached", "national_programs_hosted", "national_engagement_moments", "national_regions_count"]
   };
@@ -164,9 +167,9 @@
     "national-teens": ["national_teens_reached", "first_time_teens"],
     "national-programs": ["national_programs_hosted"],
     "national-moments": ["national_engagement_moments"],
-    "national-footprint": ["national_schools_represented", "national_regions_count", "national_chapters_count"],
+    "national-footprint": ["national_states_count", "national_provinces_count", "national_cities_count", "national_chapters_count", "footprint_label"],
     "national-immersive": ["national_shabbatons", "national_learning_sessions", "national_immersive_teens", "national_depth_chapters", "national_chapters_count"],
-    "national-regions": ["national_regions_count", "national_chapters_count", "national_teens_reached"],
+    "national-regions": ["national_regions_count", "national_chapters_count", "national_states_count"],
     "national-growth": ["growth_rate_label", "first_time_teens", "national_programs_hosted"],
     "national-why": ["impact_line"],
     final: ["scope_name", "national_teens_reached", "national_programs_hosted", "national_engagement_moments", "national_regions_count"]
@@ -868,6 +871,15 @@
         });
       }
     });
+
+    if (hasValue(source.footprint_label)) {
+      changes.push({
+        type: "setting",
+        field: "footprint_label",
+        label: "footprint label",
+        value: source.footprint_label
+      });
+    }
 
     Object.keys(overrides).filter(function (key) {
       return hasValue(overrides[key]);
