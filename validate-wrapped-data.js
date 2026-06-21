@@ -206,7 +206,8 @@ const CONFIG_SECTION_KEYS = new Set([
   "card_overrides",
   "record_overrides",
   "custom_cards",
-  "variants"
+  "variants",
+  "footprint_label"
 ]);
 
 const CARD_OVERRIDE_KEYS = new Set([

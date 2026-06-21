@@ -1466,9 +1466,16 @@
 
     status.classList.remove("builder-review-email-status--ok", "builder-review-email-status--warning");
 
+    var emailButton = $("[data-builder-action=\"email-submission\"]");
+
     if (formButton) {
       formButton.disabled = !formUrl;
       formButton.setAttribute("aria-disabled", formUrl ? "false" : "true");
+    }
+
+    if (emailButton) {
+      emailButton.disabled = !email;
+      emailButton.setAttribute("aria-disabled", email ? "false" : "true");
     }
 
     if (email) {

@@ -612,6 +612,14 @@
     return asText(settings.shareBase || settings.shareBaseUrl || settings.staticShareBase || dataset.shareBase || dataset.shareBaseUrl || dataset.staticShareBase, "");
   }
 
+  function getSocialImageUrl(container, options) {
+    var settings = options || {};
+    var dataset = (container && container.dataset) || {};
+    var explicit = settings.socialImageUrl || settings.socialImage || dataset.socialImageUrl || dataset.socialImage;
+
+    return hasValue(explicit) ? asText(explicit) : SOCIAL_IMAGE_URL;
+  }
+
   function createFormPrefillContext(record, url) {
     var scope = getStoryScope(record);
     var href = asText(url || root && root.location && root.location.href, "");
@@ -1523,7 +1531,7 @@
       return {
         title: brandLabel + " - " + teenName,
         description: teenDescription,
-        image: SOCIAL_IMAGE_URL,
+        image: asText(state && state.socialImageUrl, SOCIAL_IMAGE_URL),
         robots: "noindex,nofollow"
       };
     }
@@ -1541,7 +1549,7 @@
     return {
       title: brandLabel + " - " + chapterName,
       description: descriptionParts.join(" "),
-      image: SOCIAL_IMAGE_URL
+      image: asText(state && state.socialImageUrl, SOCIAL_IMAGE_URL)
     };
   }
 
@@ -3082,6 +3090,7 @@
     var storyScope = getStoryScope(record);
     var yearLabel = asText(record.year_label || record.school_year, "This year");
     var movementName = asText(storyScope.name, "JSU/NCSY");
+    var footprintLabel = asText(options && options.storyConfig && options.storyConfig.footprint_label, "");
     var brandChoice = getBrandChoice(record);
     var assetBase = options && options.assetBase || "";
     var logoUrl = getLogoAsset(brandChoice, assetBase);
@@ -3185,7 +3194,7 @@
         ].filter(Boolean),
         provinceCount: provinceCount,
         cityCount: cityCount,
-        subtext: "Schools lit up the map from coast to coast."
+        subtext: footprintLabel || "Schools lit up the map from coast to coast."
       },
       {
         id: "national-immersive",
@@ -6029,6 +6038,9 @@
     try {
       return await fetchRecords(url);
     } catch (error) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn("[jsu-wrapped] Could not load config from " + url + ":", error && error.message || error);
+      }
       return {};
     }
   }
@@ -6186,6 +6198,7 @@
         cardStartedAt: null,
         storyCompletedAt: null,
         shareBase: getShareBase(target, settings),
+        socialImageUrl: getSocialImageUrl(target, settings),
         soundEnabled: false,
         soundEngine: null
       };
@@ -6250,6 +6263,7 @@
     getConfigUrl: getConfigUrl,
     getBrandChoice: getBrandChoice,
     isSafeStaticUrl: isSafeStaticUrl,
+    getSocialImageUrl: getSocialImageUrl,
     getSoundProfileForCard: getSoundProfileForCard,
     getAutoplayPreference: getAutoplayPreference,
     getAutoplayDelay: getAutoplayDelay,
