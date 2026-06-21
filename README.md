@@ -198,8 +198,50 @@ node render-smoke.js --skip-if-missing
 
 This serves the static files locally and confirms the chapter picker, Baltimore story, layout smoke page, CTA form prefill page, CTA link prefill page, analytics dataLayer page, and builder render real DOM in mobile and desktop headless viewports. `node check-production.js` runs the same render smoke with `--skip-if-missing`, so it remains dependency-free on minimal machines.
 
+## Adding a New Chapter
+
+1. Add a record to `sample-wrapped-2026.json` with at least `chapter_slug`, `chapter_name`, `region_name`, `year_label`, and any available metrics.
+2. Optionally add a config entry in `wrapped-config-2026.json` under `chapters[slug]` to set custom branding, copy overrides, or custom cards.
+3. Run `node check-production.js` — it regenerates the share page for the new chapter and validates all data.
+4. Commit all changed files including the new `share/{slug}/index.html`.
+
+To add a region, program, or national story instead: use `scope_type: "region"` / `"program"` / `"national"` and `scope_slug` / `scope_name` fields. See `docs/data-contract.md` for the full field list.
+
+## Social Image Configuration
+
+The default social preview image is a single generic PNG at `assets/wrapped-social-preview.png`. To use a different image for a specific WordPress embed:
+
+```html
+<div
+  id="jsu-wrapped"
+  data-social-image="https://ncsy.org/wp-content/uploads/wrapped-social.png"
+  ...
+></div>
+```
+
+The `data-social-image` attribute overrides the default in `og:image` and `twitter:image` metadata applied by the widget JS. This is useful when the widget is hosted on ncsy.org rather than GitHub Pages.
+
+Per-chapter social images (one PNG per chapter, generated at build time) are planned. See `docs/superpowers/plans/2026-06-21-per-chapter-social-images.md`.
+
+## WordPress Social Title
+
+The WordPress page title set in Yoast/Open Graph (e.g., "JSU/NCSY Wrapped - Baltimore") is a static page-level setting. The widget JS dynamically updates `og:title` and `document.title` when a chapter story loads, so visitors navigating to `?chapter=X` will see the correct chapter name in the browser tab. However, social scrapers use the *static* per-chapter share pages at `share/{slug}/` rather than the live widget URL — those share pages already have chapter-specific titles and descriptions.
+
+Set the WordPress page Yoast title to a generic value like `JSU/NCSY Wrapped` or `JSU/NCSY Wrapped - Your Chapter`. The widget will update it dynamically for real visitors.
+
+## Architecture Notes
+
+**No build step.** `jsu-wrapped.js` is plain ES5 and runs directly in any browser. The Node tooling scripts (`check-production.js`, `generate-share-pages.js`, etc.) use modern JS but are never served to browsers.
+
+**`wordpress-inline-embed.html` is auto-generated.** Do not edit it manually. After changing `jsu-wrapped.js` or `jsu-wrapped.css`, run `node sync-wordpress-inline.js` to regenerate it. The production check enforces this with a drift check.
+
+**Config override layering.** `wrapped-config-2026.json` overlays in order: `defaults → national → region → program → chapter → variant`. Each layer only overrides what it explicitly sets. See `docs/data-contract.md` for all supported keys.
+
+**URL safety.** All CTA `href` values and custom card media image URLs are validated by `isSafeStaticUrl()` at config validation time, builder submission time, and runtime render time. This guard rejects non-HTTP(S) schemes and URLs carrying JSON payload parameters.
+
 ## Documentation
 
+- `CLAUDE.md` - developer and AI agent reference: file map, architecture patterns, key functions, gotchas
 - `docs/production-readiness.md` - technical production notes, URL patterns, QA expectations, CSS isolation, social sharing, WordPress embed details
 - `docs/launch-checklist.md` - final go/no-go checklist for WordPress, Gravity Forms, analytics, social preview, and staff pilot launch
 - `docs/data-contract.md` - JSON and config contract for story data, overrides, custom screens, and privacy boundaries
@@ -207,5 +249,6 @@ This serves the static files locally and confirms the chapter picker, Baltimore 
 - `docs/staff-submission-intake.md` - maintainer setup for Gravity Forms or email-based staff builder submissions
 - `docs/pilot-staff-builder-guide.md` - short sendable guide for pilot staff returning builder submission JSON
 - `analytics-gtm-setup.md` - GA4/GTM event setup notes
+- `docs/superpowers/plans/` - implementation plans for agentic workers
 
 Teen mode remains a proof of concept and is marked `noindex,nofollow` until real teen-level data, consent, and privacy review are ready. The production validator rejects teen ID/contact fields and obvious email or phone values in teen data.
